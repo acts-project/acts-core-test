@@ -187,7 +187,7 @@ struct Navigator
     /// Navigation state : a break has been detected
     bool navigationBreak = false;
     /// Navigation state : Re-initialize after a break and continue
-    bool continueNavigationAfterBreak = true;
+    bool continueNavigationAfterBreak = false;
   };
 
   /// Unique typedef to publish to the Propagator
