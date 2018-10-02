@@ -186,6 +186,8 @@ struct Navigator
     bool targetReached = false;
     /// Navigation state : a break has been detected
     bool navigationBreak = false;
+    /// Navigation state : Re-initialize after a break and continue
+    bool continueNavigationAfterBreak = true;
   };
 
   /// Unique typedef to publish to the Propagator
@@ -302,6 +304,12 @@ struct Navigator
   navigationBreak(propagator_state_t& state) const
   {
     if (state.navigation.navigationBreak) {
+      // Retry navigation if broken
+      if (state.navigation.continueNavigationAfterBreak) {
+        state.navigation.navBoundaries.clear();
+        state.navigation.navigationBreak = false;
+        return false;
+      }
       // target exists and reached, or no target exists
       if (state.navigation.targetReached || !state.navigation.targetSurface) {
         return true;
