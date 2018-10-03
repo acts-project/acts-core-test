@@ -186,8 +186,6 @@ struct Navigator
     bool targetReached = false;
     /// Navigation state : a break has been detected
     bool navigationBreak = false;
-    /// Navigation state : Re-initialize after a break and continue
-    bool continueNavigationAfterBreak = false;
   };
 
   /// Unique typedef to publish to the Propagator
@@ -304,12 +302,6 @@ struct Navigator
   navigationBreak(propagator_state_t& state) const
   {
     if (state.navigation.navigationBreak) {
-      // Retry navigation if broken
-      if (state.navigation.continueNavigationAfterBreak) {
-        state.navigation.navBoundaries.clear();
-        state.navigation.navigationBreak = false;
-        return false;
-      }
       // target exists and reached, or no target exists
       if (state.navigation.targetReached || !state.navigation.targetSurface) {
         return true;
@@ -654,7 +646,7 @@ struct Navigator
       NavigationOptions<Surface> navOpts(state.stepping.navDir, true);
       // get the navigation boundaries
       state.navigation.navBoundaries
-          = state.navigation.currentVolume->compatibleBoundaries(
+          = state.navigation.currentVolume->boundaries(
               state.stepping, navOpts, navCorr);
       // the number of boundary candidates
       debugLog(state, [&] {
@@ -749,7 +741,7 @@ struct Navigator
         navOpts.startObject = boundarySurface;  // exclude the current boundary
         // re-evaluate the boundary surfaces
         state.navigation.navBoundaries
-            = state.navigation.currentVolume->compatibleBoundaries(
+            = state.navigation.currentVolume->boundaries(
                 state.stepping, navOpts, navCorr);
         state.navigation.navBoundaryIter
             = state.navigation.navBoundaries.begin();
