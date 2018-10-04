@@ -16,6 +16,7 @@
 #include "Acts/Layers/Layer.hpp"
 #include "Acts/Propagator/detail/ConstrainedStep.hpp"
 #include "Acts/Surfaces/Surface.hpp"
+#include "Acts/Utilities/Sorter.hpp"
 #include "Acts/Volumes/BoundarySurfaceT.hpp"
 
 #include <boost/algorithm/string.hpp>
@@ -646,8 +647,8 @@ struct Navigator
       NavigationOptions<Surface> navOpts(state.stepping.navDir, true);
       // get the navigation boundaries
       state.navigation.navBoundaries
-          = state.navigation.currentVolume->boundaries(
-              state.stepping, navOpts, navCorr);
+          = state.navigation.currentVolume->compatibleBoundaries(
+              state.stepping, navOpts, navCorr, BoundaryIntersectionSorter());
       // the number of boundary candidates
       debugLog(state, [&] {
         std::stringstream dstream;
@@ -741,8 +742,8 @@ struct Navigator
         navOpts.startObject = boundarySurface;  // exclude the current boundary
         // re-evaluate the boundary surfaces
         state.navigation.navBoundaries
-            = state.navigation.currentVolume->boundaries(
-                state.stepping, navOpts, navCorr);
+            = state.navigation.currentVolume->compatibleBoundaries(
+                state.stepping, navOpts, navCorr, BoundaryIntersectionSorter());
         state.navigation.navBoundaryIter
             = state.navigation.navBoundaries.begin();
       }
