@@ -112,7 +112,6 @@ namespace units {
 
   /// @name fundamental physical constants in SI units
   /// @{
-
   /// speed of light in vacuum
   const double _c = 2.99792458e8 * _m / _s;
   /// reduced Planck constant
