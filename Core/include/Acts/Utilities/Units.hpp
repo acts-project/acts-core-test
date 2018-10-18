@@ -99,6 +99,8 @@ namespace units {
   constexpr double _C   = 1. / 1.60217733e-19;
 #endif  // DOXYGEN
   constexpr double _e = 1.60217733e-19 * _C;
+  /// Higher orders
+  constexpr double _e2 = _e * _e;
   /// @}
 
   /// @name derived units
@@ -118,6 +120,10 @@ namespace units {
   constexpr double _hbar = 1.05457266e-34 * _J * _s;
   /// value of elementary charge in Coulomb
   constexpr double _el_charge = _e / _C;
+  /// Higher orders
+  constexpr double _c2 = _c * _c;
+  constexpr double _c3 = _c * _c * _c;
+  constexpr double _c4 = _c2 * _c2;
   /// @}
 
   /// @cond
