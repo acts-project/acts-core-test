@@ -52,6 +52,8 @@ namespace units {
   constexpr double _nm = 1e-9 * _m;
   constexpr double _pm = 1e-12 * _m;
   constexpr double _fm = 1e-15 * _m;
+  /// Higher orders
+  constexpr double _mm2 = _mm * _mm;
 /// @}
 
 /// @name mass units
