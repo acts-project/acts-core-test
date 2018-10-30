@@ -357,7 +357,7 @@ public:
     extensionlist_t extension;
 
     /// Tolerance for the error of the integration
-    double tolerance = 5e-5;
+    double tolerance = 2e-4;
 
     /// Cut-off value for the step size
     double stepSizeCutOff = 0.;
@@ -495,7 +495,7 @@ public:
 
     // Select and adjust the appropriate Runge-Kutta step size in ATLAS style
     double error_estimate = std::max(tryRungeKuttaStep(state.stepSize), 1e-20);
-    while (error_estimate > 4. * state.tolerance) {
+    while (error_estimate > state.tolerance) {
       state.stepSize = state.stepSize
           * std::min(std::max(
                          0.25,
@@ -520,9 +520,6 @@ public:
 
       // for moment, only update the transport part
       state.jacTransport = D * state.jacTransport;
-
-      //~ std::cout << "D:\n" << D << std::endl;
-      //~ std::cout << "jac:\n" << state.jacTransport << std::endl;
     } else
       state.extension.finalize(state, h);
 
@@ -533,11 +530,6 @@ public:
     state.derivative.template head<3>()     = state.dir;
     state.derivative.template segment<3>(3) = sd.k4;
     state.pathAccumulated += h;
-
-    //~ std::cout << "result pos: " << state.pos << std::endl;
-    //~ std::cout << "result dir: " << state.dir << std::endl;
-    //~ std::cout << "result p: " << state.p << std::endl;
-    //~ std::cout << "result cov:\n" << state.jacTransport << std::endl;
 
     return h;
   }
