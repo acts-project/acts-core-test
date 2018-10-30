@@ -62,7 +62,7 @@ public:
 
   /// return the lowest tracking Volume
   ///
-  /// @param gp is the global position fo the call
+  /// @param gp is the global position of the call
   ///
   /// @return plain pointer to the lowest TrackingVolume
   const TrackingVolume*
@@ -70,7 +70,7 @@ public:
 
   /// return the vector of lowest detached tracking Volume(->overlaps)
   ///
-  /// @param gp is the global position fo the call
+  /// @param gp is the global position of the call
   ///
   /// @return plain pointer to the the lowest DetachedTrackingVolume
   const DetachedVolumeVector*
@@ -78,7 +78,7 @@ public:
 
   /// return the lowest static volume
   ///
-  /// @param gp is the global position fo the call
+  /// @param gp is the global position of the call
   ///
   /// @return plain pointer to the the lowest static tracking volume
   const TrackingVolume*
@@ -94,7 +94,7 @@ public:
 
   /// Forward the associated Layer information
   ///
-  /// @param gp is the global position fo the call
+  /// @param gp is the global position of the call
   ///
   /// @return plain pointer to assocaiated layer
   const Layer*
@@ -102,7 +102,7 @@ public:
 
   /// check position at volume boundary
   ///
-  /// @param gp is the global position fo the call
+  /// @param gp is the global position of the call
   /// @param vol is the volume to be cheked
   /// @param tol is the tolerance parameter
   ///
@@ -116,8 +116,8 @@ public:
 
   /// Check position at volume boundary + navigation link
   ///
-  /// @param gpos is the global position fo the call
-  /// @param mom is the momentum fo the call
+  /// @param gpos is the global position of the call
+  /// @param mom is the momentum of the call
   /// @param vol is the volume to be cheked
   /// @param nextVol is the next tracking volume (filled)
   /// @param dir is the propagation direction
