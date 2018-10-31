@@ -10,9 +10,4 @@ add_executable (ExtrapolatorTests ExtrapolatorTests.cpp)
 target_link_libraries (ExtrapolatorTests PRIVATE ActsCore)
 add_test(NAME ExtrapolatorUnitTests COMMAND ExtrapolatorTests)
 
-add_executable (StepActorTests StepActorTests.cpp)
-target_link_libraries (StepActorTests PRIVATE ActsCore)
-add_test(NAME StepActorUnitTests COMMAND StepActorTests)
-
-
 
