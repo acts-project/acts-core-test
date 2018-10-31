@@ -357,7 +357,7 @@ public:
     extensionlist_t extension;
 
     /// Tolerance for the error of the integration
-    double tolerance = 1e-6;
+    double tolerance = 1e-8;
 
     /// Cut-off value for the step size
     double stepSizeCutOff = 0.;
