@@ -6,9 +6,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#define BOOST_TEST_MODULE KalmanFitter Tests
-#include <boost/test/included/unit_test.hpp>
-
 #include <vector>
 #include "Acts/Detector/TrackingGeometry.hpp"
 #include "Acts/Detector/TrackingVolume.hpp"
@@ -25,7 +22,6 @@
 #include "Acts/Volumes/CuboidVolumeBounds.hpp"
 
 namespace Acts {
-namespace Test {
 
 	class BoxGeometryBuilder
 	{
@@ -44,11 +40,17 @@ namespace Test {
 			std::shared_ptr<TrackingGeometry>
 			buildGeometry(const std::vector<Vector3D>& pixelSurfaces, const std::vector<Vector3D>& stripSurfaces, const double distStrips, const std::pair<double, double>& detectorLength) const;
 		
-		private:
-		
 			template<typename DetectorElement_t>
 			std::vector<PlaneSurface*>
 			buildSurfaces(const std::vector<Vector3D>& surfacePos) const;
+			
+			struct SurfaceConfig
+			{
+				Vector3D position;
+				RotationMatrix3D rotation;
+				std::shared_ptr<const RectangleBounds> rBounds;
+				std::shared_ptr<const SurfaceMaterial> surMat;
+			}
 			
 			RotationMatrix3D rotation;
 			std::shared_ptr<const RectangleBounds> rBounds;
@@ -365,7 +367,7 @@ namespace Test {
 
 	template<typename DetectorElement_t>
 	std::vector<PlaneSurface*>
-	BoxGeometryBuilder::buildSurfaces(const std::vector<Vector3D>& surfacePos) const
+	BoxGeometryBuilder::buildSurfaces(const std::vector<SurfaceConfig>& surfcfg) const
 	{
 		// Construct surfaces
 		std::vector<PlaneSurface*> surfaces;
