@@ -31,10 +31,12 @@ namespace Acts {
 			{
 				Vector3D position;
 				RotationMatrix3D rotation;
-				std::shared_ptr<const RectangleBounds> rBounds;
-				std::shared_ptr<const SurfaceMaterial> surMat;
-				double thickness;
-			}
+				std::shared_ptr<const RectangleBounds> rBounds = nullptr;
+				std::shared_ptr<const SurfaceMaterial> surMat = nullptr;
+				double thickness = 0.;
+				
+				PlaneSurface* surface = nullptr;
+			};
 			
 			BoxGeometryBuilder() = default;
 			
@@ -51,35 +53,18 @@ namespace Acts {
 			//~ buildGeometry(const std::vector<Vector3D>& pixelSurfaces, const std::vector<Vector3D>& stripSurfaces, const double distStrips, const std::pair<double, double>& detectorLength) const;
 		
 			template<typename DetectorElement_t>
-			std::vector<PlaneSurface*>
-			buildSensitiveSurfaces(const std::vector<SurfaceConfig>& surfacePos) const;
+			//~ std::vector<PlaneSurface*>
+			void
+			buildSensitiveSurfaces(std::vector<SurfaceConfig>& surfacePos) const;
 			
-			std::vector<PlaneSurface*>
-			buildPassiveSurfaces(const std::vector<SurfaceConfig>& surfacePos) const;
+			//~ std::vector<PlaneSurface*>
+			void
+			buildPassiveSurfaces(std::vector<SurfaceConfig>& surfacePos) const;
 			
-			
+			std::vector<LayerPtr>
+			buildLayers(std::vector<PlaneSurface*>& surfaces) const;
 
 	};
-
-	//~ BoxGeometryBuilder::BoxGeometryBuilder()
-	//~ {
-		//~ // Construct the rotation
-		//~ double           rotationAngle = M_PI * 0.5;
-		//~ Vector3D         xPos(cos(rotationAngle), 0., sin(rotationAngle));
-		//~ Vector3D         yPos(0., 1., 0.);
-		//~ Vector3D         zPos(-sin(rotationAngle), 0., cos(rotationAngle));
-		//~ rotation.col(0) = xPos;
-		//~ rotation.col(1) = yPos;
-		//~ rotation.col(2) = zPos;
-		
-		//~ // Boundaries of the surfaces
-		//~ rBounds = std::make_shared<const RectangleBounds>(
-			//~ RectangleBounds(0.5 * units::_m, 0.5 * units::_m));
-
-		//~ // Material of the surfaces
-		//~ MaterialProperties matProp(352.8, 407., 9.012, 4., 1.848e-3, 0.5 * units::_mm);
-		//~ surMat = std::shared_ptr<const SurfaceMaterial>(new HomogeneousSurfaceMaterial(matProp));
-	//~ }
 
   //~ /// @brief Builds a simple 4-layer detector with 2 pixel-like and 2
   //~ /// double-strip-like detectors
@@ -89,7 +74,7 @@ namespace Acts {
   //~ std::shared_ptr<TrackingGeometry>
   //~ BoxGeometryBuilder::buildGeometry() const
   //~ {
-    //~ // Set translation vectors
+    // Set translation vectors
     //~ double                eps = 1. * units::_mm;
     //~ std::vector<Vector3D> translations;
     //~ translations.push_back({-2. * units::_m, 0., 0.});
@@ -114,7 +99,7 @@ namespace Acts {
       //~ surfaces[i]->setAssociatedMaterial(surMat);
     //~ }
 
-    //~ // Construct layers
+    // Construct layers
     //~ std::array<LayerPtr, 6> layers;
     //~ for (i = 0; i < 6; i++) {
       //~ Transform3D trafo(Transform3D::Identity() * rotation);
@@ -370,43 +355,70 @@ namespace Acts {
   //~ }
 
 	template<typename DetectorElement_t>
-	std::vector<PlaneSurface*>
-	BoxGeometryBuilder::buildSensitiveSurfaces(const std::vector<SurfaceConfig>& surfcfg) const
+	//~ std::vector<PlaneSurface*>
+	void
+	BoxGeometryBuilder::buildSensitiveSurfaces(std::vector<SurfaceConfig>& surcfg) const
 	{
 		// Construct surfaces
-		std::vector<PlaneSurface*> surfaces;
-		surfaces.reserve(surcfg.size());
+		//~ std::vector<PlaneSurface*> surfaces;
+		PlaneSurface* surface;
+		//~ surfaces.reserve(surcfg.size());
 		
-		for (const SurfaceConfig& sc : surcfg) {
+		for (SurfaceConfig& sc : surcfg) {
 		  Transform3D trafo(Transform3D::Identity() * sc.rotation);
 		  trafo.translation() = sc.position;
 
-		  surfaces.push_back(new PlaneSurface(
+		  //~ surfaces.push_back(new PlaneSurface(
+		  surface = new PlaneSurface(
 			  sc.rBounds,
 			  *(new DetectorElement_t(std::make_shared<const Transform3D>(trafo),
 							sc.rBounds,
-							sc.thickness))));
-		  surfaces[i]->setAssociatedMaterial(sc.surMat);
+							sc.thickness)));
+		  surface->setAssociatedMaterial(sc.surMat);
+		  sc.surface = surface;
 		}
-		return surfaces;
+		//~ return surfaces;
 	}
 	
-	std::vector<PlaneSurface*>
-	BoxGeometryBuilder::buildPassiveSurfaces(const std::vector<SurfaceConfig>& surcfg) const
+	//~ std::vector<PlaneSurface*>
+	void
+	BoxGeometryBuilder::buildPassiveSurfaces(std::vector<SurfaceConfig>& surcfg) const
 	{
-		std::vector<PlaneSurface*> surfaces;
-		surfaces.reserve(surcfg.size());
+		//~ std::vector<PlaneSurface*> surfaces;
+		PlaneSurface* surface;
+		//~ surfaces.reserve(surcfg.size());
 		
-		for(const SurfaceConfig& sc : surcfg)
+		for(SurfaceConfig& sc : surcfg)
 		{
 		  Transform3D trafo(Transform3D::Identity() * sc.rotation);
 		  trafo.translation() = sc.position;
 
-		  surfaces.push_back(new PlaneSurface(std::make_shared<const Transform3D>(trafo),
-			  sc.rBounds));
-		  surfaces[i]->setAssociatedMaterial(sc.surMat);
+		  //~ surfaces.push_back(new PlaneSurface(std::make_shared<const Transform3D>(trafo),
+		  surface = new PlaneSurface(std::make_shared<const Transform3D>(trafo), sc.rBounds);
+		  surface->setAssociatedMaterial(sc.surMat);
+		  sc.surface = surface;
 		}
-		return surfaces;
+		//~ return surfaces;
 	}
-}  // namespace Test
+	
+	std::vector<LayerPtr>
+	BoxGeometryBuilder::buildLayers(std::vector<PlaneSurface*>& surfaces) const
+	{
+		std::vector<LayerPtr> layers;
+		return layers;
+	}
+	//~ // Construct layers
+    //~ std::array<LayerPtr, 6> layers;
+    //~ for (i = 0; i < 6; i++) {
+      //~ Transform3D trafo(Transform3D::Identity() * rotation);
+      //~ trafo.translation() = translations[i];
+
+      //~ std::unique_ptr<SurfaceArray> surArray(new SurfaceArray(surfaces[i]));
+
+      //~ layers[i] = PlaneLayer::create(std::make_shared<const Transform3D>(trafo),
+                                     //~ rBounds,
+                                     //~ std::move(surArray),
+                                     //~ 1. * units::_mm);
+      //~ surfaces[i]->associateLayer(*layers[i]);
+    //~ }
 }  // namespace Acts
