@@ -343,6 +343,8 @@ private:
         dstream << s;
         return dstream.str();
       });
+if(result.steps > 5000)
+std::cout << "currentsteps: " << result.steps << "\t" << state.options.maxSteps << std::endl;
       m_navigator(state);
       state.options.actionList(state, result);
       // Call the stop_conditions and the internal stop conditions
