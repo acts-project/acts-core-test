@@ -376,5 +376,4 @@ BoxGeometryBuilder::buildTrackingGeometry(Config& cfg) const
   // Build and return tracking geometry
   return std::shared_ptr<TrackingGeometry>(new TrackingGeometry(mtvp));
 }
-
 }  // namespace Acts
