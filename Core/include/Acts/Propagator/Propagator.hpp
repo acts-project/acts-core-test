@@ -49,6 +49,9 @@ struct VoidNavigator
 
     /// Navigation state : a break has been detected
     bool navigationBreak = false;
+
+    /// Navigation state: the current volume
+    const TrackingVolume* currentVolume = nullptr;
   };
 
   /// Unique typedef to publish to the Propagator
@@ -334,8 +337,6 @@ private:
         dstream << s;
         return dstream.str();
       });
-if(result.steps > 5000)
-std::cout << "currentsteps: " << result.steps << "\t" << state.options.maxSteps << std::endl;
       m_navigator(state);
       state.options.actionList(state, result);
       // Call the stop_conditions and the internal stop conditions
