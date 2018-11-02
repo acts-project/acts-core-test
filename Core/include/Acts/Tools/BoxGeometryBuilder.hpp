@@ -8,8 +8,11 @@
 
 #include <limits>
 #include <vector>
+<<<<<<< HEAD
 #include "Acts/Detector/TrackingGeometry.hpp"
 #include "Acts/Detector/TrackingVolume.hpp"
+=======
+>>>>>>> Building config structure in progress
 #include "Acts/Layers/PlaneLayer.hpp"
 #include "Acts/Material/HomogeneousSurfaceMaterial.hpp"
 #include "Acts/Surfaces/PlaneSurface.hpp"
@@ -20,8 +23,9 @@
 #include "Acts/Utilities/BinnedArrayXD.hpp"
 #include "Acts/Utilities/Definitions.hpp"
 #include "Acts/Volumes/CuboidVolumeBounds.hpp"
+#include "Acts/Detector/TrackingGeometry.hpp"
+#include "Acts/Detector/TrackingVolume.hpp"
 
-// TODO: move things to a cpp
 namespace Acts {
 
 /// @brief This class builds a box detector with a configurable amount of
