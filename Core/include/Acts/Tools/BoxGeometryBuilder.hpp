@@ -21,6 +21,7 @@
 #include "Acts/Utilities/Definitions.hpp"
 #include "Acts/Volumes/CuboidVolumeBounds.hpp"
 
+// TODO: move things to a cpp
 namespace Acts {
 
 /// @brief This class builds a box detector with a configurable amount of
