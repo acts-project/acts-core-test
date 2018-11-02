@@ -1,15 +1,12 @@
 // This file is part of the Acts project.
 //
-// Copyright (C) 2016-2018 Acts project team
+// Copyright (C) 2018 Acts project team
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include <vector>
-#include "Acts/Detector/TrackingGeometry.hpp"
-#include "Acts/Detector/TrackingVolume.hpp"
-#include "Acts/Detector/detail/DefaultDetectorElementBase.hpp"
 #include "Acts/Layers/PlaneLayer.hpp"
 #include "Acts/Material/HomogeneousSurfaceMaterial.hpp"
 #include "Acts/Surfaces/PlaneSurface.hpp"
@@ -20,24 +17,46 @@
 #include "Acts/Utilities/BinnedArrayXD.hpp"
 #include "Acts/Utilities/Definitions.hpp"
 #include "Acts/Volumes/CuboidVolumeBounds.hpp"
+#include "Acts/Detector/TrackingGeometry.hpp"
+#include "Acts/Detector/TrackingVolume.hpp"
 
-// TODO: move things to a cpp
 namespace Acts {
 
+	/// @brief This class builds a box detector with a configurable amount of surfaces in it.
 	class BoxGeometryBuilder
 	{
 		public:
-			
-			struct SurfaceConfig
-			{
-				Vector3D position;
-				RotationMatrix3D rotation;
-				std::shared_ptr<const RectangleBounds> rBounds = nullptr;
-				std::shared_ptr<const SurfaceMaterial> surMat = nullptr;
-				double thickness = 0.;
+		
+				struct SurfaceConfig{
+					Vector3D position;
+					RotationMatrix3D rotation = RotationMatrix3D::Identity();
+					std::shared_ptr<const RectangleBounds> rBounds = nullptr;
+					std::shared_ptr<const SurfaceMaterial> surMat = nullptr;
+					double thickness = 0.;
+				};
 				
+			/// @brief Storage container. Every configuration parameter is set in this struct.
+			struct LayerConfig
+			{
+				SurfaceConfig surfaceCfg;
+				double layerThickness = 0.;
 				PlaneSurface* surface = nullptr;
 			};
+			
+			struct VolumeConfig
+			{
+				Vector3D position, length;
+				RotationMatrix3D rotation = RotationMatrix3D::Identity();
+				std::vector<LayerConfig> layerCfg;
+				std::vector<std::shared_ptr<const Layer>> layers;
+			};
+			
+			struct Config
+			{
+				std::vector<VolumeConfig> volumeCfg;
+				std::vector<TrackingVolume*> volumes;
+			};
+			
 			
 			BoxGeometryBuilder() = default;
 			
@@ -55,16 +74,83 @@ namespace Acts {
 		
 			template<typename DetectorElement_t>
 			void
-			buildSensitiveSurfaces(std::vector<SurfaceConfig>& surfacePos) const;
+			buildSensitiveSurfaces(std::vector<Config>& config) const;
 			
 			void
-			buildPassiveSurfaces(std::vector<SurfaceConfig>& surfacePos) const;
+			buildPassiveSurfaces(std::vector<Config>& config) const;
 			
-			std::vector<LayerPtr>
-			buildLayers(std::vector<PlaneSurface*>& surfaces) const;
+			void
+			buildLayers(std::vector<Config>& config) const;
 
+			TrackingVolume*
+			buildVolumes(std::vector<Config>& config) const;
 	};
 
+	template<typename DetectorElement_t>
+	void
+	BoxGeometryBuilder::buildSensitiveSurfaces(std::vector<Config>& config) const
+	{
+		PlaneSurface* surface;
+		
+			// Build transformation
+		for (Config& cfg : config) {
+		  Transform3D trafo(Transform3D::Identity() * cfg.surfaceCfg.rotation);
+		  trafo.translation() = cfg.surfaceCfg.position;
+
+			// Create and store surface
+		  surface = new PlaneSurface(
+			  cfg.surfaceCfg.rBounds,
+			  *(new DetectorElement_t(std::make_shared<const Transform3D>(trafo),
+							cfg.surfaceCfg.rBounds,
+							cfg.surfaceCfg.thickness)));
+		  surface->setAssociatedMaterial(cfg.surfaceCfg.surMat);
+		  cfg.surface = surface;
+		}
+	}
+	
+	TrackingVolume*
+	BoxGeometryBuilder::buildVolumes(std::vector<Config>& config) const
+	{
+		return nullptr;
+		
+		for(const auto& cfg : config)
+		{
+			Transform3D trafoVol1(Transform3D::Identity() * cfg.volumeCfg.rotation);
+			trafoVol1.translation() = cfg.volumeCfg.position;
+			
+			 auto boundsVol = std::make_shared<const CuboidVolumeBounds>(cfg.volumeCfg.length.x() * 0.5, cfg.volumeCfg.length.y() * 0.5, cfg.volumeCfg.length.z() * 0.5);
+
+
+		}
+
+    //~ LayerArrayCreator layArrCreator(
+        //~ getDefaultLogger("LayerArrayCreator", Logging::VERBOSE));
+    //~ LayerVector layVec;
+    //~ layVec.push_back(layers[0]);
+    //~ layVec.push_back(layers[1]);
+    //~ std::unique_ptr<const LayerArray> layArr1(
+        //~ layArrCreator.layerArray(layVec,
+                                 //~ -2. * units::_m - 1. * units::_mm,
+                                 //~ -1. * units::_m + 1. * units::_mm,
+                                 //~ BinningType::arbitrary,
+                                 //~ BinningValue::binX));
+
+    //~ auto trackVolume1
+        //~ = TrackingVolume::create(std::make_shared<const Transform3D>(trafoVol1),
+                                 //~ boundsVol,
+                                 //~ nullptr,
+                                 //~ std::move(layArr1),
+                                 //~ layVec,
+                                 //~ {},
+                                 //~ {},
+                                 //~ "Volume 1");
+    //~ trackVolume1->sign(GeometrySignature::Global);
+    
+    
+}
+	
+
+	
   //~ /// @brief Builds a simple 4-layer detector with 2 pixel-like and 2
   //~ /// double-strip-like detectors
   //~ ///
@@ -353,70 +439,5 @@ namespace Acts {
         //~ new Acts::TrackingGeometry(mtvpWorld));
   //~ }
 
-	template<typename DetectorElement_t>
-	void
-	BoxGeometryBuilder::buildSensitiveSurfaces(std::vector<SurfaceConfig>& surcfg) const
-	{
-		// Construct surfaces
-		PlaneSurface* surface;
-		
-		for (SurfaceConfig& sc : surcfg) {
-		  Transform3D trafo(Transform3D::Identity() * sc.rotation);
-		  trafo.translation() = sc.position;
 
-		  surface = new PlaneSurface(
-			  sc.rBounds,
-			  *(new DetectorElement_t(std::make_shared<const Transform3D>(trafo),
-							sc.rBounds,
-							sc.thickness)));
-		  surface->setAssociatedMaterial(sc.surMat);
-		  sc.surface = surface;
-		}
-	}
-	
-	void
-	BoxGeometryBuilder::buildPassiveSurfaces(std::vector<SurfaceConfig>& surcfg) const
-	{
-		PlaneSurface* surface;
-		
-		for(SurfaceConfig& sc : surcfg)
-		{
-		  Transform3D trafo(Transform3D::Identity() * sc.rotation);
-		  trafo.translation() = sc.position;
-
-		  surface = new PlaneSurface(std::make_shared<const Transform3D>(trafo), sc.rBounds);
-		  surface->setAssociatedMaterial(sc.surMat);
-		  sc.surface = surface;
-		}
-	}
-
-			//~ struct SurfaceConfig
-			//~ {
-				//~ Vector3D position;
-				//~ RotationMatrix3D rotation;
-				//~ std::shared_ptr<const RectangleBounds> rBounds = nullptr;
-				//~ std::shared_ptr<const SurfaceMaterial> surMat = nullptr;
-				//~ double thickness = 0.;
-				
-				//~ PlaneSurface* surface = nullptr;
-			//~ };
-				
-	std::vector<LayerPtr>
-	BoxGeometryBuilder::buildLayers(std::vector<SurfaceConfig>& surcfg) const
-	{
-		std::vector<LayerPtr> layers;
-		layers.reserve(surcfg.size());
-		
-		for (SurfaceConfig& sc : surcfg) {
-		  Transform3D trafo(Transform3D::Identity() * sc.rotation);
-		  trafo.translation() = sc.position;
-		  std::unique_ptr<SurfaceArray> surArray(new SurfaceArray(sc.surface));
-
-		  layers.push(PlaneLayer::create(std::make_shared<const Transform3D>(trafo),
-										 rBounds,
-										 std::move(surArray),
-										 1. * units::_mm));
-		  sc.surface->associateLayer(*layers.back());
-		}
-	}
 }  // namespace Acts
