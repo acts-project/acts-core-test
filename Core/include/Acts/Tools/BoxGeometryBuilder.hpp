@@ -76,10 +76,6 @@ namespace Acts {
 			PlaneSurface*
 			buildSurface(const SurfaceConfig& config) const;
 			
-			//~ template<>
-			//~ PlaneSurface*
-			//~ buildSurface<void>(const SurfaceConfig& config) const;
-			
 			template<typename DetectorElement_t = void>
 			std::shared_ptr<const Layer>
 			buildLayer(const LayerConfig& config) const;
@@ -90,7 +86,6 @@ namespace Acts {
 
 	template<typename DetectorElement_t>
 	PlaneSurface*
-	//~ BoxGeometryBuilder::buildSensitiveSurface(const SurfaceConfig& cfg) const
 	BoxGeometryBuilder::buildSurface(const SurfaceConfig& cfg) const
 	{
 		PlaneSurface* surface;
@@ -131,12 +126,13 @@ BoxGeometryBuilder::buildLayer(const LayerConfig& cfg) const
 {
 	LayerPtr layer;
 	
+		// Build the surface
 		cfg.surface = buildSurface<DetectorElement_t>(cfg.surfaceCfg);
 		// Build transformation centered at the surface position
 	  Transform3D trafo(Transform3D::Identity() * cfg.surfaceCfg.rotation);
 	  trafo.translation() = cfg.surfaceCfg.position;
 	  
-	  // Get the surface, build layer and store it
+	  // Get the surface and build the layer
 	  std::unique_ptr<SurfaceArray> surArray(new SurfaceArray(cfg.surface));
 
 	  layer = PlaneLayer::create(std::make_shared<const Transform3D>(trafo),
