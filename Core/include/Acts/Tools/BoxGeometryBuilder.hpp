@@ -290,7 +290,6 @@ BoxGeometryBuilder::buildVolume(VolumeConfig& cfg) const
   return trackVolume;
 }
 
-// TODO: test this function
 std::pair<double, double>
 BoxGeometryBuilder::binningRange(const VolumeConfig& cfg) const
 {
