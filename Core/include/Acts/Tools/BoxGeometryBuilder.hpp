@@ -19,6 +19,7 @@
 #include "Acts/Volumes/CuboidVolumeBounds.hpp"
 #include "Acts/Detector/TrackingGeometry.hpp"
 #include "Acts/Detector/TrackingVolume.hpp"
+#include <limits>
 
 namespace Acts {
 
@@ -26,16 +27,21 @@ namespace Acts {
 	class BoxGeometryBuilder
 	{
 		public:
-		
+				/// @brief This struct stores the data for the construction of a single PlaneSurface
 				struct SurfaceConfig{
+					// Center position
 					Vector3D position;
+					// Rotation
 					RotationMatrix3D rotation = RotationMatrix3D::Identity();
+					// Bounds
 					std::shared_ptr<const RectangleBounds> rBounds = nullptr;
+					// Attached material
 					std::shared_ptr<const SurfaceMaterial> surMat = nullptr;
+					// Thickness
 					double thickness = 0.;
 				};
 				
-			/// @brief Storage container. Every configuration parameter is set in this struct.
+			/// @brief 
 			struct LayerConfig
 			{
 				SurfaceConfig surfaceCfg;
@@ -49,6 +55,8 @@ namespace Acts {
 				RotationMatrix3D rotation = RotationMatrix3D::Identity();
 				std::vector<LayerConfig> layerCfg;
 				std::vector<std::shared_ptr<const Layer>> layers;
+				BinningValue binningValue;
+				std::string name = "Volume";
 			};
 			
 			struct Config
@@ -74,14 +82,18 @@ namespace Acts {
 		
 			template<typename DetectorElement_t = void>
 			PlaneSurface*
-			buildSurface(const SurfaceConfig& config) const;
+			buildSurface(const SurfaceConfig& cfg) const;
 			
 			template<typename DetectorElement_t = void>
 			std::shared_ptr<const Layer>
-			buildLayer(const LayerConfig& config) const;
+			buildLayer(LayerConfig& cfg) const;
 
-			//~ TrackingVolume*
-			//~ buildVolumes(std::vector<VolumeConfig>& config) const;
+			template<typename DetectorElement_t = void>
+			TrackingVolume*
+			buildVolumes(VolumeConfig& cfg) const;
+			
+			std::pair<double, double>
+			binningRange(const VolumeConfig& cfg) const;
 	};
 
 	template<typename DetectorElement_t>
@@ -122,7 +134,7 @@ Acts::BoxGeometryBuilder::buildSurface<void>(const SurfaceConfig& cfg) const
 
 template<typename DetectorElement_t>
 std::shared_ptr<const Layer>
-BoxGeometryBuilder::buildLayer(const LayerConfig& cfg) const
+BoxGeometryBuilder::buildLayer(LayerConfig& cfg) const
 {
 	LayerPtr layer;
 	
@@ -142,50 +154,86 @@ BoxGeometryBuilder::buildLayer(const LayerConfig& cfg) const
 	  cfg.surface->associateLayer(*layer);
 	  return layer;
 }
-
-	//~ TrackingVolume*
-	//~ BoxGeometryBuilder::buildVolumes(std::vector<Config>& config) const
-	//~ {
-		//~ return nullptr;
-		
-		//~ for(const auto& cfg : config)
-		//~ {
-			//~ Transform3D trafoVol1(Transform3D::Identity() * cfg.volumeCfg.rotation);
-			//~ trafoVol1.translation() = cfg.volumeCfg.position;
+// TODO: treat case without surfaces
+	template<typename DetectorElement_t>
+	TrackingVolume*
+	BoxGeometryBuilder::buildVolumes(VolumeConfig& cfg) const
+	{
+			Transform3D trafo(Transform3D::Identity() * cfg.rotation);
+			trafo.translation() = cfg.position;
 			
-			 //~ auto boundsVol = std::make_shared<const CuboidVolumeBounds>(cfg.volumeCfg.length.x() * 0.5, cfg.volumeCfg.length.y() * 0.5, cfg.volumeCfg.length.z() * 0.5);
+			 auto bounds = std::make_shared<const CuboidVolumeBounds>(cfg.length.x() * 0.5, cfg.length.y() * 0.5, cfg.length.z() * 0.5);
+			 
+		cfg.layers.reserve(cfg.layerCfg.size()); // TODO: maybe can be removed
+		LayerVector layVec;
 
+		for(auto& layerCfg : cfg.layerCfg)
+		{
+			cfg.layers.push_back(buildLayer(layerCfg));
+			layVec.push_back(cfg.layers.back());
+		}
 
-		//~ }
+		std::pair<double, double> minMax = binningRange(cfg);
+		LayerArrayCreator layArrCreator(getDefaultLogger("LayerArrayCreator", Logging::VERBOSE));
+		
+    std::unique_ptr<const LayerArray> layArr(
+        layArrCreator.layerArray(layVec,
+                                 minMax.first,
+                                 minMax.second,
+                                 BinningType::arbitrary,
+                                 cfg.binningValue));
 
-    //~ LayerArrayCreator layArrCreator(
-        //~ getDefaultLogger("LayerArrayCreator", Logging::VERBOSE));
-    //~ LayerVector layVec;
-    //~ layVec.push_back(layers[0]);
-    //~ layVec.push_back(layers[1]);
-    //~ std::unique_ptr<const LayerArray> layArr1(
-        //~ layArrCreator.layerArray(layVec,
-                                 //~ -2. * units::_m - 1. * units::_mm,
-                                 //~ -1. * units::_m + 1. * units::_mm,
-                                 //~ BinningType::arbitrary,
-                                 //~ BinningValue::binX));
-
-    //~ auto trackVolume1
-        //~ = TrackingVolume::create(std::make_shared<const Transform3D>(trafoVol1),
-                                 //~ boundsVol,
-                                 //~ nullptr,
-                                 //~ std::move(layArr1),
-                                 //~ layVec,
-                                 //~ {},
-                                 //~ {},
-                                 //~ "Volume 1");
-    //~ trackVolume1->sign(GeometrySignature::Global);
+    auto trackVolume
+        = TrackingVolume::create(std::make_shared<const Transform3D>(trafo),
+                                 bounds,
+                                 nullptr,
+                                 std::move(layArr),
+                                 layVec,
+                                 {},
+                                 {},
+                                 "Volume 1");
+    trackVolume->sign(GeometrySignature::Global);
     
-    
-//~ }
+    return trackVolume;
+}
 	
+std::pair<double, double>
+BoxGeometryBuilder::binningRange(const VolumeConfig& cfg) const
+{
+	std::pair<double, double> minMax = std::make_pair(std::numeric_limits<double>::max(), -std::numeric_limits<double>::max());
+	switch(cfg.binningValue)
+	{
+		case BinningValue::binX : { 
+			for(const auto& layercfg : cfg.layerCfg) 
+			{
+				if(layercfg.surfaceCfg.position.x() - layercfg.layerThickness < minMax.first) minMax.first = layercfg.surfaceCfg.position.x() - layercfg.layerThickness;
+				if(layercfg.surfaceCfg.position.x() + layercfg.layerThickness > minMax.second) minMax.second = layercfg.surfaceCfg.position.x() + layercfg.layerThickness;
+			}
+			break;
+		}
+		case BinningValue::binY : 
+		{
+			for(const auto& layercfg : cfg.layerCfg) 
+			{
+				if(layercfg.surfaceCfg.position.y() - layercfg.layerThickness < minMax.first) minMax.first = layercfg.surfaceCfg.position.y() - layercfg.layerThickness;
+				if(layercfg.surfaceCfg.position.y() + layercfg.layerThickness > minMax.second) minMax.second = layercfg.surfaceCfg.position.y() + layercfg.layerThickness;
+			}
+			break;
+		}
+		case BinningValue::binZ : 
+		{
+			for(const auto& layercfg : cfg.layerCfg) 
+			{
+				if(layercfg.surfaceCfg.position.z() - layercfg.layerThickness < minMax.first) minMax.first = layercfg.surfaceCfg.position.z() - layercfg.layerThickness;
+				if(layercfg.surfaceCfg.position.z() + layercfg.layerThickness> minMax.second) minMax.second = layercfg.surfaceCfg.position.z() + layercfg.layerThickness;
+			}
+			break;
+		}
+		default : {}
+	}
+	return minMax;
+}
 
-	
   //~ /// @brief Builds a simple 4-layer detector with 2 pixel-like and 2
   //~ /// double-strip-like detectors
   //~ ///
