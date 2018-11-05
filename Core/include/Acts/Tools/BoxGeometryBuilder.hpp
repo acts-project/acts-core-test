@@ -72,56 +72,95 @@ namespace Acts {
 			//~ std::shared_ptr<TrackingGeometry>
 			//~ buildGeometry(const std::vector<Vector3D>& pixelSurfaces, const std::vector<Vector3D>& stripSurfaces, const double distStrips, const std::pair<double, double>& detectorLength) const;
 		
-			template<typename DetectorElement_t>
-			void
-			buildSensitiveSurfaces(std::vector<Config>& config) const;
+			template<typename DetectorElement_t = void>
+			PlaneSurface*
+			buildSurface(const SurfaceConfig& config) const;
 			
-			void
-			buildPassiveSurfaces(std::vector<Config>& config) const;
+			//~ template<>
+			//~ PlaneSurface*
+			//~ buildSurface<void>(const SurfaceConfig& config) const;
 			
-			void
-			buildLayers(std::vector<Config>& config) const;
+			template<typename DetectorElement_t = void>
+			std::shared_ptr<const Layer>
+			buildLayer(const LayerConfig& config) const;
 
-			TrackingVolume*
-			buildVolumes(std::vector<Config>& config) const;
+			//~ TrackingVolume*
+			//~ buildVolumes(std::vector<VolumeConfig>& config) const;
 	};
 
 	template<typename DetectorElement_t>
-	void
-	BoxGeometryBuilder::buildSensitiveSurfaces(std::vector<Config>& config) const
+	PlaneSurface*
+	//~ BoxGeometryBuilder::buildSensitiveSurface(const SurfaceConfig& cfg) const
+	BoxGeometryBuilder::buildSurface(const SurfaceConfig& cfg) const
 	{
 		PlaneSurface* surface;
 		
 			// Build transformation
-		for (Config& cfg : config) {
-		  Transform3D trafo(Transform3D::Identity() * cfg.surfaceCfg.rotation);
-		  trafo.translation() = cfg.surfaceCfg.position;
+		  Transform3D trafo(Transform3D::Identity() * cfg.rotation);
+		  trafo.translation() = cfg.position;
 
 			// Create and store surface
 		  surface = new PlaneSurface(
-			  cfg.surfaceCfg.rBounds,
+			  cfg.rBounds,
 			  *(new DetectorElement_t(std::make_shared<const Transform3D>(trafo),
-							cfg.surfaceCfg.rBounds,
-							cfg.surfaceCfg.thickness)));
-		  surface->setAssociatedMaterial(cfg.surfaceCfg.surMat);
-		  cfg.surface = surface;
-		}
+							cfg.rBounds,
+							cfg.thickness)));
+		  surface->setAssociatedMaterial(cfg.surMat);
+		  return surface;
 	}
 	
-	TrackingVolume*
-	BoxGeometryBuilder::buildVolumes(std::vector<Config>& config) const
-	{
-		return nullptr;
+	template<>
+	Acts::PlaneSurface*
+Acts::BoxGeometryBuilder::buildSurface<void>(const SurfaceConfig& cfg) const
+{
+	PlaneSurface* surface;
+	
+		// Build transformation
+	  Transform3D trafo(Transform3D::Identity() * cfg.rotation);
+	  trafo.translation() = cfg.position;
+
+		// Create and store surface
+	  surface = new PlaneSurface(std::make_shared<const Transform3D>(trafo), cfg.rBounds);
+	  surface->setAssociatedMaterial(cfg.surMat);
+	  return surface;
+}
+
+template<typename DetectorElement_t>
+std::shared_ptr<const Layer>
+BoxGeometryBuilder::buildLayer(const LayerConfig& cfg) const
+{
+	LayerPtr layer;
+	
+		cfg.surface = buildSurface<DetectorElement_t>(cfg.surfaceCfg);
+		// Build transformation centered at the surface position
+	  Transform3D trafo(Transform3D::Identity() * cfg.surfaceCfg.rotation);
+	  trafo.translation() = cfg.surfaceCfg.position;
+	  
+	  // Get the surface, build layer and store it
+	  std::unique_ptr<SurfaceArray> surArray(new SurfaceArray(cfg.surface));
+
+	  layer = PlaneLayer::create(std::make_shared<const Transform3D>(trafo),
+									 cfg.surfaceCfg.rBounds,
+									 std::move(surArray),
+									 cfg.layerThickness);
+	  cfg.surface->associateLayer(*layer);
+	  return layer;
+}
+
+	//~ TrackingVolume*
+	//~ BoxGeometryBuilder::buildVolumes(std::vector<Config>& config) const
+	//~ {
+		//~ return nullptr;
 		
-		for(const auto& cfg : config)
-		{
-			Transform3D trafoVol1(Transform3D::Identity() * cfg.volumeCfg.rotation);
-			trafoVol1.translation() = cfg.volumeCfg.position;
+		//~ for(const auto& cfg : config)
+		//~ {
+			//~ Transform3D trafoVol1(Transform3D::Identity() * cfg.volumeCfg.rotation);
+			//~ trafoVol1.translation() = cfg.volumeCfg.position;
 			
-			 auto boundsVol = std::make_shared<const CuboidVolumeBounds>(cfg.volumeCfg.length.x() * 0.5, cfg.volumeCfg.length.y() * 0.5, cfg.volumeCfg.length.z() * 0.5);
+			 //~ auto boundsVol = std::make_shared<const CuboidVolumeBounds>(cfg.volumeCfg.length.x() * 0.5, cfg.volumeCfg.length.y() * 0.5, cfg.volumeCfg.length.z() * 0.5);
 
 
-		}
+		//~ }
 
     //~ LayerArrayCreator layArrCreator(
         //~ getDefaultLogger("LayerArrayCreator", Logging::VERBOSE));
@@ -147,7 +186,7 @@ namespace Acts {
     //~ trackVolume1->sign(GeometrySignature::Global);
     
     
-}
+//~ }
 	
 
 	
