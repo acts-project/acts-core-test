@@ -90,7 +90,6 @@ namespace IntegrationTest {
     return DensePropagatorType(dstepper, std::move(navi));
   }
 
-
   // The constant field test
   /// test forward propagation in constant magnetic field
   BOOST_DATA_TEST_CASE(
