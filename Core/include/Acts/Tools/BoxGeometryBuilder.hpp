@@ -22,6 +22,7 @@
 #include "Acts/Volumes/CuboidVolumeBounds.hpp"
 #include "Acts/Detector/TrackingGeometry.hpp"
 #include "Acts/Detector/TrackingVolume.hpp"
+#include <limits>
 
 namespace Acts {
 
