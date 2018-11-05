@@ -8,11 +8,8 @@
 
 #include <limits>
 #include <vector>
-<<<<<<< HEAD
 #include "Acts/Detector/TrackingGeometry.hpp"
 #include "Acts/Detector/TrackingVolume.hpp"
-=======
->>>>>>> Building config structure in progress
 #include "Acts/Layers/PlaneLayer.hpp"
 #include "Acts/Material/HomogeneousSurfaceMaterial.hpp"
 #include "Acts/Surfaces/PlaneSurface.hpp"
