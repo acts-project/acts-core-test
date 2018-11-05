@@ -86,22 +86,6 @@ public:
 
   BoxGeometryBuilder() = default;
 
-  //~ template<typename DetectorElement_t>
-  //~ std::shared_ptr<TrackingGeometry>
-  //~ buildGeometry() const;
-
-  //~ template<typename DetectorElement_t>
-  //~ std::shared_ptr<TrackingGeometry>
-  //~ buildGeometry(const std::vector<Vector3D>& pixelSurfaces, const
-  // std::vector<Vector3D>& stripSurfaces, const std::pair<double, double>&
-  // detectorLength) const;
-
-  //~ template<typename DetectorElement_t>
-  //~ std::shared_ptr<TrackingGeometry>
-  //~ buildGeometry(const std::vector<Vector3D>& pixelSurfaces, const
-  // std::vector<Vector3D>& stripSurfaces, const double distStrips, const
-  // std::pair<double, double>& detectorLength) const;
-
   /// @brief This function creates a surface with a given configuration. A
   /// detector element is attached if the template parameter is non-void.
   ///
@@ -133,6 +117,16 @@ public:
   template <typename DetectorElement_t = void>
   std::shared_ptr<TrackingVolume>
   buildVolume(VolumeConfig& cfg) const;
+
+  /// @brief This function builds a TrackingGeometry based on a given
+  /// configuration
+  ///
+  /// @tparam DetectorElement_t Type of the optional detector element
+  /// @param [in, out] cfg Configuration of the TrackingGeometry
+  /// @return Pointer to the created TrackingGeometry
+  template <typename DetectorElement_t = void>
+  std::shared_ptr<TrackingGeometry>
+  buildTrackingGeometry(Config& cfg) const;
 
   /// @brief This function evaluates the minimum and maximum of the binning as
   /// given by the configurations of the surfaces and layers. The ordering
@@ -210,7 +204,7 @@ BoxGeometryBuilder::buildLayer(LayerConfig& cfg) const
   return layer;
 }
 // TODO: treat case without surfaces
-// TODO: dense volume
+
 template <typename DetectorElement_t>
 std::shared_ptr<TrackingVolume>
 BoxGeometryBuilder::buildVolume(VolumeConfig& cfg) const
@@ -316,8 +310,14 @@ BoxGeometryBuilder::binningRange(const VolumeConfig& cfg) const
   }
   return minMax;
 }
+// TODO: check which surface, layer, volume needs to be stored by the structs
 
-
+template <typename DetectorElement_t>
+std::shared_ptr<TrackingGeometry>
+BoxGeometryBuilder::buildTrackingGeometry(Config& cfg) const
+{
+  return nullptr;
+}
 
 //~ // Glue volumes
 //~ trackVolume2->glueTrackingVolume(BoundarySurfaceFace::negativeFaceYZ,
