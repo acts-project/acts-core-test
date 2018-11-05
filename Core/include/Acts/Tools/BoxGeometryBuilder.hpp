@@ -20,9 +20,6 @@
 #include "Acts/Utilities/BinnedArrayXD.hpp"
 #include "Acts/Utilities/Definitions.hpp"
 #include "Acts/Volumes/CuboidVolumeBounds.hpp"
-#include "Acts/Detector/TrackingGeometry.hpp"
-#include "Acts/Detector/TrackingVolume.hpp"
-#include <limits>
 
 namespace Acts {
 
@@ -293,7 +290,6 @@ BoxGeometryBuilder::buildVolume(VolumeConfig& cfg) const
   return trackVolume;
 }
 
-// TODO: test this function
 std::pair<double, double>
 BoxGeometryBuilder::binningRange(const VolumeConfig& cfg) const
 {
