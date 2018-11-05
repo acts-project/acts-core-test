@@ -91,14 +91,14 @@ public:
   //~ template<typename DetectorElement_t>
   //~ std::shared_ptr<TrackingGeometry>
   //~ buildGeometry(const std::vector<Vector3D>& pixelSurfaces, const
-  //std::vector<Vector3D>& stripSurfaces, const std::pair<double, double>&
-  //detectorLength) const;
+  // std::vector<Vector3D>& stripSurfaces, const std::pair<double, double>&
+  // detectorLength) const;
 
   //~ template<typename DetectorElement_t>
   //~ std::shared_ptr<TrackingGeometry>
   //~ buildGeometry(const std::vector<Vector3D>& pixelSurfaces, const
-  //std::vector<Vector3D>& stripSurfaces, const double distStrips, const
-  //std::pair<double, double>& detectorLength) const;
+  // std::vector<Vector3D>& stripSurfaces, const double distStrips, const
+  // std::pair<double, double>& detectorLength) const;
 
   /// @brief This function creates a surface with a given configuration. A
   /// detector element is attached if the template parameter is non-void.
@@ -129,7 +129,7 @@ public:
   /// @param [in, out] cfg Configuration of the TrackingVolume
   /// @return Pointer to the created TrackingVolume
   template <typename DetectorElement_t = void>
-  TrackingVolume*
+  std::shared_ptr<TrackingVolume>
   buildVolume(VolumeConfig& cfg) const;
 
   /// @brief This function evaluates the minimum and maximum of the binning as
@@ -208,8 +208,9 @@ BoxGeometryBuilder::buildLayer(LayerConfig& cfg) const
   return layer;
 }
 // TODO: treat case without surfaces
+// TODO: dense volume
 template <typename DetectorElement_t>
-TrackingVolume*
+std::shared_ptr<TrackingVolume>
 BoxGeometryBuilder::buildVolume(VolumeConfig& cfg) const
 {
   // Build transformation
@@ -466,14 +467,14 @@ BoxGeometryBuilder::binningRange(const VolumeConfig& cfg) const
 //~ template<typename DetectorElement_t>
 //~ std::shared_ptr<TrackingGeometry>
 //~ BoxGeometryBuilder::buildGeometry(const std::vector<Vector3D>&
-//pixelSurfaces, const std::vector<Vector3D>& stripSurfaces, const
-//std::pair<double, double>& detectorLength) const
+// pixelSurfaces, const std::vector<Vector3D>& stripSurfaces, const
+// std::pair<double, double>& detectorLength) const
 //~ {
 //~ // Construct surfaces
 //~ std::vector<PlaneSurface*> surfacesP =
-//buildSurfaces<DetectorElement_t>(pixelSurfaces);
+// buildSurfaces<DetectorElement_t>(pixelSurfaces);
 //~ std::vector<PlaneSurface*> surfacesS =
-//buildSurfaces<DetectorElement_t>(stripSurfaces);
+// buildSurfaces<DetectorElement_t>(stripSurfaces);
 
 //~ // Construct layers
 //~ std::vector<LayerPtr> layersP, layersS;
@@ -486,7 +487,7 @@ BoxGeometryBuilder::binningRange(const VolumeConfig& cfg) const
 //~ std::unique_ptr<SurfaceArray> surArray(new SurfaceArray(surfacesP[i]));
 
 //~ layersP.push_back(PlaneLayer::create(std::make_shared<const
-//Transform3D>(trafo),
+// Transform3D>(trafo),
 //~ rBounds,
 //~ std::move(surArray),
 //~ 1. * units::_mm));
@@ -499,7 +500,7 @@ BoxGeometryBuilder::binningRange(const VolumeConfig& cfg) const
 //~ std::unique_ptr<SurfaceArray> surArray(new SurfaceArray(surfacesS[i]));
 
 //~ layersS.push_back(PlaneLayer::create(std::make_shared<const
-//Transform3D>(trafo),
+// Transform3D>(trafo),
 //~ rBounds,
 //~ std::move(surArray),
 //~ 1. * units::_mm));
@@ -578,7 +579,7 @@ BoxGeometryBuilder::binningRange(const VolumeConfig& cfg) const
 
 //~ auto worldVol = std::make_shared<const CuboidVolumeBounds>(
 //~ (detectorLength.first + detectorLength.second) * 0.5, 0.5 * units::_m, 0.5 *
-//units::_m);
+// units::_m);
 
 //~ std::vector<std::pair<TrackingVolumePtr, Vector3D>> tapVec;
 
@@ -586,10 +587,10 @@ BoxGeometryBuilder::binningRange(const VolumeConfig& cfg) const
 //~ std::make_pair(trackVolumeP, Vector3D(detectorLength.first * 0.5, 0., 0.)));
 //~ tapVec.push_back(
 //~ std::make_pair(trackVolumeS, Vector3D(detectorLength.second * 0.5, 0.,
-//0.)));
+// 0.)));
 
 //~ std::vector<double> binBoundaries = {detectorLength.first, 0.,
-//detectorLength.second};
+// detectorLength.second};
 
 //~ BinningData binData(BinningOption::open, BinningValue::binX, binBoundaries);
 //~ std::unique_ptr<const BinUtility> bu(new BinUtility(binData));
