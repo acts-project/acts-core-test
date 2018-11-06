@@ -54,6 +54,8 @@ public:
     double layerThickness = 0.;
     // Encapsulated surface
     PlaneSurface* surface = nullptr;
+    // Boolean flag if layer is active
+    bool active = false;
   };
 
   /// @brief This struct stores the data for the construction of a cuboid
@@ -224,7 +226,10 @@ BoxGeometryBuilder::buildVolume(VolumeConfig& cfg) const
   cfg.layers.reserve(cfg.layerCfg.size());
   LayerVector layVec;
   for (auto& layerCfg : cfg.layerCfg) {
-    cfg.layers.push_back(buildLayer(layerCfg));
+    if (layerCfg.active)
+      cfg.layers.push_back(buildLayer<DetectorElement_t>(layerCfg));
+    else
+      cfg.layers.push_back(buildLayer(layerCfg));
     layVec.push_back(cfg.layers.back());
   }
 
@@ -321,8 +326,9 @@ BoxGeometryBuilder::buildTrackingGeometry(Config& cfg) const
 {
   // Build volumes
   cfg.volumes.reserve(cfg.volumeCfg.size());
-  for (VolumeConfig volCfg : cfg.volumeCfg)
+  for (VolumeConfig volCfg : cfg.volumeCfg) {
     cfg.volumes.push_back(buildVolume<DetectorElement_t>(volCfg));
+  }
 
   // Glue volumes
   for (unsigned int i = 0; i < cfg.volumes.size() - 1; i++) {
@@ -355,15 +361,18 @@ BoxGeometryBuilder::buildTrackingGeometry(Config& cfg) const
   switch (cfg.volumeCfg[0].binningValue) {
   case BinningValue::binX: {
     binBoundaries.push_back(cfg.volumes[0]->center().x()
-                            - cfg.volumeCfg[0].length.x());
+                            - cfg.volumeCfg[0].length.x() * 0.5);
+    break;
   }
   case BinningValue::binY: {
     binBoundaries.push_back(cfg.volumes[0]->center().y()
-                            - cfg.volumeCfg[0].length.y());
+                            - cfg.volumeCfg[0].length.y() * 0.5);
+    break;
   }
   case BinningValue::binZ: {
     binBoundaries.push_back(cfg.volumes[0]->center().z()
-                            - cfg.volumeCfg[0].length.z());
+                            - cfg.volumeCfg[0].length.z() * 0.5);
+    break;
   }
   default: {
   }
@@ -373,15 +382,18 @@ BoxGeometryBuilder::buildTrackingGeometry(Config& cfg) const
     switch (cfg.volumeCfg[i].binningValue) {
     case BinningValue::binX: {
       binBoundaries.push_back(cfg.volumes[i]->center().x()
-                              + cfg.volumeCfg[i].length.x());
+                              + cfg.volumeCfg[i].length.x() * 0.5);
+      break;
     }
     case BinningValue::binY: {
       binBoundaries.push_back(cfg.volumes[i]->center().y()
-                              + cfg.volumeCfg[i].length.y());
+                              + cfg.volumeCfg[i].length.y() * 0.5);
+      break;
     }
     case BinningValue::binZ: {
       binBoundaries.push_back(cfg.volumes[i]->center().z()
-                              + cfg.volumeCfg[i].length.z());
+                              + cfg.volumeCfg[i].length.z() * 0.5);
+      break;
     }
     default: {
     }
