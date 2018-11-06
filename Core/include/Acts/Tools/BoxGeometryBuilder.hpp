@@ -70,8 +70,6 @@ public:
     std::vector<LayerConfig> layerCfg;
     // Stored layers
     std::vector<std::shared_ptr<const Layer>> layers;
-    // Binning direction (x,y,z)
-    BinningValue binningValue;
     // Name of the volume
     std::string name = "Volume";
     // Material
@@ -139,10 +137,6 @@ public:
   /// direction
   std::pair<double, double>
   binningRange(const VolumeConfig& cfg) const;
-
-  void
-  sortVolumes(std::vector<std::pair<TrackingVolumePtr, Vector3D>>& tapVec,
-              BinningValue bValue) const;
 };
 
 template <typename DetectorElement_t>
@@ -222,6 +216,28 @@ BoxGeometryBuilder::buildVolume(VolumeConfig& cfg) const
   auto bounds = std::make_shared<const CuboidVolumeBounds>(
       cfg.length.x() * 0.5, cfg.length.y() * 0.5, cfg.length.z() * 0.5);
 
+  if (cfg.layerCfg.empty()) {
+    // Build dummy layer if no layer is given (tmp solution)
+    SurfaceConfig sCfg;
+    sCfg.position = cfg.position;
+    // Rotation of the surfaces
+    double   rotationAngle = M_PI * 0.5;
+    Vector3D xPos(cos(rotationAngle), 0., sin(rotationAngle));
+    Vector3D yPos(0., 1., 0.);
+    Vector3D zPos(-sin(rotationAngle), 0., cos(rotationAngle));
+    sCfg.rotation.col(0) = xPos;
+    sCfg.rotation.col(1) = yPos;
+    sCfg.rotation.col(2) = zPos;
+    // Bounds
+    sCfg.rBounds = std::make_shared<const RectangleBounds>(
+        RectangleBounds(cfg.length.y() * 0.5, cfg.length.z() * 0.5));
+
+    LayerConfig lCfg;
+    lCfg.surfaceCfg = sCfg;
+
+    cfg.layerCfg.push_back(lCfg);
+  }
+
   // Gather the layers
   cfg.layers.reserve(cfg.layerCfg.size());
   LayerVector layVec;
@@ -242,7 +258,7 @@ BoxGeometryBuilder::buildVolume(VolumeConfig& cfg) const
                                minMax.first,
                                minMax.second,
                                BinningType::arbitrary,
-                               cfg.binningValue));
+                               BinningValue::binX));
 
   // Build TrackingVolume
   auto trackVolume
@@ -266,56 +282,15 @@ BoxGeometryBuilder::binningRange(const VolumeConfig& cfg) const
   // Construct return value
   std::pair<double, double> minMax = std::make_pair(
       std::numeric_limits<double>::max(), -std::numeric_limits<double>::max());
-  // Test for binning direction
-  switch (cfg.binningValue) {
-  // Binning in x-direction
-  case BinningValue::binX: {
-    for (const auto& layercfg : cfg.layerCfg) {
-      // Test if new extreme is found and set it
-      if (layercfg.surfaceCfg.position.x() - layercfg.layerThickness
-          < minMax.first)
-        minMax.first
-            = layercfg.surfaceCfg.position.x() - layercfg.layerThickness;
-      if (layercfg.surfaceCfg.position.x() + layercfg.layerThickness
-          > minMax.second)
-        minMax.second
-            = layercfg.surfaceCfg.position.x() + layercfg.layerThickness;
-    }
-    break;
-  }
-  // Binning in x-direction
-  case BinningValue::binY: {
-    for (const auto& layercfg : cfg.layerCfg) {
-      // Test if new extreme is found and set it
-      if (layercfg.surfaceCfg.position.y() - layercfg.layerThickness
-          < minMax.first)
-        minMax.first
-            = layercfg.surfaceCfg.position.y() - layercfg.layerThickness;
-      if (layercfg.surfaceCfg.position.y() + layercfg.layerThickness
-          > minMax.second)
-        minMax.second
-            = layercfg.surfaceCfg.position.y() + layercfg.layerThickness;
-    }
-    break;
-  }
-  // Binning in x-direction
-  case BinningValue::binZ: {
-    for (const auto& layercfg : cfg.layerCfg) {
-      // Test if new extreme is found and set it
-      if (layercfg.surfaceCfg.position.z() - layercfg.layerThickness
-          < minMax.first)
-        minMax.first
-            = layercfg.surfaceCfg.position.z() - layercfg.layerThickness;
-      if (layercfg.surfaceCfg.position.z() + layercfg.layerThickness
-          > minMax.second)
-        minMax.second
-            = layercfg.surfaceCfg.position.z() + layercfg.layerThickness;
-    }
-    break;
-  }
-  // Don't do anything if direction is something else
-  default: {
-  }
+  for (const auto& layercfg : cfg.layerCfg) {
+    // Test if new extreme is found and set it
+    if (layercfg.surfaceCfg.position.x() - layercfg.layerThickness
+        < minMax.first)
+      minMax.first = layercfg.surfaceCfg.position.x() - layercfg.layerThickness;
+    if (layercfg.surfaceCfg.position.x() + layercfg.layerThickness
+        > minMax.second)
+      minMax.second
+          = layercfg.surfaceCfg.position.x() + layercfg.layerThickness;
   }
   return minMax;
 }
@@ -331,6 +306,7 @@ BoxGeometryBuilder::buildTrackingGeometry(Config& cfg) const
   }
 
   // Glue volumes
+  // TODO: YZ due to x-binning. Keep it that way or allow variations?
   for (unsigned int i = 0; i < cfg.volumes.size() - 1; i++) {
     cfg.volumes[i + 1]->glueTrackingVolume(BoundarySurfaceFace::negativeFaceYZ,
                                            cfg.volumes[i],
@@ -340,8 +316,6 @@ BoxGeometryBuilder::buildTrackingGeometry(Config& cfg) const
                                        BoundarySurfaceFace::negativeFaceYZ);
   }
 
-  // Build world volume
-  // TODO: translation and lengths might be derived from the volumes
   // Translation
   Transform3D trafo(Transform3D::Identity());
   trafo.translation() = cfg.position;
@@ -358,50 +332,15 @@ BoxGeometryBuilder::buildTrackingGeometry(Config& cfg) const
 
   // Set bin boundaries along binning
   std::vector<double> binBoundaries;
-  switch (cfg.volumeCfg[0].binningValue) {
-  case BinningValue::binX: {
-    binBoundaries.push_back(cfg.volumes[0]->center().x()
-                            - cfg.volumeCfg[0].length.x() * 0.5);
-    break;
-  }
-  case BinningValue::binY: {
-    binBoundaries.push_back(cfg.volumes[0]->center().y()
-                            - cfg.volumeCfg[0].length.y() * 0.5);
-    break;
-  }
-  case BinningValue::binZ: {
-    binBoundaries.push_back(cfg.volumes[0]->center().z()
-                            - cfg.volumeCfg[0].length.z() * 0.5);
-    break;
-  }
-  default: {
-  }
-  }
+  binBoundaries.push_back(cfg.volumes[0]->center().x()
+                          - cfg.volumeCfg[0].length.x() * 0.5);
 
   for (size_t i = 0; i < cfg.volumes.size(); i++)
-    switch (cfg.volumeCfg[i].binningValue) {
-    case BinningValue::binX: {
-      binBoundaries.push_back(cfg.volumes[i]->center().x()
-                              + cfg.volumeCfg[i].length.x() * 0.5);
-      break;
-    }
-    case BinningValue::binY: {
-      binBoundaries.push_back(cfg.volumes[i]->center().y()
-                              + cfg.volumeCfg[i].length.y() * 0.5);
-      break;
-    }
-    case BinningValue::binZ: {
-      binBoundaries.push_back(cfg.volumes[i]->center().z()
-                              + cfg.volumeCfg[i].length.z() * 0.5);
-      break;
-    }
-    default: {
-    }
-    }
+    binBoundaries.push_back(cfg.volumes[i]->center().x()
+                            + cfg.volumeCfg[i].length.x() * 0.5);
 
   // Build binning
-  BinningData binData(
-      BinningOption::open, cfg.volumeCfg[0].binningValue, binBoundaries);
+  BinningData binData(BinningOption::open, BinningValue::binX, binBoundaries);
   std::unique_ptr<const BinUtility> bu(new BinUtility(binData));
 
   // Build TrackingVolume array
