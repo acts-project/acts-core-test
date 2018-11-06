@@ -137,6 +137,10 @@ public:
   /// direction
   std::pair<double, double>
   binningRange(const VolumeConfig& cfg) const;
+
+  void
+  sortVolumes(std::vector<std::pair<TrackingVolumePtr, Vector3D>>& tapVec,
+              BinningValue bValue) const;
 };
 
 template <typename DetectorElement_t>
@@ -217,7 +221,7 @@ BoxGeometryBuilder::buildVolume(VolumeConfig& cfg) const
       cfg.length.x() * 0.5, cfg.length.y() * 0.5, cfg.length.z() * 0.5);
 
   // Gather the layers
-  cfg.layers.reserve(cfg.layerCfg.size());  // TODO: maybe can be removed
+  cfg.layers.reserve(cfg.layerCfg.size());
   LayerVector layVec;
   for (auto& layerCfg : cfg.layerCfg) {
     cfg.layers.push_back(buildLayer(layerCfg));
@@ -310,18 +314,16 @@ BoxGeometryBuilder::binningRange(const VolumeConfig& cfg) const
   }
   return minMax;
 }
-// TODO: check which surface, layer, volume needs to be stored by the structs
 
 template <typename DetectorElement_t>
 std::shared_ptr<TrackingGeometry>
 BoxGeometryBuilder::buildTrackingGeometry(Config& cfg) const
 {
+  // Build volumes
   cfg.volumes.reserve(cfg.volumeCfg.size());
   for (VolumeConfig volCfg : cfg.volumeCfg)
     cfg.volumes.push_back(buildVolume<DetectorElement_t>(volCfg));
 
-  // TODO: glueing assumes that every volume is ordered. Can this be ordered
-  // automatically?
   // Glue volumes
   for (unsigned int i = 0; i < cfg.volumes.size() - 1; i++) {
     cfg.volumes[i + 1]->glueTrackingVolume(BoundarySurfaceFace::negativeFaceYZ,
@@ -333,20 +335,22 @@ BoxGeometryBuilder::buildTrackingGeometry(Config& cfg) const
   }
 
   // Build world volume
-  // TODO: rotation, translation and lengths might be derived from the volumes
+  // TODO: translation and lengths might be derived from the volumes
+  // Translation
   Transform3D trafo(Transform3D::Identity());
   trafo.translation() = cfg.position;
 
+  // Size of the volume
   auto volume = std::make_shared<const CuboidVolumeBounds>(
       cfg.length.x() * 0.5, cfg.length.y() * 0.5, cfg.length.z() * 0.5);
 
-  // TODO: try to use this for sorting
+  // Build vector of confined volumes
   std::vector<std::pair<TrackingVolumePtr, Vector3D>> tapVec;
   tapVec.reserve(cfg.volumeCfg.size());
   for (auto& tVol : cfg.volumes)
     tapVec.push_back(std::make_pair(tVol, tVol->center()));
 
-  // TODO: still assuming everything is sorted here
+  // Set bin boundaries along binning
   std::vector<double> binBoundaries;
   switch (cfg.volumeCfg[0].binningValue) {
   case BinningValue::binX: {
@@ -383,13 +387,16 @@ BoxGeometryBuilder::buildTrackingGeometry(Config& cfg) const
     }
     }
 
+  // Build binning
   BinningData binData(
       BinningOption::open, cfg.volumeCfg[0].binningValue, binBoundaries);
   std::unique_ptr<const BinUtility> bu(new BinUtility(binData));
 
+  // Build TrackingVolume array
   std::shared_ptr<const TrackingVolumeArray> trVolArr(
       new BinnedArrayXD<TrackingVolumePtr>(tapVec, std::move(bu)));
 
+  // Create world volume
   MutableTrackingVolumePtr mtvp(TrackingVolume::create(
       std::make_shared<const Transform3D>(trafo), volume, trVolArr, "World"));
 
@@ -398,40 +405,5 @@ BoxGeometryBuilder::buildTrackingGeometry(Config& cfg) const
   // Build and return tracking geometry
   return std::shared_ptr<TrackingGeometry>(new TrackingGeometry(mtvp));
 }
-
-// Build world volume
-//~ Transform3D trafoWorld(Transform3D::Identity());
-//~ trafoWorld.translation() = Vector3D(0., 0., 0.);
-
-//~ auto worldVol = std::make_shared<const CuboidVolumeBounds>(
-//~ 3. * units::_m, 0.5 * units::_m, 0.5 * units::_m);
-
-//~ std::vector<std::pair<TrackingVolumePtr, Vector3D>> tapVec;
-
-//~ tapVec.push_back(
-//~ std::make_pair(trackVolume1, Vector3D(-1.5 * units::_m, 0., 0.)));
-//~ tapVec.push_back(
-//~ std::make_pair(trackVolume2, Vector3D(1.5 * units::_m, 0., 0.)));
-
-//~ std::vector<double> binBoundaries = {-3. * units::_m, 0., 3. * units::_m};
-
-//~ BinningData binData(BinningOption::open, BinningValue::binX, binBoundaries);
-//~ std::unique_ptr<const BinUtility> bu(new BinUtility(binData));
-
-//~ std::shared_ptr<const TrackingVolumeArray> trVolArr(
-//~ new BinnedArrayXD<TrackingVolumePtr>(tapVec, std::move(bu)));
-
-//~ MutableTrackingVolumePtr mtvpWorld(
-//~ TrackingVolume::create(std::make_shared<const Transform3D>(trafoWorld),
-//~ worldVol,
-//~ trVolArr,
-//~ "World"));
-
-//~ mtvpWorld->sign(GeometrySignature::Global);
-
-//~ // Build and return tracking geometry
-//~ return std::shared_ptr<TrackingGeometry>(
-//~ new Acts::TrackingGeometry(mtvpWorld));
-//~ }
 
 }  // namespace Acts
