@@ -142,6 +142,10 @@ public:
   /// direction
   std::pair<double, double>
   binningRange(const VolumeConfig& cfg) const;
+
+  void
+  sortVolumes(std::vector<std::pair<TrackingVolumePtr, Vector3D>>& tapVec,
+              BinningValue bValue) const;
 };
 
 template <typename DetectorElement_t>
