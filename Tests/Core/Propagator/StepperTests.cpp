@@ -561,6 +561,19 @@ namespace Test {
     BOOST_TEST(endParams.second.z() == endParamsControl.second.z(),
                tt::tolerance(1e-5));
 
+    BOOST_TEST(endParams.first.x() == endParamsControl.first.x(),
+               tt::tolerance(1e-5));
+    BOOST_TEST(endParams.first.y() == endParamsControl.first.y(),
+               tt::tolerance(1e-5));
+    BOOST_TEST(endParams.first.z() == endParamsControl.first.z(),
+               tt::tolerance(1e-5));
+    BOOST_TEST(endParams.second.x() == endParamsControl.second.x(),
+               tt::tolerance(1e-5));
+    BOOST_TEST(endParams.second.y() == endParamsControl.second.y(),
+               tt::tolerance(1e-5));
+    BOOST_TEST(endParams.second.z() == endParamsControl.second.z(),
+               tt::tolerance(1e-5));
+
     // Build launcher through material
     // Set initial parameters for the particle track by using the result of the
     // first volume
