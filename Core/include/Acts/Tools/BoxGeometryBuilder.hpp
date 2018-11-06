@@ -76,12 +76,17 @@ public:
     std::shared_ptr<const Material> material = nullptr;
   };
 
+  /// @brief This struct stores the configuration of the tracking geometry
   struct Config
   {
-    std::vector<VolumeConfig>                    volumeCfg;
+    // Center position
+    Vector3D position;
+    // Length in x,y,z
+    Vector3D length;
+    // Configuration of its volumes
+    std::vector<VolumeConfig> volumeCfg;
+    // Stored volumes
     std::vector<std::shared_ptr<TrackingVolume>> volumes;
-    Vector3D                                     position;
-    Vector3D                                     length;
   };
 
   BoxGeometryBuilder() = default;
