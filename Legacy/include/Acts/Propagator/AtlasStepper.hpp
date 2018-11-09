@@ -74,7 +74,7 @@ public:
     int                          pdg            = 0.;
     double                       tolerance      = 0.;
     double                       stepSizeCutOff = 0.;
-    
+
     Vector3D
     position() const
     {
