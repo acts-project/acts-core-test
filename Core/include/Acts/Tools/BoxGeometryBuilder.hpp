@@ -259,7 +259,7 @@ BoxGeometryBuilder::buildVolume(VolumeConfig& cfg) const
       layVec.push_back(cfg.layers.back());
     }
   } else {
-    for (auto& lay : cfg.layers) layVec.push_back(lay);
+    for (auto& lay : cfg.layers) {layVec.push_back(lay);}
   }
 
   // Build layer array
@@ -298,12 +298,12 @@ BoxGeometryBuilder::binningRange(const VolumeConfig& cfg) const
   for (const auto& layercfg : cfg.layerCfg) {
     // Test if new extreme is found and set it
     if (layercfg.surfaceCfg.position.x() - layercfg.layerThickness
-        < minMax.first)
-      minMax.first = layercfg.surfaceCfg.position.x() - layercfg.layerThickness;
+        < minMax.first){
+      minMax.first = layercfg.surfaceCfg.position.x() - layercfg.layerThickness;}
     if (layercfg.surfaceCfg.position.x() + layercfg.layerThickness
-        > minMax.second)
+        > minMax.second){
       minMax.second
-          = layercfg.surfaceCfg.position.x() + layercfg.layerThickness;
+          = layercfg.surfaceCfg.position.x() + layercfg.layerThickness;}
   }
   return minMax;
 }
@@ -341,17 +341,17 @@ BoxGeometryBuilder::buildTrackingGeometry(Config& cfg) const
   // Build vector of confined volumes
   std::vector<std::pair<TrackingVolumePtr, Vector3D>> tapVec;
   tapVec.reserve(cfg.volumeCfg.size());
-  for (auto& tVol : cfg.volumes)
-    tapVec.push_back(std::make_pair(tVol, tVol->center()));
+  for (auto& tVol : cfg.volumes){
+    tapVec.push_back(std::make_pair(tVol, tVol->center()));}
 
   // Set bin boundaries along binning
   std::vector<double> binBoundaries;
   binBoundaries.push_back(cfg.volumes[0]->center().x()
                           - cfg.volumeCfg[0].length.x() * 0.5);
 
-  for (size_t i = 0; i < cfg.volumes.size(); i++)
+  for (size_t i = 0; i < cfg.volumes.size(); i++){
     binBoundaries.push_back(cfg.volumes[i]->center().x()
-                            + cfg.volumeCfg[i].length.x() * 0.5);
+                            + cfg.volumeCfg[i].length.x() * 0.5);}
 
   // Build binning
   BinningData binData(BinningOption::open, BinningValue::binX, binBoundaries);
