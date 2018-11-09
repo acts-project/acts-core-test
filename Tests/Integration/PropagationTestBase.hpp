@@ -647,7 +647,8 @@ BOOST_DATA_TEST_CASE(
       1e-1);
 }
 
-/// test correct covariance transport for curvilinear parameters in dense environment
+/// test correct covariance transport for curvilinear parameters in dense
+/// environment
 /// this test only works within the
 /// s_curvilinearProjTolerance (in: Definitions.hpp)
 BOOST_DATA_TEST_CASE(
@@ -683,8 +684,8 @@ BOOST_DATA_TEST_CASE(
   // covariance check for eigen stepper in dense environment
   DensePropagator_type dpropagator = setupDensePropagator();
   covariance_curvilinear(
-	  dpropagator, pT, 0., M_PI / 2., 1, plimit * Acts::units::_m, index);
-	  
+      dpropagator, pT, 0., M_PI / 2., 1, plimit * Acts::units::_m, index);
+
   covariance_bound<DensePropagator_type, DiscSurface, DiscSurface>(
       dpropagator,
       pT,
@@ -699,7 +700,7 @@ BOOST_DATA_TEST_CASE(
       true,
       true,
       1e-1);
-      
+
   covariance_bound<DensePropagator_type, PlaneSurface, PlaneSurface>(
       dpropagator,
       pT,

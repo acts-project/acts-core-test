@@ -188,7 +188,9 @@ BoxGeometryBuilder::buildLayer(LayerConfig& cfg) const
   LayerPtr layer;
 
   // Build the surface
-  cfg.surface = buildSurface<DetectorElement_t>(cfg.surfaceCfg);
+  if (cfg.surface == nullptr) {
+    cfg.surface = buildSurface<DetectorElement_t>(cfg.surfaceCfg);
+  }
   // Build transformation centered at the surface position
   Transform3D trafo(Transform3D::Identity() * cfg.surfaceCfg.rotation);
   trafo.translation() = cfg.surfaceCfg.position;
@@ -238,21 +240,26 @@ BoxGeometryBuilder::buildVolume(VolumeConfig& cfg) const
         RectangleBounds(cfg.length.y() * 0.5, cfg.length.z() * 0.5));
 
     LayerConfig lCfg;
-    lCfg.surfaceCfg = sCfg;
+    lCfg.surfaceCfg     = sCfg;
     lCfg.layerThickness = 1. * units::_mm;
 
     cfg.layerCfg.push_back(lCfg);
   }
 
   // Gather the layers
-  cfg.layers.reserve(cfg.layerCfg.size());
   LayerVector layVec;
-  for (auto& layerCfg : cfg.layerCfg) {
-    if (layerCfg.active)
-      cfg.layers.push_back(buildLayer<DetectorElement_t>(layerCfg));
-    else
-      cfg.layers.push_back(buildLayer(layerCfg));
-    layVec.push_back(cfg.layers.back());
+  if (cfg.layers.empty()) {
+    cfg.layers.reserve(cfg.layerCfg.size());
+
+    for (auto& layerCfg : cfg.layerCfg) {
+      if (layerCfg.active)
+        cfg.layers.push_back(buildLayer<DetectorElement_t>(layerCfg));
+      else
+        cfg.layers.push_back(buildLayer(layerCfg));
+      layVec.push_back(cfg.layers.back());
+    }
+  } else {
+    for (auto& lay : cfg.layers) layVec.push_back(lay);
   }
 
   // Build layer array
@@ -306,13 +313,14 @@ std::shared_ptr<TrackingGeometry>
 BoxGeometryBuilder::buildTrackingGeometry(Config& cfg) const
 {
   // Build volumes
-  cfg.volumes.reserve(cfg.volumeCfg.size());
-  for (VolumeConfig volCfg : cfg.volumeCfg) {
-    cfg.volumes.push_back(buildVolume<DetectorElement_t>(volCfg));
+  if (cfg.volumes.empty()) {
+    cfg.volumes.reserve(cfg.volumeCfg.size());
+    for (VolumeConfig volCfg : cfg.volumeCfg) {
+      cfg.volumes.push_back(buildVolume<DetectorElement_t>(volCfg));
+    }
   }
 
   // Glue volumes
-  // TODO: YZ due to x-binning. Keep it that way or allow variations?
   for (unsigned int i = 0; i < cfg.volumes.size() - 1; i++) {
     cfg.volumes[i + 1]->glueTrackingVolume(BoundarySurfaceFace::negativeFaceYZ,
                                            cfg.volumes[i],
