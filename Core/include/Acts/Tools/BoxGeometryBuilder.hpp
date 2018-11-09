@@ -239,6 +239,7 @@ BoxGeometryBuilder::buildVolume(VolumeConfig& cfg) const
 
     LayerConfig lCfg;
     lCfg.surfaceCfg = sCfg;
+    lCfg.layerThickness = 1. * units::_mm;
 
     cfg.layerCfg.push_back(lCfg);
   }
@@ -257,7 +258,7 @@ BoxGeometryBuilder::buildVolume(VolumeConfig& cfg) const
   // Build layer array
   std::pair<double, double> minMax = binningRange(cfg);
   LayerArrayCreator layArrCreator(
-      getDefaultLogger("LayerArrayCreator", Logging::VERBOSE));
+      getDefaultLogger("LayerArrayCreator", Logging::INFO));
   std::unique_ptr<const LayerArray> layArr(
       layArrCreator.layerArray(layVec,
                                minMax.first,
