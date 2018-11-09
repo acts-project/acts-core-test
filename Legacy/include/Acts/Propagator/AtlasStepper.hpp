@@ -67,7 +67,7 @@ public:
     /// buffer & formatting for consistent output
     size_t debugPfxWidth = 30;
     size_t debugMsgWidth = 50;
-
+	
     Vector3D
     position() const
     {

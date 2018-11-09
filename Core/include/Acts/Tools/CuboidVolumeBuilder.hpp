@@ -276,6 +276,7 @@ CuboidVolumeBuilder::buildVolume(VolumeConfig& cfg) const
 
     LayerConfig lCfg;
     lCfg.surfaceCfg = sCfg;
+    lCfg.layerThickness = 1. * units::_mm;
 
     cfg.layerCfg.push_back(lCfg);
   }
