@@ -352,7 +352,6 @@ BoxGeometryBuilder::buildTrackingGeometry(Config& cfg) const
   std::vector<float> binBoundaries;
   binBoundaries.push_back(cfg.volumes[0]->center().x()
                           - cfg.volumeCfg[0].length.x() * 0.5);
-
   for (size_t i = 0; i < cfg.volumes.size(); i++) {
     binBoundaries.push_back(cfg.volumes[i]->center().x()
                             + cfg.volumeCfg[i].length.x() * 0.5);
