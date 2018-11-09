@@ -324,7 +324,6 @@ BoxGeometryBuilder::buildTrackingGeometry(Config& cfg) const
   }
 
   // Glue volumes
-  // TODO: YZ due to x-binning. Keep it that way or allow variations?
   for (unsigned int i = 0; i < cfg.volumes.size() - 1; i++) {
     cfg.volumes[i + 1]->glueTrackingVolume(BoundarySurfaceFace::negativeFaceYZ,
                                            cfg.volumes[i],
