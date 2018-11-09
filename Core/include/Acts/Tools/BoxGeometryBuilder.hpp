@@ -210,7 +210,6 @@ BoxGeometryBuilder::buildLayer(LayerConfig& cfg) const
   cfg.surface->associateLayer(*layer);
   return layer;
 }
-// TODO: treat case without surfaces
 
 template <typename DetectorElement_t>
 std::shared_ptr<TrackingVolume>
@@ -252,10 +251,11 @@ BoxGeometryBuilder::buildVolume(VolumeConfig& cfg) const
     cfg.layers.reserve(cfg.layerCfg.size());
 
     for (auto& layerCfg : cfg.layerCfg) {
-      if (layerCfg.active)
+      if (layerCfg.active) {
         cfg.layers.push_back(buildLayer<DetectorElement_t>(layerCfg));
-      else
+      } else {
         cfg.layers.push_back(buildLayer(layerCfg));
+      }
       layVec.push_back(cfg.layers.back());
     }
   } else {
