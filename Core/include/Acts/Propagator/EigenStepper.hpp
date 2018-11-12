@@ -357,6 +357,9 @@ public:
 
     /// Volume with material that is passed
     TrackingVolume const* const* volume = nullptr;
+
+    /// Auctioneer for choosing the extension
+    auctioneer_t auctioneer;
   };
 
   /// Always use the same propagation state type, independently of the initial
@@ -451,7 +454,7 @@ public:
 
     // First Runge-Kutta point (at current position)
     sd.B_first = getField(state, state.pos);
-    state.extension.template k<State, auctioneer_t>(state, sd.k1, sd.B_first);
+    state.extension.k(state, sd.k1, sd.B_first);
 
     // The following functor starts to perform a Runge-Kutta step of a certain
     // size, going up to the point where it can return an estimate of the local
