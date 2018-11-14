@@ -78,8 +78,9 @@ public:
     std::vector<LayerConfig> layerCfg;
     // Stored layers
     std::vector<std::shared_ptr<const Layer>> layers;
-    
+    // Configurations of confined volumes
     std::vector<VolumeConfig> volumeCfg;
+    // Stored confined volumes
     std::vector<std::shared_ptr<const TrackingVolume>> trackingVolumes;
     // Name of the volume
     std::string name = "Volume";
@@ -315,8 +316,9 @@ CuboidVolumeBuilder::buildVolume(VolumeConfig& cfg) const
                                BinningValue::binX));
 
 	// Build confined volumes
-	for(VolumeConfig vc : cfg.volumeCfg)
-		cfg.trackingVolumes.push_back(buildVolume(vc));
+	if(cfg.trackingVolumes.empty())
+		for(VolumeConfig vc : cfg.volumeCfg)
+			cfg.trackingVolumes.push_back(buildVolume(vc));
 
   // Build TrackingVolume
   auto trackVolume

@@ -89,7 +89,7 @@ TrackingVolume::compatibleBoundaries(const parameters_t& parameters,
 {
   // Loop over boundarySurfaces and calculate the intersection
   auto  excludeObject = options.startObject;
-  auto& bSurfaces     = boundarySurfaces();
+  auto& bSurfaces     = boundarySurfaces();  
   std::vector<const BoundarySurfaceT<TrackingVolume>*> nonExcludedBoundaries;
 
   for (auto& bsIter : bSurfaces) {
@@ -102,5 +102,42 @@ TrackingVolume::compatibleBoundaries(const parameters_t& parameters,
     }
     nonExcludedBoundaries.push_back(bSurface);
   }
+std::cout << "#non: " << nonExcludedBoundaries.size() << std::endl;
+  const TrackingVolumeVector denseVolumes = confinedDenseVolumes();
+  for(const auto& dv : denseVolumes)
+  {
+	  auto& bSurfacesConfined = dv->boundarySurfaces();
+	  for(auto& bsIter : bSurfacesConfined)
+	  {
+		// get the boundary surface pointer
+		const BoundarySurfaceT<TrackingVolume>* bSurface = bsIter.get();
+		const auto& bSurfaceRep = bSurface->surfaceRepresentation();
+		// exclude the on boundary object		
+		if(excludeObject && excludeObject == &bSurfaceRep)
+		{
+			continue;
+		}
+		nonExcludedBoundaries.push_back(bSurface);
+	  }
+  }
+std::cout << "#non: " << nonExcludedBoundaries.size() << std::endl;  
+  const TrackingVolumeVector detachedVolumes = confinedDetachedVolumes();
+  for(const auto& dv : detachedVolumes)
+  {
+	  auto& bSurfacesConfined = dv->boundarySurfaces();
+	  for(auto& bsIter : bSurfacesConfined)
+	  {
+		// get the boundary surface pointer
+		const BoundarySurfaceT<TrackingVolume>* bSurface = bsIter.get();
+		const auto& bSurfaceRep = bSurface->surfaceRepresentation();
+		// exclude the on boundary object		
+		if(excludeObject && excludeObject == &bSurfaceRep)
+		{
+			continue;
+		}
+		nonExcludedBoundaries.push_back(bSurface);
+	  }
+  }
+std::cout << "#non: " << nonExcludedBoundaries.size() << std::endl;
   return sorter(nonExcludedBoundaries, parameters, options, corrfnc);
 }

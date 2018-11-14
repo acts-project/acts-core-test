@@ -26,7 +26,7 @@ namespace Acts {
 
 using cstep = detail::ConstrainedStep;
 
-/// @breif struct for the Navigation options that are forwarded to
+/// @brief struct for the Navigation options that are forwarded to
 ///        the geometry
 ///
 /// @tparam propagator_state_t Type of the object for navigation state
@@ -507,10 +507,10 @@ struct Navigator
   /// Volume, this will be called at:
   /// - initialization
   /// - attempted volume switch
-  /// Target findin by association will not be done again
+  /// Target finding by association will not be done again
   ///
   /// @tparam propagator_state_t The state type of the propagagor
-  /// @tparam is a step corrector (can be void corrector)
+  /// @tparam corrector_t Is a step corrector (can be void corrector)
   ///
   /// @param[in,out] state is the propagation state object
   /// @param[in] navCorr is the navigation path corrector
