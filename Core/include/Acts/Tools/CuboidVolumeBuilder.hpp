@@ -78,6 +78,9 @@ public:
     std::vector<LayerConfig> layerCfg;
     // Stored layers
     std::vector<std::shared_ptr<const Layer>> layers;
+    
+    std::vector<VolumeConfig> volumeCfg;
+    std::vector<std::shared_ptr<const TrackingVolume>> trackingVolumes;
     // Name of the volume
     std::string name = "Volume";
     // Material
@@ -311,6 +314,10 @@ CuboidVolumeBuilder::buildVolume(VolumeConfig& cfg) const
                                BinningType::arbitrary,
                                BinningValue::binX));
 
+	// Build confined volumes
+	for(VolumeConfig vc : cfg.volumeCfg)
+		cfg.trackingVolumes.push_back(buildVolume(vc));
+
   // Build TrackingVolume
   auto trackVolume
       = TrackingVolume::create(std::make_shared<const Transform3D>(trafo),
@@ -318,7 +325,7 @@ CuboidVolumeBuilder::buildVolume(VolumeConfig& cfg) const
                                cfg.material,
                                std::move(layArr),
                                layVec,
-                               {},
+                               cfg.trackingVolumes,
                                {},
                                cfg.name);
   trackVolume->sign(GeometrySignature::Global);
