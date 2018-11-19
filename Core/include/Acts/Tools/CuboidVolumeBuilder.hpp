@@ -81,7 +81,7 @@ public:
     // Configurations of confined volumes
     std::vector<VolumeConfig> volumeCfg;
     // Stored confined volumes
-    std::vector<std::shared_ptr<const TrackingVolume>> trackingVolumes;
+    std::vector<std::shared_ptr<TrackingVolume>> trackingVolumes;
     // Name of the volume
     std::string name = "Volume";
     // Material
@@ -262,28 +262,28 @@ CuboidVolumeBuilder::buildVolume(VolumeConfig& cfg) const
   auto bounds = std::make_shared<const CuboidVolumeBounds>(
       cfg.length.x() * 0.5, cfg.length.y() * 0.5, cfg.length.z() * 0.5);
 
-  if (cfg.layerCfg.empty()) {
-    // Build dummy layer if no layer is given (tmp solution)
-    SurfaceConfig sCfg;
-    sCfg.position = cfg.position;
-    // Rotation of the surfaces
-    double   rotationAngle = M_PI * 0.5;
-    Vector3D xPos(cos(rotationAngle), 0., sin(rotationAngle));
-    Vector3D yPos(0., 1., 0.);
-    Vector3D zPos(-sin(rotationAngle), 0., cos(rotationAngle));
-    sCfg.rotation.col(0) = xPos;
-    sCfg.rotation.col(1) = yPos;
-    sCfg.rotation.col(2) = zPos;
-    // Bounds
-    sCfg.rBounds = std::make_shared<const RectangleBounds>(
-        RectangleBounds(cfg.length.y() * 0.5, cfg.length.z() * 0.5));
+  //~ if (cfg.layerCfg.empty()) {
+    //~ // Build dummy layer if no layer is given (tmp solution)
+    //~ SurfaceConfig sCfg;
+    //~ sCfg.position = cfg.position;
+    //~ // Rotation of the surfaces
+    //~ double   rotationAngle = M_PI * 0.5;
+    //~ Vector3D xPos(cos(rotationAngle), 0., sin(rotationAngle));
+    //~ Vector3D yPos(0., 1., 0.);
+    //~ Vector3D zPos(-sin(rotationAngle), 0., cos(rotationAngle));
+    //~ sCfg.rotation.col(0) = xPos;
+    //~ sCfg.rotation.col(1) = yPos;
+    //~ sCfg.rotation.col(2) = zPos;
+    //~ // Bounds
+    //~ sCfg.rBounds = std::make_shared<const RectangleBounds>(
+        //~ RectangleBounds(cfg.length.y() * 0.5, cfg.length.z() * 0.5));
 
-    LayerConfig lCfg;
-    lCfg.surfaceCfg     = sCfg;
-    lCfg.layerThickness = 1. * units::_mm;
+    //~ LayerConfig lCfg;
+    //~ lCfg.surfaceCfg     = sCfg;
+    //~ lCfg.layerThickness = 1. * units::_mm;
 
-    cfg.layerCfg.push_back(lCfg);
-  }
+    //~ cfg.layerCfg.push_back(lCfg);
+  //~ }
 
   // Gather the layers
   LayerVector layVec;
@@ -304,24 +304,40 @@ CuboidVolumeBuilder::buildVolume(VolumeConfig& cfg) const
     }
   }
 
-  // Build layer array
-  std::pair<double, double> minMax = binningRange(cfg);
-  LayerArrayCreator layArrCreator(
-      getDefaultLogger("LayerArrayCreator", Logging::INFO));
-  std::unique_ptr<const LayerArray> layArr(
-      layArrCreator.layerArray(layVec,
-                               minMax.first,
-                               minMax.second,
-                               BinningType::arbitrary,
-                               BinningValue::binX));
-
 	// Build confined volumes
 	if(cfg.trackingVolumes.empty())
 		for(VolumeConfig vc : cfg.volumeCfg)
 			cfg.trackingVolumes.push_back(buildVolume(vc));
-
+					
+std::shared_ptr<TrackingVolume> trackVolume;
+  if(layVec.empty())
+	{
+	  // Build TrackingVolume
+	  trackVolume
+		  = TrackingVolume::create(std::make_shared<const Transform3D>(trafo),
+								   bounds,
+								   cfg.material,
+								   nullptr,
+								   {},
+								   cfg.trackingVolumes,
+								   {},
+								   cfg.name);
+	}
+	else
+	{
+		  // Build layer array
+	  std::pair<double, double> minMax = binningRange(cfg);
+	  LayerArrayCreator layArrCreator(
+		  getDefaultLogger("LayerArrayCreator", Logging::INFO));
+	  std::unique_ptr<const LayerArray>  layArr( 
+		  layArrCreator.layerArray(layVec,
+								   minMax.first,
+								   minMax.second,
+								   BinningType::arbitrary,
+								   BinningValue::binX));
+	
   // Build TrackingVolume
-  auto trackVolume
+  trackVolume
       = TrackingVolume::create(std::make_shared<const Transform3D>(trafo),
                                bounds,
                                cfg.material,
@@ -330,7 +346,8 @@ CuboidVolumeBuilder::buildVolume(VolumeConfig& cfg) const
                                cfg.trackingVolumes,
                                {},
                                cfg.name);
-  trackVolume->sign(GeometrySignature::Global);
+   }
+  //~ trackVolume->sign(GeometrySignature::Global);
 
   return trackVolume;
 }
@@ -355,7 +372,7 @@ MutableTrackingVolumePtr
                                    volumes[i + 1],
                                    BoundarySurfaceFace::negativeFaceYZ);
   }
-
+  
   // Translation
   Transform3D trafo(Transform3D::Identity());
   trafo.translation() = m_cfg.position;

@@ -45,6 +45,7 @@ using DetachedTrackingVolumePtr = std::shared_ptr<const DetachedTrackingVolume>;
 // possible contained
 using TrackingVolumeArray  = BinnedArray<TrackingVolumePtr>;
 using TrackingVolumeVector = std::vector<TrackingVolumePtr>;
+using MutableTrackingVolumeVector = std::vector<MutableTrackingVolumePtr>;
 using LayerArray           = BinnedArray<LayerPtr>;
 using LayerVector          = std::vector<LayerPtr>;
 using DetachedVolumeVector = std::vector<DetachedTrackingVolumePtr>;
@@ -126,7 +127,7 @@ public:
          std::shared_ptr<const Material>    matprop,
          std::unique_ptr<const LayerArray>  cLayerArray   = nullptr,
          const LayerVector&                 cLayerVector  = {},
-         const TrackingVolumeVector&        cVolumeVector = {},
+         MutableTrackingVolumeVector        cVolumeVector = {},
          const DetachedVolumeVector&        dVolumeVector = {},
          const std::string&                 volumeName    = "undefined")
   {
@@ -260,7 +261,7 @@ public:
   /// @param bsfNeighbor is the boudnary surface of the neighbor
   void
   glueTrackingVolume(BoundarySurfaceFace             bsfMine,
-                     const MutableTrackingVolumePtr& neighbor,
+                     TrackingVolume* const neighbor,
                      BoundarySurfaceFace             bsfNeighbor);
 
   /// Glue another tracking volume to this one
@@ -330,15 +331,15 @@ public:
   unsigned int
   colorCode() const;
 
-  /// Return the MotherVolume - if it exists
-  const TrackingVolume*
-  motherVolume() const;
+  //~ /// Return the MotherVolume - if it exists
+  //~ const TrackingVolume*
+  //~ motherVolume() const;
 
-  /// Set the MotherVolume
-  ///
-  /// @param mvol is the mother volume
-  void
-  setMotherVolume(const TrackingVolume* mvol);
+  //~ /// Set the MotherVolume
+  //~ ///
+  //~ /// @param mvol is the mother volume
+  //~ void
+  //~ setMotherVolume(const TrackingVolume* mvol);
 
 protected:
   /// Default constructor
@@ -377,7 +378,7 @@ protected:
                  const LayerVector&                 arbitraryLayerVector = {},
                  std::shared_ptr<const TrackingVolumeArray> containedVolumeArray
                  = nullptr,
-                 const TrackingVolumeVector& denseVolumeVector    = {},
+                 MutableTrackingVolumeVector denseVolumeVector    = {},
                  const DetachedVolumeVector& detachedVolumeVector = {},
                  const std::string&          volumeName = "undefined");
 
@@ -393,6 +394,10 @@ protected:
                  const std::string&    volumeName = "undefined");
 
 private:
+
+	void
+	connectDenseBoundarySurfaces(std::vector<std::shared_ptr<TrackingVolume>> m_confinedDenseVolumes);
+
   /// Create Boundary Surface
   void
   createBoundarySurfaces();
@@ -430,8 +435,8 @@ private:
   /// The Material the TrackingVolume consists of
   std::shared_ptr<const Material> m_material;
 
-  /// Remember the mother volume
-  const TrackingVolume* m_motherVolume{nullptr};
+  //~ /// Remember the mother volume
+  //~ const TrackingVolume* m_motherVolume{nullptr};
 
   // the boundary surfaces
   std::vector<TrackingVolumeBoundaryPtr> m_boundarySurfaces;
@@ -445,10 +450,10 @@ private:
 
   /// (b)  non-static setups
   /// detacathd
-  const DetachedVolumeVector m_confinedDetachedVolumes;
+  DetachedVolumeVector m_confinedDetachedVolumes;
 
   /// confined dense
-  const TrackingVolumeVector m_confinedDenseVolumes;
+  TrackingVolumeVector m_confinedDenseVolumes;
 
   /// confined arbitrary
   const LayerVector m_confinedArbitraryLayers;
@@ -535,17 +540,17 @@ TrackingVolume::colorCode() const
   return m_colorCode;
 }
 
-inline const TrackingVolume*
-TrackingVolume::motherVolume() const
-{
-  return m_motherVolume;
-}
+//~ inline const TrackingVolume*
+//~ TrackingVolume::motherVolume() const
+//~ {
+  //~ return m_motherVolume;
+//~ }
 
-inline void
-TrackingVolume::setMotherVolume(const TrackingVolume* mvol)
-{
-  m_motherVolume = mvol;
-}
+//~ inline void
+//~ TrackingVolume::setMotherVolume(const TrackingVolume* mvol)
+//~ {
+  //~ m_motherVolume = mvol;
+//~ }
 
 #include "detail/TrackingVolume.ipp"
 

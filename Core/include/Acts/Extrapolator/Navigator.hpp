@@ -265,6 +265,7 @@ struct Navigator
       });
       return;
     }
+
     // -------------------------------------------------
     // Volume be handled
     // - if you arrived
@@ -275,6 +276,7 @@ struct Navigator
       });
       return;
     }
+
     // -------------------------------------------------
     // neither surfaces, layers nor boundaries triggered a return
     // navigation broken - switch navigator off
@@ -421,7 +423,7 @@ struct Navigator
       // assign to the currentVolume
       state.navigation.currentVolume = state.navigation.startVolume;
       // fast exit if start and target layer are identical
-      if (state.navigation.startLayer == state.navigation.targetLayer) {
+      if (state.navigation.startLayer && (state.navigation.startLayer == state.navigation.targetLayer)) {
         debugLog(state, [&] {
           return std::string(
               "Start and target layer identical, check surfaces.");
@@ -461,6 +463,7 @@ struct Navigator
         }
         return false;
       }
+
       // initialize layer - if it works go ahead with processing
       if (resolveLayers(state, navCorr)) {
         if (state.stepping.stepSize == 0.) {
@@ -702,11 +705,13 @@ struct Navigator
         });
         // get the actual boundary for the navigation & the next volume
         auto boundary = state.navigation.navBoundaryIter->object;
+std::cout << state.navigation.currentVolume << std::endl;
         state.navigation.currentVolume
             = boundary->attachedVolume(state.stepping.position(),
                                        state.stepping.direction(),
                                        state.stepping.navDir);
         // no volume anymore : end of known world
+std::cout << "currvol " << state.navigation.currentVolume << std::endl;
         if (!state.navigation.currentVolume) {
           debugLog(state, [&] {
             return std::string(

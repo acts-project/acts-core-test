@@ -139,17 +139,17 @@ public:
   virtual ~BoundarySurfaceT() = default;
 
 protected:
-  /// Helper metho: attach a Volume to this BoundarySurfaceT
-  /// this si done during the geometry construction and only called by
+  /// Helper method: attach a Volume to this BoundarySurfaceT
+  /// this is done during the geometry construction and only called by
   /// the friend templated volume
   ///
   /// @param volume is the volume to be attached
   /// @param inout is the boundary orientation @todo update to along/opposite
   void
-  attachVolume(VolumePtr volume, BoundaryOrientation inout);
+  attachVolume(const T* volume, BoundaryOrientation inout);
 
-  /// Helper metho: attach a Volume to this BoundarySurfaceT
-  /// this si done during the geometry construction and only called by
+  /// Helper method: attach a Volume to this BoundarySurfaceT
+  /// this is done during the geometry construction and only called by
   /// the friend templated volume
   ///
   /// @param volumes is the volume array to be attached
@@ -179,12 +179,13 @@ BoundarySurfaceT<T>::surfaceRepresentation() const
 
 template <class T>
 void
-BoundarySurfaceT<T>::attachVolume(VolumePtr volume, BoundaryOrientation inout)
+BoundarySurfaceT<T>::attachVolume(const T* volume, BoundaryOrientation inout)
 {
   if (inout == insideVolume) {
-    m_insideVolume = volume.get();
+    //~ m_insideVolume = volume.get();
+    m_insideVolume = volume;
   } else {
-    m_outsideVolume = volume.get();
+    m_outsideVolume = volume;
   }
 }
 

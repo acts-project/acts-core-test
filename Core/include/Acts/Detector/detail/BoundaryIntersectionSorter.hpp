@@ -126,6 +126,7 @@ struct BoundaryIntersectionSorter
              const options_t&                                      options,
              const corrector_t& corrfnc) const
   {
+
     // Resulting vector
     std::vector<BoundaryIntersection> bIntersections, bIntersectionsOtherNavDir;
     bIntersections.reserve(boundaries.size());
@@ -167,7 +168,6 @@ struct BoundaryIntersectionSorter
             intersect(boundary, parameters, optionsOtherNavDir, corrfnc));
       }
     }
-
     // Sort both lists
     if (options.navDir == forward) {
       std::sort(bIntersections.begin(), bIntersections.end());

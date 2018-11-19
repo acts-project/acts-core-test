@@ -298,21 +298,23 @@ namespace Test {
 		cvCfg2.length = {10. * units::_cm, 10. * units::_cm, 10. * units::_cm};
 		cvCfg2.name = "Confined volume2";
 		vCfg.volumeCfg = {cvCfg1, cvCfg2};
-		
+	
 		// Build detector
 		BoxGeometryBuilder::Config config;
 		config.position = {1. * units::_m, 0., 0.};
 		config.length = {1. * units::_m, 1. * units::_m, 1. * units::_m};
 		config.volumeCfg = {vCfg};
+std::cout << "machett" << std::endl;
 		std::shared_ptr<TrackingGeometry> detector = bgb.buildTrackingGeometry(config);
-		
+std::cout << "this is my detector" << std::endl;
 		// Test that the right volume is selected
 		BOOST_TEST(detector->lowestTrackingVolume({1. * units::_m, 0., 0.})->volumeName() == vCfg.name);
 		BOOST_TEST(detector->lowestTrackingVolume({1.1 * units::_m, 0., 0.})->volumeName() == cvCfg1.name);
 		BOOST_TEST(detector->lowestTrackingVolume({0.9 * units::_m, 0., 0.})->volumeName() == cvCfg2.name);
 		
 		PropagatorOptions<ActionList<StepVolumeCollector>> propOpts;
-		propOpts.maxStepSize = 10. * units::_mm;
+		propOpts.maxStepSize = 100. * units::_mm;
+		propOpts.debug = true;
 		StraightLineStepper sls;
 		Navigator navi(detector);
 		navi.resolvePassive   = true;
@@ -324,13 +326,14 @@ namespace Test {
 	    // Set initial parameters for the particle track
 		Vector3D startParams(0., 0., 0.), startMom(1. * units::_GeV, 0., 0.);
 		SingleCurvilinearTrackParameters<ChargedPolicy> sbtp(nullptr, startParams, startMom, 1.);
-        
+  
 		const auto&                       result = prop.propagate(sbtp, propOpts);
 		const StepVolumeCollector::this_result& stepResult
 			= result.get<typename StepVolumeCollector::result_type>();
 
 		for(unsigned int i = 0; i < stepResult.position.size(); i++)
 			std::cout << stepResult.position[i].x() << "\t" << stepResult.position[i].y() << "\t" << stepResult.position[i].z() << "\t" << stepResult.volume[i]->volumeName() << std::endl;
+		
     
 	}
 }  // namespace Test

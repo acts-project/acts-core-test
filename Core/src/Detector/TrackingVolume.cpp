@@ -61,7 +61,7 @@ Acts::TrackingVolume::TrackingVolume(
     std::unique_ptr<const LayerArray>          staticLayerArray,
     const LayerVector&                         arbitraryLayerVector,
     std::shared_ptr<const TrackingVolumeArray> containedVolumeArray,
-    const TrackingVolumeVector&                denseVolumeVector,
+    MutableTrackingVolumeVector                denseVolumeVector,
     const DetachedVolumeVector&                detachedVolumeVector,
     const std::string&                         volumeName)
   : Volume(std::move(htrans), std::move(volbounds))
@@ -69,12 +69,15 @@ Acts::TrackingVolume::TrackingVolume(
   , m_confinedLayers(std::move(staticLayerArray))
   , m_confinedVolumes(std::move(containedVolumeArray))
   , m_confinedDetachedVolumes(detachedVolumeVector)
-  , m_confinedDenseVolumes(denseVolumeVector)
+  , m_confinedDenseVolumes({})
   , m_confinedArbitraryLayers(arbitraryLayerVector)
   , m_name(volumeName)
 {
   createBoundarySurfaces();
   interlinkLayers();
+  connectDenseBoundarySurfaces(denseVolumeVector);
+  if(!m_confinedDenseVolumes.empty())
+	std::cout << "constructor end " << m_confinedDenseVolumes.size() << "\t" << typeid(m_confinedDenseVolumes.front()).name() << "\t" << m_confinedDenseVolumes.front() << std::endl;
 }
 
 Acts::TrackingVolume::~TrackingVolume()
@@ -157,6 +160,11 @@ Acts::TrackingVolume::detachedTrackingVolumes(const Vector3D& gp,
 void
 Acts::TrackingVolume::sign(GeometrySignature geosign, GeometryType geotype)
 {
+	//~ std::cout << "start sign " << m_confinedDenseVolumes.size() << "\t" << typeid(m_confinedDenseVolumes.front()).name() << "\t" << m_confinedDenseVolumes.front() << std::endl;
+	//~ std::cout << "start sign " << m_confinedDenseVolumes.front()->volumeName() << std::endl;
+for (auto& volumesIter : m_confinedDenseVolumes) {
+	std::cout << "convert " << volumesIter->geometrySignature() << "\t" << volumesIter->geometryType() << std::endl;
+}
   // never overwrite what is already signed, that's a crime
   if (m_geometrySignature == Unsigned) {
     m_geometrySignature = geosign;
@@ -180,12 +188,16 @@ Acts::TrackingVolume::sign(GeometrySignature geosign, GeometryType geotype)
       mutableVolumesIter->sign(geosign, geotype);
     }
   }
-
+std::cout << "sign confined" << std::endl;
   // finally for confined dense volumes
   if (!m_confinedDenseVolumes.empty()) {
     for (auto& volumesIter : m_confinedDenseVolumes) {
+std::cout << "convert " << volumesIter->geometrySignature() << "\t" << volumesIter->geometryType() << std::endl;
       auto mutableVolumesIter
           = std::const_pointer_cast<TrackingVolume>(volumesIter);
+std::cout << "sign " << volumesIter << "\t" << mutableVolumesIter << std::endl;
+std::cout << "sign " << mutableVolumesIter->geometrySignature() << std::endl;
+std::cout << "\t" << mutableVolumesIter->geometryType() << std::endl;
       mutableVolumesIter->sign(geosign, geotype);
     }
   }
@@ -196,6 +208,40 @@ const std::
     Acts::TrackingVolume::boundarySurfaces() const
 {
   return (m_boundarySurfaces);
+}
+
+void
+Acts::TrackingVolume::connectDenseBoundarySurfaces(MutableTrackingVolumeVector confinedDenseVolumes)
+{
+	if (!confinedDenseVolumes.empty()) {
+		BoundaryOrientation bo;
+		//~ auto thisVolume = std::shared_ptr<const TrackingVolume>(this);
+		for(auto& confDenseVol : confinedDenseVolumes)
+		{
+std::cout << "confDenseVol: " << confDenseVol->geometrySignature() << "\t" << confDenseVol->geometryType() << std::endl;
+			auto& boundSur = confDenseVol->boundarySurfaces();
+			for(unsigned int i = 0; i < boundSur.size(); i++)
+			{
+				if(boundSur.at(i) == nullptr)
+					continue;
+				auto mutableBs = std::const_pointer_cast<BoundarySurfaceT<TrackingVolume>>(boundSur.at(i));
+				
+				if(mutableBs->m_insideVolume && !mutableBs->m_outsideVolume)
+					bo = BoundaryOrientation::outsideVolume;
+				else
+					if(!mutableBs->m_insideVolume && mutableBs->m_outsideVolume)
+						bo = BoundaryOrientation::insideVolume;
+						
+				//~ mutableBs->attachVolume(thisVolume, bo);
+				mutableBs->attachVolume(this, bo);
+				confDenseVol->updateBoundarySurface((BoundarySurfaceFace)i, mutableBs);
+			}
+			m_confinedDenseVolumes.push_back(std::move(confDenseVol));
+		}
+	}
+if(!m_confinedDenseVolumes.empty())
+std::cout << "m_confinedDenseVolumes: " << m_confinedDenseVolumes.back()->geometrySignature() << "\t" << m_confinedDenseVolumes.back()->geometryType() << std::endl;
+
 }
 
 void
@@ -228,7 +274,8 @@ Acts::TrackingVolume::createBoundarySurfaces()
 void
 Acts::TrackingVolume::glueTrackingVolume(
     BoundarySurfaceFace                    bsfMine,
-    const std::shared_ptr<TrackingVolume>& neighbor,
+    //~ const std::shared_ptr<TrackingVolume>& neighbor,
+    TrackingVolume* const neighbor,
     BoundarySurfaceFace                    bsfNeighbor)
 {
   // find the connection of the two tracking volumes : binR returns the center
@@ -401,9 +448,11 @@ Acts::TrackingVolume::closeGeometry(
   GeometryID volumeID(0);
   volumeID.add(++vol, GeometryID::volume_mask);
   // assign the Volume ID to the volume itself
-  auto thisVolume = const_cast<TrackingVolume*>(this);
-  thisVolume->assignGeoID(volumeID);
-
+std::cout << "closegeo0.25 " << typeid(this).name() << "\t" << this->geoID() << "\t" << vol << std::endl;
+  //~ auto thisVolume = const_cast<TrackingVolume*>(this);
+  //~ thisVolume->assignGeoID(volumeID);
+  this->assignGeoID(volumeID);
+std::cout << "closegeo0.5" << std::endl;
   // loop over the boundary surfaces
   geo_id_value iboundary = 0;
   // loop over the boundary surfaces
@@ -439,9 +488,25 @@ Acts::TrackingVolume::closeGeometry(
     for (auto& volumesIter : m_confinedVolumes->arrayObjects()) {
       auto mutableVolumesIter
           = std::const_pointer_cast<TrackingVolume>(volumesIter);
+std::cout << "closegeo1" << std::endl;
       mutableVolumesIter->closeGeometry(volumeMap, vol);
     }
   }
+
+  //~ auto confinedDenseVolumes = thisVolume->m_confinedDenseVolumes;
+//~ std::cout << "confined: " << confinedDenseVolumes.size() << std::endl;
+	//~ if (!confinedDenseVolumes.empty()) {
+		//~ for (auto& volumesIter : confinedDenseVolumes)
+		//~ {
+			//~ for(auto& boundSur : volumesIter->m_boundarySurfaces)
+			//~ {
+				//~ auto& thisBoundSur = const_cast<BoundarySurfaceT<TrackingVolume>&>(*boundSur);
+				//~ auto& thisBoundSur = *boundSur;
+				//~ std::cout << thisBoundSur.m_insideVolume << "\t" << thisBoundSur.m_outsideVolume << std::endl;
+			//~ }
+			//~ if (volumesIter) volumesIter->closeGeometry(volumeMap, vol);	
+		//~ }
+	//~ }
 
   // @todo update that
   // auto confinedDenseVolumes= tvol.confinedDenseVolumes();

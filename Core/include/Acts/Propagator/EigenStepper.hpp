@@ -449,7 +449,7 @@ public:
     // The following functor starts to perform a Runge-Kutta step of a certain
     // size, going up to the point where it can return an estimate of the local
     // integration error. The results are stated in the local variables above,
-    // allowing integration to continue once the error is deemed satisfactory
+    // allowing integration to continue once the error is below threshold
     const auto tryRungeKuttaStep = [&](const double h) -> bool {
 
       // State the square and half of the step size
