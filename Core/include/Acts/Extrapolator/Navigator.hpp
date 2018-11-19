@@ -710,6 +710,7 @@ struct Navigator
             = boundary->attachedVolume(state.stepping.position(),
                                        state.stepping.direction(),
                                        state.stepping.navDir);
+
         // no volume anymore : end of known world
         if (!state.navigation.currentVolume) {
           debugLog(state, [&] {
