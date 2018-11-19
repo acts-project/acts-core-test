@@ -95,6 +95,6 @@ Acts::Volume::inside(const Acts::Vector3D& gpos, double tol) const
 std::ostream&
 Acts::operator<<(std::ostream& sl, const Acts::Volume& vol)
 {
-  sl << "Voluem with " << vol.volumeBounds() << std::endl;
+  sl << "Volume with " << vol.volumeBounds() << std::endl;
   return sl;
 }

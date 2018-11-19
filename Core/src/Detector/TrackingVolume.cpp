@@ -482,6 +482,14 @@ Acts::TrackingVolume::closeGeometry(
     }
   }
 
+  if (!m_confinedDenseVolumes.empty()) {
+    for (auto& volumesIter : m_confinedDenseVolumes) {
+      auto mutableVolumesIter
+          = std::const_pointer_cast<TrackingVolume>(volumesIter);
+      mutableVolumesIter->closeGeometry(volumeMap, vol);
+    }
+  }
+
   // @todo update that
   // auto confinedDenseVolumes= tvol.confinedDenseVolumes();
   // if (!confinedDenseVolumes.empty()) {
