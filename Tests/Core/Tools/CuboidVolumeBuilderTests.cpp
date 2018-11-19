@@ -11,13 +11,11 @@
 #include <boost/test/included/unit_test.hpp>
 
 #include <vector>
+#include "Acts/Extrapolator/Navigator.hpp"
 #include "Acts/Material/Material.hpp"
 #include "Acts/Tools/CuboidVolumeBuilder.hpp"
 #include "Acts/Utilities/Definitions.hpp"
 #include "Acts/Utilities/Units.hpp"
-#include "Acts/Propagator/Propagator.hpp"
-#include "Acts/Propagator/StraightLineStepper.hpp"
-#include "Acts/Extrapolator/Navigator.hpp"
 
 namespace Acts {
 namespace Test {
@@ -201,7 +199,7 @@ namespace Test {
     for (auto& lay : volumeConfig.layers) {
       BOOST_TEST(lay->layerType() == LayerType::active);
     }
-
+    
     volumeConfig.layers.clear();
     for (auto& lay : volumeConfig.layerCfg) {
       lay.active = true;
@@ -304,9 +302,9 @@ namespace Test {
 		config.position = {1. * units::_m, 0., 0.};
 		config.length = {1. * units::_m, 1. * units::_m, 1. * units::_m};
 		config.volumeCfg = {vCfg};
-std::cout << "machett" << std::endl;
+
 		std::shared_ptr<TrackingGeometry> detector = bgb.buildTrackingGeometry(config);
-std::cout << "this is my detector" << std::endl;
+
 		// Test that the right volume is selected
 		BOOST_TEST(detector->lowestTrackingVolume({1. * units::_m, 0., 0.})->volumeName() == vCfg.name);
 		BOOST_TEST(detector->lowestTrackingVolume({1.1 * units::_m, 0., 0.})->volumeName() == cvCfg1.name);

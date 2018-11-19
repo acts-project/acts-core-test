@@ -43,12 +43,12 @@ using MutableTrackingVolumePtr  = std::shared_ptr<TrackingVolume>;
 using DetachedTrackingVolumePtr = std::shared_ptr<const DetachedTrackingVolume>;
 
 // possible contained
-using TrackingVolumeArray  = BinnedArray<TrackingVolumePtr>;
-using TrackingVolumeVector = std::vector<TrackingVolumePtr>;
+using TrackingVolumeArray         = BinnedArray<TrackingVolumePtr>;
+using TrackingVolumeVector        = std::vector<TrackingVolumePtr>;
 using MutableTrackingVolumeVector = std::vector<MutableTrackingVolumePtr>;
-using LayerArray           = BinnedArray<LayerPtr>;
-using LayerVector          = std::vector<LayerPtr>;
-using DetachedVolumeVector = std::vector<DetachedTrackingVolumePtr>;
+using LayerArray                  = BinnedArray<LayerPtr>;
+using LayerVector                 = std::vector<LayerPtr>;
+using DetachedVolumeVector        = std::vector<DetachedTrackingVolumePtr>;
 
 // full intersection with Layer
 using LayerIntersection = FullIntersection<Layer, Surface>;
@@ -260,9 +260,9 @@ public:
   /// @param neighbor is the TrackingVolume to be glued
   /// @param bsfNeighbor is the boudnary surface of the neighbor
   void
-  glueTrackingVolume(BoundarySurfaceFace             bsfMine,
+  glueTrackingVolume(BoundarySurfaceFace   bsfMine,
                      TrackingVolume* const neighbor,
-                     BoundarySurfaceFace             bsfNeighbor);
+                     BoundarySurfaceFace   bsfNeighbor);
 
   /// Glue another tracking volume to this one
   ///  - if common face is set the glued volumes are sharing the boundary, down
@@ -394,9 +394,9 @@ protected:
                  const std::string&    volumeName = "undefined");
 
 private:
-
-	void
-	connectDenseBoundarySurfaces(std::vector<std::shared_ptr<TrackingVolume>> m_confinedDenseVolumes);
+  void
+  connectDenseBoundarySurfaces(
+      std::vector<std::shared_ptr<TrackingVolume>> m_confinedDenseVolumes);
 
   /// Create Boundary Surface
   void
@@ -543,13 +543,13 @@ TrackingVolume::colorCode() const
 //~ inline const TrackingVolume*
 //~ TrackingVolume::motherVolume() const
 //~ {
-  //~ return m_motherVolume;
+//~ return m_motherVolume;
 //~ }
 
 //~ inline void
 //~ TrackingVolume::setMotherVolume(const TrackingVolume* mvol)
 //~ {
-  //~ m_motherVolume = mvol;
+//~ m_motherVolume = mvol;
 //~ }
 
 #include "detail/TrackingVolume.ipp"
