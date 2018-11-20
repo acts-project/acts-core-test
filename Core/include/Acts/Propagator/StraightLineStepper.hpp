@@ -236,7 +236,7 @@ public:
   ///                be modified by the stepper class during propagation.
   ///
   /// @return the step size taken
-  template<typename propagator_state_t>
+  template <typename propagator_state_t>
   double
   step(propagator_state_t& state) const
   {
