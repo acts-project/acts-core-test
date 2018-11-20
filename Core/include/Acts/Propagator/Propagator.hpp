@@ -327,7 +327,7 @@ private:
     // Propagation loop : stepping
     for (; result.steps < state.options.maxSteps; ++result.steps) {
       // Perform a propagation step - it only takes the stepping state
-      double s = m_stepper.step(state.stepping);
+      double s = m_stepper.step(state);
       // accumulate the path length
       result.pathLength += s;
       // Call the actions, can (& will likely) modify the state
