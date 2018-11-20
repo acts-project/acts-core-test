@@ -346,13 +346,17 @@ namespace Test {
           && stepResult.position[i].x() < 0.95 * units::_m) {
         BOOST_TEST(stepResult.volume[i]->volumeName() == cvCfg2.name);
         BOOST_TEST(stepResult.volume[i]->material() == nullptr);
-      } else if (stepResult.position[i].x() >= 1.05 * units::_m
-                 && stepResult.position[i].x() < 1.15 * units::_m) {
-        BOOST_TEST(stepResult.volume[i]->volumeName() == cvCfg1.name);
-        BOOST_TEST(stepResult.volume[i]->material() != nullptr);
-      } else if (stepResult.position[i].x() < 2. * units::_m) {
-        BOOST_TEST(stepResult.volume[i]->volumeName() == vCfg.name);
-        BOOST_TEST(stepResult.volume[i]->material() == nullptr);
+      } else {
+        if (stepResult.position[i].x() >= 1.05 * units::_m
+            && stepResult.position[i].x() < 1.15 * units::_m) {
+          BOOST_TEST(stepResult.volume[i]->volumeName() == cvCfg1.name);
+          BOOST_TEST(stepResult.volume[i]->material() != nullptr);
+        } else {
+          if (stepResult.position[i].x() < 2. * units::_m) {
+            BOOST_TEST(stepResult.volume[i]->volumeName() == vCfg.name);
+            BOOST_TEST(stepResult.volume[i]->material() == nullptr);
+          }
+        }
       }
     }
   }
@@ -443,8 +447,9 @@ namespace Test {
           if (stepResult.position[i].x() < 2. * units::_m) {
             BOOST_TEST(stepResult.volume[i]->volumeName() == vCfg1.name);
           } else {
-            if (stepResult.position[i].x() < 3. * units::_m)
+            if (stepResult.position[i].x() < 3. * units::_m) {
               BOOST_TEST(stepResult.volume[i]->volumeName() == vCfg2.name);
+            }
           }
         }
       }
