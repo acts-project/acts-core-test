@@ -70,7 +70,31 @@ namespace Test {
     double m_thickness;
   };
 
-  BOOST_AUTO_TEST_CASE(CuboidVolumeBuilderTest)
+  struct StepVolumeCollector
+  {
+    ///
+    /// @brief Data container for result analysis
+    ///
+    struct this_result
+    {
+      // Position of the propagator after each step
+      std::vector<Vector3D> position;
+
+      std::vector<TrackingVolume const*> volume;
+    };
+
+    using result_type = this_result;
+
+    template <typename propagator_state_t>
+    void
+    operator()(propagator_state_t& state, result_type& result) const
+    {
+      result.position.push_back(state.stepping.position());
+      result.volume.push_back(state.navigation.currentVolume);
+    }
+  };
+
+  BOOST_AUTO_TEST_CASE(BoxGeometryBuilderTest)
   {
 
     // Construct builder
@@ -199,7 +223,7 @@ namespace Test {
     for (auto& lay : volumeConfig.layers) {
       BOOST_TEST(lay->layerType() == LayerType::active);
     }
-    
+
     volumeConfig.layers.clear();
     for (auto& lay : volumeConfig.layerCfg) {
       lay.active = true;
@@ -274,7 +298,7 @@ namespace Test {
                == volumeConfig2.name);
   }
 
-  BOOST_AUTO_TEST_CASE(BoxGeometryBuilderTest_confinedVolumes)
+  BOOST_AUTO_TEST_CASE(CuboidVolumeBuilderTest_confinedVolumes)
   {
     // Production factory
     BoxGeometryBuilder bgb;
@@ -361,7 +385,7 @@ namespace Test {
     }
   }
 
-  BOOST_AUTO_TEST_CASE(BoxGeometryBuilderTest_confinedVolumes_edgecases)
+  BOOST_AUTO_TEST_CASE(CuboidVolumeBuilderTest_confinedVolumes_edgecases)
   {
     // Production factory
     BoxGeometryBuilder bgb;

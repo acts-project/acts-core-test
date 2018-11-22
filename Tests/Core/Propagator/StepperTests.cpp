@@ -728,9 +728,7 @@ namespace Test {
         std::move(covPtr), startParams, startMom, 1.);
 
     // Set options for propagator
-    PropagatorOptions<ActionList<StepCollector,
-                                 DefaultExtensionActor,
-                                 DenseEnvironmentExtensionActor,
+    DenseStepperPropagatorOptions<ActionList<StepCollector,
                                  MaterialInteractor>,
                       AbortList<EndOfWorld>>
         propOpts;
