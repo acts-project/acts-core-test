@@ -386,7 +386,7 @@ protected:
 private:
   void
   connectDenseBoundarySurfaces(
-      MutableTrackingVolumeVector& m_confinedDenseVolumes);
+      MutableTrackingVolumeVector& confinedDenseVolumes);
 
   /// Create Boundary Surface
   void
