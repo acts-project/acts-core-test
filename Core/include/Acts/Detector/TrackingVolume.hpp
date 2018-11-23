@@ -137,7 +137,7 @@ public:
                                                        std::move(cLayerArray),
                                                        cLayerVector,
                                                        nullptr,
-                                                       cVolumeVector,
+                                                       std::move(cVolumeVector),
                                                        dVolumeVector,
                                                        volumeName));
   }
@@ -331,16 +331,6 @@ public:
   unsigned int
   colorCode() const;
 
-  //~ /// Return the MotherVolume - if it exists
-  //~ const TrackingVolume*
-  //~ motherVolume() const;
-
-  //~ /// Set the MotherVolume
-  //~ ///
-  //~ /// @param mvol is the mother volume
-  //~ void
-  //~ setMotherVolume(const TrackingVolume* mvol);
-
 protected:
   /// Default constructor
   TrackingVolume();
@@ -396,7 +386,7 @@ protected:
 private:
   void
   connectDenseBoundarySurfaces(
-      std::vector<std::shared_ptr<TrackingVolume>> m_confinedDenseVolumes);
+      MutableTrackingVolumeVector& m_confinedDenseVolumes);
 
   /// Create Boundary Surface
   void
@@ -435,9 +425,6 @@ private:
   /// The Material the TrackingVolume consists of
   std::shared_ptr<const Material> m_material;
 
-  //~ /// Remember the mother volume
-  //~ const TrackingVolume* m_motherVolume{nullptr};
-
   // the boundary surfaces
   std::vector<TrackingVolumeBoundaryPtr> m_boundarySurfaces;
 
@@ -467,7 +454,7 @@ private:
   /// The gometry type for the navigation schema
   GeometryType m_geometryType{NumberOfGeometryTypes};
 
-  //// Volume name for debug reasons & screen output
+  /// Volume name for debug reasons & screen output
   std::string m_name;
 
   /// color code for displaying
@@ -539,18 +526,6 @@ TrackingVolume::colorCode() const
 {
   return m_colorCode;
 }
-
-//~ inline const TrackingVolume*
-//~ TrackingVolume::motherVolume() const
-//~ {
-//~ return m_motherVolume;
-//~ }
-
-//~ inline void
-//~ TrackingVolume::setMotherVolume(const TrackingVolume* mvol)
-//~ {
-//~ m_motherVolume = mvol;
-//~ }
 
 #include "detail/TrackingVolume.ipp"
 
