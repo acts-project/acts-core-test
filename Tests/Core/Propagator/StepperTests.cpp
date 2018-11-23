@@ -683,11 +683,15 @@ namespace Test {
     BoxGeometryBuilder::VolumeConfig muConf1;
     muConf1.position = {2.3 * units::_m, 0., 0.};
     muConf1.length   = {20. * units::_cm, 20. * units::_cm, 20. * units::_cm};
-    muConf1.name     = "MDT1";
+    muConf1.material = std::make_shared<const Material>(
+        Material(352.8, 407., 9.012, 4., 1.848e-3));
+    muConf1.name = "MDT1";
     BoxGeometryBuilder::VolumeConfig muConf2;
     muConf2.position = {2.7 * units::_m, 0., 0.};
     muConf2.length   = {20. * units::_cm, 20. * units::_cm, 20. * units::_cm};
-    muConf2.name     = "MDT2";
+    muConf2.material = std::make_shared<const Material>(
+        Material(352.8, 407., 9.012, 4., 1.848e-3));
+    muConf2.name = "MDT2";
 
     BoxGeometryBuilder::VolumeConfig vConf1;
     vConf1.position = {0.5 * units::_m, 0., 0.};
@@ -728,9 +732,8 @@ namespace Test {
         std::move(covPtr), startParams, startMom, 1.);
 
     // Set options for propagator
-    DenseStepperPropagatorOptions<ActionList<StepCollector,
-                                 MaterialInteractor>,
-                      AbortList<EndOfWorld>>
+    DenseStepperPropagatorOptions<ActionList<StepCollector, MaterialInteractor>,
+                                  AbortList<EndOfWorld>>
         propOpts;
     propOpts.stopConditions.get<EndOfWorld>().maxX = 3. * units::_m;
 
@@ -755,13 +758,36 @@ namespace Test {
     const StepCollector::this_result& stepResult
         = result.get<typename StepCollector::result_type>();
 
-    for (unsigned int i = 0; i < stepResult.position.size(); i++)
-      std::cout << stepResult.position[i].x() << "\t"
-                << stepResult.position[i].y() << "\t"
-                << stepResult.position[i].z() << "\t"
-                << stepResult.momentum[i].x() << "\t"
-                << stepResult.momentum[i].y() << "\t"
-                << stepResult.momentum[i].z() << std::endl;
+    // Test that momentum changes only occured at the right detector parts
+    double lastMomentum = stepResult.momentum[0].x();
+    for (unsigned int i = 0; i < stepResult.position.size(); i++) {
+      // Test for changes
+      if ((stepResult.position[i].x() > 0.3 * units::_m
+           && stepResult.position[i].x() < 0.6 * units::_m)
+          || (stepResult.position[i].x() > 0.6 * units::_m
+              && stepResult.position[i].x() <= 1. * units::_m)
+          || (stepResult.position[i].x() > 1. * units::_m
+              && stepResult.position[i].x() <= 2. * units::_m)
+          || (stepResult.position[i].x() > 2.2 * units::_m
+              && stepResult.position[i].x() <= 2.4 * units::_m)
+          || (stepResult.position[i].x() > 2.6 * units::_m
+              && stepResult.position[i].x() <= 2.8 * units::_m)) {
+        BOOST_TEST(stepResult.momentum[i].x() <= lastMomentum);
+        lastMomentum = stepResult.momentum[i].x();
+      } else
+      // Test the absence of momentum loss
+      {
+        if (stepResult.position[i].x() < 0.3 * units::_m
+            || (stepResult.position[i].x() > 2. * units::_m
+                && stepResult.position[i].x() <= 2.2 * units::_m)
+            || (stepResult.position[i].x() > 2.4 * units::_m
+                && stepResult.position[i].x() <= 2.6 * units::_m)
+            || (stepResult.position[i].x() > 2.8 * units::_m
+                && stepResult.position[i].x() <= 3. * units::_m)) {
+          BOOST_TEST(stepResult.momentum[i].x() == lastMomentum);
+        }
+      }
+    }
   }
 }  // namespace Test
 }  // namespace Acts
