@@ -28,7 +28,7 @@ namespace Acts {
 
 /// @brief This class builds a box detector with a configurable amount of
 /// surfaces in it.
-class BoxGeometryBuilder : public ITrackingVolumeBuilder
+class CuboidVolumeBuilder : public ITrackingVolumeBuilder
 {
 public:
   /// @brief This struct stores the data for the construction of a single
@@ -93,12 +93,12 @@ public:
   };
 
   /// @brief Default constructor without a configuration
-  BoxGeometryBuilder() = default;
+  CuboidVolumeBuilder() = default;
 
   /// @brief Constructor that sets the config
   ///
   /// @param [in] cfg Configuration of the detector
-  BoxGeometryBuilder(Config& cfg) : m_cfg(cfg) {}
+  CuboidVolumeBuilder(Config& cfg) : m_cfg(cfg) {}
 
   /// @brief Setter of the config
   ///
@@ -166,7 +166,7 @@ private:
 
 template <typename DetectorElement_t>
 PlaneSurface*
-BoxGeometryBuilder::buildSurface(const SurfaceConfig& cfg) const
+CuboidVolumeBuilder::buildSurface(const SurfaceConfig& cfg) const
 {
   PlaneSurface* surface;
 
@@ -186,7 +186,7 @@ BoxGeometryBuilder::buildSurface(const SurfaceConfig& cfg) const
 
 template <>
 Acts::PlaneSurface*
-Acts::BoxGeometryBuilder::buildSurface<void>(const SurfaceConfig& cfg) const
+Acts::CuboidVolumeBuilder::buildSurface<void>(const SurfaceConfig& cfg) const
 {
   PlaneSurface* surface;
 
@@ -203,7 +203,7 @@ Acts::BoxGeometryBuilder::buildSurface<void>(const SurfaceConfig& cfg) const
 
 template <typename DetectorElement_t>
 std::shared_ptr<const Layer>
-BoxGeometryBuilder::buildLayer(LayerConfig& cfg) const
+CuboidVolumeBuilder::buildLayer(LayerConfig& cfg) const
 {
   // Build the surface
   if (cfg.surface == nullptr) {
@@ -227,7 +227,7 @@ BoxGeometryBuilder::buildLayer(LayerConfig& cfg) const
 }
 
 std::pair<double, double>
-BoxGeometryBuilder::binningRange(const VolumeConfig& cfg) const
+CuboidVolumeBuilder::binningRange(const VolumeConfig& cfg) const
 {
   // Construct return value
   std::pair<double, double> minMax = std::make_pair(
@@ -246,7 +246,7 @@ BoxGeometryBuilder::binningRange(const VolumeConfig& cfg) const
 
 template <typename DetectorElement_t>
 std::shared_ptr<TrackingVolume>
-BoxGeometryBuilder::buildVolume(VolumeConfig& cfg) const
+CuboidVolumeBuilder::buildVolume(VolumeConfig& cfg) const
 {
   // Build transformation
   Transform3D trafo(Transform3D::Identity());
@@ -323,7 +323,7 @@ BoxGeometryBuilder::buildVolume(VolumeConfig& cfg) const
 }
 
 MutableTrackingVolumePtr
-    BoxGeometryBuilder::trackingVolume(TrackingVolumePtr /*unused*/,
+    CuboidVolumeBuilder::trackingVolume(TrackingVolumePtr /*unused*/,
                                        VolumeBoundsPtr /*unused*/) const
 {
   // Build volumes
