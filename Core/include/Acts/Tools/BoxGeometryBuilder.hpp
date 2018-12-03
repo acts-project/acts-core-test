@@ -100,6 +100,9 @@ public:
   /// @param [in] cfg Configuration of the detector
   BoxGeometryBuilder(Config& cfg) : m_cfg(cfg) {}
 
+  /// @brief Setter of the config
+  ///
+  /// @param [in] cfg Configuration that is set
   void
   setConfig(Config& cfg)
   {
@@ -138,16 +141,6 @@ public:
   std::shared_ptr<TrackingVolume>
   buildVolume(VolumeConfig& cfg) const;
 
-  //~ /// @brief This function builds a TrackingGeometry based on a given
-  //~ /// configuration
-  //~ ///
-  //~ /// @tparam DetectorElement_t Type of the optional detector element
-  //~ /// @param [in, out] cfg Configuration of the TrackingGeometry
-  //~ /// @return Pointer to the created TrackingGeometry
-  //~ template <typename DetectorElement_t = void>
-  //~ std::unique_ptr<TrackingGeometry>
-  //~ buildTrackingGeometry(Config& cfg) const;
-
   /// @brief This function evaluates the minimum and maximum of the binning as
   /// given by the configurations of the surfaces and layers. The ordering
   /// depends on the binning value specified in the configuration of the volume.
@@ -158,11 +151,16 @@ public:
   std::pair<double, double>
   binningRange(const VolumeConfig& cfg) const;
 
+  /// @brief This function builds a world TrackingVolume based on a given
+  /// configuration
+  ///
+  /// @return Pointer to the created TrackingGeometry
   MutableTrackingVolumePtr
       trackingVolume(TrackingVolumePtr /*unused*/,
                      VolumeBoundsPtr /*unused*/) const override;
 
 private:
+  /// Configuration of the world volume
   Config m_cfg;
 };
 
@@ -226,6 +224,24 @@ BoxGeometryBuilder::buildLayer(LayerConfig& cfg) const
                                  BinningValue::binX,
                                  boost::none,
                                  std::make_shared<const Transform3D>(trafo));
+}
+
+std::pair<double, double>
+BoxGeometryBuilder::binningRange(const VolumeConfig& cfg) const
+{
+  // Construct return value
+  std::pair<double, double> minMax = std::make_pair(
+      std::numeric_limits<double>::max(), -std::numeric_limits<double>::max());
+  for (const auto& layercfg : cfg.layerCfg) {
+    // Test if new extreme is found and set it
+    if (layercfg.surfaceCfg.position.x() - 1. * units::_um < minMax.first) {
+      minMax.first = layercfg.surfaceCfg.position.x() - 1. * units::_um;
+    }
+    if (layercfg.surfaceCfg.position.x() + 1. * units::_um > minMax.second) {
+      minMax.second = layercfg.surfaceCfg.position.x() + 1. * units::_um;
+    }
+  }
+  return minMax;
 }
 
 template <typename DetectorElement_t>
@@ -305,91 +321,6 @@ BoxGeometryBuilder::buildVolume(VolumeConfig& cfg) const
 
   return trackVolume;
 }
-
-std::pair<double, double>
-BoxGeometryBuilder::binningRange(const VolumeConfig& cfg) const
-{
-  // Construct return value
-  std::pair<double, double> minMax = std::make_pair(
-      std::numeric_limits<double>::max(), -std::numeric_limits<double>::max());
-  for (const auto& layercfg : cfg.layerCfg) {
-    // Test if new extreme is found and set it
-    if (layercfg.surfaceCfg.position.x() - 1. * units::_um < minMax.first) {
-      minMax.first = layercfg.surfaceCfg.position.x() - 1. * units::_um;
-    }
-    if (layercfg.surfaceCfg.position.x() + 1. * units::_um > minMax.second) {
-      minMax.second = layercfg.surfaceCfg.position.x() + 1. * units::_um;
-    }
-  }
-  return minMax;
-}
-
-//~ template <typename DetectorElement_t>
-//~ std::unique_ptr<TrackingGeometry>
-//~ BoxGeometryBuilder::buildTrackingGeometry(Config& cfg) const
-//~ {
-//~ // Build volumes
-//~ if (cfg.volumes.empty()) {
-//~ cfg.volumes.reserve(cfg.volumeCfg.size());
-//~ for (VolumeConfig volCfg : cfg.volumeCfg) {
-//~ cfg.volumes.push_back(buildVolume<DetectorElement_t>(volCfg));
-//~ }
-//~ }
-
-//~ // Glue volumes
-//~ for (unsigned int i = 0; i < cfg.volumes.size() - 1; i++) {
-//~ cfg.volumes[i + 1]->glueTrackingVolume(BoundarySurfaceFace::negativeFaceYZ,
-//~ cfg.volumes[i],
-//~ BoundarySurfaceFace::positiveFaceYZ);
-//~ cfg.volumes[i]->glueTrackingVolume(BoundarySurfaceFace::positiveFaceYZ,
-//~ cfg.volumes[i + 1],
-//~ BoundarySurfaceFace::negativeFaceYZ);
-//~ }
-
-//~ // Translation
-//~ Transform3D trafo(Transform3D::Identity());
-//~ trafo.translation() = cfg.position;
-
-//~ // Size of the volume
-//~ auto volume = std::make_shared<const CuboidVolumeBounds>(
-//~ cfg.length.x() * 0.5, cfg.length.y() * 0.5, cfg.length.z() * 0.5);
-
-//~ // Build vector of confined volumes
-//~ std::vector<std::pair<TrackingVolumePtr, Vector3D>> tapVec;
-//~ tapVec.reserve(cfg.volumeCfg.size());
-//~ for (auto& tVol : cfg.volumes) {
-//~ tapVec.push_back(std::make_pair(tVol, tVol->center()));
-//~ }
-
-//~ // Set bin boundaries along binning
-//~ std::vector<float> binBoundaries;
-//~ binBoundaries.push_back(cfg.volumes[0]->center().x()
-//~ - cfg.volumeCfg[0].length.x() * 0.5);
-//~ for (size_t i = 0; i < cfg.volumes.size(); i++) {
-//~ binBoundaries.push_back(cfg.volumes[i]->center().x()
-//~ + cfg.volumeCfg[i].length.x() * 0.5);
-//~ }
-
-//~ // Build binning
-//~ BinningData binData(BinningOption::open, BinningValue::binX, binBoundaries);
-//~ std::unique_ptr<const BinUtility> bu(new BinUtility(binData));
-
-//~ // Build TrackingVolume array
-//~ std::shared_ptr<const TrackingVolumeArray> trVolArr(
-//~ new BinnedArrayXD<TrackingVolumePtr>(tapVec, std::move(bu)));
-
-//~ // Create world volume
-//~ MutableTrackingVolumePtr mtvp(TrackingVolume::create(
-//~ std::make_shared<const Transform3D>(trafo), volume, trVolArr, "World"));
-
-//~ mtvp->sign(GeometrySignature::Global);
-//~ TrackingGeometryBuilder::Config tgbCfg;
-//~ tgbCfg.trackingVolumeBuilders.push_back(*this);
-//~ TrackingGeometryBuilder tgb(tgbCfg);
-//~ return tgb.trackingGeometry();
-//~ // Build and return tracking geometry
-//~ return std::shared_ptr<TrackingGeometry>(new TrackingGeometry(mtvp));
-//~ }
 
 MutableTrackingVolumePtr
     BoxGeometryBuilder::trackingVolume(TrackingVolumePtr /*unused*/,
