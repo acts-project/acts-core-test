@@ -16,10 +16,12 @@
 #include "Acts/Surfaces/RectangleBounds.hpp"
 #include "Acts/Surfaces/SurfaceArray.hpp"
 #include "Acts/Tools/LayerArrayCreator.hpp"
+#include "Acts/Tools/LayerCreator.hpp"
 #include "Acts/Utilities/BinnedArray.hpp"
 #include "Acts/Utilities/BinnedArrayXD.hpp"
 #include "Acts/Utilities/Definitions.hpp"
 #include "Acts/Volumes/CuboidVolumeBounds.hpp"
+//~ #include "Acts/Tools/SurfaceArrayCreator.hpp"
 
 namespace Acts {
 
@@ -50,8 +52,6 @@ public:
   {
     // Configuration of the surface
     SurfaceConfig surfaceCfg;
-    // Thickness
-    double layerThickness = 0.;
     // Encapsulated surface
     PlaneSurface* surface = nullptr;
     // Boolean flag if layer is active
@@ -185,7 +185,7 @@ template <typename DetectorElement_t>
 std::shared_ptr<const Layer>
 BoxGeometryBuilder::buildLayer(LayerConfig& cfg) const
 {
-  LayerPtr layer;
+  //~ LayerPtr layer;
 
   // Build the surface
   if (cfg.surface == nullptr) {
@@ -195,20 +195,33 @@ BoxGeometryBuilder::buildLayer(LayerConfig& cfg) const
   Transform3D trafo(Transform3D::Identity() * cfg.surfaceCfg.rotation);
   trafo.translation() = cfg.surfaceCfg.position;
 
-  // Get the surface and build the layer
-  std::unique_ptr<SurfaceArray> surArray(new SurfaceArray(cfg.surface));
+  LayerCreator::Config lCfg;
+  lCfg.surfaceArrayCreator
+      = std::shared_ptr<const SurfaceArrayCreator>(new SurfaceArrayCreator());
+  LayerCreator layerCreator(lCfg);
 
-  layer
-      = PlaneLayer::create(std::make_shared<const Transform3D>(trafo),
-                           cfg.surfaceCfg.rBounds,
-                           std::move(surArray),
-                           cfg.layerThickness,
-                           nullptr,
-                           (cfg.surface->associatedDetectorElement() == nullptr
-                                ? LayerType::passive
-                                : LayerType::active));
-  cfg.surface->associateLayer(*layer);
-  return layer;
+  return layerCreator.planeLayer(
+      {cfg.surface},
+      BinningValue::binX,
+      1,
+      1,
+      boost::none,
+      std::make_shared<const Transform3D>(trafo));  // TODO: custom binning
+
+  //~ // Get the surface and build the layer
+  //~ std::unique_ptr<SurfaceArray> surArray(new SurfaceArray(cfg.surface));
+
+  //~ layer
+  //~ = PlaneLayer::create(std::make_shared<const Transform3D>(trafo),
+  //~ cfg.surfaceCfg.rBounds,
+  //~ std::move(surArray),
+  //~ cfg.layerThickness,
+  //~ nullptr,
+  //~ (cfg.surface->associatedDetectorElement() == nullptr
+  //~ ? LayerType::passive
+  //~ : LayerType::active));
+  //~ cfg.surface->associateLayer(*layer);
+  //~ return layer;
 }
 
 template <typename DetectorElement_t>
@@ -239,8 +252,7 @@ BoxGeometryBuilder::buildVolume(VolumeConfig& cfg) const
         RectangleBounds(cfg.length.y() * 0.5, cfg.length.z() * 0.5));
 
     LayerConfig lCfg;
-    lCfg.surfaceCfg     = sCfg;
-    lCfg.layerThickness = 1. * units::_mm;
+    lCfg.surfaceCfg = sCfg;
 
     cfg.layerCfg.push_back(lCfg);
   }
@@ -298,14 +310,11 @@ BoxGeometryBuilder::binningRange(const VolumeConfig& cfg) const
       std::numeric_limits<double>::max(), -std::numeric_limits<double>::max());
   for (const auto& layercfg : cfg.layerCfg) {
     // Test if new extreme is found and set it
-    if (layercfg.surfaceCfg.position.x() - layercfg.layerThickness
-        < minMax.first) {
-      minMax.first = layercfg.surfaceCfg.position.x() - layercfg.layerThickness;
+    if (layercfg.surfaceCfg.position.x() - 1. * units::_um < minMax.first) {
+      minMax.first = layercfg.surfaceCfg.position.x() - 1. * units::_um;
     }
-    if (layercfg.surfaceCfg.position.x() + layercfg.layerThickness
-        > minMax.second) {
-      minMax.second
-          = layercfg.surfaceCfg.position.x() + layercfg.layerThickness;
+    if (layercfg.surfaceCfg.position.x() + 1. * units::_um > minMax.second) {
+      minMax.second = layercfg.surfaceCfg.position.x() + 1. * units::_um;
     }
   }
   return minMax;
