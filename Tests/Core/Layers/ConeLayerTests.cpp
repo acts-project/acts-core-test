@@ -23,6 +23,7 @@
 //#include "Acts/Utilities/Definitions.hpp"
 #include "Acts/EventData/SingleTrackParameters.hpp"
 #include "Acts/Layers/GenericApproachDescriptor.hpp"
+#include "Acts/Surfaces/PlaneSurface.hpp"
 #include "Acts/Tools/SurfaceArrayCreator.hpp"
 #include "Acts/Volumes/CuboidVolumeBounds.hpp"
 #include "LayerStub.hpp"
@@ -51,13 +52,17 @@ namespace Test {
       // auto         pConeLayer = ConeLayer::create(pTransform, pCone);
       // BOOST_TEST(pConeLayer->layerType() == LayerType::passive);
       // next level: need an array of Surfaces;
-      const std::vector<const Surface*> aSurfaces{new SurfaceStub(),
-                                                  new SurfaceStub()};
+      // bounds object, rectangle type
+      auto rBounds = std::make_shared<const RectangleBounds>(1., 1.);
+      /// Constructor with transform pointer
+      auto pNullTransform = std::make_shared<const Transform3D>();
+      const std::vector<const Surface*> aSurfaces{
+          new PlaneSurface(pNullTransform, rBounds),
+          new PlaneSurface(pNullTransform, rBounds)};
       const double        thickness(1.0);
       SurfaceArrayCreator sac;
       size_t              binsX(2), binsY(4);
-      auto                pSurfaceArray
-          = sac.surfaceArrayOnPlane(aSurfaces, 10, 20, binsX, binsY);
+      auto pSurfaceArray = sac.surfaceArrayOnPlane(aSurfaces, binsX, binsY);
       auto pConeLayerFromSurfaces
           = ConeLayer::create(pTransform, pCone, std::move(pSurfaceArray));
       BOOST_TEST(pConeLayerFromSurfaces->layerType() == LayerType::active);
@@ -94,14 +99,18 @@ namespace Test {
       auto       pTransform = std::make_shared<const Transform3D>(translation);
       double     alpha(M_PI / 8.0);
       const bool symmetric(false);
-      auto       pCone = std::make_shared<const ConeBounds>(alpha, symmetric);
-      const std::vector<const Surface*> aSurfaces{new SurfaceStub(),
-                                                  new SurfaceStub()};
+      // bounds object, rectangle type
+      auto rBounds = std::make_shared<const RectangleBounds>(1., 1.);
+      /// Constructor with transform pointer
+      auto pNullTransform = std::make_shared<const Transform3D>();
+      auto pCone = std::make_shared<const ConeBounds>(alpha, symmetric);
+      const std::vector<const Surface*> aSurfaces{
+          new PlaneSurface(pNullTransform, rBounds),
+          new PlaneSurface(pNullTransform, rBounds)};
       // const double        thickness(1.0);
       SurfaceArrayCreator sac;
       size_t              binsX(2), binsY(4);
-      auto                pSurfaceArray
-          = sac.surfaceArrayOnPlane(aSurfaces, 10, 20, binsX, binsY);
+      auto pSurfaceArray = sac.surfaceArrayOnPlane(aSurfaces, binsX, binsY);
       auto pConeLayerFromSurfaces
           = ConeLayer::create(pTransform, pCone, std::move(pSurfaceArray));
       // auto planeSurface = pConeLayer->surfaceRepresentation();

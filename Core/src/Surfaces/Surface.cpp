@@ -91,6 +91,9 @@ Acts::Surface::isOnSurface(const Acts::Vector3D& gpos,
   Acts::Vector2D lpos;
   // global to local transformation
   bool g2L = globalToLocal(gpos, Acts::Vector3D::UnitX(), lpos);
+  std::cout << "test: " << gpos << "\t" << g2L << "\t" << lpos << "\t" << bcheck
+            << std::endl;
+  bounds().dump(std::cout);
   if (g2L) {
     // no boundary check, then return true
     if (!bcheck) {
