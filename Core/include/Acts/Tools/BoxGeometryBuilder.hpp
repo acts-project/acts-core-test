@@ -15,19 +15,20 @@
 #include "Acts/Surfaces/PlaneSurface.hpp"
 #include "Acts/Surfaces/RectangleBounds.hpp"
 #include "Acts/Surfaces/SurfaceArray.hpp"
+#include "Acts/Tools/ITrackingVolumeBuilder.hpp"
 #include "Acts/Tools/LayerArrayCreator.hpp"
 #include "Acts/Tools/LayerCreator.hpp"
+#include "Acts/Tools/TrackingGeometryBuilder.hpp"
 #include "Acts/Utilities/BinnedArray.hpp"
 #include "Acts/Utilities/BinnedArrayXD.hpp"
 #include "Acts/Utilities/Definitions.hpp"
 #include "Acts/Volumes/CuboidVolumeBounds.hpp"
-//~ #include "Acts/Tools/SurfaceArrayCreator.hpp"
 
 namespace Acts {
 
 /// @brief This class builds a box detector with a configurable amount of
 /// surfaces in it.
-class BoxGeometryBuilder
+class BoxGeometryBuilder : public ITrackingVolumeBuilder
 {
 public:
   /// @brief This struct stores the data for the construction of a single
@@ -56,6 +57,10 @@ public:
     PlaneSurface* surface = nullptr;
     // Boolean flag if layer is active
     bool active = false;
+    // Bins in Y direction
+    size_t binsY = 1;
+    // Bins in Z direction
+    size_t binsZ = 1;
   };
 
   /// @brief This struct stores the data for the construction of a cuboid
@@ -85,11 +90,21 @@ public:
     Vector3D length;
     // Configuration of its volumes
     std::vector<VolumeConfig> volumeCfg;
-    // Stored volumes
-    std::vector<std::shared_ptr<TrackingVolume>> volumes;
   };
 
+  /// @brief Default constructor without a configuration
   BoxGeometryBuilder() = default;
+
+  /// @brief Constructor that sets the config
+  ///
+  /// @param [in] cfg Configuration of the detector
+  BoxGeometryBuilder(Config& cfg) : m_cfg(cfg) {}
+
+  void
+  setConfig(Config& cfg)
+  {
+    m_cfg = cfg;
+  }
 
   /// @brief This function creates a surface with a given configuration. A
   /// detector element is attached if the template parameter is non-void.
@@ -123,15 +138,15 @@ public:
   std::shared_ptr<TrackingVolume>
   buildVolume(VolumeConfig& cfg) const;
 
-  /// @brief This function builds a TrackingGeometry based on a given
-  /// configuration
-  ///
-  /// @tparam DetectorElement_t Type of the optional detector element
-  /// @param [in, out] cfg Configuration of the TrackingGeometry
-  /// @return Pointer to the created TrackingGeometry
-  template <typename DetectorElement_t = void>
-  std::shared_ptr<TrackingGeometry>
-  buildTrackingGeometry(Config& cfg) const;
+  //~ /// @brief This function builds a TrackingGeometry based on a given
+  //~ /// configuration
+  //~ ///
+  //~ /// @tparam DetectorElement_t Type of the optional detector element
+  //~ /// @param [in, out] cfg Configuration of the TrackingGeometry
+  //~ /// @return Pointer to the created TrackingGeometry
+  //~ template <typename DetectorElement_t = void>
+  //~ std::unique_ptr<TrackingGeometry>
+  //~ buildTrackingGeometry(Config& cfg) const;
 
   /// @brief This function evaluates the minimum and maximum of the binning as
   /// given by the configurations of the surfaces and layers. The ordering
@@ -142,6 +157,13 @@ public:
   /// direction
   std::pair<double, double>
   binningRange(const VolumeConfig& cfg) const;
+
+  MutableTrackingVolumePtr
+      trackingVolume(TrackingVolumePtr /*unused*/,
+                     VolumeBoundsPtr /*unused*/) const override;
+
+private:
+  Config m_cfg;
 };
 
 template <typename DetectorElement_t>
@@ -185,8 +207,6 @@ template <typename DetectorElement_t>
 std::shared_ptr<const Layer>
 BoxGeometryBuilder::buildLayer(LayerConfig& cfg) const
 {
-  //~ LayerPtr layer;
-
   // Build the surface
   if (cfg.surface == nullptr) {
     cfg.surface = buildSurface<DetectorElement_t>(cfg.surfaceCfg);
@@ -200,28 +220,12 @@ BoxGeometryBuilder::buildLayer(LayerConfig& cfg) const
       = std::shared_ptr<const SurfaceArrayCreator>(new SurfaceArrayCreator());
   LayerCreator layerCreator(lCfg);
 
-  return layerCreator.planeLayer(
-      {cfg.surface},
-      BinningValue::binX,
-      1,
-      1,
-      boost::none,
-      std::make_shared<const Transform3D>(trafo));  // TODO: custom binning
-
-  //~ // Get the surface and build the layer
-  //~ std::unique_ptr<SurfaceArray> surArray(new SurfaceArray(cfg.surface));
-
-  //~ layer
-  //~ = PlaneLayer::create(std::make_shared<const Transform3D>(trafo),
-  //~ cfg.surfaceCfg.rBounds,
-  //~ std::move(surArray),
-  //~ cfg.layerThickness,
-  //~ nullptr,
-  //~ (cfg.surface->associatedDetectorElement() == nullptr
-  //~ ? LayerType::passive
-  //~ : LayerType::active));
-  //~ cfg.surface->associateLayer(*layer);
-  //~ return layer;
+  return layerCreator.planeLayer({cfg.surface},
+                                 cfg.binsY,
+                                 cfg.binsZ,
+                                 BinningValue::binX,
+                                 boost::none,
+                                 std::make_shared<const Transform3D>(trafo));
 }
 
 template <typename DetectorElement_t>
@@ -320,50 +324,116 @@ BoxGeometryBuilder::binningRange(const VolumeConfig& cfg) const
   return minMax;
 }
 
-template <typename DetectorElement_t>
-std::shared_ptr<TrackingGeometry>
-BoxGeometryBuilder::buildTrackingGeometry(Config& cfg) const
+//~ template <typename DetectorElement_t>
+//~ std::unique_ptr<TrackingGeometry>
+//~ BoxGeometryBuilder::buildTrackingGeometry(Config& cfg) const
+//~ {
+//~ // Build volumes
+//~ if (cfg.volumes.empty()) {
+//~ cfg.volumes.reserve(cfg.volumeCfg.size());
+//~ for (VolumeConfig volCfg : cfg.volumeCfg) {
+//~ cfg.volumes.push_back(buildVolume<DetectorElement_t>(volCfg));
+//~ }
+//~ }
+
+//~ // Glue volumes
+//~ for (unsigned int i = 0; i < cfg.volumes.size() - 1; i++) {
+//~ cfg.volumes[i + 1]->glueTrackingVolume(BoundarySurfaceFace::negativeFaceYZ,
+//~ cfg.volumes[i],
+//~ BoundarySurfaceFace::positiveFaceYZ);
+//~ cfg.volumes[i]->glueTrackingVolume(BoundarySurfaceFace::positiveFaceYZ,
+//~ cfg.volumes[i + 1],
+//~ BoundarySurfaceFace::negativeFaceYZ);
+//~ }
+
+//~ // Translation
+//~ Transform3D trafo(Transform3D::Identity());
+//~ trafo.translation() = cfg.position;
+
+//~ // Size of the volume
+//~ auto volume = std::make_shared<const CuboidVolumeBounds>(
+//~ cfg.length.x() * 0.5, cfg.length.y() * 0.5, cfg.length.z() * 0.5);
+
+//~ // Build vector of confined volumes
+//~ std::vector<std::pair<TrackingVolumePtr, Vector3D>> tapVec;
+//~ tapVec.reserve(cfg.volumeCfg.size());
+//~ for (auto& tVol : cfg.volumes) {
+//~ tapVec.push_back(std::make_pair(tVol, tVol->center()));
+//~ }
+
+//~ // Set bin boundaries along binning
+//~ std::vector<float> binBoundaries;
+//~ binBoundaries.push_back(cfg.volumes[0]->center().x()
+//~ - cfg.volumeCfg[0].length.x() * 0.5);
+//~ for (size_t i = 0; i < cfg.volumes.size(); i++) {
+//~ binBoundaries.push_back(cfg.volumes[i]->center().x()
+//~ + cfg.volumeCfg[i].length.x() * 0.5);
+//~ }
+
+//~ // Build binning
+//~ BinningData binData(BinningOption::open, BinningValue::binX, binBoundaries);
+//~ std::unique_ptr<const BinUtility> bu(new BinUtility(binData));
+
+//~ // Build TrackingVolume array
+//~ std::shared_ptr<const TrackingVolumeArray> trVolArr(
+//~ new BinnedArrayXD<TrackingVolumePtr>(tapVec, std::move(bu)));
+
+//~ // Create world volume
+//~ MutableTrackingVolumePtr mtvp(TrackingVolume::create(
+//~ std::make_shared<const Transform3D>(trafo), volume, trVolArr, "World"));
+
+//~ mtvp->sign(GeometrySignature::Global);
+//~ TrackingGeometryBuilder::Config tgbCfg;
+//~ tgbCfg.trackingVolumeBuilders.push_back(*this);
+//~ TrackingGeometryBuilder tgb(tgbCfg);
+//~ return tgb.trackingGeometry();
+//~ // Build and return tracking geometry
+//~ return std::shared_ptr<TrackingGeometry>(new TrackingGeometry(mtvp));
+//~ }
+
+MutableTrackingVolumePtr
+    BoxGeometryBuilder::trackingVolume(TrackingVolumePtr /*unused*/,
+                                       VolumeBoundsPtr /*unused*/) const
 {
   // Build volumes
-  if (cfg.volumes.empty()) {
-    cfg.volumes.reserve(cfg.volumeCfg.size());
-    for (VolumeConfig volCfg : cfg.volumeCfg) {
-      cfg.volumes.push_back(buildVolume<DetectorElement_t>(volCfg));
-    }
+  std::vector<std::shared_ptr<TrackingVolume>> volumes;
+  volumes.reserve(m_cfg.volumeCfg.size());
+  for (VolumeConfig volCfg : m_cfg.volumeCfg) {
+    volumes.push_back(buildVolume(volCfg));
   }
 
   // Glue volumes
-  for (unsigned int i = 0; i < cfg.volumes.size() - 1; i++) {
-    cfg.volumes[i + 1]->glueTrackingVolume(BoundarySurfaceFace::negativeFaceYZ,
-                                           cfg.volumes[i],
-                                           BoundarySurfaceFace::positiveFaceYZ);
-    cfg.volumes[i]->glueTrackingVolume(BoundarySurfaceFace::positiveFaceYZ,
-                                       cfg.volumes[i + 1],
-                                       BoundarySurfaceFace::negativeFaceYZ);
+  for (unsigned int i = 0; i < volumes.size() - 1; i++) {
+    volumes[i + 1]->glueTrackingVolume(BoundarySurfaceFace::negativeFaceYZ,
+                                       volumes[i],
+                                       BoundarySurfaceFace::positiveFaceYZ);
+    volumes[i]->glueTrackingVolume(BoundarySurfaceFace::positiveFaceYZ,
+                                   volumes[i + 1],
+                                   BoundarySurfaceFace::negativeFaceYZ);
   }
 
   // Translation
   Transform3D trafo(Transform3D::Identity());
-  trafo.translation() = cfg.position;
+  trafo.translation() = m_cfg.position;
 
   // Size of the volume
   auto volume = std::make_shared<const CuboidVolumeBounds>(
-      cfg.length.x() * 0.5, cfg.length.y() * 0.5, cfg.length.z() * 0.5);
+      m_cfg.length.x() * 0.5, m_cfg.length.y() * 0.5, m_cfg.length.z() * 0.5);
 
   // Build vector of confined volumes
   std::vector<std::pair<TrackingVolumePtr, Vector3D>> tapVec;
-  tapVec.reserve(cfg.volumeCfg.size());
-  for (auto& tVol : cfg.volumes) {
+  tapVec.reserve(m_cfg.volumeCfg.size());
+  for (auto& tVol : volumes) {
     tapVec.push_back(std::make_pair(tVol, tVol->center()));
   }
 
   // Set bin boundaries along binning
   std::vector<float> binBoundaries;
-  binBoundaries.push_back(cfg.volumes[0]->center().x()
-                          - cfg.volumeCfg[0].length.x() * 0.5);
-  for (size_t i = 0; i < cfg.volumes.size(); i++) {
-    binBoundaries.push_back(cfg.volumes[i]->center().x()
-                            + cfg.volumeCfg[i].length.x() * 0.5);
+  binBoundaries.push_back(volumes[0]->center().x()
+                          - m_cfg.volumeCfg[0].length.x() * 0.5);
+  for (size_t i = 0; i < volumes.size(); i++) {
+    binBoundaries.push_back(volumes[i]->center().x()
+                            + m_cfg.volumeCfg[i].length.x() * 0.5);
   }
 
   // Build binning
@@ -379,8 +449,6 @@ BoxGeometryBuilder::buildTrackingGeometry(Config& cfg) const
       std::make_shared<const Transform3D>(trafo), volume, trVolArr, "World"));
 
   mtvp->sign(GeometrySignature::Global);
-
-  // Build and return tracking geometry
-  return std::shared_ptr<TrackingGeometry>(new TrackingGeometry(mtvp));
+  return mtvp;
 }
 }  // namespace Acts

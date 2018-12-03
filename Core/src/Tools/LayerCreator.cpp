@@ -360,9 +360,9 @@ Acts::LayerCreator::discLayer(const std::vector<const Surface*>&  surfaces,
 
 Acts::MutableLayerPtr
 Acts::LayerCreator::planeLayer(const std::vector<const Surface*>&  surfaces,
-                               BinningValue                        bValue,
                                size_t                              bins1,
                                size_t                              bins2,
+                               BinningValue                        bValue,
                                boost::optional<ProtoLayer>         _protoLayer,
                                std::shared_ptr<const Transform3D>  transform,
                                std::unique_ptr<ApproachDescriptor> ad) const
@@ -430,7 +430,7 @@ Acts::LayerCreator::planeLayer(const std::vector<const Surface*>&  surfaces,
   std::unique_ptr<SurfaceArray> sArray;
   if (!surfaces.empty()) {
     sArray = m_cfg.surfaceArrayCreator->surfaceArrayOnPlane(
-        surfaces, bValue, bins1, bins2, protoLayer, nullptr);
+        surfaces, bins1, bins2, bValue, protoLayer, nullptr);
 
     checkBinning(*sArray);
   }
