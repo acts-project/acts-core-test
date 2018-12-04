@@ -652,7 +652,8 @@ namespace Test {
     MaterialProperties matProp(
         352.8, 407., 9.012, 4., 1.848e-3, 0.5 * units::_mm);
 
-    BoxGeometryBuilder::SurfaceConfig sConf1;
+    CuboidVolumeBuilder                cvb;
+    CuboidVolumeBuilder::SurfaceConfig sConf1;
     sConf1.position        = Vector3D(0.3 * units::_m, 0., 0.);
     sConf1.rotation.col(0) = xPos;
     sConf1.rotation.col(1) = yPos;
@@ -662,11 +663,10 @@ namespace Test {
     sConf1.surMat = std::shared_ptr<const SurfaceMaterial>(
         new HomogeneousSurfaceMaterial(matProp));
     sConf1.thickness = 1. * units::_mm;
-    BoxGeometryBuilder::LayerConfig lConf1;
-    lConf1.surfaceCfg     = sConf1;
-    lConf1.layerThickness = 2. * units::_mm;
+    CuboidVolumeBuilder::LayerConfig lConf1;
+    lConf1.surfaceCfg = sConf1;
 
-    BoxGeometryBuilder::SurfaceConfig sConf2;
+    CuboidVolumeBuilder::SurfaceConfig sConf2;
     sConf2.position        = Vector3D(0.6 * units::_m, 0., 0.);
     sConf2.rotation.col(0) = xPos;
     sConf2.rotation.col(1) = yPos;
@@ -676,47 +676,50 @@ namespace Test {
     sConf2.surMat = std::shared_ptr<const SurfaceMaterial>(
         new HomogeneousSurfaceMaterial(matProp));
     sConf2.thickness = 1. * units::_mm;
-    BoxGeometryBuilder::LayerConfig lConf2;
-    lConf2.surfaceCfg     = sConf2;
-    lConf2.layerThickness = 2. * units::_mm;
+    CuboidVolumeBuilder::LayerConfig lConf2;
+    lConf2.surfaceCfg = sConf2;
 
-    BoxGeometryBuilder::VolumeConfig muConf1;
+    CuboidVolumeBuilder::VolumeConfig muConf1;
     muConf1.position = {2.3 * units::_m, 0., 0.};
     muConf1.length   = {20. * units::_cm, 20. * units::_cm, 20. * units::_cm};
     muConf1.material = std::make_shared<const Material>(
         Material(352.8, 407., 9.012, 4., 1.848e-3));
     muConf1.name = "MDT1";
-    BoxGeometryBuilder::VolumeConfig muConf2;
+    CuboidVolumeBuilder::VolumeConfig muConf2;
     muConf2.position = {2.7 * units::_m, 0., 0.};
     muConf2.length   = {20. * units::_cm, 20. * units::_cm, 20. * units::_cm};
     muConf2.material = std::make_shared<const Material>(
         Material(352.8, 407., 9.012, 4., 1.848e-3));
     muConf2.name = "MDT2";
 
-    BoxGeometryBuilder::VolumeConfig vConf1;
+    CuboidVolumeBuilder::VolumeConfig vConf1;
     vConf1.position = {0.5 * units::_m, 0., 0.};
     vConf1.length   = {1. * units::_m, 1. * units::_m, 1. * units::_m};
     vConf1.layerCfg = {lConf1, lConf2};
     vConf1.name     = "Tracker";
-    BoxGeometryBuilder::VolumeConfig vConf2;
+    CuboidVolumeBuilder::VolumeConfig vConf2;
     vConf2.position = {1.5 * units::_m, 0., 0.};
     vConf2.length   = {1. * units::_m, 1. * units::_m, 1. * units::_m};
     vConf2.material = std::make_shared<const Material>(
         Material(352.8, 407., 9.012, 4., 1.848e-3));
     vConf2.name = "Calorimeter";
-    BoxGeometryBuilder::VolumeConfig vConf3;
+    CuboidVolumeBuilder::VolumeConfig vConf3;
     vConf3.position  = {2.5 * units::_m, 0., 0.};
     vConf3.length    = {1. * units::_m, 1. * units::_m, 1. * units::_m};
     vConf3.volumeCfg = {muConf1, muConf2};
     vConf3.name      = "Muon system";
-    BoxGeometryBuilder::Config conf;
+    CuboidVolumeBuilder::Config conf;
     conf.volumeCfg = {vConf1, vConf2, vConf3};
     conf.position  = {1.5 * units::_m, 0., 0.};
     conf.length    = {3. * units::_m, 1. * units::_m, 1. * units::_m};
 
     // Build detector
-    std::shared_ptr<TrackingGeometry> detector
-        = bgb.buildTrackingGeometry(conf);
+    cvb.setConfig(conf);
+    TrackingGeometryBuilder::Config tgbCfg;
+    tgbCfg.trackingVolumeBuilders.push_back(
+        std::make_shared<const CuboidVolumeBuilder>(cvb));
+    TrackingGeometryBuilder                 tgb(tgbCfg);
+    std::shared_ptr<const TrackingGeometry> detector = tgb.trackingGeometry();
 
     // Build navigator
     Navigator naviVac(detector);

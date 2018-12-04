@@ -341,10 +341,10 @@ MutableTrackingVolumePtr
   // Glue volumes
   for (unsigned int i = 0; i < volumes.size() - 1; i++) {
     volumes[i + 1]->glueTrackingVolume(BoundarySurfaceFace::negativeFaceYZ,
-                                       volumes[i],
+                                       volumes[i].get(),
                                        BoundarySurfaceFace::positiveFaceYZ);
     volumes[i]->glueTrackingVolume(BoundarySurfaceFace::positiveFaceYZ,
-                                   volumes[i + 1],
+                                   volumes[i + 1].get(),
                                    BoundarySurfaceFace::negativeFaceYZ);
   }
 

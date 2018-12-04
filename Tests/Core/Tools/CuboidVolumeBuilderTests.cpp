@@ -13,6 +13,8 @@
 #include <vector>
 #include "Acts/Extrapolator/Navigator.hpp"
 #include "Acts/Material/Material.hpp"
+#include "Acts/Propagator/Propagator.hpp"
+#include "Acts/Propagator/StraightLineStepper.hpp"
 #include "Acts/Tools/CuboidVolumeBuilder.hpp"
 #include "Acts/Utilities/Definitions.hpp"
 #include "Acts/Utilities/Units.hpp"
@@ -94,7 +96,7 @@ namespace Test {
     }
   };
 
-  BOOST_AUTO_TEST_CASE(BoxGeometryBuilderTest)
+  BOOST_AUTO_TEST_CASE(CuboidVolumeBuilderTest)
   {
 
     // Construct builder
@@ -301,33 +303,38 @@ namespace Test {
   BOOST_AUTO_TEST_CASE(CuboidVolumeBuilderTest_confinedVolumes)
   {
     // Production factory
-    BoxGeometryBuilder bgb;
+    CuboidVolumeBuilder cvb;
 
     // Build a volume that confines another volume
-    BoxGeometryBuilder::VolumeConfig vCfg;
+    CuboidVolumeBuilder::VolumeConfig vCfg;
     vCfg.position = {1. * units::_m, 0., 0.};
     vCfg.length   = {2. * units::_m, 1. * units::_m, 1. * units::_m};
     vCfg.name     = "Test volume";
     // Build and add 2 confined volumes
-    BoxGeometryBuilder::VolumeConfig cvCfg1;
+    CuboidVolumeBuilder::VolumeConfig cvCfg1;
     cvCfg1.position = {1.1 * units::_m, 0., 0.};
     cvCfg1.length   = {10. * units::_cm, 10. * units::_cm, 10. * units::_cm};
     cvCfg1.name     = "Confined volume1";
     cvCfg1.material = std::make_shared<const Material>(
         Material(352.8, 407., 9.012, 4., 1.848e-3));
-    BoxGeometryBuilder::VolumeConfig cvCfg2;
+    CuboidVolumeBuilder::VolumeConfig cvCfg2;
     cvCfg2.position = {0.9 * units::_m, 0., 0.};
     cvCfg2.length   = {10. * units::_cm, 10. * units::_cm, 10. * units::_cm};
     cvCfg2.name     = "Confined volume2";
     vCfg.volumeCfg  = {cvCfg1, cvCfg2};
 
     // Build detector
-    BoxGeometryBuilder::Config config;
+    CuboidVolumeBuilder::Config config;
     config.position  = {1. * units::_m, 0., 0.};
     config.length    = {2. * units::_m, 1. * units::_m, 1. * units::_m};
     config.volumeCfg = {vCfg};
-    std::shared_ptr<TrackingGeometry> detector
-        = bgb.buildTrackingGeometry(config);
+
+    cvb.setConfig(config);
+    TrackingGeometryBuilder::Config tgbCfg;
+    tgbCfg.trackingVolumeBuilders.push_back(
+        std::make_shared<const CuboidVolumeBuilder>(cvb));
+    TrackingGeometryBuilder                 tgb(tgbCfg);
+    std::shared_ptr<const TrackingGeometry> detector = tgb.trackingGeometry();
 
     // Test that the right volume is selected
     BOOST_TEST(
@@ -388,51 +395,56 @@ namespace Test {
   BOOST_AUTO_TEST_CASE(CuboidVolumeBuilderTest_confinedVolumes_edgecases)
   {
     // Production factory
-    BoxGeometryBuilder bgb;
+    CuboidVolumeBuilder cvb;
 
     // Build a volume that confines another volume
-    BoxGeometryBuilder::VolumeConfig vCfg1;
+    CuboidVolumeBuilder::VolumeConfig vCfg1;
     vCfg1.position = {1. * units::_m, 0., 0.};
     vCfg1.length   = {2. * units::_m, 1. * units::_m, 1. * units::_m};
     vCfg1.name     = "Test volume1";
     // Build and add 4 confined volumes
     // Volume that is missed and quite orthogonal to the starting position
-    BoxGeometryBuilder::VolumeConfig cvCfg1;
+    CuboidVolumeBuilder::VolumeConfig cvCfg1;
     cvCfg1.position = {0.1 * units::_m, 0.4 * units::_m, 0.4 * units::_m};
     cvCfg1.length   = {10. * units::_cm, 10. * units::_cm, 10. * units::_cm};
     cvCfg1.name     = "Confined volume1";
     cvCfg1.material = std::make_shared<const Material>(
         Material(352.8, 407., 9.012, 4., 1.848e-3));
     // Volume that is missed but far away such that it may be hit
-    BoxGeometryBuilder::VolumeConfig cvCfg2;
+    CuboidVolumeBuilder::VolumeConfig cvCfg2;
     cvCfg2.position = {1.9 * units::_m, -0.4 * units::_m, -0.4 * units::_m};
     cvCfg2.length   = {10. * units::_cm, 10. * units::_cm, 10. * units::_cm};
     cvCfg2.name     = "Confined volume2";
     // Volume that is hit but with identical boundary as its mother
-    BoxGeometryBuilder::VolumeConfig cvCfg3;
+    CuboidVolumeBuilder::VolumeConfig cvCfg3;
     cvCfg3.position = {1.95 * units::_m, 0., 0.};
     cvCfg3.length   = {10. * units::_cm, 10. * units::_cm, 10. * units::_cm};
     cvCfg3.name     = "Confined volume3";
     // Volume to grind along the boundary
-    BoxGeometryBuilder::VolumeConfig cvCfg4;
+    CuboidVolumeBuilder::VolumeConfig cvCfg4;
     cvCfg4.position = {1. * units::_m, 5. * units::_cm, 0.};
     cvCfg4.length   = {10. * units::_cm, 10. * units::_cm, 10. * units::_cm};
     cvCfg4.name     = "Confined volume4";
     vCfg1.volumeCfg = {cvCfg1, cvCfg2, cvCfg3, cvCfg4};
 
     // Build a volume that confines another volume
-    BoxGeometryBuilder::VolumeConfig vCfg2;
+    CuboidVolumeBuilder::VolumeConfig vCfg2;
     vCfg2.position = {2.5 * units::_m, 0., 0.};
     vCfg2.length   = {1. * units::_m, 1. * units::_m, 1. * units::_m};
     vCfg2.name     = "Test volume2";
 
     // Build detector
-    BoxGeometryBuilder::Config config;
+    CuboidVolumeBuilder::Config config;
     config.position  = {1.5 * units::_m, 0., 0.};
     config.length    = {3. * units::_m, 1. * units::_m, 1. * units::_m};
     config.volumeCfg = {vCfg1, vCfg2};
-    std::shared_ptr<TrackingGeometry> detector
-        = bgb.buildTrackingGeometry(config);
+
+    cvb.setConfig(config);
+    TrackingGeometryBuilder::Config tgbCfg;
+    tgbCfg.trackingVolumeBuilders.push_back(
+        std::make_shared<const CuboidVolumeBuilder>(cvb));
+    TrackingGeometryBuilder                 tgb(tgbCfg);
+    std::shared_ptr<const TrackingGeometry> detector = tgb.trackingGeometry();
 
     // Set propagator and navigator
     PropagatorOptions<ActionList<StepVolumeCollector>> propOpts;
