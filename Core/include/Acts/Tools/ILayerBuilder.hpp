@@ -14,6 +14,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include "Acts/Detector/TrackingVolume.hpp"
 
 namespace Acts {
 

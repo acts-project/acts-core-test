@@ -97,6 +97,8 @@ public:
     bool isEndcap{false};
     /// Indicating that the DD4hep::DetElement is a layer
     bool isLayer{false};
+    /// Indicating that the DD4hep::DetElement is a volume
+    bool isVolume{false};
     /// This extension is needed to allow material mapping on a layer
     /// The number of bins indicate the granularity of the material map of one
     /// layer in the first direction which is phi for both, cylinder and disc
@@ -196,6 +198,9 @@ public:
   /// @copydoc IActsExtension::isLayer()
   bool
   isLayer() const final;
+  /// @copydoc IActsExtension::isVolume()
+  bool
+  isVolume() const final;
   /// @copydoc IActsExtension::hasSupportMaterial()
   bool
   hasSupportMaterial() const final;
@@ -260,6 +265,12 @@ inline bool
 ActsExtension::isLayer() const
 {
   return m_cfg.isLayer;
+}
+
+inline bool
+ActsExtension::isVolume() const
+{
+  return m_cfg.isVolume;
 }
 
 inline bool
