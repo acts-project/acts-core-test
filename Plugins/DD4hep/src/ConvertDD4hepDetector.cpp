@@ -12,6 +12,7 @@
 #include "Acts/Material/HomogeneousSurfaceMaterial.hpp"
 #include "Acts/Material/MaterialProperties.hpp"
 #include "Acts/Plugins/DD4hep/DD4hepLayerBuilder.hpp"
+#include "Acts/Plugins/DD4hep/DD4hepVolumeBuilder.hpp"
 #include "Acts/Plugins/DD4hep/IActsExtension.hpp"
 #include "Acts/Tools/LayerArrayCreator.hpp"
 #include "Acts/Tools/LayerCreator.hpp"
@@ -55,6 +56,7 @@ convertDD4hepDetector(
   std::shared_ptr<const CylinderVolumeBuilder> beamPipeVolumeBuilder;
   // loop over the sub detectors
   for (auto& subDetector : subDetectors) {
+std::cout << "sd: " << subDetector.type() << std::endl;
     // create volume builder
     auto volBuilder = volumeBuilder_dd4hep(subDetector,
                                            loggingLevel,
@@ -122,6 +124,7 @@ volumeBuilder_dd4hep(dd4hep::DetElement subDetector,
     subDetExtension = subDetector.extension<Acts::IActsExtension>();
   } catch (std::runtime_error& e) {
   }
+std::cout << "sdtype: " << subDetector.type() << "\t" << subDetector.name() << std::endl;
   if (subDetector.type() == "compound") {
     ACTS_VERBOSE("[D] Subdetector : '"
                  << subDetector.name()
@@ -356,10 +359,18 @@ volumeBuilder_dd4hep(dd4hep::DetElement subDetector,
     ACTS_VERBOSE("[D] Subdetector: "
                  << subDetector.name()
                  << " is a Barrel volume - building barrel.");
+                 
     /// the dd4hep::DetElements of the layers of the central volume
-    std::vector<dd4hep::DetElement> centralLayers;
+    std::vector<dd4hep::DetElement> centralLayers, centralVolumes;
     collectLayers_dd4hep(subDetector, centralLayers);
-
+std::cout << " vong " << centralLayers.size() << " lagigkeit her" << std::endl;
+for(auto& cl : centralLayers)
+{
+	//~ if(cl.extension<Acts::IActsExtension>()->isVolume())
+		
+	//~ cv.extension<Acts::IActsExtensions>()->isVolume()
+	std::cout << "fass? " << cl.extension<Acts::IActsExtension>()->isVolume() << std::endl;
+}
     // configure SurfaceArrayCreator
     auto surfaceArrayCreator
         = std::make_shared<const Acts::SurfaceArrayCreator>(
@@ -379,7 +390,13 @@ volumeBuilder_dd4hep(dd4hep::DetElement subDetector,
     lbConfig.defaultThickness  = defaultLayerThickness;
     auto dd4hepLayerBuilder = std::make_shared<const Acts::DD4hepLayerBuilder>(
         lbConfig, Acts::getDefaultLogger("DD4hepLayerBuilder", loggingLevel));
-
+	// Configure DD4hepVolumeBuilder
+	Acts::DD4hepVolumeBuilder::Config vbConfig;
+	vbConfig.configurationName = subDetector.name();
+	vbConfig.centralVolumes = centralVolumes;
+	auto dd4hepVolumeBuilder  = std::make_shared<const Acts::DD4hepVolumeBuilder>(
+        vbConfig, Acts::getDefaultLogger("DD4hepVolumeBuilder", loggingLevel));
+        
     // the configuration object of the volume builder
     Acts::CylinderVolumeBuilder::Config cvbConfig;
     // get the dimensions of the volume
@@ -389,7 +406,7 @@ volumeBuilder_dd4hep(dd4hep::DetElement subDetector,
     if (geoShape == nullptr) {
       throw std::logic_error(std::string("Volume of DetElement: ")
                              + subDetector.name()
-                             + std::string(" has no a shape!"));
+                             + std::string(" has not a shape!"));
     }
 
     // get the possible material
@@ -408,6 +425,7 @@ volumeBuilder_dd4hep(dd4hep::DetElement subDetector,
     cvbConfig.volumeName           = subDetector.name();
     cvbConfig.volumeMaterial       = volumeMaterial;
     cvbConfig.layerBuilder         = dd4hepLayerBuilder;
+    cvbConfig.ctVolumeBuilder = dd4hepVolumeBuilder;
     auto cylinderVolumeBuilder
         = std::make_shared<const Acts::CylinderVolumeBuilder>(
             cvbConfig,
