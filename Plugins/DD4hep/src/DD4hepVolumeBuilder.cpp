@@ -54,14 +54,6 @@ Acts::DD4hepVolumeBuilder::centralVolumes() const
 
   // Go through volumes
   for (auto& detElement : m_cfg.centralVolumes) {
-    // Access the extension of the volume
-    // At this stage all layer detElements have extension (checked in
-    // ConvertDD4hepDetector)
-    Acts::IActsExtension* detExtension
-        = detElement.extension<Acts::IActsExtension>();
-
-    //~ // Access the axis orienation of the modules
-    //~ std::string axes = detExtension->axes();
 
     // Access the global transformation matrix of the volume
     auto transform
