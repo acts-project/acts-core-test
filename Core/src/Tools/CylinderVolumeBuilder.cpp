@@ -74,6 +74,12 @@ Acts::CylinderVolumeBuilder::trackingVolume(
     // the positive Layer
     positiveLayers = m_cfg.layerBuilder->positiveLayers();
   }
+
+  MutableTrackingVolumeVector centralVolumes;
+  if (m_cfg.ctVolumeBuilder) {
+    centralVolumes = m_cfg.ctVolumeBuilder->centralVolumes();
+  }
+
   // (0) PREP WORK ------------------------------------------------
   //
   // a) volume config of the existing volume
@@ -128,9 +134,9 @@ Acts::CylinderVolumeBuilder::trackingVolume(
 
   // Find out with Layer analysis
   // analyze the layers
-  wConfig.nVolumeConfig = analyzeLayers(negativeLayers);
-  wConfig.cVolumeConfig = analyzeLayers(centralLayers);
-  wConfig.pVolumeConfig = analyzeLayers(positiveLayers);
+  wConfig.nVolumeConfig = analyzeContent(negativeLayers, {});  // TODO
+  wConfig.cVolumeConfig = analyzeContent(centralLayers, centralVolumes);
+  wConfig.pVolumeConfig = analyzeContent(positiveLayers, {});  // TODO
 
   std::string layerConfiguration = "|";
   if (wConfig.nVolumeConfig) {
@@ -184,6 +190,7 @@ Acts::CylinderVolumeBuilder::trackingVolume(
   // the barrel is always created
   auto barrel = wConfig.cVolumeConfig
       ? tvHelper->createTrackingVolume(wConfig.cVolumeConfig.layers,
+                                       wConfig.cVolumeConfig.volumes,
                                        m_cfg.volumeMaterial,
                                        wConfig.cVolumeConfig.rMin,
                                        wConfig.cVolumeConfig.rMax,
@@ -195,6 +202,7 @@ Acts::CylinderVolumeBuilder::trackingVolume(
   // the negative endcap is created if present
   auto nEndcap = wConfig.nVolumeConfig
       ? tvHelper->createTrackingVolume(wConfig.nVolumeConfig.layers,
+                                       wConfig.cVolumeConfig.volumes,
                                        m_cfg.volumeMaterial,
                                        wConfig.nVolumeConfig.rMin,
                                        wConfig.nVolumeConfig.rMax,
@@ -206,6 +214,7 @@ Acts::CylinderVolumeBuilder::trackingVolume(
   // the positive endcap is created
   auto pEndcap = wConfig.pVolumeConfig
       ? tvHelper->createTrackingVolume(wConfig.pVolumeConfig.layers,
+                                       wConfig.cVolumeConfig.volumes,
                                        m_cfg.volumeMaterial,
                                        wConfig.pVolumeConfig.rMin,
                                        wConfig.pVolumeConfig.rMax,
@@ -252,7 +261,8 @@ Acts::CylinderVolumeBuilder::trackingVolume(
     if (wConfig.fGapVolumeConfig) {
       // create the gap volume
       auto fGap
-          = tvHelper->createGapTrackingVolume(m_cfg.volumeMaterial,
+          = tvHelper->createGapTrackingVolume(wConfig.cVolumeConfig.volumes,
+                                              m_cfg.volumeMaterial,
                                               wConfig.fGapVolumeConfig.rMin,
                                               wConfig.fGapVolumeConfig.rMax,
                                               wConfig.fGapVolumeConfig.zMin,
@@ -267,7 +277,8 @@ Acts::CylinderVolumeBuilder::trackingVolume(
     if (wConfig.sGapVolumeConfig) {
       // create the gap volume
       auto sGap
-          = tvHelper->createGapTrackingVolume(m_cfg.volumeMaterial,
+          = tvHelper->createGapTrackingVolume(wConfig.cVolumeConfig.volumes,
+                                              m_cfg.volumeMaterial,
                                               wConfig.sGapVolumeConfig.rMin,
                                               wConfig.sGapVolumeConfig.rMax,
                                               wConfig.sGapVolumeConfig.zMin,
@@ -331,14 +342,16 @@ Acts::CylinderVolumeBuilder::trackingVolume(
 
 // -----------------------------
 Acts::VolumeConfig
-Acts::CylinderVolumeBuilder::analyzeLayers(const LayerVector& lVector) const
+Acts::CylinderVolumeBuilder::analyzeContent(
+    const LayerVector&                 lVector,
+    const MutableTrackingVolumeVector& mtvVector) const
 {
   // @TODO add envelope tolerance
   //
   // return object
   VolumeConfig lConfig;
   // only if the vector is present it can actually be analyzed
-  if (!lVector.empty()) {
+  if (!lVector.empty() || !mtvVector.empty()) {
     // we have layers
     lConfig.present = true;
     // loop over the layer
@@ -379,9 +392,22 @@ Acts::CylinderVolumeBuilder::analyzeLayers(const LayerVector& lVector) const
         //!< @todo check for Endcap Ring config
       }
     }
+    for (auto& volume : mtvVector) {
+      const CylinderVolumeBounds* cvBounds
+          = dynamic_cast<const CylinderVolumeBounds*>(&volume->volumeBounds());
+      if (cvBounds != nullptr) {
+        takeSmaller(lConfig.rMin, cvBounds->innerRadius());
+        takeBigger(lConfig.rMax, cvBounds->outerRadius());
+        takeSmaller(lConfig.zMin, -cvBounds->halflengthZ());
+        takeBigger(lConfig.zMax, cvBounds->halflengthZ());
+      }
+    }
   }
+
   // set the layers to the layer vector
   lConfig.layers = lVector;
+  // set the layers to the layer vector
+  lConfig.volumes = mtvVector;
   // overwrite to radius 0 if needed
   if (m_cfg.buildToRadiusZero) {
     ACTS_VERBOSE("This layer builder is configured to build to the beamline.");

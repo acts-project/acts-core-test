@@ -26,12 +26,13 @@ class DetElement;
 
 namespace Acts {
 
-/// @brief build layers of one cylinder-endcap setup from DD4hep input
+/// @brief build confined TrackingVolumes of one cylinder setup from DD4hep
+/// input.
 ///
-/// This class is an implementation of the Acts::ILayerBuilder,
-/// creating the central (layers of barrel), the negative and positive layers
-/// (layers of endcaps) of one hierarchy (e.g. PixelDetector, StripDetector,...)
-/// with input from DD4hep.
+/// This class is an implementation of the Acts::IConfinedTrackingVolumeBuilder,
+/// creating the central (volumes of barrel), the negative and positive volumes
+/// (volumes of endcaps) of one hierarchy (e.g. ECal, HCal...) with input from
+/// DD4hep.
 
 class DD4hepVolumeBuilder : public IConfinedTrackingVolumeBuilder
 {
@@ -42,7 +43,7 @@ public:
   {
     /// string based identification
     std::string configurationName = "undefined";
-
+    /// Vector of central confined volumes
     std::vector<dd4hep::DetElement> centralVolumes;
   };
 
@@ -59,8 +60,8 @@ public:
   //~ const LayerVector
   //~ negativeLayers() const final;
 
-  //~ /// LayerBuilder interface method
-  //~ /// @return the layers at the central sector
+  /// Confined volume builder interface method
+  /// @return the vector of TrackingVolumes at the central sector
   MutableTrackingVolumeVector
   centralVolumes() const final;
 
@@ -101,6 +102,11 @@ private:
     return *m_logger;
   }
 
+  /// @brief Converter of the transformation of a volume from DD4hep to Acts
+  /// formalism
+  ///
+  /// @param [in] tGeoTrans Transformation of the DD4hep DetElement
+  /// @return Pointer to the corresponding Acts transformation
   std::shared_ptr<const Acts::Transform3D>
   convertTransform(const TGeoMatrix* tGeoTrans) const;
 };

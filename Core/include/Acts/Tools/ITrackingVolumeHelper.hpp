@@ -31,8 +31,9 @@ using TrackingVolumePtr        = std::shared_ptr<const TrackingVolume>;
 using MutableTrackingVolumePtr = std::shared_ptr<TrackingVolume>;
 using VolumeBoundsPtr          = std::shared_ptr<const VolumeBounds>;
 
-using LayerVector          = std::vector<LayerPtr>;
-using TrackingVolumeVector = std::vector<TrackingVolumePtr>;
+using LayerVector                 = std::vector<LayerPtr>;
+using TrackingVolumeVector        = std::vector<TrackingVolumePtr>;
+using MutableTrackingVolumeVector = std::vector<MutableTrackingVolumePtr>;
 
 ///  @class ITrackingVolumeHelper
 ///
@@ -68,6 +69,7 @@ public:
   createTrackingVolume(const LayerVector&                 layers,
                        std::shared_ptr<const Material>    matprop,
                        VolumeBoundsPtr                    volBounds,
+                       MutableTrackingVolumeVector        mtvVector = {},
                        std::shared_ptr<const Transform3D> transform = nullptr,
                        const std::string& volumeName = "UndefinedVolume",
                        BinningType        btype = arbitrary) const = 0;
@@ -86,6 +88,7 @@ public:
   /// @return shared pointer to a new TrackingVolume
   virtual MutableTrackingVolumePtr
   createTrackingVolume(const LayerVector&              layers,
+                       MutableTrackingVolumeVector&    mtvVector,
                        std::shared_ptr<const Material> matprop,
                        double                          loc0Min,
                        double                          loc0Max,
@@ -105,7 +108,8 @@ public:
   ///
   /// @return shared pointer to a new TrackingVolume
   virtual MutableTrackingVolumePtr
-  createGapTrackingVolume(std::shared_ptr<const Material> matprop,
+  createGapTrackingVolume(MutableTrackingVolumeVector&    mtvVector,
+                          std::shared_ptr<const Material> matprop,
                           double                          loc0Min,
                           double                          loc0Max,
                           double                          loc1Min,
@@ -126,7 +130,8 @@ public:
   ///
   /// @return shared pointer to a new TrackingVolume
   virtual MutableTrackingVolumePtr
-  createGapTrackingVolume(std::shared_ptr<const Material> matprop,
+  createGapTrackingVolume(MutableTrackingVolumeVector&    mtvVector,
+                          std::shared_ptr<const Material> matprop,
                           double                          loc0Min,
                           double                          loc0Max,
                           double                          loc1Min,

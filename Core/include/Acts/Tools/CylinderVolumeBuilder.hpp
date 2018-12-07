@@ -14,6 +14,7 @@
 #include <limits>
 #include <string>
 #include "Acts/Material/Material.hpp"
+#include "Acts/Tools/IConfinedTrackingVolumeBuilder.hpp"
 #include "Acts/Tools/ILayerBuilder.hpp"
 #include "Acts/Tools/ITrackingVolumeBuilder.hpp"
 #include "Acts/Tools/ITrackingVolumeHelper.hpp"
@@ -49,13 +50,14 @@ enum WrappingCondition {
 /// VolumeConfig struct to understand the layer config
 struct VolumeConfig
 {
-  bool        present{false};   ///< layers are present
-  bool        wrapping{false};  ///< in what way they are binned
-  double      rMin;             ///< min parameter r
-  double      rMax;             ///< max parameter r
-  double      zMin;             ///< min parameter z
-  double      zMax;             ///< max parameter z
-  LayerVector layers;           ///< the layers you have
+  bool                        present{false};   ///< layers are present
+  bool                        wrapping{false};  ///< in what way they are binned
+  double                      rMin;             ///< min parameter r
+  double                      rMax;             ///< max parameter r
+  double                      zMin;             ///< min parameter z
+  double                      zMax;             ///< max parameter z
+  LayerVector                 layers;           ///< the layers you have
+  MutableTrackingVolumeVector volumes;  ///< the confined volumes you have
 
   /// Default constructor
   VolumeConfig()
@@ -505,14 +507,17 @@ public:
     std::shared_ptr<const ITrackingVolumeHelper> trackingVolumeHelper = nullptr;
     /// the string based indenfication
     std::string volumeName = "";
-    /// The dimensions of the manually created world
-    std::vector<double> volumeDimension = {};
+    //~ /// The dimensions of the manually created world
+    //~ std::vector<double> volumeDimension = {};
     /// the world material
     std::shared_ptr<const Material> volumeMaterial = nullptr;
     /// build the volume to the beam line
     bool buildToRadiusZero = false;
     /// needed to build layers within the volume
     std::shared_ptr<const ILayerBuilder> layerBuilder = nullptr;
+    /// needed to build confined volumes within the volume
+    std::shared_ptr<const IConfinedTrackingVolumeBuilder> ctVolumeBuilder
+        = nullptr;
     /// the additional envelope in R to create rMin, rMax
     std::pair<double, double> layerEnvelopeR
         = {1. * Acts::units::_mm, 1. * Acts::units::_mm};
@@ -585,7 +590,8 @@ private:
   /// @param [in] lVector is the vector of layers that are parsed
   /// @return a VolumeConfig representing this layer
   VolumeConfig
-  analyzeLayers(const LayerVector& lVector) const;
+  analyzeContent(const LayerVector&                 lVector,
+                 const MutableTrackingVolumeVector& mtvVector) const;
 
   /// Helper method check the layer containment,
   /// both for inside / outside.

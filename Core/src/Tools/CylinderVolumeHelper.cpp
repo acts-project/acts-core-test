@@ -57,6 +57,7 @@ Acts::CylinderVolumeHelper::createTrackingVolume(
     const LayerVector&                  layers,
     std::shared_ptr<const Material>     matprop,
     std::shared_ptr<const VolumeBounds> volBounds,
+    MutableTrackingVolumeVector         mtvVector,
     std::shared_ptr<const Transform3D>  transform,
     const std::string&                  volumeName,
     BinningType                         bType) const
@@ -142,7 +143,7 @@ Acts::CylinderVolumeHelper::createTrackingVolume(
                                    matprop,
                                    std::move(layerArray),
                                    {},
-                                   {},
+                                   mtvVector,
                                    {},
                                    volumeName);
   // screen output
@@ -156,6 +157,7 @@ Acts::CylinderVolumeHelper::createTrackingVolume(
 std::shared_ptr<Acts::TrackingVolume>
 Acts::CylinderVolumeHelper::createTrackingVolume(
     const LayerVector&              layers,
+    MutableTrackingVolumeVector&    mtvVector,
     std::shared_ptr<const Material> matprop,
     double                          rMin,
     double                          rMax,
@@ -201,12 +203,18 @@ Acts::CylinderVolumeHelper::createTrackingVolume(
       ? std::make_shared<const Transform3D>(Translation3D(0., 0., zPosition))
       : nullptr;
   // call to the creation method with Bounds & Translation3D
-  return createTrackingVolume(
-      layers, matprop, VolumeBoundsPtr(cBounds), transform, volumeName, bType);
+  return createTrackingVolume(layers,
+                              matprop,
+                              VolumeBoundsPtr(cBounds),
+                              mtvVector,
+                              transform,
+                              volumeName,
+                              bType);
 }
 
 std::shared_ptr<Acts::TrackingVolume>
 Acts::CylinderVolumeHelper::createGapTrackingVolume(
+    MutableTrackingVolumeVector&    mtvVector,
     std::shared_ptr<const Material> matprop,
     double                          rMin,
     double                          rMax,
@@ -239,7 +247,8 @@ Acts::CylinderVolumeHelper::createGapTrackingVolume(
   }
 
   // now call the main method
-  return createGapTrackingVolume(matprop,
+  return createGapTrackingVolume(mtvVector,
+                                 matprop,
                                  rMin,
                                  rMax,
                                  zMin,
@@ -252,6 +261,7 @@ Acts::CylinderVolumeHelper::createGapTrackingVolume(
 
 std::shared_ptr<Acts::TrackingVolume>
 Acts::CylinderVolumeHelper::createGapTrackingVolume(
+    MutableTrackingVolumeVector&    mtvVector,
     std::shared_ptr<const Material> matprop,
     double                          rMin,
     double                          rMax,
@@ -304,7 +314,7 @@ Acts::CylinderVolumeHelper::createGapTrackingVolume(
   }
   // now call the createTrackingVolume() method
   return createTrackingVolume(
-      layers, matprop, rMin, rMax, zMin, zMax, volumeName, bType);
+      layers, mtvVector, matprop, rMin, rMax, zMin, zMax, volumeName, bType);
 }
 
 std::shared_ptr<Acts::TrackingVolume>

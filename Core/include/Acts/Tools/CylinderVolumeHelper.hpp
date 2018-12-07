@@ -91,6 +91,7 @@ public:
   createTrackingVolume(const LayerVector&                 layers,
                        std::shared_ptr<const Material>    matprop,
                        VolumeBoundsPtr                    volBounds,
+                       MutableTrackingVolumeVector        mtvVector = {},
                        std::shared_ptr<const Transform3D> transform = nullptr,
                        const std::string& volumeName = "UndefinedVolume",
                        BinningType        bType = arbitrary) const override;
@@ -112,6 +113,7 @@ public:
   /// @return shared pointer to a new TrackingVolume
   MutableTrackingVolumePtr
   createTrackingVolume(const LayerVector&              layers,
+                       MutableTrackingVolumeVector&    mtvVector,
                        std::shared_ptr<const Material> matprop,
                        double                          rMin,
                        double                          rMax,
@@ -134,7 +136,8 @@ public:
   ///
   /// @return shared pointer to a new TrackingVolume
   MutableTrackingVolumePtr
-  createGapTrackingVolume(std::shared_ptr<const Material> matprop,
+  createGapTrackingVolume(MutableTrackingVolumeVector&    mtvVector,
+                          std::shared_ptr<const Material> matprop,
                           double                          rMin,
                           double                          rMax,
                           double                          zMin,
@@ -158,7 +161,8 @@ public:
   ///
   /// @return shared pointer to a new TrackingVolume
   MutableTrackingVolumePtr
-  createGapTrackingVolume(std::shared_ptr<const Material> matprop,
+  createGapTrackingVolume(MutableTrackingVolumeVector&    mtvVector,
+                          std::shared_ptr<const Material> matprop,
                           double                          rMin,
                           double                          rMax,
                           double                          zMin,
