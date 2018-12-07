@@ -75,6 +75,7 @@ Acts::CylinderVolumeBuilder::trackingVolume(
     positiveLayers = m_cfg.layerBuilder->positiveLayers();
   }
 
+  // Build the confined volumes
   MutableTrackingVolumeVector centralVolumes;
   if (m_cfg.ctVolumeBuilder) {
     centralVolumes = m_cfg.ctVolumeBuilder->centralVolumes();

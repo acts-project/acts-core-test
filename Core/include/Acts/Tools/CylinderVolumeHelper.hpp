@@ -81,6 +81,7 @@ public:
   /// @param matprop dense material properties for this TrackingVolume
   /// @param volBounds (optional) bounds of this TrackingVolume - ownership
   /// given
+  /// @param mtvVector (optiona) Vector of confined TrackingVolumes
   /// @param transform (optional) placement of this TrackingVolume - ownership
   /// given
   /// @param volumeName  volume name to be given
@@ -102,6 +103,7 @@ public:
   /// @param layers vector of static layers confined by the TrackingVolume
   /// if no bounds or HepTransform is given, they define the size
   /// together with the volume enevlope parameters
+  /// @param mtvVector Vector of confined TrackingVolumes
   /// @param matprop dense material properties for this TrackingVolume
   /// @param rMin minimum radius
   /// @param rMax maximum radius
@@ -125,6 +127,7 @@ public:
   /// Create a gap volume from dimensions and
   /// @note this TrackingVolume is restricted to Translation only
   ///
+  /// @param mtvVector Vector of confined TrackingVolumes
   /// @param matprop dense material properties for this TrackingVolume
   /// @param rMin minimum radius
   /// @param rMax maximum radius
@@ -149,6 +152,7 @@ public:
 
   /// Create a gap volume from dimensions and
   ///
+  /// @param mtvVector Vector of confined TrackingVolumes
   /// @param matprop dense material properties for this TrackingVolume
   /// @param rMin minimum radius
   /// @param rMax maximum radius

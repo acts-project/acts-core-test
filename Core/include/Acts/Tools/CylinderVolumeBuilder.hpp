@@ -507,8 +507,6 @@ public:
     std::shared_ptr<const ITrackingVolumeHelper> trackingVolumeHelper = nullptr;
     /// the string based indenfication
     std::string volumeName = "";
-    //~ /// The dimensions of the manually created world
-    //~ std::vector<double> volumeDimension = {};
     /// the world material
     std::shared_ptr<const Material> volumeMaterial = nullptr;
     /// build the volume to the beam line

@@ -38,7 +38,7 @@ class DD4hepVolumeBuilder : public IConfinedTrackingVolumeBuilder
 {
 public:
   /// @struct Config
-  /// nested configuration struct for steering of the layer builder
+  /// Nested configuration struct for steering of the volume builder
   struct Config
   {
     /// string based identification
@@ -52,6 +52,7 @@ public:
   /// @param logger is the logging instance
   DD4hepVolumeBuilder(const Acts::DD4hepVolumeBuilder::Config& config,
                       std::unique_ptr<const Logger>            logger);
+
   /// Destructor
   ~DD4hepVolumeBuilder() override;
 
@@ -60,8 +61,9 @@ public:
   //~ const LayerVector
   //~ negativeLayers() const final;
 
-  /// Confined volume builder interface method
-  /// @return the vector of TrackingVolumes at the central sector
+  /// @brief Builder method for cylindrical, confined volume
+  ///
+  /// @return The vector of TrackingVolumes at the central sector
   MutableTrackingVolumeVector
   centralVolumes() const final;
 
@@ -71,28 +73,28 @@ public:
   //~ positiveLayers() const final;
 
   /// Name identification
-  /// @return the string based identification of this configuration
+  /// @return The string based identification of this configuration
   const std::string&
   identification() const final;
 
-  /// set the configuration object
-  /// @param config is the configuration struct
+  /// Set the configuration object
+  /// @param Config is the configuration struct
   void
   setConfiguration(const Config& config);
 
-  /// get the configuration object
+  /// Get the configuration object
   Config
   getConfiguration() const;
 
-  /// set logging instance
+  /// Set logging instance
   void
   setLogger(std::unique_ptr<const Logger> logger);
 
 private:
-  /// configruation object
+  /// Configruation object
   Config m_cfg;
 
-  /// logging instance
+  /// Logging instance
   std::unique_ptr<const Logger> m_logger;
 
   /// Private access to the logger
