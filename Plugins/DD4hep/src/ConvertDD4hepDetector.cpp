@@ -364,12 +364,14 @@ std::cout << "sdtype: " << subDetector.type() << "\t" << subDetector.name() << s
     std::vector<dd4hep::DetElement> centralLayers, centralVolumes;
     collectLayers_dd4hep(subDetector, centralLayers);
 std::cout << " vong " << centralLayers.size() << " lagigkeit her" << std::endl;
-for(auto& cl : centralLayers)
+//~ for(auto& cl : centralLayers)
+for(std::vector<dd4hep::DetElement>::reverse_iterator rit = centralLayers.rbegin(); rit != centralLayers.rend(); rit++)
 {
-	//~ if(cl.extension<Acts::IActsExtension>()->isVolume())
+	if(rit->extension<Acts::IActsExtension>()->isVolume())
+		
 		
 	//~ cv.extension<Acts::IActsExtensions>()->isVolume()
-	std::cout << "fass? " << cl.extension<Acts::IActsExtension>()->isVolume() << std::endl;
+	std::cout << "fass? new " << rit->extension<Acts::IActsExtension>()->isVolume() << std::endl;
 }
     // configure SurfaceArrayCreator
     auto surfaceArrayCreator
