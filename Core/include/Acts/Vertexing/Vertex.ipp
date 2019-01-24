@@ -64,6 +64,7 @@ Acts::ActsSymMatrixD<3> Acts::Vertex<input_track_t>::covariance() const {
 template <typename input_track_t>
 const Acts::SpacePointSymMatrix& Acts::Vertex<input_track_t>::fullCovariance()
     const {
+
   return m_covariance;
 }
 
@@ -74,6 +75,7 @@ Acts::Vertex<input_track_t>::tracks() const {
 }
 
 template <typename input_track_t>
+
 std::pair<double, double> Acts::Vertex<input_track_t>::fitQuality() const {
   return std::pair<double, double>(m_chiSquared, m_numberDoF);
 }
@@ -97,6 +99,7 @@ void Acts::Vertex<input_track_t>::setTime(ParValue_t time) {
 }
 
 template <typename input_track_t>
+
 void Acts::Vertex<input_track_t>::setCovariance(
     const ActsSymMatrixD<3>& covariance) {
   m_covariance.block<3, 3>(0, 0) = covariance;
@@ -109,12 +112,14 @@ void Acts::Vertex<input_track_t>::setFullCovariance(
 }
 
 template <typename input_track_t>
+
 void Acts::Vertex<input_track_t>::setTracksAtVertex(
     const std::vector<TrackAtVertex<input_track_t>>& tracks) {
   m_tracksAtVertex = std::move(tracks);
 }
 
 template <typename input_track_t>
+
 void Acts::Vertex<input_track_t>::setFitQuality(double chiSquared,
                                                 double numberDoF) {
   m_chiSquared = chiSquared;

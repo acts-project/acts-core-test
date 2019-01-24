@@ -174,7 +174,6 @@ Acts::MultiAdaptiveVertexFitter<input_track_t, linearizer_t>::fit(
   if (!fitRes.ok()) {
     return fitRes.error();
   }
-
   return {};
 }
 
