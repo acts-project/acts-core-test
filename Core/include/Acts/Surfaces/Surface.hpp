@@ -389,12 +389,10 @@ public:
   /// @param gpos is the global position of the parameters
   /// @param dir is the direction at of the parameters
   /// @param pars is the parameter vector
-  virtual void
-  initJacobianToGlobal(const GeometryContext& gctx,
-                       ActsMatrixD<7, 5>& jacobian,
-                       const Vector3D&       gpos,
-                       const Vector3D&       dir,
-                       const ActsVectorD<5>& pars) const;
+  virtual void initJacobianToGlobal(const GeometryContext& gctx, ActsMatrixD<7, TrackParsDim>& jacobian,
+                                    const Vector3D&       gpos,
+                                    const Vector3D&       dir,
+                                    const ActsVectorD<TrackParsDim>& pars) const;
 
   /// Initialize the jacobian from global to local
   /// the surface knows best, hence the calculation is done here.
@@ -412,10 +410,9 @@ public:
   ///
   /// @return the transposed reference frame (avoids recalculation)
   virtual const RotationMatrix3D
-  initJacobianToLocal(const GeometryContext& gctx,
-                      ActsMatrixD<5, 7>& jacobian,
-                      const Vector3D& gpos,
-                      const Vector3D& dir) const;
+      initJacobianToLocal(const GeometryContext& gctx, ActsMatrixD<TrackParsDim, 7>& jacobian,
+                          const Vector3D& gpos,
+                          const Vector3D& dir) const;
 
   /// Calculate the form factors for the derivatives
   /// the calculation is identical for all surfaces where the
@@ -433,12 +430,11 @@ public:
   /// @param jac is the transport jacobian
   ///
   /// @return a five-dim vector
-  virtual const ActsRowVectorD<5>
-  derivativeFactors(const GeometryContext&  gctx,
-                    const Vector3D&         gpos,
+  virtual const ActsRowVectorD<TrackParsDim>
+  derivativeFactors(const const GeometryContext& gctx, const Vector3D&         gpos,
                     const Vector3D&         dir,
                     const RotationMatrix3D& rft,
-                    const ActsMatrixD<7, 5>& jac) const;
+                    const ActsMatrixD<7, TrackParsDim>& jac) const;
 
   /// Calucation of the path correction for incident
   ///

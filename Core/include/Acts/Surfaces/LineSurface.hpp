@@ -135,12 +135,10 @@ public:
   /// @param dir is the direction at of the parameters
   ///
   /// @param pars is the paranmeters vector
-  void
-  initJacobianToGlobal(const GeometryContext& gctx,
-                       ActsMatrixD<7, 5>& jacobian,
-                       const Vector3D&       gpos,
-                       const Vector3D&       dir,
-                       const ActsVectorD<5>& pars) const final;
+  void initJacobianToGlobal(const GeometryContext& gctx, ActsMatrixD<7, TrackParsDim>& jacobian,
+                            const Vector3D&       gpos,
+                            const Vector3D&       dir,
+                            const ActsVectorD<TrackParsDim>& pars) const final;
 
   /// Calculate the form factors for the derivatives
   /// the calculation is identical for all surfaces where the
@@ -153,12 +151,11 @@ public:
   /// @param jac is the transport jacobian
   ///
   /// @return a five-dim vector
-  const ActsRowVectorD<5>
-  derivativeFactors(const GeometryContext&  gctx,
-                    const Vector3D&         pos,
+  const ActsRowVectorD<TrackParsDim>
+  derivativeFactors(const GeometryContext& gctx, const Vector3D&         pos,
                     const Vector3D&         dir,
                     const RotationMatrix3D& rft,
-                    const ActsMatrixD<7, 5>& jac) const final;
+                    const ActsMatrixD<7, TrackParsDim>& jac) const final;
 
   /// Local to global transformation
   /// for line surfaces the momentum is used in order to interpret the drift

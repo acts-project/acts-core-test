@@ -88,7 +88,7 @@ public:
 
     /// Boolean to indiciate if you need covariance transport
     bool              covTransport = false;
-    ActsSymMatrixD<5> cov          = ActsSymMatrixD<5>::Zero();
+    ActsSymMatrixD<TrackParsDim> cov          = ActsSymMatrixD<TrackParsDim>::Zero();
 
     /// Global particle position
     Vector3D pos = Vector3D(0., 0., 0.);
@@ -284,9 +284,18 @@ public:
   /// @param [in] reinitialize is a flag to steer whether the
   ///        state should be reinitialized at the new
   ///        position
+<<<<<<< HEAD
   void
   covarianceTransport(State& /*state*/, bool /*reinitialize = false*/) const
   {
+=======
+  ///
+  /// @return the full transport jacobian
+  static const ActsMatrixD<TrackParsDim, TrackParsDim>
+  covarianceTransport(State& /*state*/, bool /*reinitialize = false*/)
+  {
+    return ActsMatrixD<TrackParsDim, TrackParsDim>::Identity();
+>>>>>>> Removed 5's from Core/
   }
 
   /// Method for on-demand transport of the covariance
@@ -303,6 +312,61 @@ public:
   ///        position
   /// @note no check is done if the position is actually on the surface
   ///
+<<<<<<< HEAD
+=======
+  /// @return the full transport jacobian
+  template <typename surface_t>
+  static const ActsMatrixD<TrackParsDim, TrackParsDim>
+  covarianceTransport(State& /*unused*/,
+                      const surface_t& /*surface*/,
+                      bool /*reinitialize = false*/)
+  {
+    return ActsMatrixD<TrackParsDim, TrackParsDim>::Identity();
+  }
+
+  /// Always use the same propagation state type, independently of the initial
+  /// track parameter type and of the target surface
+  template <typename parameters_t, typename surface_t = int>
+  using state_type = State;
+
+  /// Intermediate track parameters are always in curvilinear parametrization
+  template <typename parameters_t>
+  using step_parameter_type = CurvilinearParameters;
+
+  /// Return parameter types depend on the propagation mode:
+  /// - when propagating to a surface we return BoundParameters
+  /// - otherwise CurvilinearParameters
+  template <typename parameters_t, typename surface_t = int>
+  using return_parameter_type = typename s<parameters_t, surface_t>::type;
+
+  /// Constructor
+  StraightLineStepper() = default;
+
+  /// Convert the propagation state (global) to curvilinear parameters
+  ///
+  /// @tparam result_t Type of the propagator result to be filled
+  ///
+  /// @param [in] state The stepper state
+  /// @param [in,out] result The result object from the propagator
+  template <typename result_t>
+  void
+  convert(State& state, result_t& result) const
+  {
+    // Fill the end parameters
+    result.endParameters = std::make_unique<const CurvilinearParameters>(
+        nullptr, state.pos, state.p * state.dir, state.q);
+  }
+
+  /// Convert the propagation state to track parameters at a certain surface
+  ///
+  /// @tparam result_t Type of the propagator result to be filled
+  /// @tparam surface_t Type of the surface
+  ///
+  /// @param [in,out] state Propagation state used
+  /// @param [in,out] result Result object from the propagator
+  /// @param [in] surface Destination surface to which the conversion is done
+  template <typename result_t, typename surface_t>
+>>>>>>> Removed 5's from Core/
   void
   covarianceTransport(State& /*unused*/,
                       const Surface& /*surface*/,
