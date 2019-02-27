@@ -29,8 +29,20 @@ enum ParDef : unsigned int {
   eTHETA    = 3,  ///< theta direction of momentum in global frame
   eQOP = 4,  ///< charge/momentum for charged tracks, for neutral tracks it is
              /// 1/momentum
-  NGlobalPars
+  TrackParsDim
 };
+
+//~ enum GlobalParDef : unsigned int {
+//~ eGLOB_X    = 0,  ///< first coordinate (x) in global frame
+//~ eGLOB_Y    = 1,  ///< second coordinate (y) in global frame
+//~ eGLOB_Z    = 2,  ///< third coordinate (z) in global frame
+//~ eGLOB_PX = 3, ///< first momentum coordinate (p_x) in global frame
+//~ eGLOB_PY = 4, ///< second momentum coordinate (p_y) in global frame
+//~ eGLOB_PZ = 5, ///< third momentum coordinate (p_z) in global frame
+//~ eQOP = 4,  ///< charge/momentum for charged tracks, for neutral tracks it is
+//~ /// 1/momentum
+//~ NGlobalPars
+//~ };
 
 using ParID_t    = ParDef;
 using ParValue_t = double;

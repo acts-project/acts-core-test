@@ -57,7 +57,7 @@ using FullParameterSet = typename detail::full_parset::type;
  * The template parameter pack @c params must be given in a strictly ascending
  * order. The parameter pack must
  * be non-empty and it cannot contain more elements than
- * <tt>Acts::NGlobalPars</tt>.
+ * <tt>Acts::TrackParsDim</tt>.
  *
  * @test The behavior of this class is tested in the following unit tests:
  *       - \link Acts::Test::BOOST_AUTO_TEST_CASE(parset_consistency_tests)
@@ -91,20 +91,20 @@ private:
   static_assert(
       detail::are_within<unsigned int,
                          0,
-                         Acts::NGlobalPars,
+                         Acts::TrackParsDim,
                          static_cast<unsigned int>(params)...>::value,
       "parameter identifiers must be greater or "
       "equal to zero and smaller than the total number of parameters");
   static_assert(NPars > 0, "number of stored parameters can not be zero");
   static_assert(
-      NPars <= Acts::NGlobalPars,
+      NPars <= Acts::TrackParsDim,
       "number of stored parameters can not exceed number of total parameters");
 
 public:
   // public typedefs
   /// matrix type for projecting full parameter vector onto local parameter
   /// space
-  using Projection_t = ActsMatrix<ParValue_t, NPars, Acts::NGlobalPars>;
+  using Projection_t = ActsMatrix<ParValue_t, NPars, Acts::TrackParsDim>;
   /// vector type for stored parameters
   using ParVector_t = ActsVector<ParValue_t, NPars>;
   /// type of covariance matrix
@@ -552,10 +552,10 @@ public:
    * the sub-space
    * spanned by the parameters defined in this ParameterSet object.
    *
-   * @return constant matrix with @c #NPars rows and @c #Acts::NGlobalPars
+   * @return constant matrix with @c #NPars rows and @c #Acts::TrackParsDim
    * columns
    */
-  static const ActsMatrix<ParValue_t, NPars, Acts::NGlobalPars>
+  static const ActsMatrix<ParValue_t, NPars, Acts::TrackParsDim>
   projector()
   {
     return sProjector;
@@ -606,7 +606,7 @@ constexpr unsigned int ParameterSet<params...>::NPars;
 template <ParID_t... params>
 const typename ParameterSet<params...>::Projection_t
     ParameterSet<params...>::sProjector
-    = detail::make_projection_matrix<Acts::NGlobalPars,
+    = detail::make_projection_matrix<Acts::TrackParsDim,
                                      static_cast<unsigned int>(
                                          params)...>::init();
 }  // namespace Acts

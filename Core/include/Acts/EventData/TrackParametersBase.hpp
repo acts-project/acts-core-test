@@ -37,10 +37,10 @@ public:
   // public typedef's
 
   /// vector type for stored track parameters
-  using ParVector_t = ActsVector<ParValue_t, Acts::NGlobalPars>;
+  using ParVector_t = ActsVector<ParValue_t, Acts::TrackParsDim>;
 
   /// type of covariance matrix
-  using CovMatrix_t = ActsSymMatrix<ParValue_t, Acts::NGlobalPars>;
+  using CovMatrix_t = ActsSymMatrix<ParValue_t, Acts::TrackParsDim>;
 
   /// @brief virtual default destructor to allow for inheritance
   virtual ~TrackParametersBase() = default;
@@ -76,7 +76,7 @@ public:
 
   /// @brief access track parameters
   ///
-  /// @return Eigen vector of dimension Acts::NGlobalPars with values of the
+  /// @return Eigen vector of dimension Acts::TrackParsDim with values of the
   /// track parameters
   ///         (in the order as defined by the ParID_t enumeration)
   ParVector_t

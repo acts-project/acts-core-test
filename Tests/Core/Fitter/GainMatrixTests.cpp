@@ -45,10 +45,10 @@ namespace Test {
         cylinder, 0, std::move(cov), -0.1, 0.45));
 
     // Make dummy track parameter
-    ActsSymMatrixD<Acts::NGlobalPars> covTrk;
+    ActsSymMatrixD<Acts::TrackParsDim> covTrk;
     covTrk << 0.08, 0, 0, 0, 0, 0, 0.3, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0,
         0, 0, 0, 0, 1;
-    ActsVectorD<Acts::NGlobalPars> parValues;
+    ActsVectorD<Acts::TrackParsDim> parValues;
     parValues << 0.3, 0.5, 0.5 * M_PI, 0.3 * M_PI, 0.01;
     BoundParameters pars(
         tgContext,
