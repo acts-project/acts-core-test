@@ -279,14 +279,16 @@ namespace IntegrationTest {
     Vector3D pos(x, y, z);
     Vector3D mom(px, py, pz);
 
-    std::unique_ptr<const ActsSymMatrixD<5>> covPtr = nullptr;
+    std::unique_ptr<const ActsSymMatrixD<TrackParsDim>> covPtr = nullptr;
     if (covtransport) {
-      ActsSymMatrixD<5> cov;
+      ActsSymMatrixD<5> cov_def;
       // take some major correlations (off-diagonals)
-      cov << 10 * units::_mm, 0, 0.123, 0, 0.5, 0, 10 * units::_mm, 0, 0.162, 0,
+      cov_def << 10 * units::_mm, 0, 0.123, 0, 0.5, 0, 10 * units::_mm, 0, 0.162, 0,
           0.123, 0, 0.1, 0, 0, 0, 0.162, 0, 0.1, 0, 0.5, 0, 0, 0,
           1. / (10 * units::_GeV);
-      covPtr = std::make_unique<const ActsSymMatrixD<5>>(cov);
+                      ActsSymMatrixD<TrackParsDim> cov;
+    cov.block<5, 5>(0, 0) = cov_def;  
+      covPtr = std::make_unique<const ActsSymMatrixD<TrackParsDim>>(cov);
     }
     // do propagation of the start parameters
     CurvilinearParameters start(std::move(covPtr), pos, mom, q);
@@ -345,14 +347,16 @@ namespace IntegrationTest {
     Vector3D pos(x, y, z);
     Vector3D mom(px, py, pz);
 
-    std::unique_ptr<const ActsSymMatrixD<5>> covPtr = nullptr;
+    std::unique_ptr<const ActsSymMatrixD<TrackParsDim>> covPtr = nullptr;
     if (covtransport) {
-      ActsSymMatrixD<5> cov;
+      ActsSymMatrixD<5> cov_def;
       // take some major correlations (off-diagonals)
-      cov << 10 * units::_mm, 0, 0.123, 0, 0.5, 0, 10 * units::_mm, 0, 0.162, 0,
+      cov_def << 10 * units::_mm, 0, 0.123, 0, 0.5, 0, 10 * units::_mm, 0, 0.162, 0,
           0.123, 0, 0.1, 0, 0, 0, 0.162, 0, 0.1, 0, 0.5, 0, 0, 0,
           1. / (10 * units::_GeV);
-      covPtr = std::make_unique<const ActsSymMatrixD<5>>(cov);
+                      ActsSymMatrixD<TrackParsDim> cov;
+    cov.block<5, 5>(0, 0) = cov_def;  
+      covPtr = std::make_unique<const ActsSymMatrixD<TrackParsDim>>(cov);
     }
     // Create curvilinear start parameters
     CurvilinearParameters start(std::move(covPtr), pos, mom, q);
@@ -434,12 +438,14 @@ namespace IntegrationTest {
     Vector3D pos(x, y, z);
     Vector3D mom(px, py, pz);
 
-    ActsSymMatrixD<5> cov;
+    ActsSymMatrixD<5> cov_def;
     // take some major correlations (off-diagonals)
-    cov << 10. * units::_mm, 0, 0.123, 0, 0.5, 0, 10. * units::_mm, 0, 0.162, 0,
+    cov_def << 10. * units::_mm, 0, 0.123, 0, 0.5, 0, 10. * units::_mm, 0, 0.162, 0,
         0.123, 0, 0.1, 0, 0, 0, 0.162, 0, 0.1, 0, 0.5, 0, 0, 0,
         1. / (10. * units::_GeV);
-    auto covPtr = std::make_unique<const ActsSymMatrixD<5>>(cov);
+        ActsSymMatrixD<TrackParsDim> cov;
+    cov.block<5, 5>(0, 0) = cov_def;
+    auto covPtr = std::make_unique<const ActsSymMatrixD<TrackParsDim>>(cov);
 
     // do propagation of the start parameters
     CurvilinearParameters start(std::move(covPtr), pos, mom, q);
@@ -449,9 +455,9 @@ namespace IntegrationTest {
     const auto& tp     = result.endParameters;
 
     // get numerically propagated covariance matrix
-    ActsSymMatrixD<5> calculated_cov = fixture.calculateCovariance(
+    ActsSymMatrixD<TrackParsDim> calculated_cov = fixture.calculateCovariance(
         start_wo_c, *(start.covariance()), *tp, options);
-    ActsSymMatrixD<5> obtained_cov = (*(tp->covariance()));
+    ActsSymMatrixD<TrackParsDim> obtained_cov = (*(tp->covariance()));
     CHECK_CLOSE_COVARIANCE(calculated_cov, obtained_cov, reltol);
   }
 
@@ -491,7 +497,7 @@ namespace IntegrationTest {
     double            q  = charge;
     Vector3D          pos(x, y, z);
     Vector3D          mom(px, py, pz);
-    ActsSymMatrixD<5> cov;
+    ActsSymMatrixD<5> cov_def;
 
     // take some major correlations (off-diagonals)
     // cov << 10 * units::_mm, 0, 0.123, 0, 0.5, 0, 10 * units::_mm, 0, 0.162,
@@ -499,10 +505,11 @@ namespace IntegrationTest {
     //     0.123, 0, 0.1, 0, 0, 0, 0.162, 0, 0.1, 0, 0.5, 0, 0, 0,
     //     1. / (10 * units::_GeV);
 
-    cov << 10. * units::_mm, 0, 0, 0, 0, 0, 10. * units::_mm, 0, 0, 0, 0, 0,
+    cov_def << 10. * units::_mm, 0, 0, 0, 0, 0, 10. * units::_mm, 0, 0, 0, 0, 0,
         0.1, 0, 0, 0, 0, 0, 0.1, 0, 0, 0, 0, 0, 1. / (10. * units::_GeV);
-
-    auto covPtr = std::make_unique<const ActsSymMatrixD<5>>(cov);
+ActsSymMatrixD<TrackParsDim> cov;
+    cov.block<5, 5>(0, 0) = cov_def;
+    auto covPtr = std::make_unique<const ActsSymMatrixD<TrackParsDim>>(cov);
 
     // create curvilinear start parameters
     CurvilinearParameters start_c(nullptr, pos, mom, q);
@@ -536,10 +543,10 @@ namespace IntegrationTest {
     const auto& tp = result.endParameters;
 
     // get obtained covariance matrix
-    ActsSymMatrixD<5> obtained_cov = (*(tp->covariance()));
+    ActsSymMatrixD<TrackParsDim> obtained_cov = (*(tp->covariance()));
 
     // get numerically propagated covariance matrix
-    ActsSymMatrixD<5> calculated_cov = fixture.calculateCovariance(
+    ActsSymMatrixD<TrackParsDim> calculated_cov = fixture.calculateCovariance(
         start_wo_c, *(start.covariance()), *tp, options);
 
     CHECK_CLOSE_COVARIANCE(calculated_cov, obtained_cov, reltol);

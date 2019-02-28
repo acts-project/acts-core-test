@@ -30,8 +30,6 @@
 #include "Acts/Utilities/GeometryContext.hpp"
 #include "Acts/Utilities/MagneticFieldContext.hpp"
 
-// TODO: Testing of covariances in Integration test - requires N-layer box
-// detector for implementation of DenseEnvironmentExtension
 namespace tt = boost::test_tools;
 
 namespace Acts {
@@ -153,8 +151,8 @@ namespace Test {
     naviVac.resolveSensitive = true;
 
     // Set initial parameters for the particle track
-    ActsSymMatrixD<5> cov    = ActsSymMatrixD<5>::Identity();
-    auto              covPtr = std::make_unique<const ActsSymMatrixD<5>>(cov);
+    ActsSymMatrixD<TrackParsDim> cov    = ActsSymMatrixD<TrackParsDim>::Identity();
+    auto              covPtr = std::make_unique<const ActsSymMatrixD<TrackParsDim>>(cov);
     Vector3D startParams(0., 0., 0.), startMom(1. * units::_GeV, 0., 0.);
     SingleCurvilinearTrackParameters<ChargedPolicy> sbtp(
         std::move(covPtr), startParams, startMom, 1.);
@@ -275,8 +273,8 @@ namespace Test {
     naviMat.resolveSensitive = true;
 
     // Set initial parameters for the particle track
-    ActsSymMatrixD<5> cov    = ActsSymMatrixD<5>::Identity();
-    auto              covPtr = std::make_unique<const ActsSymMatrixD<5>>(cov);
+    ActsSymMatrixD<TrackParsDim> cov    = ActsSymMatrixD<TrackParsDim>::Identity();
+    auto              covPtr = std::make_unique<const ActsSymMatrixD<TrackParsDim>>(cov);
     Vector3D startParams(0., 0., 0.), startMom(5. * units::_GeV, 0., 0.);
     SingleCurvilinearTrackParameters<ChargedPolicy> sbtp(
         std::move(covPtr), startParams, startMom, 1.);
@@ -460,8 +458,8 @@ namespace Test {
     naviDet.resolveSensitive = true;
 
     // Set initial parameters for the particle track
-    ActsSymMatrixD<5> cov    = ActsSymMatrixD<5>::Identity();
-    auto              covPtr = std::make_unique<const ActsSymMatrixD<5>>(cov);
+    ActsSymMatrixD<TrackParsDim> cov    = ActsSymMatrixD<TrackParsDim>::Identity();
+    auto              covPtr = std::make_unique<const ActsSymMatrixD<TrackParsDim>>(cov);
     Vector3D startParams(0., 0., 0.), startMom(5. * units::_GeV, 0., 0.);
     SingleCurvilinearTrackParameters<ChargedPolicy> sbtp(
         std::move(covPtr), startParams, startMom, 1.);
@@ -584,8 +582,8 @@ namespace Test {
     // Build launcher through material
     // Set initial parameters for the particle track by using the result of the
     // first volume
-    covPtr = std::make_unique<const ActsSymMatrixD<5>>(
-        ActsSymMatrixD<5>::Identity());
+    covPtr = std::make_unique<const ActsSymMatrixD<TrackParsDim>>(
+        ActsSymMatrixD<TrackParsDim>::Identity());
     startParams = endParams.first;
     startMom    = endParams.second;
     SingleCurvilinearTrackParameters<ChargedPolicy> sbtpPiecewise(

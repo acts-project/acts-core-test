@@ -168,11 +168,11 @@ namespace Test {
       const double phi_max   = par_type_t<ParID_t::ePHI>::max;
       const double phi_min   = par_type_t<ParID_t::ePHI>::min;
 
-      ActsVectorD<5>     parValues_1;
-      ActsVectorD<5>     parValues_2;
+      ActsVectorD<TrackParsDim>     parValues_1;
+      ActsVectorD<TrackParsDim>     parValues_2;
       FullParameterSet   parSet_1(nullptr, parValues_1);
       FullParameterSet   parSet_2(nullptr, parValues_2);
-      ActsVectorD<5>     residual;
+      ActsVectorD<TrackParsDim>     residual;
       const unsigned int toys = 1000;
       for (unsigned int i = 0; i < toys; ++i) {
         const double loc0_1  = uniform_dist(e);
@@ -477,25 +477,37 @@ namespace Test {
    */
   BOOST_AUTO_TEST_CASE(parset_projection_tests)
   {
-    ActsMatrixD<1, 5> phi_proj;
-    phi_proj << 0, 0, 1, 0, 0;
+    ActsMatrixD<1, 5> phi_proj_def;
+    phi_proj_def << 0, 0, 1, 0, 0, 0;
+    ActsMatrixD<1, TrackParsDim> phi_proj;
+    phi_proj.block<1, 5>(0, 0) = phi_proj_def;
 
-    ActsMatrixD<2, 5> loc0_qop_proj;
-    loc0_qop_proj << 1, 0, 0, 0, 0, 0, 0, 0, 0, 1;
+    ActsMatrixD<2, 5> loc0_qop_proj_def;
+    loc0_qop_proj_def << 1, 0, 0, 0, 0, 0, 0, 0, 0, 1;
+	ActsMatrixD<2, TrackParsDim> loc0_qop_proj;
+    loc0_qop_proj.block<2, 5>(0, 0) = loc0_qop_proj_def;
 
-    ActsMatrixD<2, 5> loc1_theta_proj;
-    loc1_theta_proj << 0, 1, 0, 0, 0, 0, 0, 0, 1, 0;
+    ActsMatrixD<2, 5> loc1_theta_proj_def;
+    loc1_theta_proj_def << 0, 1, 0, 0, 0, 0, 0, 0, 1, 0;
+	ActsMatrixD<2, TrackParsDim> loc1_theta_proj;
+    loc1_theta_proj.block<2, 5>(0, 0) = loc1_theta_proj_def;
 
-    ActsMatrixD<3, 5> loc0_loc1_phi_proj;
-    loc0_loc1_phi_proj << 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0;
+    ActsMatrixD<3, 5> loc0_loc1_phi_proj_def;
+    loc0_loc1_phi_proj_def << 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0;
+	ActsMatrixD<3, TrackParsDim> loc0_loc1_phi_proj;
+    loc0_loc1_phi_proj.block<3, 5>(0, 0) = loc0_loc1_phi_proj_def;
 
-    ActsMatrixD<4, 5> loc0_phi_theta_qop_proj;
-    loc0_phi_theta_qop_proj << 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0,
+    ActsMatrixD<4, 5> loc0_phi_theta_qop_proj_def;
+    loc0_phi_theta_qop_proj_def << 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0,
         0, 0, 0, 1;
+	ActsMatrixD<4, TrackParsDim> loc0_phi_theta_qop_proj;
+    loc0_phi_theta_qop_proj.block<4, 5>(0, 0) = loc0_phi_theta_qop_proj_def;
 
-    ActsMatrixD<5, 5> loc0_loc1_phi_theta_qop_proj;
-    loc0_loc1_phi_theta_qop_proj << 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0,
+    ActsMatrixD<5, 5> loc0_loc1_phi_theta_qop_proj_def;
+    loc0_loc1_phi_theta_qop_proj_def << 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0,
         0, 0, 0, 1, 0, 0, 0, 0, 0, 1;
+	ActsMatrixD<5, TrackParsDim> loc0_loc1_phi_theta_qop_proj;
+    loc0_loc1_phi_theta_qop_proj.block<5, 5>(0, 0) = loc0_loc1_phi_theta_qop_proj_def;
 
     BOOST_CHECK((ParameterSet<ParID_t::ePHI>::projector() == phi_proj));
     BOOST_CHECK((ParameterSet<ParID_t::eLOC_0, ParID_t::eQOP>::projector()

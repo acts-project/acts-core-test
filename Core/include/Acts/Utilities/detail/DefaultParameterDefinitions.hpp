@@ -29,6 +29,7 @@ enum ParDef : unsigned int {
   eTHETA    = 3,  ///< theta direction of momentum in global frame
   eQOP = 4,  ///< charge/momentum for charged tracks, for neutral tracks it is
              /// 1/momentum
+  eT = 5,
   TrackParsDim
 };
 
@@ -99,6 +100,12 @@ struct par_type<ParDef::eTHETA>
 
 template <>
 struct par_type<ParDef::eQOP>
+{
+  using type = unbound_parameter;
+};
+
+template <>
+struct par_type<ParDef::eT>
 {
   using type = unbound_parameter;
 };
