@@ -221,16 +221,18 @@ LineSurface::derivativeFactors(const GeometryContext&  gctx,const Vector3D&     
   double            long_c   = locz * dir;
   ActsRowVectorD<3> norm_vec = dir.transpose() - long_c * locz;
   // calculate the s factors for the dependency on X
-  const ActsRowVectorD<TrackParsDim> s_vec = norm_vec * jac.topLeftCorner<3, TrackParsDim>();
+  const ActsRowVectorD<TrackParsDim> s_vec
+      = norm_vec * jac.topLeftCorner<3, TrackParsDim>();
   // calculate the d factors for the dependency on Tx
-  const ActsRowVectorD<TrackParsDim> d_vec = locz * jac.block<3, TrackParsDim>(3, 0);
+  const ActsRowVectorD<TrackParsDim> d_vec
+      = locz * jac.block<3, TrackParsDim>(3, 0);
   // normalisation of normal & longitudinal components
   double norm = 1. / (1. - long_c * long_c);
   // create a matrix representation
   ActsMatrixD<3, TrackParsDim> long_mat = ActsMatrixD<3, TrackParsDim>::Zero();
   long_mat.colwise() += locz.transpose();
   // build the combined normal & longitudinal components
-  return (
-      norm
-      * (s_vec - pc * (long_mat * d_vec.asDiagonal() - jac.block<3, TrackParsDim>(3, 0))));
+  return (norm * (s_vec
+                  - pc * (long_mat * d_vec.asDiagonal()
+                          - jac.block<3, TrackParsDim>(3, 0))));
 }

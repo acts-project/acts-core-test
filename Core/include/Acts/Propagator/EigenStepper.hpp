@@ -136,10 +136,12 @@ public:
     NavigationDirection navDir;
 
     /// The full jacobian of the transport entire transport
-    ActsMatrixD<TrackParsDim, TrackParsDim> jacobian = ActsMatrixD<TrackParsDim, TrackParsDim>::Identity();
+    ActsMatrixD<TrackParsDim, TrackParsDim> jacobian
+        = ActsMatrixD<TrackParsDim, TrackParsDim>::Identity();
 
     /// Jacobian from local to the global frame
-    ActsMatrixD<7, TrackParsDim> jacToGlobal = ActsMatrixD<7, TrackParsDim>::Zero();
+    ActsMatrixD<7, TrackParsDim> jacToGlobal
+        = ActsMatrixD<7, TrackParsDim>::Zero();
 
     /// Pure transport jacobian part from runge kutta integration
     ActsMatrixD<7, 7> jacTransport = ActsMatrixD<7, 7>::Identity();

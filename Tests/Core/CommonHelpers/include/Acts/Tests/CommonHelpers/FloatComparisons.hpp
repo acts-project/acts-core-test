@@ -305,6 +305,9 @@ namespace Test {
         //
         auto orderOfMagnitude = std::sqrt(ref(row, row) * ref(col, col));
         if (std::abs(val(row, col) - ref(row, col)) >= tol * orderOfMagnitude) {
+          if (val(row, col) == 0 && ref(row, col) == 0) {
+            continue;
+          }
           boost::test_tools::predicate_result res(false);
           res.message() << "The difference between the covariance matrix term "
                         << val(row, col) << " and its reference "

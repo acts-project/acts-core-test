@@ -87,8 +87,8 @@ public:
     }
 
     /// Boolean to indiciate if you need covariance transport
-    bool              covTransport = false;
-    ActsSymMatrixD<TrackParsDim> cov          = ActsSymMatrixD<TrackParsDim>::Zero();
+    bool                         covTransport = false;
+    ActsSymMatrixD<TrackParsDim> cov = ActsSymMatrixD<TrackParsDim>::Zero();
 
     /// Global particle position
     Vector3D pos = Vector3D(0., 0., 0.);

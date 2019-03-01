@@ -186,8 +186,12 @@ namespace Test {
 
     auto covPtr = std::make_unique<const ActsSymMatrixD<TrackParsDim>>(cov);
 
-    ActsVectorD<TrackParsDim> pars;
-    pars << 182.34, -82., 0.134, 0.85, 1. / (100 * units::_GeV);
+    ActsVectorD<TrackParsDim> pars = ActsVectorD<TrackParsDim>::Zero();
+    pars(0)                        = 182.34;
+    pars(1)                        = -82.;
+    pars(2)                        = 0.134;
+    pars(3)                        = 0.85;
+    pars(4)                        = 1. / (100 * units::_GeV);
 
     BoundParameters atCylinder(
         tgContext, std::move(covPtr), std::move(pars), cSurface);
@@ -213,8 +217,12 @@ namespace Test {
 
     auto covPtr = std::make_unique<const ActsSymMatrixD<TrackParsDim>>(cov);
 
-    ActsVectorD<TrackParsDim> pars;
-    pars << 192.34, 1.823, 0.734, 0.235, 1. / (100 * units::_GeV);
+    ActsVectorD<TrackParsDim> pars = ActsVectorD<TrackParsDim>::Zero();
+    pars(0)                        = 192.34;
+    pars(1)                        = 1.823;
+    pars(2)                        = 0.734;
+    pars(3)                        = 0.235;
+    pars(4)                        = 1. / (100 * units::_GeV);
 
     BoundParameters atDisc(
         tgContext, std::move(covPtr), std::move(pars), dSurface);
@@ -241,8 +249,12 @@ namespace Test {
 
     auto covPtr = std::make_unique<const ActsSymMatrixD<TrackParsDim>>(cov);
 
-    ActsVectorD<TrackParsDim> pars;
-    pars << 12.34, -8722., 2.134, 0.85, 1. / (100 * units::_GeV);
+    ActsVectorD<TrackParsDim> pars = ActsVectorD<TrackParsDim>::Zero();
+    pars(0)                        = 12.34;
+    pars(1)                        = -8722.;
+    pars(2)                        = 2.134;
+    pars(3)                        = 0.85;
+    pars(4)                        = 1. / (100 * units::_GeV);
 
     BoundParameters atPlane(
         tgContext, std::move(covPtr), std::move(pars), pSurface);
@@ -266,8 +278,12 @@ namespace Test {
 
     auto covPtr = std::make_unique<const ActsSymMatrixD<TrackParsDim>>(cov);
 
-    ActsVectorD<TrackParsDim> pars;
-    pars << -3.34, -822., -0.734, 0.85, 1. / (100 * units::_GeV);
+    ActsVectorD<TrackParsDim> pars = ActsVectorD<TrackParsDim>::Zero();
+    pars(0)                        = -3.34;
+    pars(1)                        = -822.;
+    pars(2)                        = -0.734;
+    pars(3)                        = 0.85;
+    pars(4)                        = 1. / (100 * units::_GeV);
 
     BoundParameters perigee(
         tgContext, std::move(covPtr), std::move(pars), pSurface);
@@ -291,8 +307,12 @@ namespace Test {
 
     auto covPtr = std::make_unique<const ActsSymMatrixD<TrackParsDim>>(cov);
 
-    ActsVectorD<TrackParsDim> pars;
-    pars << -8.34, 812., 0.734, 0.25, 1. / (100 * units::_GeV);
+    ActsVectorD<TrackParsDim> pars = ActsVectorD<TrackParsDim>::Zero();
+    pars(0)                        = -8.34;
+    pars(1)                        = 812;
+    pars(2)                        = 0.734;
+    pars(3)                        = 0.25;
+    pars(4)                        = 1. / (100 * units::_GeV);
 
     BoundParameters atStraw(
         tgContext, std::move(covPtr), std::move(pars), sSurface);

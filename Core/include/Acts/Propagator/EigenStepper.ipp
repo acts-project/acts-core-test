@@ -140,7 +140,7 @@ Acts::EigenStepper<B, C, E, A>::covarianceTransport(State& state,
   // Transport the covariance
   ActsRowVectorD<3>       normVec(state.dir);
   const ActsRowVectorD<TrackParsDim> sfactors
-      = normVec * state.jacToGlobal.template topLeftCorner<3, 5>();
+      = normVec * state.jacToGlobal.template topLeftCorner<3, TrackParsDim>();
   // The full jacobian is ([to local] jacobian) * ([transport] jacobian)
   const ActsMatrixD<TrackParsDim, TrackParsDim> jacFull
       = jacToCurv * (state.jacToGlobal - state.derivative * sfactors);
@@ -203,9 +203,12 @@ Acts::EigenStepper<B, C, E, A>::covarianceTransport(State& state,
     // fill the jacobian to global for next transport
     Vector2D loc{0., 0.};
     surface.globalToLocal(state.geoContext, state.pos, state.dir, loc);
-    ActsVectorD<TrackParsDim> pars;
-    pars << loc[eLOC_0], loc[eLOC_1], phi(state.dir), theta(state.dir),
-        state.q / state.p;
+      ActsVectorD<TrackParsDim> pars = ActsVectorD<TrackParsDim>::Zero();
+      pars(0)                        = loc[eLOC_0];
+      pars(1)                        = loc[eLOC_1];
+      pars(2)                        = phi(state.dir);
+      pars(3)                        = theta(state.dir);
+      pars(4)                        = state.q / state.p;
     surface.initJacobianToGlobal(
         state.geoContext, state.jacToGlobal, state.pos, state.dir, pars);
   }

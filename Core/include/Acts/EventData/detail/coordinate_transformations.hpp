@@ -95,8 +95,8 @@ namespace detail {
       using VectorHelpers::phi;
       using VectorHelpers::theta;
       ParVector_t parameters = ParVector_t::Zero();
-      parameters(2) = phi(mom);
-      parameters(3) = theta(mom);
+      parameters(2)          = phi(mom);
+      parameters(3)          = theta(mom);
       parameters(4) = ((std::abs(charge) < 1e-4) ? 1. : charge) / mom.norm();
 
       return parameters;
@@ -128,12 +128,12 @@ namespace detail {
       ActsVectorD<2> localPosition;
       s.globalToLocal(gctx, pos, mom, localPosition);
       ParVector_t result = ParVector_t::Zero();
-      result(0) = localPosition(0);
-      result(1) = localPosition(1);
-      result(2) = phi(mom);
-      result(3) = theta(mom);
+      result(0)          = localPosition(0);
+      result(1)          = localPosition(1);
+      result(2)          = phi(mom);
+      result(3)          = theta(mom);
       result(4) = ((std::abs(charge) < 1e-4) ? 1. : charge) / mom.norm();
-          
+
       return result;
     }
 
