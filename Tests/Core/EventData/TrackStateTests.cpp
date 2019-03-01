@@ -84,9 +84,13 @@ namespace Test {
 
     // Construct the parameter
     std::array<double, 5> pars_array = {{-0.1234, 9.8765, 0.45, 0.888, 0.001}};
-    TrackParametersBase::ParVector_t pars;
-    pars << pars_array[0], pars_array[1], pars_array[2], pars_array[3],
-        pars_array[4];
+    TrackParametersBase::ParVector_t pars
+        = TrackParametersBase::ParVector_t::Zero();
+    pars(0) = pars_array[0];
+    pars(1) = pars_array[1];
+    pars(2) = pars_array[2];
+    pars(3) = pars_array[3];
+    pars(4) = pars_array[4];
 
     // constructor from parameter vector: predicted filtered, smoothed
     BoundParameters ataPlane(tgContext, nullptr, pars, plane);

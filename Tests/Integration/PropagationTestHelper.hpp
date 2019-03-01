@@ -283,11 +283,11 @@ namespace IntegrationTest {
     if (covtransport) {
       ActsSymMatrixD<5> cov_def;
       // take some major correlations (off-diagonals)
-      cov_def << 10 * units::_mm, 0, 0.123, 0, 0.5, 0, 10 * units::_mm, 0, 0.162, 0,
-          0.123, 0, 0.1, 0, 0, 0, 0.162, 0, 0.1, 0, 0.5, 0, 0, 0,
+      cov_def << 10 * units::_mm, 0, 0.123, 0, 0.5, 0, 10 * units::_mm, 0,
+          0.162, 0, 0.123, 0, 0.1, 0, 0, 0, 0.162, 0, 0.1, 0, 0.5, 0, 0, 0,
           1. / (10 * units::_GeV);
-                      ActsSymMatrixD<TrackParsDim> cov;
-    cov.block<5, 5>(0, 0) = cov_def;  
+      ActsSymMatrixD<TrackParsDim> cov;
+      cov.block<5, 5>(0, 0) = cov_def;
       covPtr = std::make_unique<const ActsSymMatrixD<TrackParsDim>>(cov);
     }
     // do propagation of the start parameters
@@ -351,11 +351,11 @@ namespace IntegrationTest {
     if (covtransport) {
       ActsSymMatrixD<5> cov_def;
       // take some major correlations (off-diagonals)
-      cov_def << 10 * units::_mm, 0, 0.123, 0, 0.5, 0, 10 * units::_mm, 0, 0.162, 0,
-          0.123, 0, 0.1, 0, 0, 0, 0.162, 0, 0.1, 0, 0.5, 0, 0, 0,
+      cov_def << 10 * units::_mm, 0, 0.123, 0, 0.5, 0, 10 * units::_mm, 0,
+          0.162, 0, 0.123, 0, 0.1, 0, 0, 0, 0.162, 0, 0.1, 0, 0.5, 0, 0, 0,
           1. / (10 * units::_GeV);
-                      ActsSymMatrixD<TrackParsDim> cov;
-    cov.block<5, 5>(0, 0) = cov_def;  
+      ActsSymMatrixD<TrackParsDim> cov;
+      cov.block<5, 5>(0, 0) = cov_def;
       covPtr = std::make_unique<const ActsSymMatrixD<TrackParsDim>>(cov);
     }
     // Create curvilinear start parameters
@@ -440,10 +440,10 @@ namespace IntegrationTest {
 
     ActsSymMatrixD<5> cov_def;
     // take some major correlations (off-diagonals)
-    cov_def << 10. * units::_mm, 0, 0.123, 0, 0.5, 0, 10. * units::_mm, 0, 0.162, 0,
-        0.123, 0, 0.1, 0, 0, 0, 0.162, 0, 0.1, 0, 0.5, 0, 0, 0,
+    cov_def << 10. * units::_mm, 0, 0.123, 0, 0.5, 0, 10. * units::_mm, 0,
+        0.162, 0, 0.123, 0, 0.1, 0, 0, 0, 0.162, 0, 0.1, 0, 0.5, 0, 0, 0,
         1. / (10. * units::_GeV);
-        ActsSymMatrixD<TrackParsDim> cov;
+    ActsSymMatrixD<TrackParsDim> cov;
     cov.block<5, 5>(0, 0) = cov_def;
     auto covPtr = std::make_unique<const ActsSymMatrixD<TrackParsDim>>(cov);
 
@@ -507,7 +507,7 @@ namespace IntegrationTest {
 
     cov_def << 10. * units::_mm, 0, 0, 0, 0, 0, 10. * units::_mm, 0, 0, 0, 0, 0,
         0.1, 0, 0, 0, 0, 0, 0.1, 0, 0, 0, 0, 0, 1. / (10. * units::_GeV);
-ActsSymMatrixD<TrackParsDim> cov;
+    ActsSymMatrixD<TrackParsDim> cov;
     cov.block<5, 5>(0, 0) = cov_def;
     auto covPtr = std::make_unique<const ActsSymMatrixD<TrackParsDim>>(cov);
 

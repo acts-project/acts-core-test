@@ -81,10 +81,10 @@ main(int argc, char* argv[])
   Vector3D          pos(0, 0, 0);
   Vector3D          mom(pT * units::_GeV, 0, 0);
   ActsSymMatrixD<5> cov_def;
-  cov_def << 10 * units::_mm, 0, 0, 0, 0, 0, 10 * units::_mm, 0, 0, 0, 0, 0, 1, 0,
-      0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1. / (10 * units::_GeV);
-	ActsSymMatrixD<TrackParsDim> cov;
-	cov.block<5, 5>(0, 0) = cov_def;
+  cov_def << 10 * units::_mm, 0, 0, 0, 0, 0, 10 * units::_mm, 0, 0, 0, 0, 0, 1,
+      0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1. / (10 * units::_GeV);
+  ActsSymMatrixD<TrackParsDim> cov;
+  cov.block<5, 5>(0, 0) = cov_def;
 
   std::unique_ptr<const ActsSymMatrixD<TrackParsDim>> covPtr = nullptr;
   if (withCov) {

@@ -86,9 +86,13 @@ namespace Test {
     // now create parameters on this surface
     // l_x, l_y, phi, theta, q/p (1/p)
     std::array<double, 5> pars_array = {{-0.1234, 9.8765, 0.45, 0.888, 0.001}};
-    TrackParametersBase::ParVector_t pars;
-    pars << pars_array[0], pars_array[1], pars_array[2], pars_array[3],
-        pars_array[4];
+    TrackParametersBase::ParVector_t pars
+        = TrackParametersBase::ParVector_t::Zero();
+    pars(0) = pars_array[0];
+    pars(1) = pars_array[1];
+    pars(2) = pars_array[2];
+    pars(3) = pars_array[3];
+    pars(4) = pars_array[4];
 
     const double phi   = pars_array[2];
     const double theta = pars_array[3];
@@ -200,9 +204,13 @@ namespace Test {
     // now create parameters on this surface
     // r, phi, phi, theta, q/p (1/p)
     std::array<double, 5> pars_array = {{125., 0.345, 0.45, 0.888, 0.001}};
-    TrackParametersBase::ParVector_t pars;
-    pars << pars_array[0], pars_array[1], pars_array[2], pars_array[3],
-        pars_array[4];
+    TrackParametersBase::ParVector_t pars
+        = TrackParametersBase::ParVector_t::Zero();
+    pars(0) = pars_array[0];
+    pars(1) = pars_array[1];
+    pars(2) = pars_array[2];
+    pars(3) = pars_array[3];
+    pars(4) = pars_array[4];
 
     const double phi   = pars_array[2];
     const double theta = pars_array[3];
@@ -294,9 +302,13 @@ namespace Test {
     // now create parameters on this surface
     // rPhi, a, phi, theta, q/p (1/p)
     std::array<double, 5> pars_array = {{125., 343., 0.45, 0.888, 0.001}};
-    TrackParametersBase::ParVector_t pars;
-    pars << pars_array[0], pars_array[1], pars_array[2], pars_array[3],
-        pars_array[4];
+    TrackParametersBase::ParVector_t pars
+        = TrackParametersBase::ParVector_t::Zero();
+    pars(0) = pars_array[0];
+    pars(1) = pars_array[1];
+    pars(2) = pars_array[2];
+    pars(3) = pars_array[3];
+    pars(4) = pars_array[4];
 
     const double phi   = pars_array[2];
     const double theta = pars_array[3];
@@ -397,9 +409,13 @@ namespace Test {
     // now create parameters on this surface
     // d0, z0, phi, theta, q/p (1/p)
     std::array<double, 5> pars_array = {{-0.7321, 22.5, 0.45, 0.888, 0.001}};
-    TrackParametersBase::ParVector_t pars;
-    pars << pars_array[0], pars_array[1], pars_array[2], pars_array[3],
-        pars_array[4];
+    TrackParametersBase::ParVector_t pars
+        = TrackParametersBase::ParVector_t::Zero();
+    pars(0) = pars_array[0];
+    pars(1) = pars_array[1];
+    pars(2) = pars_array[2];
+    pars(3) = pars_array[3];
+    pars(4) = pars_array[4];
 
     BoundParameters ataPerigee_from_pars(tgContext, nullptr, pars, pSurface);
     auto            pos = ataPerigee_from_pars.position();
@@ -478,9 +494,13 @@ namespace Test {
     // now create parameters on this surface
     // r, z, phi, theta, q/p (1/p)
     std::array<double, 5> pars_array = {{0.2321, 22.5, 0.45, 0.888, 0.001}};
-    TrackParametersBase::ParVector_t pars;
-    pars << pars_array[0], pars_array[1], pars_array[2], pars_array[3],
-        pars_array[4];
+    TrackParametersBase::ParVector_t pars
+        = TrackParametersBase::ParVector_t::Zero();
+    pars(0) = pars_array[0];
+    pars(1) = pars_array[1];
+    pars(2) = pars_array[2];
+    pars(3) = pars_array[3];
+    pars(4) = pars_array[4];
 
     // constructor from parameter vector
     BoundParameters ataLine_from_pars(tgContext, nullptr, pars, sSurface);

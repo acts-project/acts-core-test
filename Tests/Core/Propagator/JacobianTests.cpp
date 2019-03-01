@@ -151,11 +151,11 @@ namespace Test {
   BOOST_AUTO_TEST_CASE(JacobianCurvilinearToGlobalTest)
   {
     ActsSymMatrixD<5> cov_def;
-    cov_def << 10 * units::_mm, 0, 0, 0, 0, 0, 10 * units::_mm, 0, 0, 0, 0, 0, 0.1,
-        0, 0, 0, 0, 0, 0.1, 0, 0, 0, 0, 0, 1. / (10 * units::_GeV);
-                    ActsSymMatrixD<TrackParsDim> cov;
-    cov.block<5, 5>(0, 0) = cov_def;  
-    
+    cov_def << 10 * units::_mm, 0, 0, 0, 0, 0, 10 * units::_mm, 0, 0, 0, 0, 0,
+        0.1, 0, 0, 0, 0, 0, 0.1, 0, 0, 0, 0, 0, 1. / (10 * units::_GeV);
+    ActsSymMatrixD<TrackParsDim> cov;
+    cov.block<5, 5>(0, 0) = cov_def;
+
     auto covPtr = std::make_unique<const ActsSymMatrixD<TrackParsDim>>(cov);
 
     // Let's create a surface somewhere in space
@@ -179,11 +179,11 @@ namespace Test {
         = Surface::makeShared<CylinderSurface>(cTransform, 200., 1000.);
 
     ActsSymMatrixD<5> cov_def;
-    cov_def << 10 * units::_mm, 0, 0, 0, 0, 0, 10 * units::_mm, 0, 0, 0, 0, 0, 0.1,
-        0, 0, 0, 0, 0, 0.1, 0, 0, 0, 0, 0, 1. / (10 * units::_GeV);
-                    ActsSymMatrixD<TrackParsDim> cov;
-    cov.block<5, 5>(0, 0) = cov_def;  
-    
+    cov_def << 10 * units::_mm, 0, 0, 0, 0, 0, 10 * units::_mm, 0, 0, 0, 0, 0,
+        0.1, 0, 0, 0, 0, 0, 0.1, 0, 0, 0, 0, 0, 1. / (10 * units::_GeV);
+    ActsSymMatrixD<TrackParsDim> cov;
+    cov.block<5, 5>(0, 0) = cov_def;
+
     auto covPtr = std::make_unique<const ActsSymMatrixD<TrackParsDim>>(cov);
 
     ActsVectorD<TrackParsDim> pars;
@@ -206,11 +206,11 @@ namespace Test {
     auto dSurface = Surface::makeShared<DiscSurface>(dTransform, 200., 1000.);
 
     ActsSymMatrixD<5> cov_def;
-    cov_def << 10 * units::_mm, 0, 0, 0, 0, 0, 10 * units::_mm, 0, 0, 0, 0, 0, 0.1,
-        0, 0, 0, 0, 0, 0.1, 0, 0, 0, 0, 0, 1. / (10 * units::_GeV);
-                    ActsSymMatrixD<TrackParsDim> cov;
-    cov.block<5, 5>(0, 0) = cov_def;  
-    
+    cov_def << 10 * units::_mm, 0, 0, 0, 0, 0, 10 * units::_mm, 0, 0, 0, 0, 0,
+        0.1, 0, 0, 0, 0, 0, 0.1, 0, 0, 0, 0, 0, 1. / (10 * units::_GeV);
+    ActsSymMatrixD<TrackParsDim> cov;
+    cov.block<5, 5>(0, 0) = cov_def;
+
     auto covPtr = std::make_unique<const ActsSymMatrixD<TrackParsDim>>(cov);
 
     ActsVectorD<TrackParsDim> pars;
@@ -234,11 +234,11 @@ namespace Test {
     auto pSurface = Surface::makeShared<PlaneSurface>(sPosition, sNormal);
 
     ActsSymMatrixD<5> cov_def;
-    cov_def << 10 * units::_mm, 0, 0, 0, 0, 0, 10 * units::_mm, 0, 0, 0, 0, 0, 0.1,
-        0, 0, 0, 0, 0, 0.1, 0, 0, 0, 0, 0, 1. / (10 * units::_GeV);
-                    ActsSymMatrixD<TrackParsDim> cov;
-    cov.block<5, 5>(0, 0) = cov_def;  
-    
+    cov_def << 10 * units::_mm, 0, 0, 0, 0, 0, 10 * units::_mm, 0, 0, 0, 0, 0,
+        0.1, 0, 0, 0, 0, 0, 0.1, 0, 0, 0, 0, 0, 1. / (10 * units::_GeV);
+    ActsSymMatrixD<TrackParsDim> cov;
+    cov.block<5, 5>(0, 0) = cov_def;
+
     auto covPtr = std::make_unique<const ActsSymMatrixD<TrackParsDim>>(cov);
 
     ActsVectorD<TrackParsDim> pars;
@@ -259,11 +259,11 @@ namespace Test {
     auto pSurface = Surface::makeShared<PerigeeSurface>(Vector3D({0., 0., 0.}));
 
     ActsSymMatrixD<5> cov_def;
-    cov_def << 10 * units::_mm, 0, 0, 0, 0, 0, 10 * units::_mm, 0, 0, 0, 0, 0, 0.1,
-        0, 0, 0, 0, 0, 0.1, 0, 0, 0, 0, 0, 1. / (10 * units::_GeV);
-                    ActsSymMatrixD<TrackParsDim> cov;
-    cov.block<5, 5>(0, 0) = cov_def;  
-    
+    cov_def << 10 * units::_mm, 0, 0, 0, 0, 0, 10 * units::_mm, 0, 0, 0, 0, 0,
+        0.1, 0, 0, 0, 0, 0, 0.1, 0, 0, 0, 0, 0, 1. / (10 * units::_GeV);
+    ActsSymMatrixD<TrackParsDim> cov;
+    cov.block<5, 5>(0, 0) = cov_def;
+
     auto covPtr = std::make_unique<const ActsSymMatrixD<TrackParsDim>>(cov);
 
     ActsVectorD<TrackParsDim> pars;
@@ -284,11 +284,11 @@ namespace Test {
     auto sSurface   = Surface::makeShared<StrawSurface>(sTransform, 10., 1000.);
 
     ActsSymMatrixD<5> cov_def;
-    cov_def << 10 * units::_mm, 0, 0, 0, 0, 0, 10 * units::_mm, 0, 0, 0, 0, 0, 0.1,
-        0, 0, 0, 0, 0, 0.1, 0, 0, 0, 0, 0, 1. / (10 * units::_GeV);
-                    ActsSymMatrixD<TrackParsDim> cov;
-    cov.block<5, 5>(0, 0) = cov_def;  
-    
+    cov_def << 10 * units::_mm, 0, 0, 0, 0, 0, 10 * units::_mm, 0, 0, 0, 0, 0,
+        0.1, 0, 0, 0, 0, 0, 0.1, 0, 0, 0, 0, 0, 1. / (10 * units::_GeV);
+    ActsSymMatrixD<TrackParsDim> cov;
+    cov.block<5, 5>(0, 0) = cov_def;
+
     auto covPtr = std::make_unique<const ActsSymMatrixD<TrackParsDim>>(cov);
 
     ActsVectorD<TrackParsDim> pars;

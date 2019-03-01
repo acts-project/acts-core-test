@@ -293,10 +293,11 @@ namespace Test {
 
     // Set initial parameters for the particle track
     ActsSymMatrixD<5> cov_def;
-    cov_def << 1000. * units::_um, 0., 0., 0., 0., 0., 1000. * units::_um, 0., 0.,
-        0., 0., 0., 0.05, 0., 0., 0., 0., 0., 0.05, 0., 0., 0., 0., 0., 0.01;
-	ActsSymMatrixD<TrackParsDim> cov;
-	cov.block<5, 5>(0, 0) = cov_def;
+    cov_def << 1000. * units::_um, 0., 0., 0., 0., 0., 1000. * units::_um, 0.,
+        0., 0., 0., 0., 0.05, 0., 0., 0., 0., 0., 0.05, 0., 0., 0., 0., 0.,
+        0.01;
+    ActsSymMatrixD<TrackParsDim> cov;
+    cov.block<5, 5>(0, 0) = cov_def;
 
     auto covPtr = std::make_unique<const ActsSymMatrixD<TrackParsDim>>(cov);
 

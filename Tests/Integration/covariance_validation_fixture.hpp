@@ -32,10 +32,10 @@ namespace IntegrationTest {
     /// it can either be used for curvilinear transport
     template <typename StartParameters, typename EndParameters, typename U>
     ActsSymMatrixD<TrackParsDim>
-    calculateCovariance(const StartParameters&   startPars,
+    calculateCovariance(const StartParameters&              startPars,
                         const ActsSymMatrixD<TrackParsDim>& startCov,
-                        const EndParameters&     endPars,
-                        const U&                 options) const
+                        const EndParameters&                endPars,
+                        const U&                            options) const
     {
       // steps for estimating derivatives
       const std::array<double, 4> h_steps = {{-2e-4, -1e-4, 1e-4, 2e-4}};

@@ -271,12 +271,12 @@ namespace Test {
     /// a covariance matrix to transport
     ActsSymMatrixD<5> cov_def;
     // take some major correlations (off-diagonals)
-    cov_def << 10 * units::_mm, 0, 0.123, 0, 0.5, 0, 10 * units::_mm, 0, 0.162, 0,
-        0.123, 0, 0.1, 0, 0, 0, 0.162, 0, 0.1, 0, 0.5, 0, 0, 0,
+    cov_def << 10 * units::_mm, 0, 0.123, 0, 0.5, 0, 10 * units::_mm, 0, 0.162,
+        0, 0.123, 0, 0.1, 0, 0, 0, 0.162, 0, 0.1, 0, 0.5, 0, 0, 0,
         1. / (10 * units::_GeV);
     ActsSymMatrixD<TrackParsDim> cov;
-    cov.block<5, 5>(0, 0) = cov_def;    
-        
+    cov.block<5, 5>(0, 0) = cov_def;
+
     auto covPtr = std::make_unique<const ActsSymMatrixD<TrackParsDim>>(cov);
     CurvilinearParameters start(std::move(covPtr), pos, mom, q);
     // propagate to a path length of 100 with two steps of 50
@@ -348,12 +348,12 @@ namespace Test {
     /// a covariance matrix to transport
     ActsSymMatrixD<5> cov_def;
     // take some major correlations (off-diagonals)
-    cov_def << 10 * units::_mm, 0, 0.123, 0, 0.5, 0, 10 * units::_mm, 0, 0.162, 0,
-        0.123, 0, 0.1, 0, 0, 0, 0.162, 0, 0.1, 0, 0.5, 0, 0, 0,
+    cov_def << 10 * units::_mm, 0, 0.123, 0, 0.5, 0, 10 * units::_mm, 0, 0.162,
+        0, 0.123, 0, 0.1, 0, 0, 0, 0.162, 0, 0.1, 0, 0.5, 0, 0, 0,
         1. / (10 * units::_GeV);
-            ActsSymMatrixD<TrackParsDim> cov;
-    cov.block<5, 5>(0, 0) = cov_def;  
-    
+    ActsSymMatrixD<TrackParsDim> cov;
+    cov.block<5, 5>(0, 0) = cov_def;
+
     auto covPtr = std::make_unique<const ActsSymMatrixD<TrackParsDim>>(cov);
     CurvilinearParameters start(std::move(covPtr), pos, mom, q);
     // propagate to a final surface with one stop in between

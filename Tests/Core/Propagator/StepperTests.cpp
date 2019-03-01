@@ -151,8 +151,8 @@ namespace Test {
     naviVac.resolveSensitive = true;
 
     // Set initial parameters for the particle track
-    ActsSymMatrixD<TrackParsDim> cov    = ActsSymMatrixD<TrackParsDim>::Identity();
-    auto              covPtr = std::make_unique<const ActsSymMatrixD<TrackParsDim>>(cov);
+    ActsSymMatrixD<TrackParsDim> cov = ActsSymMatrixD<TrackParsDim>::Identity();
+    auto     covPtr = std::make_unique<const ActsSymMatrixD<TrackParsDim>>(cov);
     Vector3D startParams(0., 0., 0.), startMom(1. * units::_GeV, 0., 0.);
     SingleCurvilinearTrackParameters<ChargedPolicy> sbtp(
         std::move(covPtr), startParams, startMom, 1.);
@@ -273,8 +273,8 @@ namespace Test {
     naviMat.resolveSensitive = true;
 
     // Set initial parameters for the particle track
-    ActsSymMatrixD<TrackParsDim> cov    = ActsSymMatrixD<TrackParsDim>::Identity();
-    auto              covPtr = std::make_unique<const ActsSymMatrixD<TrackParsDim>>(cov);
+    ActsSymMatrixD<TrackParsDim> cov = ActsSymMatrixD<TrackParsDim>::Identity();
+    auto     covPtr = std::make_unique<const ActsSymMatrixD<TrackParsDim>>(cov);
     Vector3D startParams(0., 0., 0.), startMom(5. * units::_GeV, 0., 0.);
     SingleCurvilinearTrackParameters<ChargedPolicy> sbtp(
         std::move(covPtr), startParams, startMom, 1.);
@@ -458,8 +458,8 @@ namespace Test {
     naviDet.resolveSensitive = true;
 
     // Set initial parameters for the particle track
-    ActsSymMatrixD<TrackParsDim> cov    = ActsSymMatrixD<TrackParsDim>::Identity();
-    auto              covPtr = std::make_unique<const ActsSymMatrixD<TrackParsDim>>(cov);
+    ActsSymMatrixD<TrackParsDim> cov = ActsSymMatrixD<TrackParsDim>::Identity();
+    auto     covPtr = std::make_unique<const ActsSymMatrixD<TrackParsDim>>(cov);
     Vector3D startParams(0., 0., 0.), startMom(5. * units::_GeV, 0., 0.);
     SingleCurvilinearTrackParameters<ChargedPolicy> sbtp(
         std::move(covPtr), startParams, startMom, 1.);

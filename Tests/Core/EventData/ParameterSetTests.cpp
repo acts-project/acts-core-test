@@ -168,19 +168,23 @@ namespace Test {
       const double phi_max   = par_type_t<ParID_t::ePHI>::max;
       const double phi_min   = par_type_t<ParID_t::ePHI>::min;
 
-      ActsVectorD<TrackParsDim>     parValues_1;
-      ActsVectorD<TrackParsDim>     parValues_2;
-      FullParameterSet   parSet_1(nullptr, parValues_1);
-      FullParameterSet   parSet_2(nullptr, parValues_2);
-      ActsVectorD<TrackParsDim>     residual;
-      const unsigned int toys = 1000;
+      ActsVectorD<TrackParsDim> parValues_1 = ActsVectorD<TrackParsDim>::Zero();
+      ActsVectorD<TrackParsDim> parValues_2 = ActsVectorD<TrackParsDim>::Zero();
+      FullParameterSet          parSet_1(nullptr, parValues_1);
+      FullParameterSet          parSet_2(nullptr, parValues_2);
+      ActsVectorD<TrackParsDim> residual;
+      const unsigned int        toys = 1000;
       for (unsigned int i = 0; i < toys; ++i) {
         const double loc0_1  = uniform_dist(e);
         const double loc1_1  = uniform_dist(e);
         const double phi_1   = uniform_dist(e);
         const double theta_1 = uniform_dist(e);
         const double qop_1   = uniform_dist(e);
-        parValues_1 << loc0_1, loc1_1, phi_1, theta_1, qop_1;
+        parValues_1(0)       = loc0_1;
+        parValues_1(1)       = loc1_1;
+        parValues_1(2)       = phi_1;
+        parValues_1(3)       = theta_1;
+        parValues_1(4)       = qop_1;
         parSet_1.setParameters(parValues_1);
 
         const double loc0_2  = uniform_dist(e);
@@ -188,7 +192,11 @@ namespace Test {
         const double phi_2   = uniform_dist(e);
         const double theta_2 = uniform_dist(e);
         const double qop_2   = uniform_dist(e);
-        parValues_2 << loc0_2, loc1_2, phi_2, theta_2, qop_2;
+        parValues_2(0)       = loc0_2;
+        parValues_2(1)       = loc1_2;
+        parValues_2(2)       = phi_2;
+        parValues_2(3)       = theta_2;
+        parValues_2(4)       = qop_2;
         parSet_2.setParameters(parValues_2);
 
         const double delta_loc0 = loc0_1 - loc0_2;
@@ -478,36 +486,43 @@ namespace Test {
   BOOST_AUTO_TEST_CASE(parset_projection_tests)
   {
     ActsMatrixD<1, 5> phi_proj_def;
-    phi_proj_def << 0, 0, 1, 0, 0, 0;
-    ActsMatrixD<1, TrackParsDim> phi_proj;
+    phi_proj_def << 0, 0, 1, 0, 0;
+    ActsMatrixD<1, TrackParsDim> phi_proj
+        = ActsMatrixD<1, TrackParsDim>::Zero();
     phi_proj.block<1, 5>(0, 0) = phi_proj_def;
 
     ActsMatrixD<2, 5> loc0_qop_proj_def;
     loc0_qop_proj_def << 1, 0, 0, 0, 0, 0, 0, 0, 0, 1;
-	ActsMatrixD<2, TrackParsDim> loc0_qop_proj;
+    ActsMatrixD<2, TrackParsDim> loc0_qop_proj
+        = ActsMatrixD<2, TrackParsDim>::Zero();
     loc0_qop_proj.block<2, 5>(0, 0) = loc0_qop_proj_def;
 
     ActsMatrixD<2, 5> loc1_theta_proj_def;
     loc1_theta_proj_def << 0, 1, 0, 0, 0, 0, 0, 0, 1, 0;
-	ActsMatrixD<2, TrackParsDim> loc1_theta_proj;
+    ActsMatrixD<2, TrackParsDim> loc1_theta_proj
+        = ActsMatrixD<2, TrackParsDim>::Zero();
     loc1_theta_proj.block<2, 5>(0, 0) = loc1_theta_proj_def;
 
     ActsMatrixD<3, 5> loc0_loc1_phi_proj_def;
     loc0_loc1_phi_proj_def << 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0;
-	ActsMatrixD<3, TrackParsDim> loc0_loc1_phi_proj;
+    ActsMatrixD<3, TrackParsDim> loc0_loc1_phi_proj
+        = ActsMatrixD<3, TrackParsDim>::Zero();
     loc0_loc1_phi_proj.block<3, 5>(0, 0) = loc0_loc1_phi_proj_def;
 
     ActsMatrixD<4, 5> loc0_phi_theta_qop_proj_def;
-    loc0_phi_theta_qop_proj_def << 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0,
-        0, 0, 0, 1;
-	ActsMatrixD<4, TrackParsDim> loc0_phi_theta_qop_proj;
+    loc0_phi_theta_qop_proj_def << 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0,
+        0, 0, 0, 0, 1;
+    ActsMatrixD<4, TrackParsDim> loc0_phi_theta_qop_proj
+        = ActsMatrixD<4, TrackParsDim>::Zero();
     loc0_phi_theta_qop_proj.block<4, 5>(0, 0) = loc0_phi_theta_qop_proj_def;
 
     ActsMatrixD<5, 5> loc0_loc1_phi_theta_qop_proj_def;
-    loc0_loc1_phi_theta_qop_proj_def << 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0,
-        0, 0, 0, 1, 0, 0, 0, 0, 0, 1;
-	ActsMatrixD<5, TrackParsDim> loc0_loc1_phi_theta_qop_proj;
-    loc0_loc1_phi_theta_qop_proj.block<5, 5>(0, 0) = loc0_loc1_phi_theta_qop_proj_def;
+    loc0_loc1_phi_theta_qop_proj_def << 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1,
+        0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1;
+    ActsMatrixD<5, TrackParsDim> loc0_loc1_phi_theta_qop_proj
+        = ActsMatrixD<5, TrackParsDim>::Zero();
+    loc0_loc1_phi_theta_qop_proj.block<5, 5>(0, 0)
+        = loc0_loc1_phi_theta_qop_proj_def;
 
     BOOST_CHECK((ParameterSet<ParID_t::ePHI>::projector() == phi_proj));
     BOOST_CHECK((ParameterSet<ParID_t::eLOC_0, ParID_t::eQOP>::projector()
