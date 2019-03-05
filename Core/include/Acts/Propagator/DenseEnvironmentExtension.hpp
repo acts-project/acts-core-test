@@ -185,7 +185,7 @@ struct DenseEnvironmentExtension
   finalize(propagator_state_t& state,
            const stepper_t&    stepper,
            const double        h,
-           ActsMatrixD<7, 7>& D) const
+           GlobalMatrix&       D) const
   {
     return finalize(state, stepper, h) && transportMatrix(state, stepper, h, D);
   }
@@ -204,7 +204,7 @@ private:
   transportMatrix(propagator_state_t& state,
                   const stepper_t&    stepper,
                   const double        h,
-                  ActsMatrixD<7, 7>& D) const
+                  GlobalMatrix&       D) const
   {
     /// The calculations are based on ATL-SOFT-PUB-2009-002. The update of the
     /// Jacobian matrix is requires only the calculation of eq. 17 and 18.
@@ -229,7 +229,7 @@ private:
     auto& sd  = state.stepping.stepData;
     auto  dir = stepper.direction(state.stepping);
 
-    D                   = ActsMatrixD<7, 7>::Identity();
+    D                   = GlobalMatrix::Identity();
     const double half_h = h * 0.5;
 
     // This sets the reference to the sub matrices

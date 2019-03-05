@@ -13,12 +13,6 @@
 #include "Acts/Utilities/GeometryContext.hpp"
 #include "Acts/Utilities/ParameterDefinitions.hpp"
 
-#ifdef ACTS_COORDINATE_TRANSFORM_PLUGIN
-
-#include ACTS_COORDINATE_TRANSFORM_PLUGIN
-
-#else
-
 namespace Acts {
 /// @cond detail
 namespace detail {
@@ -76,66 +70,56 @@ namespace detail {
       return momentum;
     }
 
-    /// @brief static method to transform a global representation into
-    /// a curvilinear represenation
-    ///
-    /// This transformation does not use the surface and hence no context
-    /// object is needed
-    ///
-    /// @param pos - ignored
-    /// @param mom the global momentum parameters
-    /// @param charge of the particle/track
-    ///
-    /// @return curvilinear parameter representation
-    static ParVector_t
-    global2curvilinear(const ActsVectorD<3>& /*pos*/,
-                       const ActsVectorD<3>& mom,
-                       double                charge)
-    {
-      using VectorHelpers::phi;
-      using VectorHelpers::theta;
-      ParVector_t parameters = ParVector_t::Zero();
-      parameters(2)          = phi(mom);
-      parameters(3)          = theta(mom);
-      parameters(4) = ((std::abs(charge) < 1e-4) ? 1. : charge) / mom.norm();
+    //~ /// @brief static method to transform a global representation into
+    //~ /// a curvilinear represenation
+    //~ ///
+    //~ /// This transformation does not use the surface and hence no context
+    //~ /// object is needed
+    //~ ///
+    //~ /// @param pos - ignored
+    //~ /// @param mom the global momentum parameters
+    //~ /// @param charge of the particle/track
+    //~ ///
+    //~ /// @return curvilinear parameter representation
+    //~ static ParVector_t
+    //~ global2curvilinear(const ActsVectorD<3>& /*pos*/,
+    //~ const ActsVectorD<3>& mom,
+    //~ double                charge);
 
-      return parameters;
-    }
+    //~ /// @brief static method to transform the global information into
+    //~ /// the track parameterisation
+    //~ ///
+    //~ /// This transformation uses the surface and hence needs a context
+    //~ /// object to guarantee the local to global transformation is done
+    //~ /// within the right (alginment/conditions) context
+    //~ ///
+    //~ /// @param gctx The current geometry context object, e.g. alignment
+    //~ /// @param pos position of the parameterisation in global
+    //~ /// @param mom position of the parameterisation in global
+    //~ /// @param charge of the particle/track
+    //~ /// @param s the surface for the global to local transform
+    //~ ///
+    //~ /// @return the track parameterisation
+    //~ static ParVector_t
+    //~ global2parameters(const GeometryContext& gctx,
+                      //~ const ActsVectorD<3>&  pos,
+                      //~ const ActsVectorD<3>&  mom,
+                      //~ double                 charge,
+                      //~ const Surface&         s)
+    //~ {
+      //~ using VectorHelpers::phi;
+      //~ using VectorHelpers::theta;
+      //~ ActsVectorD<2> localPosition;
+      //~ s.globalToLocal(gctx, pos, mom, localPosition);
+      //~ ParVector_t result = ParVector_t::Zero();
+      //~ result(0)          = localPosition(0);
+      //~ result(1)          = localPosition(1);
+      //~ result(2)          = phi(mom);
+      //~ result(3)          = theta(mom);
+      //~ result(4) = ((std::abs(charge) < 1e-4) ? 1. : charge) / mom.norm();
 
-    /// @brief static method to transform the global information into
-    /// the track parameterisation
-    ///
-    /// This transformation uses the surface and hence needs a context
-    /// object to guarantee the local to global transformation is done
-    /// within the right (alginment/conditions) context
-    ///
-    /// @param gctx The current geometry context object, e.g. alignment
-    /// @param pos position of the parameterisation in global
-    /// @param mom position of the parameterisation in global
-    /// @param charge of the particle/track
-    /// @param s the surface for the global to local transform
-    ///
-    /// @return the track parameterisation
-    static ParVector_t
-    global2parameters(const GeometryContext& gctx,
-                      const ActsVectorD<3>&  pos,
-                      const ActsVectorD<3>&  mom,
-                      double                 charge,
-                      const Surface&         s)
-    {
-      using VectorHelpers::phi;
-      using VectorHelpers::theta;
-      ActsVectorD<2> localPosition;
-      s.globalToLocal(gctx, pos, mom, localPosition);
-      ParVector_t result = ParVector_t::Zero();
-      result(0)          = localPosition(0);
-      result(1)          = localPosition(1);
-      result(2)          = phi(mom);
-      result(3)          = theta(mom);
-      result(4) = ((std::abs(charge) < 1e-4) ? 1. : charge) / mom.norm();
-
-      return result;
-    }
+      //~ return result;
+    //~ }
 
     /// @brief static calculate the charge from the track parameterisation
     ///
@@ -145,9 +129,11 @@ namespace detail {
     {
       return (pars(Acts::eQOP) > 0) ? 1. : -1.;
     }
+
+#ifdef ACTS_COORDINATE_TRANSFORM_PLUGIN
+#include ACTS_COORDINATE_TRANSFORM_PLUGIN
+#endif
   };
 }  // namespace detail
 /// @endcond
 }  // namespace Acts
-
-#endif  // ACTS_COORDINATE_TRANSFORM_PLUGIN

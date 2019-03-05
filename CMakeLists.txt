@@ -33,6 +33,10 @@ option (ACTS_BUILD_TGEO_PLUGIN "Build TGeo plugin" OFF)
 # all other compile-time parameters must be defined here for clear visibility
 # and to avoid forgotten options somewhere deep in the hierarchy
 set (ACTS_PARAMETER_DEFINITIONS_PLUGIN "Acts/Utilities/detail/DefaultParameterDefinitions.hpp" CACHE FILEPATH "Default track parameter definition")
+set (ACTS_SURFACE_TRANSFORMATION_PLUGIN "Acts/Surfaces/detail/DefaultParameterSurface.ipp" CACHE FILEPATH "Default track parameter surface transformation")
+set (ACTS_DISCSURFACE_TRANSFORMATION_PLUGIN "Acts/Surfaces/detail/DefaultParameterDiscSurface.ipp" CACHE FILEPATH "Default track parameter disc surface transformation")
+set (ACTS_LINESURFACE_TRANSFORMATION_PLUGIN "Acts/Surfaces/detail/DefaultParameterLineSurface.ipp" CACHE FILEPATH "Default track parameter line surface transformation")
+set (ACTS_COORDINATE_TRANSFORM_PLUGIN "Acts/EventData/detail/default_coordinate_transformations.hpp" CACHE FILEPATH "Default track parameter transformation")
 
 # handle inter-plugin dependencies
 # DD4hepPlugin depends on TGeoPlugin

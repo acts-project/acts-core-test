@@ -108,7 +108,7 @@ namespace detail {
              propagator_state_t&     state,
              const stepper_t&        stepper,
              const double            h,
-             ActsMatrixD<7, 7>&                    D,
+             GlobalMatrix&           D,
              const std::array<bool, sizeof...(T)>& validExtensions)
     {
       // If element is invalid: continue
@@ -192,7 +192,7 @@ namespace detail {
              propagator_state_t& /*unused*/,
              const stepper_t& /*unused*/,
              const double /*unused*/,
-             ActsMatrixD<7, 7>& /*unused*/,
+             GlobalMatrix& /*unused*/,
              const std::array<bool, sizeof...(T)>& /*unused*/)
     {
       return true;

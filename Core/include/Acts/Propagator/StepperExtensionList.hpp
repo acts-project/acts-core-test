@@ -146,7 +146,7 @@ public:
   finalize(propagator_state_t& state,
            const stepper_t&    stepper,
            const double        h,
-           ActsMatrixD<7, 7>& D)
+           GlobalMatrix&       D)
   {
     return impl::finalize(tuple(), state, stepper, h, D, validExtensions);
   }
