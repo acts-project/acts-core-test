@@ -31,11 +31,11 @@ namespace IntegrationTest {
     /// this is for covariance propagation validation
     /// it can either be used for curvilinear transport
     template <typename StartParameters, typename EndParameters, typename U>
-    ActsSymMatrixD<TrackParsDim>
-    calculateCovariance(const StartParameters&              startPars,
-                        const ActsSymMatrixD<TrackParsDim>& startCov,
-                        const EndParameters&                endPars,
-                        const U&                            options) const
+    TrackSymMatrix
+    calculateCovariance(const StartParameters& startPars,
+                        const TrackSymMatrix&  startCov,
+                        const EndParameters&   endPars,
+                        const U&               options) const
     {
       // steps for estimating derivatives
       const std::array<double, 4> h_steps = {{-2e-4, -1e-4, 1e-4, 2e-4}};
@@ -58,7 +58,7 @@ namespace IntegrationTest {
       var_options.pathLimit *= 2;
 
       // variation in x
-      std::vector<ActsVectorD<TrackParsDim>> x_derivatives;
+      std::vector<TrackVector> x_derivatives;
       x_derivatives.reserve(h_steps.size());
       for (double h : h_steps) {
         StartParameters tp = startPars;
@@ -69,7 +69,7 @@ namespace IntegrationTest {
       }
 
       // variation in y
-      std::vector<ActsVectorD<TrackParsDim>> y_derivatives;
+      std::vector<TrackVector> y_derivatives;
       y_derivatives.reserve(h_steps.size());
       for (double h : h_steps) {
         StartParameters tp = startPars;
@@ -80,7 +80,7 @@ namespace IntegrationTest {
       }
 
       // variation in phi
-      std::vector<ActsVectorD<TrackParsDim>> phi_derivatives;
+      std::vector<TrackVector> phi_derivatives;
       phi_derivatives.reserve(h_steps.size());
       for (double h : h_steps) {
         StartParameters tp = startPars;
@@ -92,7 +92,7 @@ namespace IntegrationTest {
       }
 
       // variation in theta
-      std::vector<ActsVectorD<TrackParsDim>> theta_derivatives;
+      std::vector<TrackVector> theta_derivatives;
       theta_derivatives.reserve(h_steps.size());
       for (double h : h_steps) {
         StartParameters tp            = startPars;
@@ -111,7 +111,7 @@ namespace IntegrationTest {
       }
 
       // variation in q/p
-      std::vector<ActsVectorD<TrackParsDim>> qop_derivatives;
+      std::vector<TrackVector> qop_derivatives;
       qop_derivatives.reserve(h_steps.size());
       for (double h : h_steps) {
         StartParameters tp = startPars;
@@ -122,7 +122,7 @@ namespace IntegrationTest {
                                   / h);
       }
 
-      ActsSymMatrixD<TrackParsDim> jacobian;
+      TrackSymMatrix jacobian;
       jacobian.setIdentity();
       jacobian.col(Acts::eLOC_0) = fitLinear(x_derivatives, h_steps);
       jacobian.col(Acts::eLOC_1) = fitLinear(y_derivatives, h_steps);
@@ -135,12 +135,12 @@ namespace IntegrationTest {
 
   private:
     template <unsigned long int N>
-    static ActsVectorD<TrackParsDim>
-    fitLinear(const std::vector<ActsVectorD<TrackParsDim>>& values,
+    static TrackVector
+    fitLinear(const std::vector<TrackVector>& values,
               const std::array<double, N>& h)
     {
-      ActsVectorD<TrackParsDim> A;
-      ActsVectorD<TrackParsDim> C;
+      TrackVector A;
+      TrackVector C;
       A.setZero();
       C.setZero();
       double B = 0;
@@ -153,8 +153,8 @@ namespace IntegrationTest {
         D += h.at(i) * h.at(i);
       }
 
-      ActsVectorD<TrackParsDim> b = (N * A - B * C) / (N * D - B * B);
-      ActsVectorD<TrackParsDim> a = (C - B * b) / N;
+      TrackVector b = (N * A - B * C) / (N * D - B * B);
+      TrackVector a = (C - B * b) / N;
 
       return a;
     }

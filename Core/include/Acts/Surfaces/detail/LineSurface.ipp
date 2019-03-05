@@ -158,10 +158,10 @@ LineSurface::intersectionEstimate(const GeometryContext& gctx,
   return Intersection(gpos, std::numeric_limits<double>::max(), false);
 }
 
-inline void LineSurface::initJacobianToGlobal(const GeometryContext& gctx, ActsMatrixD<7, TrackParsDim>& jacobian,
+inline void LineSurface::initJacobianToGlobal(const GeometryContext& gctx, TrackToGlobalMatrix& jacobian,
                                               const Vector3D&       gpos,
                                               const Vector3D&       dir,
-                                              const ActsVectorD<TrackParsDim>& pars) const
+                                              const TrackVector& pars) const
 {
   // The trigonometry required to convert the direction to spherical
   // coordinates and then compute the sines and cosines again can be
@@ -207,11 +207,11 @@ inline void LineSurface::initJacobianToGlobal(const GeometryContext& gctx, ActsM
   jacobian.block<3, 1>(0, eTHETA) = dDThetaY * pars[eLOC_0] * ipdn;
 }
 
-inline const ActsRowVectorD<TrackParsDim>
+inline const TrackRowVector
 LineSurface::derivativeFactors(const GeometryContext&  gctx,const Vector3D&         pos,
                                const Vector3D&         dir,
                                const RotationMatrix3D& rft,
-                               const ActsMatrixD<7, TrackParsDim>& jac) const
+                               const TrackToGlobalMatrix& jac) const
 {
   // the vector between position and center
   ActsRowVectorD<3> pc = (pos - center(gctx)).transpose();
@@ -221,11 +221,9 @@ LineSurface::derivativeFactors(const GeometryContext&  gctx,const Vector3D&     
   double            long_c   = locz * dir;
   ActsRowVectorD<3> norm_vec = dir.transpose() - long_c * locz;
   // calculate the s factors for the dependency on X
-  const ActsRowVectorD<TrackParsDim> s_vec
-      = norm_vec * jac.topLeftCorner<3, TrackParsDim>();
+  const TrackRowVector s_vec = norm_vec * jac.topLeftCorner<3, TrackParsDim>();
   // calculate the d factors for the dependency on Tx
-  const ActsRowVectorD<TrackParsDim> d_vec
-      = locz * jac.block<3, TrackParsDim>(3, 0);
+  const TrackRowVector d_vec = locz * jac.block<3, TrackParsDim>(3, 0);
   // normalisation of normal & longitudinal components
   double norm = 1. / (1. - long_c * long_c);
   // create a matrix representation

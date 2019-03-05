@@ -47,16 +47,15 @@ namespace Test {
     ActsSymMatrixD<5> covTrk_def;
     covTrk_def << 0.08, 0, 0, 0, 0, 0, 0.3, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1,
         0, 0, 0, 0, 0, 1;
-    ActsSymMatrixD<TrackParsDim> covTrk;
+    TrackSymMatrix covTrk;
     covTrk.block<5, 5>(0, 0) = covTrk_def;
 
-    ActsVectorD<Acts::TrackParsDim> parValues
-        = ActsVectorD<Acts::TrackParsDim>::Zero();
-    parValues(0) = 0.3;
-    parValues(1) = 0.5;
-    parValues(2) = 0.5 * M_PI;
-    parValues(3) = 0.3 * M_PI;
-    parValues(4) = 0.01 * M_PI;
+    TrackVector parValues = TrackVector::Zero();
+    parValues(0)          = 0.3;
+    parValues(1)          = 0.5;
+    parValues(2)          = 0.5 * M_PI;
+    parValues(3)          = 0.3 * M_PI;
+    parValues(4)          = 0.01 * M_PI;
     BoundParameters pars(
         tgContext,
         std::make_unique<const BoundParameters::CovMatrix_t>(std::move(covTrk)),

@@ -296,10 +296,10 @@ namespace Test {
     cov_def << 1000. * units::_um, 0., 0., 0., 0., 0., 1000. * units::_um, 0.,
         0., 0., 0., 0., 0.05, 0., 0., 0., 0., 0., 0.05, 0., 0., 0., 0., 0.,
         0.01;
-    ActsSymMatrixD<TrackParsDim> cov;
+    TrackSymMatrix cov;
     cov.block<5, 5>(0, 0) = cov_def;
 
-    auto covPtr = std::make_unique<const ActsSymMatrixD<TrackParsDim>>(cov);
+    auto covPtr = std::make_unique<const TrackSymMatrix>(cov);
 
     Vector3D rPos(-3. * units::_m,
                   10. * units::_um * gauss(generator),

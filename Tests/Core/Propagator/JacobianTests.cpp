@@ -111,11 +111,11 @@ namespace Test {
   /// Az ->P[5]  dAz/   P[12]   P[19]   P[26]   P[33]   P[40]
   /// CM ->P[6]  dCM/   P[13]   P[20]   P[27]   P[34]   P[41]
 
-  ActsMatrixD<7, TrackParsDim>
+  TrackToGlobalMatrix
   convertToMatrix(const double* P)
   {
     // initialize to zero
-    ActsMatrixD<7, TrackParsDim> jMatrix = ActsMatrixD<7, TrackParsDim>::Zero();
+    TrackToGlobalMatrix jMatrix = TrackToGlobalMatrix::Zero();
     for (size_t j = 0; j < 5; ++j) {
       for (size_t i = 0; i < 7; ++i) {
         size_t ijc = 7 + j * 7 + i;
@@ -153,10 +153,10 @@ namespace Test {
     ActsSymMatrixD<5> cov_def;
     cov_def << 10 * units::_mm, 0, 0, 0, 0, 0, 10 * units::_mm, 0, 0, 0, 0, 0,
         0.1, 0, 0, 0, 0, 0, 0.1, 0, 0, 0, 0, 0, 1. / (10 * units::_GeV);
-    ActsSymMatrixD<TrackParsDim> cov;
+    TrackSymMatrix cov;
     cov.block<5, 5>(0, 0) = cov_def;
 
-    auto covPtr = std::make_unique<const ActsSymMatrixD<TrackParsDim>>(cov);
+    auto covPtr = std::make_unique<const TrackSymMatrix>(cov);
 
     // Let's create a surface somewhere in space
     Vector3D     pos(341., 412., 93.);
@@ -181,17 +181,17 @@ namespace Test {
     ActsSymMatrixD<5> cov_def;
     cov_def << 10 * units::_mm, 0, 0, 0, 0, 0, 10 * units::_mm, 0, 0, 0, 0, 0,
         0.1, 0, 0, 0, 0, 0, 0.1, 0, 0, 0, 0, 0, 1. / (10 * units::_GeV);
-    ActsSymMatrixD<TrackParsDim> cov;
+    TrackSymMatrix cov;
     cov.block<5, 5>(0, 0) = cov_def;
 
-    auto covPtr = std::make_unique<const ActsSymMatrixD<TrackParsDim>>(cov);
+    auto covPtr = std::make_unique<const TrackSymMatrix>(cov);
 
-    ActsVectorD<TrackParsDim> pars = ActsVectorD<TrackParsDim>::Zero();
-    pars(0)                        = 182.34;
-    pars(1)                        = -82.;
-    pars(2)                        = 0.134;
-    pars(3)                        = 0.85;
-    pars(4)                        = 1. / (100 * units::_GeV);
+    TrackVector pars = TrackVector::Zero();
+    pars(0)          = 182.34;
+    pars(1)          = -82.;
+    pars(2)          = 0.134;
+    pars(3)          = 0.85;
+    pars(4)          = 1. / (100 * units::_GeV);
 
     BoundParameters atCylinder(
         tgContext, std::move(covPtr), std::move(pars), cSurface);
@@ -212,17 +212,17 @@ namespace Test {
     ActsSymMatrixD<5> cov_def;
     cov_def << 10 * units::_mm, 0, 0, 0, 0, 0, 10 * units::_mm, 0, 0, 0, 0, 0,
         0.1, 0, 0, 0, 0, 0, 0.1, 0, 0, 0, 0, 0, 1. / (10 * units::_GeV);
-    ActsSymMatrixD<TrackParsDim> cov;
+    TrackSymMatrix cov;
     cov.block<5, 5>(0, 0) = cov_def;
 
-    auto covPtr = std::make_unique<const ActsSymMatrixD<TrackParsDim>>(cov);
+    auto covPtr = std::make_unique<const TrackSymMatrix>(cov);
 
-    ActsVectorD<TrackParsDim> pars = ActsVectorD<TrackParsDim>::Zero();
-    pars(0)                        = 192.34;
-    pars(1)                        = 1.823;
-    pars(2)                        = 0.734;
-    pars(3)                        = 0.235;
-    pars(4)                        = 1. / (100 * units::_GeV);
+    TrackVector pars = TrackVector::Zero();
+    pars(0)          = 192.34;
+    pars(1)          = 1.823;
+    pars(2)          = 0.734;
+    pars(3)          = 0.235;
+    pars(4)          = 1. / (100 * units::_GeV);
 
     BoundParameters atDisc(
         tgContext, std::move(covPtr), std::move(pars), dSurface);
@@ -244,17 +244,17 @@ namespace Test {
     ActsSymMatrixD<5> cov_def;
     cov_def << 10 * units::_mm, 0, 0, 0, 0, 0, 10 * units::_mm, 0, 0, 0, 0, 0,
         0.1, 0, 0, 0, 0, 0, 0.1, 0, 0, 0, 0, 0, 1. / (10 * units::_GeV);
-    ActsSymMatrixD<TrackParsDim> cov;
+    TrackSymMatrix cov;
     cov.block<5, 5>(0, 0) = cov_def;
 
-    auto covPtr = std::make_unique<const ActsSymMatrixD<TrackParsDim>>(cov);
+    auto covPtr = std::make_unique<const TrackSymMatrix>(cov);
 
-    ActsVectorD<TrackParsDim> pars = ActsVectorD<TrackParsDim>::Zero();
-    pars(0)                        = 12.34;
-    pars(1)                        = -8722.;
-    pars(2)                        = 2.134;
-    pars(3)                        = 0.85;
-    pars(4)                        = 1. / (100 * units::_GeV);
+    TrackVector pars = TrackVector::Zero();
+    pars(0)          = 12.34;
+    pars(1)          = -8722.;
+    pars(2)          = 2.134;
+    pars(3)          = 0.85;
+    pars(4)          = 1. / (100 * units::_GeV);
 
     BoundParameters atPlane(
         tgContext, std::move(covPtr), std::move(pars), pSurface);
@@ -273,17 +273,17 @@ namespace Test {
     ActsSymMatrixD<5> cov_def;
     cov_def << 10 * units::_mm, 0, 0, 0, 0, 0, 10 * units::_mm, 0, 0, 0, 0, 0,
         0.1, 0, 0, 0, 0, 0, 0.1, 0, 0, 0, 0, 0, 1. / (10 * units::_GeV);
-    ActsSymMatrixD<TrackParsDim> cov;
+    TrackSymMatrix cov;
     cov.block<5, 5>(0, 0) = cov_def;
 
-    auto covPtr = std::make_unique<const ActsSymMatrixD<TrackParsDim>>(cov);
+    auto covPtr = std::make_unique<const TrackSymMatrix>(cov);
 
-    ActsVectorD<TrackParsDim> pars = ActsVectorD<TrackParsDim>::Zero();
-    pars(0)                        = -3.34;
-    pars(1)                        = -822.;
-    pars(2)                        = -0.734;
-    pars(3)                        = 0.85;
-    pars(4)                        = 1. / (100 * units::_GeV);
+    TrackVector pars = TrackVector::Zero();
+    pars(0)          = -3.34;
+    pars(1)          = -822.;
+    pars(2)          = -0.734;
+    pars(3)          = 0.85;
+    pars(4)          = 1. / (100 * units::_GeV);
 
     BoundParameters perigee(
         tgContext, std::move(covPtr), std::move(pars), pSurface);
@@ -302,17 +302,17 @@ namespace Test {
     ActsSymMatrixD<5> cov_def;
     cov_def << 10 * units::_mm, 0, 0, 0, 0, 0, 10 * units::_mm, 0, 0, 0, 0, 0,
         0.1, 0, 0, 0, 0, 0, 0.1, 0, 0, 0, 0, 0, 1. / (10 * units::_GeV);
-    ActsSymMatrixD<TrackParsDim> cov;
+    TrackSymMatrix cov;
     cov.block<5, 5>(0, 0) = cov_def;
 
-    auto covPtr = std::make_unique<const ActsSymMatrixD<TrackParsDim>>(cov);
+    auto covPtr = std::make_unique<const TrackSymMatrix>(cov);
 
-    ActsVectorD<TrackParsDim> pars = ActsVectorD<TrackParsDim>::Zero();
-    pars(0)                        = -8.34;
-    pars(1)                        = 812;
-    pars(2)                        = 0.734;
-    pars(3)                        = 0.25;
-    pars(4)                        = 1. / (100 * units::_GeV);
+    TrackVector pars = TrackVector::Zero();
+    pars(0)          = -8.34;
+    pars(1)          = 812;
+    pars(2)          = 0.734;
+    pars(3)          = 0.25;
+    pars(4)          = 1. / (100 * units::_GeV);
 
     BoundParameters atStraw(
         tgContext, std::move(covPtr), std::move(pars), sSurface);

@@ -279,16 +279,16 @@ namespace IntegrationTest {
     Vector3D pos(x, y, z);
     Vector3D mom(px, py, pz);
 
-    std::unique_ptr<const ActsSymMatrixD<TrackParsDim>> covPtr = nullptr;
+    std::unique_ptr<const TrackSymMatrix> covPtr = nullptr;
     if (covtransport) {
       ActsSymMatrixD<5> cov_def;
       // take some major correlations (off-diagonals)
       cov_def << 10 * units::_mm, 0, 0.123, 0, 0.5, 0, 10 * units::_mm, 0,
           0.162, 0, 0.123, 0, 0.1, 0, 0, 0, 0.162, 0, 0.1, 0, 0.5, 0, 0, 0,
           1. / (10 * units::_GeV);
-      ActsSymMatrixD<TrackParsDim> cov;
+      TrackSymMatrix cov;
       cov.block<5, 5>(0, 0) = cov_def;
-      covPtr = std::make_unique<const ActsSymMatrixD<TrackParsDim>>(cov);
+      covPtr = std::make_unique<const TrackSymMatrix>(cov);
     }
     // do propagation of the start parameters
     CurvilinearParameters start(std::move(covPtr), pos, mom, q);
@@ -347,16 +347,16 @@ namespace IntegrationTest {
     Vector3D pos(x, y, z);
     Vector3D mom(px, py, pz);
 
-    std::unique_ptr<const ActsSymMatrixD<TrackParsDim>> covPtr = nullptr;
+    std::unique_ptr<const TrackSymMatrix> covPtr = nullptr;
     if (covtransport) {
       ActsSymMatrixD<5> cov_def;
       // take some major correlations (off-diagonals)
       cov_def << 10 * units::_mm, 0, 0.123, 0, 0.5, 0, 10 * units::_mm, 0,
           0.162, 0, 0.123, 0, 0.1, 0, 0, 0, 0.162, 0, 0.1, 0, 0.5, 0, 0, 0,
           1. / (10 * units::_GeV);
-      ActsSymMatrixD<TrackParsDim> cov;
+      TrackSymMatrix cov;
       cov.block<5, 5>(0, 0) = cov_def;
-      covPtr = std::make_unique<const ActsSymMatrixD<TrackParsDim>>(cov);
+      covPtr = std::make_unique<const TrackSymMatrix>(cov);
     }
     // Create curvilinear start parameters
     CurvilinearParameters start(std::move(covPtr), pos, mom, q);
@@ -443,9 +443,9 @@ namespace IntegrationTest {
     cov_def << 10. * units::_mm, 0, 0.123, 0, 0.5, 0, 10. * units::_mm, 0,
         0.162, 0, 0.123, 0, 0.1, 0, 0, 0, 0.162, 0, 0.1, 0, 0.5, 0, 0, 0,
         1. / (10. * units::_GeV);
-    ActsSymMatrixD<TrackParsDim> cov;
+    TrackSymMatrix cov;
     cov.block<5, 5>(0, 0) = cov_def;
-    auto covPtr = std::make_unique<const ActsSymMatrixD<TrackParsDim>>(cov);
+    auto covPtr = std::make_unique<const TrackSymMatrix>(cov);
 
     // do propagation of the start parameters
     CurvilinearParameters start(std::move(covPtr), pos, mom, q);
@@ -455,9 +455,9 @@ namespace IntegrationTest {
     const auto& tp     = result.endParameters;
 
     // get numerically propagated covariance matrix
-    ActsSymMatrixD<TrackParsDim> calculated_cov = fixture.calculateCovariance(
+    TrackSymMatrix calculated_cov = fixture.calculateCovariance(
         start_wo_c, *(start.covariance()), *tp, options);
-    ActsSymMatrixD<TrackParsDim> obtained_cov = (*(tp->covariance()));
+    TrackSymMatrix obtained_cov = (*(tp->covariance()));
     CHECK_CLOSE_COVARIANCE(calculated_cov, obtained_cov, reltol);
   }
 
@@ -507,9 +507,9 @@ namespace IntegrationTest {
 
     cov_def << 10. * units::_mm, 0, 0, 0, 0, 0, 10. * units::_mm, 0, 0, 0, 0, 0,
         0.1, 0, 0, 0, 0, 0, 0.1, 0, 0, 0, 0, 0, 1. / (10. * units::_GeV);
-    ActsSymMatrixD<TrackParsDim> cov;
+    TrackSymMatrix cov;
     cov.block<5, 5>(0, 0) = cov_def;
-    auto covPtr = std::make_unique<const ActsSymMatrixD<TrackParsDim>>(cov);
+    auto covPtr = std::make_unique<const TrackSymMatrix>(cov);
 
     // create curvilinear start parameters
     CurvilinearParameters start_c(nullptr, pos, mom, q);
@@ -543,10 +543,10 @@ namespace IntegrationTest {
     const auto& tp = result.endParameters;
 
     // get obtained covariance matrix
-    ActsSymMatrixD<TrackParsDim> obtained_cov = (*(tp->covariance()));
+    TrackSymMatrix obtained_cov = (*(tp->covariance()));
 
     // get numerically propagated covariance matrix
-    ActsSymMatrixD<TrackParsDim> calculated_cov = fixture.calculateCovariance(
+    TrackSymMatrix calculated_cov = fixture.calculateCovariance(
         start_wo_c, *(start.covariance()), *tp, options);
 
     CHECK_CLOSE_COVARIANCE(calculated_cov, obtained_cov, reltol);

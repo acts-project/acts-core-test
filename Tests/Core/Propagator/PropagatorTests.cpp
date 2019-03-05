@@ -274,10 +274,10 @@ namespace Test {
     cov_def << 10 * units::_mm, 0, 0.123, 0, 0.5, 0, 10 * units::_mm, 0, 0.162,
         0, 0.123, 0, 0.1, 0, 0, 0, 0.162, 0, 0.1, 0, 0.5, 0, 0, 0,
         1. / (10 * units::_GeV);
-    ActsSymMatrixD<TrackParsDim> cov;
+    TrackSymMatrix cov;
     cov.block<5, 5>(0, 0) = cov_def;
 
-    auto covPtr = std::make_unique<const ActsSymMatrixD<TrackParsDim>>(cov);
+    auto                  covPtr = std::make_unique<const TrackSymMatrix>(cov);
     CurvilinearParameters start(std::move(covPtr), pos, mom, q);
     // propagate to a path length of 100 with two steps of 50
     const auto& mid_parameters
@@ -351,10 +351,10 @@ namespace Test {
     cov_def << 10 * units::_mm, 0, 0.123, 0, 0.5, 0, 10 * units::_mm, 0, 0.162,
         0, 0.123, 0, 0.1, 0, 0, 0, 0.162, 0, 0.1, 0, 0.5, 0, 0, 0,
         1. / (10 * units::_GeV);
-    ActsSymMatrixD<TrackParsDim> cov;
+    TrackSymMatrix cov;
     cov.block<5, 5>(0, 0) = cov_def;
 
-    auto covPtr = std::make_unique<const ActsSymMatrixD<TrackParsDim>>(cov);
+    auto                  covPtr = std::make_unique<const TrackSymMatrix>(cov);
     CurvilinearParameters start(std::move(covPtr), pos, mom, q);
     // propagate to a final surface with one stop in between
     const auto& mid_parameters

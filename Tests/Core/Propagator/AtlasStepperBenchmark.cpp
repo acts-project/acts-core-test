@@ -83,12 +83,12 @@ main(int argc, char* argv[])
   ActsSymMatrixD<5> cov_def;
   cov_def << 10 * units::_mm, 0, 0, 0, 0, 0, 10 * units::_mm, 0, 0, 0, 0, 0, 1,
       0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1. / (10 * units::_GeV);
-  ActsSymMatrixD<TrackParsDim> cov;
+  TrackSymMatrix cov;
   cov.block<5, 5>(0, 0) = cov_def;
 
-  std::unique_ptr<const ActsSymMatrixD<TrackParsDim>> covPtr = nullptr;
+  std::unique_ptr<const TrackSymMatrix> covPtr = nullptr;
   if (withCov) {
-    covPtr = std::make_unique<const ActsSymMatrixD<TrackParsDim>>(cov);
+    covPtr = std::make_unique<const TrackSymMatrix>(cov);
   }
   CurvilinearParameters pars(std::move(covPtr), pos, mom, +1);
 

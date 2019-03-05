@@ -258,10 +258,10 @@ public:
   /// @param dir The direction at of the parameters
   ///
   /// @param pars The paranmeters vector
-  void initJacobianToGlobal(const GeometryContext& gctx,ActsMatrixD<7, TrackParsDim>& jacobian,
+  void initJacobianToGlobal(const GeometryContext& gctx,TrackToGlobalMatrix>& jacobian,
                             const Vector3D&       gpos,
                             const Vector3D&       dir,
-                            const ActsVectorD<TrackParsDim>& pars) const final;
+                            const TrackVector& pars) const final;
 
   /// Initialize the jacobian from global to local
   /// the surface knows best, hence the calculation is done here.
@@ -274,7 +274,7 @@ public:
   /// @param dir The direction at of the parameters
   ///
   /// @return the transposed reference frame (avoids recalculation)
-  const RotationMatrix3D initJacobianToLocal(const GeometryContext& gctx, ActsMatrixD<TrackParsDim, 7>& jacobian,
+  const RotationMatrix3D initJacobianToLocal(const GeometryContext& gctx, GlobalToTrackMatrix& jacobian,
                                              const Vector3D& gpos,
                                              const Vector3D& dir) const final;
 

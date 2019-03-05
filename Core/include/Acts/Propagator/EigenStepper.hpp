@@ -17,6 +17,7 @@
 #include "Acts/Propagator/StepperExtensionList.hpp"
 #include "Acts/Propagator/detail/Auctioneer.hpp"
 #include "Acts/Utilities/Intersection.hpp"
+#include "Acts/Utilities/ParameterDefinitions.hpp"
 #include "Acts/Utilities/Units.hpp"
 
 #include "Acts/Propagator/EigenStepperError.hpp"
@@ -63,8 +64,8 @@ public:
   using Corrector = corrector_t;
 
   /// Jacobian, Covariance and State defintions
-  using Jacobian         = ActsMatrixD<TrackParsDim, TrackParsDim>;
-  using Covariance       = ActsSymMatrixD<TrackParsDim>;
+  using Jacobian         = TrackMatrix;
+  using Covariance       = TrackSymMatrix;
   using BoundState       = std::tuple<BoundParameters, Jacobian, double>;
   using CurvilinearState = std::tuple<CurvilinearParameters, Jacobian, double>;
 
@@ -108,7 +109,7 @@ public:
         const auto& surface = par.referenceSurface();
         // set the covariance transport flag to true and copy
         covTransport = true;
-        cov          = ActsSymMatrixD<TrackParsDim>(*par.covariance());
+        cov          = TrackSymMatrix(*par.covariance());
         surface.initJacobianToGlobal(
             gctx, jacToGlobal, pos, dir, par.parameters());
       }
@@ -136,18 +137,16 @@ public:
     NavigationDirection navDir;
 
     /// The full jacobian of the transport entire transport
-    ActsMatrixD<TrackParsDim, TrackParsDim> jacobian
-        = ActsMatrixD<TrackParsDim, TrackParsDim>::Identity();
+    TrackMatrix jacobian = TrackMatrix::Identity();
 
     /// Jacobian from local to the global frame
-    ActsMatrixD<7, TrackParsDim> jacToGlobal
-        = ActsMatrixD<7, TrackParsDim>::Zero();
+    TrackToGlobalMatrix jacToGlobal = TrackToGlobalMatrix::Zero();
 
     /// Pure transport jacobian part from runge kutta integration
-    ActsMatrixD<7, 7> jacTransport = ActsMatrixD<7, 7>::Identity();
+    GlobalMatrix jacTransport = GlobalMatrix::Identity();
 
     /// The propagation derivative
-    ActsVectorD<7> derivative = ActsVectorD<7>::Zero();
+    GlobalVector derivative = GlobalVector::Zero();
 
     /// Covariance matrix (and indicator)
     //// associated with the initial error on track parameters

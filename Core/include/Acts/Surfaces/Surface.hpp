@@ -389,10 +389,10 @@ public:
   /// @param gpos is the global position of the parameters
   /// @param dir is the direction at of the parameters
   /// @param pars is the parameter vector
-  virtual void initJacobianToGlobal(const GeometryContext& gctx, ActsMatrixD<7, TrackParsDim>& jacobian,
+  virtual void initJacobianToGlobal(const GeometryContext& gctx, TrackToGlobalMatrix& jacobian,
                                     const Vector3D&       gpos,
                                     const Vector3D&       dir,
-                                    const ActsVectorD<TrackParsDim>& pars) const;
+                                    const TrackVector& pars) const;
 
   /// Initialize the jacobian from global to local
   /// the surface knows best, hence the calculation is done here.
@@ -410,7 +410,7 @@ public:
   ///
   /// @return the transposed reference frame (avoids recalculation)
   virtual const RotationMatrix3D
-      initJacobianToLocal(const GeometryContext& gctx, ActsMatrixD<TrackParsDim, 7>& jacobian,
+      initJacobianToLocal(const GeometryContext& gctx, GlobalToTrackMatrix& jacobian,
                           const Vector3D& gpos,
                           const Vector3D& dir) const;
 
@@ -430,11 +430,11 @@ public:
   /// @param jac is the transport jacobian
   ///
   /// @return a five-dim vector
-  virtual const ActsRowVectorD<TrackParsDim>
+  virtual const TrackRowVector
   derivativeFactors(const const GeometryContext& gctx, const Vector3D&         gpos,
                     const Vector3D&         dir,
                     const RotationMatrix3D& rft,
-                    const ActsMatrixD<7, TrackParsDim>& jac) const;
+                    const TrackToGlobalMatrix& jac) const;
 
   /// Calucation of the path correction for incident
   ///

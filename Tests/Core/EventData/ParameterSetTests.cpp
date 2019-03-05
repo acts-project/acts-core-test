@@ -168,12 +168,12 @@ namespace Test {
       const double phi_max   = par_type_t<ParID_t::ePHI>::max;
       const double phi_min   = par_type_t<ParID_t::ePHI>::min;
 
-      ActsVectorD<TrackParsDim> parValues_1 = ActsVectorD<TrackParsDim>::Zero();
-      ActsVectorD<TrackParsDim> parValues_2 = ActsVectorD<TrackParsDim>::Zero();
-      FullParameterSet          parSet_1(nullptr, parValues_1);
-      FullParameterSet          parSet_2(nullptr, parValues_2);
-      ActsVectorD<TrackParsDim> residual;
-      const unsigned int        toys = 1000;
+      TrackVector        parValues_1 = TrackVector::Zero();
+      TrackVector        parValues_2 = TrackVector::Zero();
+      FullParameterSet   parSet_1(nullptr, parValues_1);
+      FullParameterSet   parSet_2(nullptr, parValues_2);
+      TrackVector        residual;
+      const unsigned int toys = 1000;
       for (unsigned int i = 0; i < toys; ++i) {
         const double loc0_1  = uniform_dist(e);
         const double loc1_1  = uniform_dist(e);
