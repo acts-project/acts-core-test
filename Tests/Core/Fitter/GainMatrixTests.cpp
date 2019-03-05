@@ -45,11 +45,19 @@ namespace Test {
         cylinder, 0, std::move(cov), -0.1, 0.45));
 
     // Make dummy track parameter
-    ActsSymMatrixD<Acts::TrackParsDim> covTrk;
-    covTrk << 0.08, 0, 0, 0, 0, 0, 0.3, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0,
-        0, 0, 0, 0, 1;
-    ActsVectorD<Acts::TrackParsDim> parValues;
-    parValues << 0.3, 0.5, 0.5 * M_PI, 0.3 * M_PI, 0.01;
+    ActsSymMatrixD<5> covTrk_def;
+    covTrk_def << 0.08, 0, 0, 0, 0, 0, 0.3, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1,
+        0, 0, 0, 0, 0, 1;
+    ActsSymMatrixD<TrackParsDim> covTrk;
+    covTrk.block<5, 5>(0, 0) = covTrk_def;
+
+    ActsVectorD<Acts::TrackParsDim> parValues
+        = ActsVectorD<Acts::TrackParsDim>::Zero();
+    parValues(0) = 0.3;
+    parValues(1) = 0.5;
+    parValues(2) = 0.5 * M_PI;
+    parValues(3) = 0.3 * M_PI;
+    parValues(4) = 0.01 * M_PI;
     BoundParameters pars(
         tgContext,
         std::make_unique<const BoundParameters::CovMatrix_t>(std::move(covTrk)),

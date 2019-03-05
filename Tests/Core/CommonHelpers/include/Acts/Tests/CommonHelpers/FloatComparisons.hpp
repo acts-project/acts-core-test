@@ -70,8 +70,12 @@ namespace Test {
     closeOrSmall(double reltol, double small)
     {
       return [=](double val, double ref) -> predicate_result {
+        // Compare both directly
+        if (val == ref) {
+          return true;
+        }
         // Perform the comparison, exit on success
-        if (std::abs(ref) >= small) {
+        else if (std::abs(ref) >= small) {
           // Reference is large enough for a relative comparison
           if (std::abs(val - ref) < reltol * std::abs(ref)) {
             return true;
