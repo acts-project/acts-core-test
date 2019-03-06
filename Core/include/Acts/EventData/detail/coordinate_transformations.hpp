@@ -106,20 +106,6 @@ namespace detail {
                       //~ const ActsVectorD<3>&  mom,
                       //~ double                 charge,
                       //~ const Surface&         s)
-    //~ {
-      //~ using VectorHelpers::phi;
-      //~ using VectorHelpers::theta;
-      //~ ActsVectorD<2> localPosition;
-      //~ s.globalToLocal(gctx, pos, mom, localPosition);
-      //~ ParVector_t result = ParVector_t::Zero();
-      //~ result(0)          = localPosition(0);
-      //~ result(1)          = localPosition(1);
-      //~ result(2)          = phi(mom);
-      //~ result(3)          = theta(mom);
-      //~ result(4) = ((std::abs(charge) < 1e-4) ? 1. : charge) / mom.norm();
-
-      //~ return result;
-    //~ }
 
     /// @brief static calculate the charge from the track parameterisation
     ///

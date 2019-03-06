@@ -34,7 +34,7 @@ enum ParDef : unsigned int {
   TrackParsDim
 };
 
-constexpr unsigned int GlobalParsDim = 7;
+constexpr unsigned int GlobalParsDim = 8;
 
 using ParID_t    = ParDef;
 using ParValue_t = double;

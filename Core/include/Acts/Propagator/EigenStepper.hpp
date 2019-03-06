@@ -309,33 +309,37 @@ public:
     return corrector_t(state.startPos, state.startDir, state.pathAccumulated);
   }
 
-  /// Method for on-demand transport of the covariance
-  /// to a new curvilinear frame at current  position,
-  /// or direction of the state
-  ///
-  /// @param [in,out] state State of the stepper
-  /// @param [in] reinitialize is a flag to steer whether the state should be
-  /// reinitialized at the new position
-  ///
-  /// @return the full transport jacobian
-  void
-  covarianceTransport(State& state, bool reinitialize = false) const;
+  //~ /// Method for on-demand transport of the covariance
+  //~ /// to a new curvilinear frame at current  position,
+  //~ /// or direction of the state
+  //~ ///
+  //~ /// @param [in,out] state State of the stepper
+  //~ /// @param [in] reinitialize is a flag to steer whether the state should be
+  //~ /// reinitialized at the new position
+  //~ ///
+  //~ /// @return the full transport jacobian
+  //~ void
+  //~ covarianceTransport(State& state, bool reinitialize = false) const;
 
-  /// Method for on-demand transport of the covariance
-  /// to a new curvilinear frame at current position,
-  /// or direction of the state
-  ///
-  /// @tparam surface_t the Surface type
-  ///
-  /// @param [in,out] state State of the stepper
-  /// @param [in] surface is the surface to which the covariance is forwarded to
-  /// @param [in] reinitialize is a flag to steer whether the state should be
-  /// reinitialized at the new position
-  /// @note no check is done if the position is actually on the surface
-  void
-  covarianceTransport(State&         state,
-                      const Surface& surface,
-                      bool           reinitialize = true) const;
+  //~ /// Method for on-demand transport of the covariance
+  //~ /// to a new curvilinear frame at current position,
+  //~ /// or direction of the state
+  //~ ///
+  //~ /// @tparam surface_t the Surface type
+  //~ ///
+  //~ /// @param [in,out] state State of the stepper
+  //~ /// @param [in] surface is the surface to which the covariance is forwarded to
+  //~ /// @param [in] reinitialize is a flag to steer whether the state should be
+  //~ /// reinitialized at the new position
+  //~ /// @note no check is done if the position is actually on the surface
+  //~ void
+  //~ covarianceTransport(State&         state,
+                      //~ const Surface& surface,
+                      //~ bool           reinitialize = true) const;
+
+#ifdef ACTS_STEPPER_COVARIANCETRANSPORT_PLUGIN
+#include ACTS_STEPPER_COVARIANCETRANSPORT_PLUGIN
+#endif
 
   /// Perform a Runge-Kutta track parameter propagation step
   ///
