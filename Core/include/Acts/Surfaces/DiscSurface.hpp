@@ -258,7 +258,7 @@ public:
   /// @param dir The direction at of the parameters
   ///
   /// @param pars The paranmeters vector
-  void initJacobianToGlobal(const GeometryContext& gctx,TrackToGlobalMatrix>& jacobian,
+  void initJacobianToGlobal(const GeometryContext& gctx,TrackToGlobalMatrix& jacobian,
                             const Vector3D&       gpos,
                             const Vector3D&       dir,
                             const TrackVector& pars) const final;

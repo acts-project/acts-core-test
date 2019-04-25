@@ -7,7 +7,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 inline void
-Surface::initJacobianToGlobal(TrackToGlobalMatrix& jacobian,
+Surface::initJacobianToGlobal(const GeometryContext& gctx, TrackToGlobalMatrix& jacobian,
                               const Vector3D&      gpos,
                               const Vector3D&      dir,
                               const TrackVector& /*pars*/) const
@@ -29,7 +29,7 @@ Surface::initJacobianToGlobal(TrackToGlobalMatrix& jacobian,
   const double cos_phi       = x * inv_sin_theta;
   const double sin_phi       = y * inv_sin_theta;
   // retrieve the reference frame
-  const auto rframe = referenceFrame(gpos, dir);
+  const auto rframe = referenceFrame(gctx, gpos, dir);
   // the local error components - given by reference frame
   jacobian.topLeftCorner<3, 2>() = rframe.topLeftCorner<3, 2>();
   // the momentum components
@@ -42,7 +42,7 @@ Surface::initJacobianToGlobal(TrackToGlobalMatrix& jacobian,
 }
 
 inline const RotationMatrix3D
-Surface::initJacobianToLocal(GlobalToTrackMatrix& jacobian,
+Surface::initJacobianToLocal(const GeometryContext& gctx, GlobalToTrackMatrix& jacobian,
                              const Vector3D&      gpos,
                              const Vector3D&      dir) const
 {
@@ -55,7 +55,7 @@ Surface::initJacobianToLocal(GlobalToTrackMatrix& jacobian,
   const double sin_phi_over_sin_theta = y * inv_sin_theta_2;
   const double inv_sin_theta          = sqrt(inv_sin_theta_2);
   // The measurement frame of the surface
-  RotationMatrix3D rframeT = referenceFrame(gpos, dir).transpose();
+  RotationMatrix3D rframeT = referenceFrame(gctx, gpos, dir).transpose();
   // given by the refernece frame
   jacobian.block<2, 3>(0, 0) = rframeT.block<2, 3>(0, 0);
   // Directional and momentum elements for reference frame surface
@@ -68,7 +68,7 @@ Surface::initJacobianToLocal(GlobalToTrackMatrix& jacobian,
 }
 
 inline const TrackRowVector
-Surface::derivativeFactors(const Vector3D& /*gpos*/,
+Surface::derivativeFactors(const GeometryContext& gctx, const Vector3D& /*gpos*/,
                            const Vector3D&            dir,
                            const RotationMatrix3D&    rft,
                            const TrackToGlobalMatrix& jac) const

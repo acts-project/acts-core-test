@@ -7,7 +7,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 inline void
-DiscSurface::initJacobianToGlobal(TrackToGlobalMatrix& jacobian,
+DiscSurface::initJacobianToGlobal(const GeometryContext& gctx, TrackToGlobalMatrix& jacobian,
                                   const Vector3D&      gpos,
                                   const Vector3D&      dir,
                                   const TrackVector&   pars) const
@@ -29,7 +29,7 @@ DiscSurface::initJacobianToGlobal(TrackToGlobalMatrix& jacobian,
   const double cos_phi       = x * inv_sin_theta;
   const double sin_phi       = y * inv_sin_theta;
   // retrieve the reference frame
-  const auto rframe = referenceFrame(gpos, dir);
+  const auto rframe = referenceFrame(gctx, gpos, dir);
 
   // special polar coordinates for the Disc
   double lrad     = pars[eLOC_0];
@@ -52,7 +52,7 @@ DiscSurface::initJacobianToGlobal(TrackToGlobalMatrix& jacobian,
 }
 
 inline const RotationMatrix3D
-DiscSurface::initJacobianToLocal(GlobalToTrackMatrix& jacobian,
+DiscSurface::initJacobianToLocal(const GeometryContext& gctx, GlobalToTrackMatrix& jacobian,
                                  const Vector3D&      gpos,
                                  const Vector3D&      dir) const
 {
@@ -67,9 +67,9 @@ DiscSurface::initJacobianToLocal(GlobalToTrackMatrix& jacobian,
   const double sin_phi_over_sin_theta = y * inv_sin_theta_2;
   const double inv_sin_theta          = sqrt(inv_sin_theta_2);
   // The measurement frame of the surface
-  RotationMatrix3D rframeT = referenceFrame(gpos, dir).transpose();
+  RotationMatrix3D rframeT = referenceFrame(gctx, gpos, dir).transpose();
   // calculate the transformation to local coorinates
-  const Vector3D pos_loc = transform().inverse() * gpos;
+  const Vector3D pos_loc = transform(gctx).inverse() * gpos;
   const double   lr      = perp(pos_loc);
   const double   lphi    = phi(pos_loc);
   const double   lcphi   = cos(lphi);

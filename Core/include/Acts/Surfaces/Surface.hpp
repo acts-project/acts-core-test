@@ -431,7 +431,7 @@ public:
   ///
   /// @return a five-dim vector
   virtual const TrackRowVector
-  derivativeFactors(const const GeometryContext& gctx, const Vector3D&         gpos,
+  derivativeFactors(const GeometryContext& gctx, const Vector3D&         gpos,
                     const Vector3D&         dir,
                     const RotationMatrix3D& rft,
                     const TrackToGlobalMatrix& jac) const;

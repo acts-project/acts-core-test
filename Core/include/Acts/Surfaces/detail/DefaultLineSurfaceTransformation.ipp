@@ -7,7 +7,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 inline void
-LineSurface::initJacobianToGlobal(TrackToGlobalMatrix& jacobian,
+LineSurface::initJacobianToGlobal(const GeometryContext& gctx, TrackToGlobalMatrix& jacobian,
                                   const Vector3D&      gpos,
                                   const Vector3D&      dir,
                                   const TrackVector&   pars) const
@@ -29,7 +29,7 @@ LineSurface::initJacobianToGlobal(TrackToGlobalMatrix& jacobian,
   const double cos_phi       = x * inv_sin_theta;
   const double sin_phi       = y * inv_sin_theta;
   // retrieve the reference frame
-  const auto rframe = referenceFrame(gpos, dir);
+  const auto rframe = referenceFrame(gctx, gpos, dir);
   // the local error components - given by the reference frame
   jacobian.topLeftCorner<3, 2>() = rframe.topLeftCorner<3, 2>();
   // the momentum components
@@ -57,13 +57,13 @@ LineSurface::initJacobianToGlobal(TrackToGlobalMatrix& jacobian,
 }
 
 inline const TrackRowVector
-LineSurface::derivativeFactors(const Vector3D&            pos,
+LineSurface::derivativeFactors(const GeometryContext& gctx, const Vector3D&            pos,
                                const Vector3D&            dir,
                                const RotationMatrix3D&    rft,
                                const TrackToGlobalMatrix& jac) const
 {
   // the vector between position and center
-  ActsRowVectorD<3> pc = (pos - center()).transpose();
+  ActsRowVectorD<3> pc = (pos - center(gctx)).transpose();
   // the longitudinal component vector (alogn local z)
   ActsRowVectorD<3> locz = rft.block<1, 3>(1, 0);
   // build the norm vector comonent by subtracting the longitudinal one

@@ -22,7 +22,7 @@ global2curvilinear(const ActsVectorD<3>& /*pos*/,
 }
 
 static ParVector_t
-global2parameters(const ActsVectorD<3>& pos,
+global2parameters(const GeometryContext& gctx, const ActsVectorD<3>& pos,
                   const ActsVectorD<3>& mom,
                   double                charge,
                   const Surface&        s)
@@ -30,7 +30,7 @@ global2parameters(const ActsVectorD<3>& pos,
   using VectorHelpers::phi;
   using VectorHelpers::theta;
   ActsVectorD<2> localPosition;
-  s.globalToLocal(pos, mom, localPosition);
+  s.globalToLocal(gctx, pos, mom, localPosition);
   ParVector_t result = ParVector_t::Zero();
   result(0)          = localPosition(0);
   result(1)          = localPosition(1);
