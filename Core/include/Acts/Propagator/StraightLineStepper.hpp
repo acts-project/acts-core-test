@@ -209,7 +209,7 @@ public:
                                surface.getSharedPtr());
     // Create the bound state
     BoundState bState{std::move(parameters),
-                      ActsMatrixD<5, 5>::Identity(),
+                      TrackMatrix::Identity(),
                       state.pathAccumulated};
     /// Return the State
     return bState;
@@ -233,7 +233,7 @@ public:
         nullptr, state.pos, state.p * state.dir, state.q);
     // Create the bound state
     CurvilinearState curvState{std::move(parameters),
-                               ActsMatrixD<5, 5>::Identity(),
+                               TrackMatrix::Identity(),
                                state.pathAccumulated};
     /// Return the State
     return curvState;

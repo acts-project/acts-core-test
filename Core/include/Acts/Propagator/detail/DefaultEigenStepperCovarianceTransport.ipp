@@ -78,10 +78,9 @@ covarianceTransport(State& state, bool reinitialize = false) const
   state.jacobian = jacFull * state.jacobian;
 }
 
-template <typename surface_t>
 void
 covarianceTransport(State&           state,
-                    const surface_t& surface,
+                    const Surface& surface,
                     bool             reinitialize = true) const
 {
   using VectorHelpers::phi;
@@ -89,11 +88,11 @@ covarianceTransport(State&           state,
   // Initialize the transport final frame jacobian
   GlobalToTrackMatrix jacToLocal = GlobalToTrackMatrix::Zero();
   // initalize the jacobian to local, returns the transposed ref frame
-  auto rframeT = surface.initJacobianToLocal(jacToLocal, state.pos, state.dir);
+  auto rframeT = surface.initJacobianToLocal(state.geoContext, jacToLocal, state.pos, state.dir);
   // Update the jacobian with the transport from the steps
   state.jacToGlobal = state.jacTransport * state.jacToGlobal;
   // calculate the form factors for the derivatives
-  const TrackRowVector sVec = surface.derivativeFactors(
+  const TrackRowVector sVec = surface.derivativeFactors(state.geoContext,
       state.pos, state.dir, rframeT, state.jacToGlobal);
   // the full jacobian is ([to local] jacobian) * ([transport] jacobian)
   const TrackMatrix jacFull
@@ -113,14 +112,14 @@ covarianceTransport(State&           state,
     state.derivative = GlobalVector::Zero();
     // fill the jacobian to global for next transport
     Vector2D loc{0., 0.};
-    surface.globalToLocal(state.pos, state.dir, loc);
+    surface.globalToLocal(state.geoContext, state.pos, state.dir, loc);
     TrackVector pars = TrackVector::Zero();
     pars(0)          = loc[eLOC_0];
     pars(1)          = loc[eLOC_1];
     pars(2)          = phi(state.dir);
     pars(3)          = theta(state.dir);
     pars(4)          = state.q / state.p;
-    surface.initJacobianToGlobal(state.jacToGlobal, state.pos, state.dir, pars);
+    surface.initJacobianToGlobal(state.geoContext, state.jacToGlobal, state.pos, state.dir, pars);
   }
   // Store The global and bound jacobian (duplication for the moment)
   state.jacobian = jacFull * state.jacobian;

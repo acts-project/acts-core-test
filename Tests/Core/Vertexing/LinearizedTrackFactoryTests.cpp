@@ -104,11 +104,11 @@ namespace Test {
       // Construct random track parameters
       TrackParametersBase::ParVector_t paramVec;
       paramVec << d0v + d0Dist(gen), z0v + z0Dist(gen), phiDist(gen),
-          thetaDist(gen), q / pTDist(gen);
+          thetaDist(gen), q / pTDist(gen), 0.;
 
       // Fill vector of track objects with simple covariance matrix
-      std::unique_ptr<ActsSymMatrixD<5>> covMat
-          = std::make_unique<ActsSymMatrixD<5>>();
+      std::unique_ptr<TrackSymMatrix> covMat
+          = std::make_unique<TrackSymMatrix>();
 
       // Resolutions
       double resD0 = resIPDist(gen);
@@ -117,9 +117,12 @@ namespace Test {
       double resTh = resAngDist(gen);
       double resQp = resQoPDist(gen);
 
-      (*covMat) << resD0 * resD0, 0., 0., 0., 0., 0., resZ0 * resZ0, 0., 0., 0.,
-          0., 0., resPh * resPh, 0., 0., 0., 0., 0., resTh * resTh, 0., 0., 0.,
-          0., 0., resQp * resQp;
+      (*covMat) << resD0 * resD0, 0., 0., 0., 0., 0., 
+				   0., resZ0 * resZ0, 0., 0., 0., 0., 
+				   0., 0., resPh * resPh, 0., 0., 0., 
+				   0., 0., 0., resTh * resTh, 0., 0., 
+				   0., 0., 0., 0., 0., resQp * resQp, 
+				   0., 0., 0., 0., 0., 0.;
       tracks.push_back(BoundParameters(
           tgContext, std::move(covMat), paramVec, perigeeSurface));
     }
@@ -131,10 +134,10 @@ namespace Test {
                            Propagator<EigenStepper<ConstantBField>>>
         linFactory(ltConfig);
 
-    ActsVectorD<5>    vec5Zero = ActsVectorD<5>::Zero();
-    ActsSymMatrixD<5> mat5Zero = ActsSymMatrixD<5>::Zero();
+    TrackVector    vec6Zero = TrackVector::Zero();
+    TrackSymMatrix mat6Zero = TrackSymMatrix::Zero();
     Vector3D          vec3Zero = Vector3D::Zero();
-    ActsMatrixD<5, 3> mat53Zero = ActsMatrixD<5, 3>::Zero();
+    ActsMatrixD<TrackParsDim, 3> mat63Zero = ActsMatrixD<TrackParsDim, 3>::Zero();
 
     for (const BoundParameters& parameters : tracks) {
       LinearizedTrack linTrack = linFactory
@@ -145,12 +148,12 @@ namespace Test {
                                                      propagator)
                                      .value();
 
-      BOOST_CHECK_NE(linTrack.parametersAtPCA, vec5Zero);
-      BOOST_CHECK_NE(linTrack.covarianceAtPCA, mat5Zero);
+      BOOST_CHECK_NE(linTrack.parametersAtPCA, vec6Zero);
+      BOOST_CHECK_NE(linTrack.covarianceAtPCA, mat6Zero);
       BOOST_CHECK_EQUAL(linTrack.linearizationPoint, vec3Zero);
-      BOOST_CHECK_NE(linTrack.positionJacobian, mat53Zero);
-      BOOST_CHECK_NE(linTrack.momentumJacobian, mat53Zero);
-      BOOST_CHECK_NE(linTrack.constantTerm, vec5Zero);
+      BOOST_CHECK_NE(linTrack.positionJacobian, mat63Zero);
+      BOOST_CHECK_NE(linTrack.momentumJacobian, mat63Zero);
+      BOOST_CHECK_NE(linTrack.constantTerm, vec6Zero);
     }
   }
 
@@ -171,10 +174,10 @@ namespace Test {
                            Propagator<EigenStepper<ConstantBField>>>
         linFactory(ltConfig);
 
-    ActsVectorD<5>    vec5Zero = ActsVectorD<5>::Zero();
-    ActsSymMatrixD<5> mat5Zero = ActsSymMatrixD<5>::Zero();
+    TrackVector    vec6Zero = TrackVector::Zero();
+   TrackSymMatrix mat6Zero = TrackSymMatrix::Zero();
     Vector3D          vec3Zero = Vector3D::Zero();
-    ActsMatrixD<5, 3> mat53Zero = ActsMatrixD<5, 3>::Zero();
+    ActsMatrixD<TrackParsDim, 3> mat63Zero = ActsMatrixD<TrackParsDim, 3>::Zero();
 
     LinearizedTrack linTrack = linFactory
                                    .linearizeTrack(tgContext,
@@ -184,12 +187,12 @@ namespace Test {
                                                    propagator)
                                    .value();
 
-    BOOST_CHECK_EQUAL(linTrack.parametersAtPCA, vec5Zero);
-    BOOST_CHECK_EQUAL(linTrack.covarianceAtPCA, mat5Zero);
+    BOOST_CHECK_EQUAL(linTrack.parametersAtPCA, vec6Zero);
+    BOOST_CHECK_EQUAL(linTrack.covarianceAtPCA, mat6Zero);
     BOOST_CHECK_EQUAL(linTrack.linearizationPoint, vec3Zero);
-    BOOST_CHECK_EQUAL(linTrack.positionJacobian, mat53Zero);
-    BOOST_CHECK_EQUAL(linTrack.momentumJacobian, mat53Zero);
-    BOOST_CHECK_EQUAL(linTrack.constantTerm, vec5Zero);
+    BOOST_CHECK_EQUAL(linTrack.positionJacobian, mat63Zero);
+    BOOST_CHECK_EQUAL(linTrack.momentumJacobian, mat63Zero);
+    BOOST_CHECK_EQUAL(linTrack.constantTerm, vec6Zero);
   }
 
 }  // namespace Test

@@ -204,11 +204,11 @@ namespace Test {
         // Construct random track parameters
         TrackParametersBase::ParVector_t paramVec;
         paramVec << d0V + d0Dist(gen), z0V + z0Dist(gen), phiDist(gen),
-            thetaDist(gen), q / pTDist(gen);
+            thetaDist(gen), q / pTDist(gen), 0.;
 
         // Fill vector of track objects with simple covariance matrix
-        std::unique_ptr<ActsSymMatrixD<5>> covMat
-            = std::make_unique<ActsSymMatrixD<5>>();
+        std::unique_ptr<TrackSymMatrix> covMat
+            = std::make_unique<TrackSymMatrix>();
 
         // Resolutions
         double resD0 = resIPDist(gen);
@@ -217,9 +217,9 @@ namespace Test {
         double resTh = resAngDist(gen);
         double resQp = resQoPDist(gen);
 
-        (*covMat) << resD0 * resD0, 0., 0., 0., 0., 0., resZ0 * resZ0, 0., 0.,
-            0., 0., 0., resPh * resPh, 0., 0., 0., 0., 0., resTh * resTh, 0.,
-            0., 0., 0., 0., resQp * resQp;
+        (*covMat) << resD0 * resD0, 0., 0., 0., 0., 0., 0., resZ0 * resZ0, 0., 0.,
+            0., 0., 0., 0., resPh * resPh, 0., 0., 0., 0., 0., 0., resTh * resTh, 0.,
+            0., 0., 0., 0., 0., resQp * resQp, 0., 0., 0., 0., 0., 0., 0.;
         tracks.push_back(BoundParameters(
             tgContext, std::move(covMat), paramVec, perigeeSurface));
       }
@@ -356,11 +356,11 @@ namespace Test {
         // Construct random track parameters
         TrackParametersBase::ParVector_t paramVec;
         paramVec << d0V + d0Dist(gen), z0V + z0Dist(gen), phiDist(gen),
-            thetaDist(gen), q / pTDist(gen);
+            thetaDist(gen), q / pTDist(gen), 0.;
 
         // Fill vector of track objects with simple covariance matrix
-        std::unique_ptr<ActsSymMatrixD<5>> covMat
-            = std::make_unique<ActsSymMatrixD<5>>();
+        std::unique_ptr<TrackSymMatrix> covMat
+            = std::make_unique<TrackSymMatrix>();
 
         // Resolutions
         double resD0 = resIPDist(gen);
@@ -369,9 +369,12 @@ namespace Test {
         double resTh = resAngDist(gen);
         double resQp = resQoPDist(gen);
 
-        (*covMat) << resD0 * resD0, 0., 0., 0., 0., 0., resZ0 * resZ0, 0., 0.,
-            0., 0., 0., resPh * resPh, 0., 0., 0., 0., 0., resTh * resTh, 0.,
-            0., 0., 0., 0., resQp * resQp;
+        (*covMat) << resD0 * resD0, 0., 0., 0., 0., 0.,
+					 0., resZ0 * resZ0, 0., 0., 0., 0., 
+					 0., 0., resPh * resPh, 0., 0., 0., 
+					 0., 0., 0., resTh * resTh, 0., 0., 
+					 0., 0., 0., 0., resQp * resQp, 0., 
+					 0., 0., 0., 0., 0., 0.;
         tracks.push_back(InputTrack(BoundParameters(
             tgContext, std::move(covMat), paramVec, perigeeSurface)));
       }

@@ -32,9 +32,9 @@ Acts::LinearizedTrackFactory<bfield_t,
       = Surface::makeShared<PerigeeSurface>(linPoint);
 
   // Variables to store track params and position at PCA to linPoint
-  ActsVectorD<5>    paramsAtPCA;
+  TrackVector    paramsAtPCA;
   Vector3D          positionAtPCA;
-  ActsSymMatrixD<5> parCovarianceAtPCA;
+  TrackSymMatrix parCovarianceAtPCA;
 
   PropagatorOptions<action_list_t, aborter_list_t> pOptions(gctx, mctx);
 
@@ -87,7 +87,7 @@ Acts::LinearizedTrackFactory<bfield_t,
   /// F(V, p_i) at PCA in Billoir paper
   /// (see FullBilloirVertexFitter.hpp for paper reference,
   /// Page 140, Eq. (2) )
-  ActsVectorD<5> predParamsAtPCA;
+  TrackVector predParamsAtPCA;
 
   int sgnX = (X < 0.) ? -1 : 1;
   int sgnY = (Y < 0.) ? -1 : 1;
@@ -111,7 +111,7 @@ Acts::LinearizedTrackFactory<bfield_t,
   predParamsAtPCA[4] = qOvP;
 
   // Fill position jacobian (D_k matrix), Eq. 5.36 in Ref(1)
-  ActsMatrixD<5, 3> positionJacobian;
+  ActsMatrixD<TrackParsDim, 3> positionJacobian;
   positionJacobian.setZero();
   // First row
   positionJacobian(0, 0) = -sgnH * X / S;
@@ -127,7 +127,7 @@ Acts::LinearizedTrackFactory<bfield_t,
   positionJacobian(2, 1) = X / S2;
 
   // Fill momentum jacobian (E_k matrix), Eq. 5.37 in Ref(1)
-  ActsMatrixD<5, 3> momentumJacobian;
+  ActsMatrixD<TrackParsDim, 3> momentumJacobian;
   momentumJacobian.setZero();
 
   double R    = X * cosPhiV + Y * sinPhiV;
@@ -157,7 +157,7 @@ Acts::LinearizedTrackFactory<bfield_t,
   momentumJacobian(4, 2) = 1.;
 
   // const term F(V_0, p_0) in Talyor expansion
-  ActsVectorD<5> constTerm = predParamsAtPCA - positionJacobian * positionAtPCA
+  TrackVector constTerm = predParamsAtPCA - positionJacobian * positionAtPCA
       - momentumJacobian * momentumAtPCA;
 
   return LinearizedTrack(paramsAtPCA,
