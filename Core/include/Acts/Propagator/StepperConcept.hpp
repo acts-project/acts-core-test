@@ -63,7 +63,6 @@ namespace concept {
     template <typename S>
     constexpr bool StepperStateConcept
       = require<has_member<S, cov_transport_t, bool>,
-                has_member<S, cov_t, BoundSymMatrix>,
                 has_member<S, nav_dir_t, NavigationDirection>,
                 has_member<S, path_accumulated_t, double>,
                 has_member<S, step_size_t, detail::ConstrainedStep>
@@ -77,16 +76,20 @@ namespace concept {
         static_assert(state_exists, "State type not found");
         constexpr static bool jacobian_exists = exists<jacobian_t, S>;
         static_assert(jacobian_exists, "Jacobian type not found");
+		/*
         constexpr static bool covariance_exists = exists<covariance_t, S>;
         static_assert(covariance_exists, "Covariance type not found");
+		*/
         constexpr static bool bound_state_exists = exists<bound_state_t, S>;
         static_assert(bound_state_exists, "BoundState type not found");
         constexpr static bool curvilinear_state_exists = exists<curvilinear_state_t, S>;
         static_assert(curvilinear_state_exists, "CurvilinearState type not found");
         constexpr static bool return_type_exists = exists<return_t, S>;
         static_assert(return_type_exists, "return_parameter_type not found");
+		/*
         constexpr static bool get_field_exists = has_method<const S, Vector3D, get_field_t, state&, const Vector3D&>;
         static_assert(get_field_exists, "getField method not found");
+		*/
         constexpr static bool position_exists = has_method<const S, Vector3D, position_t, const state&>;
         static_assert(position_exists, "position method not found");
         constexpr static bool direction_exists = has_method<const S, Vector3D, direction_t, const state&>;
@@ -98,38 +101,46 @@ namespace concept {
         constexpr static bool time_exists = has_method<const S, double, timet, const state&>;
         static_assert(time_exists, "time method not found");
         constexpr static bool surface_reached_exists = has_method<const S, bool, surface_reached_t, const state&, const Surface*>;
+		/* multiStepper will change the status of state, allow State to be non-const
         static_assert(surface_reached_exists, "surfaceReached method not found");
+		*/
         constexpr static bool bound_state_method_exists= has_method<const S, typename S::BoundState, bound_state_method_t, state&, const Surface&, bool>;
         static_assert(bound_state_method_exists, "boundState method not found");
         constexpr static bool curvilinear_state_method_exists = has_method<const S, typename S::CurvilinearState, curvilinear_state_method_t, state&, bool>;
         static_assert(curvilinear_state_method_exists, "curvilinearState method not found");
+		/* multiStepper does not contain the methods currently
         constexpr static bool update_method_exists = require<has_method<const S, void, update_t, state&, const BoundParameters&>,
                                                              has_method<const S, void, update_t, state&, const Vector3D&, const Vector3D&, double, double>>;
         static_assert(update_method_exists, "update method not found");
+		*/
+		/*
         constexpr static bool corrector_exists = has_method<const S, typename S::Corrector, corrector_t, state&>;
         static_assert(corrector_exists, "corrector method not found");
+		*/
+		/* no need in multi stepper, cov transport only in single component
         constexpr static bool covariance_transport_exists = require<has_method<const S, void, covariance_transport_t, state&, bool>,
                                                                     has_method<const S, void, covariance_transport_t, state&, const Surface&, bool>>;
         static_assert(covariance_transport_exists, "covarianceTransport method not found");
+		*/
 
         constexpr static bool value = require<state_exists,
                                               jacobian_exists,
-                                              covariance_exists,
+                                              //covariance_exists,
                                               bound_state_exists,
                                               curvilinear_state_exists,
                                               return_type_exists,
-                                              get_field_exists,
+                                              //get_field_exists,
                                               position_exists,
                                               direction_exists,
                                               momentum_exists,
                                               charge_exists,
                                               time_exists,
-                                              surface_reached_exists,
+                                              //surface_reached_exists,
                                               bound_state_method_exists,
-                                              curvilinear_state_method_exists,
-                                              update_method_exists,
-                                              corrector_exists,
-                                              covariance_transport_exists>;
+                                              curvilinear_state_method_exists>;
+                                              //update_method_exists,
+                                              //corrector_exists>;
+                                              //covariance_transport_exists>;
       };
   // clang-format on
   }  // namespace Stepper

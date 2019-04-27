@@ -54,7 +54,9 @@ struct stepper_extension_list_impl {
   /// - then broadcasts the extension call to the remaining tuple
   template <typename propagator_state_t, typename stepper_t, typename... T>
   static bool k(std::tuple<T...>& obs_tuple, const propagator_state_t& state,
-                const stepper_t& stepper, Vector3D& knew,
+                const stepper_t& stepper, 
+				const typename stepper_t::state_type& component_state,
+				Vector3D& knew,
                 const Vector3D& bField,
                 const std::array<bool, sizeof...(T)>& validExtensions,
                 const int i = 0, const double h = 0,
@@ -62,15 +64,15 @@ struct stepper_extension_list_impl {
     // If element is invalid: continue
     if (!std::get<N - 1>(validExtensions)) {
       return stepper_extension_list_impl<N - 1>::k(
-          obs_tuple, state, stepper, knew, bField, validExtensions, i, h,
+          obs_tuple, state, stepper, component_state, knew, bField, validExtensions, i, h,
           kprev);
     }
 
     // Continue as long as evaluations are 'true'
-    if (std::get<N - 1>(obs_tuple).k(state, stepper, knew, bField, i, h,
+    if (std::get<N - 1>(obs_tuple).k(state, stepper, component_state, knew, bField, i, h,
                                      kprev)) {
       return stepper_extension_list_impl<N - 1>::k(
-          obs_tuple, state, stepper, knew, bField, validExtensions, i, h,
+          obs_tuple, state, stepper, component_state, knew, bField, validExtensions, i, h,
           kprev);
     } else {
       // Break at false
@@ -83,19 +85,19 @@ struct stepper_extension_list_impl {
   /// - then broadcasts the extension call to the remaining tuple
   template <typename propagator_state_t, typename stepper_t, typename... T>
   static bool finalize(const std::tuple<T...>& obs_tuple,
-                       propagator_state_t& state, const stepper_t& stepper,
+                       propagator_state_t& state, const stepper_t& stepper, typename stepper_t::state_type& component_state,
                        const double h, FreeMatrix& D,
                        const std::array<bool, sizeof...(T)>& validExtensions) {
     // If element is invalid: continue
     if (!std::get<N - 1>(validExtensions)) {
       return stepper_extension_list_impl<N - 1>::finalize(
-          obs_tuple, state, stepper, h, D, validExtensions);
+          obs_tuple, state, stepper, component_state, h, D, validExtensions);
     }
 
     // Continue as long as evaluations are 'true'
-    if (std::get<N - 1>(obs_tuple).finalize(state, stepper, h, D)) {
+    if (std::get<N - 1>(obs_tuple).finalize(state, stepper, component_state, h, D)) {
       return stepper_extension_list_impl<N - 1>::finalize(
-          obs_tuple, state, stepper, h, D, validExtensions);
+          obs_tuple, state, stepper, component_state, h, D, validExtensions);
     } else {
       // Break at false
       return false;
@@ -107,19 +109,19 @@ struct stepper_extension_list_impl {
   /// - then broadcasts the extension call to the remaining tuple
   template <typename propagator_state_t, typename stepper_t, typename... T>
   static bool finalize(const std::tuple<T...>& obs_tuple,
-                       propagator_state_t& state, const stepper_t& stepper,
+                       propagator_state_t& state, const stepper_t& stepper, typename stepper_t::state_type& component_state,
                        const double h,
                        const std::array<bool, sizeof...(T)>& validExtensions) {
     // If element is invalid: continue
     if (!std::get<N - 1>(validExtensions)) {
       return stepper_extension_list_impl<N - 1>::finalize(
-          obs_tuple, state, stepper, h, validExtensions);
+          obs_tuple, state, stepper, component_state, h, validExtensions);
     }
 
     // Continue as long as evaluations are 'true'
-    if (std::get<N - 1>(obs_tuple).finalize(state, stepper, h)) {
+    if (std::get<N - 1>(obs_tuple).finalize(state, stepper, component_state, h)) {
       return stepper_extension_list_impl<N - 1>::finalize(
-          obs_tuple, state, stepper, h, validExtensions);
+          obs_tuple, state, stepper, component_state, h, validExtensions);
     } else {
       // Break at false
       return false;
@@ -135,6 +137,7 @@ struct stepper_extension_list_impl<0u> {
   static void bid(const std::tuple<T...>& /*unused*/,
                   const propagator_state_t& /*unused*/,
                   const stepper_t& /*unused*/,
+				  const typename stepper_t::state_type& /*unused*/,
                   std::array<int, sizeof...(T)>& /*unused*/) {}
 
   /// The empty extension list call implementation
@@ -142,6 +145,7 @@ struct stepper_extension_list_impl<0u> {
   static bool k(std::tuple<T...>& /*unused*/,
                 const propagator_state_t& /*unused*/,
                 const stepper_t& /*unused*/, Vector3D& /*unused*/,
+				const typename stepper_t::state_type& /*unused*/,
                 const Vector3D& /*unused*/,
                 const std::array<bool, sizeof...(T)>& /*unused*/,
                 const int /*unused*/, const double /*unused*/,
@@ -153,7 +157,9 @@ struct stepper_extension_list_impl<0u> {
   template <typename propagator_state_t, typename stepper_t, typename... T>
   static bool finalize(const std::tuple<T...>& /*unused*/,
                        propagator_state_t& /*unused*/,
-                       const stepper_t& /*unused*/, const double /*unused*/,
+                       const stepper_t& /*unused*/,
+					   typename stepper_t::state_type& /*unused*/,
+					   const double /*unused*/,
                        FreeMatrix& /*unused*/,
                        const std::array<bool, sizeof...(T)>& /*unused*/) {
     return true;
@@ -163,7 +169,9 @@ struct stepper_extension_list_impl<0u> {
   template <typename propagator_state_t, typename stepper_t, typename... T>
   static bool finalize(const std::tuple<T...>& /*unused*/,
                        propagator_state_t& /*unused*/,
-                       const stepper_t& /*unused*/, const double /*unused*/,
+                       const stepper_t& /*unused*/,
+					   typename stepper_t::state_type& /*unused*/,
+					   const double /*unused*/,
                        const std::array<bool, sizeof...(T)>& /*unused*/) {
     return true;
   }

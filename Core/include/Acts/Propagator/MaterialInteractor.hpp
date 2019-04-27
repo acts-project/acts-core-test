@@ -11,6 +11,8 @@
 #include <cmath>
 #include <sstream>
 #include <utility>
+#include "Acts/Extrapolator/detail/InteractionFormulas.hpp"
+#include "Acts/Extrapolator/detail/MaterialEffect.hpp"
 #include "Acts/Material/ISurfaceMaterial.hpp"
 #include "Acts/Material/Material.hpp"
 #include "Acts/Material/MaterialProperties.hpp"
@@ -21,7 +23,7 @@
 namespace Acts {
 
 /// @brief The Material interaction struct
-/// It records the surface  and the passed material
+/// It records the surface and the passed material
 /// This is only nessecary recorded when configured
 struct MaterialInteraction {
   /// The material surface
@@ -41,6 +43,17 @@ struct MaterialInteraction {
   /// The (passsed) material properties
   /// it is the material and the actual (corrected) path length
   MaterialProperties materialProperties = MaterialProperties();
+
+  bool
+  operator==(const MaterialInteraction& others) const
+  {
+    if (fabs((this->direction - others.direction).norm()) > 1e-10
+        || fabs((this->position - others.position).norm()) > 1e-10
+        || this->surface != others.surface) {
+      return false;
+    }
+    return true;
+  }
 };
 
 /// The Material interactor struct
@@ -54,12 +67,16 @@ struct MaterialInteractor {
   /// multiple scattering switch on/off
   bool multipleScattering = true;
   /// The scattering formula struct
-  detail::HighlandScattering scattering;
+  detail::HighlandScattering process_scattering;
+  /// apply delta theta/phi on the covariance matrix
+  detail::MultipleScattering multiscattering;
 
   /// Energy loss switch on/off
   bool energyLoss = true;
   /// The energy loss formula struct
-  detail::IonisationLoss ionisationloss;
+  detail::IonisationLoss process_ionisationloss;
+  /// apply dE and delta covariance on the matrix
+  detail::EnergyLoss energyloss;
 
   /// Record material in detail
   bool recordInteractions = false;
@@ -176,32 +193,10 @@ struct MaterialInteractor {
           // Thickness in X0 from without path correction
           double tInX0 = mProperties.thicknessInX0();
           // Retrieve the scattering contribution
-          double sigmaScat = scattering(p, lbeta, tInX0);
-          double sinTheta =
-              std::sin(VectorHelpers::theta(stepper.direction(state.stepping)));
-          double sigmaDeltaPhiSq =
-              sigmaScat * sigmaScat / (sinTheta * sinTheta);
-          double sigmaDeltaThetaSq = sigmaScat * sigmaScat;
-          // Record the material interaction
-          mInteraction.sigmaPhi2 = sigmaDeltaPhiSq;
-          mInteraction.sigmaTheta2 = sigmaDeltaThetaSq;
-          // Good in any case for positive direction
-          if (state.stepping.navDir == forward) {
-            // Just add the multiple scattering component
-            state.stepping.cov(ePHI, ePHI) +=
-                state.stepping.navDir * sigmaDeltaPhiSq;
-            state.stepping.cov(eTHETA, eTHETA) +=
-                state.stepping.navDir * sigmaDeltaThetaSq;
-          } else {
-            // We check if the covariance stays positive
-            double sEphi = state.stepping.cov(ePHI, ePHI);
-            double sEtheta = state.stepping.cov(eTHETA, eTHETA);
-            if (sEphi > sigmaDeltaPhiSq && sEtheta > sigmaDeltaThetaSq) {
-              // Noise removal is not applied if covariance would fall below 0
-              state.stepping.cov(ePHI, ePHI) -= sigmaDeltaPhiSq;
-              state.stepping.cov(eTHETA, eTHETA) -= sigmaDeltaThetaSq;
-            }
-          }
+          double sigmaScat = process_scattering(p, lbeta, tInX0);
+          // apply on the covariance matrix
+          multiscattering(
+              state, stepper, state.stepping, sigmaScat, mInteraction);
         }
 
         // Apply the Energy loss
@@ -211,55 +206,27 @@ struct MaterialInteractor {
           // Calculate gamma
           const double lgamma = E / m;
           // Energy loss and straggling - per unit length
-          std::pair<double, double> eLoss =
-              ionisationloss.dEds(m, lbeta, lgamma, mat, 1_mm);
+          std::pair<double, double> eLoss = process_ionisationloss.dEds(
+              m, lbeta, lgamma, mat, 1. * units::_mm);
           // Apply the energy loss
-          const double dEdl = state.stepping.navDir * eLoss.first;
-          const double dE = mProperties.thickness() * dEdl;
+          const double dEdl   = state.stepping.navDir * eLoss.first;
+          const double dE     = mProperties.thickness() * dEdl;
+          const double sigmaE = state.stepping.navDir * eLoss.second;
           // Screen output
           debugLog(state, [&] {
             std::stringstream dstream;
             dstream << "Energy loss calculated to " << dE / 1_GeV << " GeV";
             return dstream.str();
           });
-          // Check for energy conservation, and only apply momentum change
-          // when kinematically allowed
-          if (E + dE > m) {
-            // Calcuate the new momentum
-            const double newP = std::sqrt((E + dE) * (E + dE) - m * m);
-            // Record the deltaP
-            mInteraction.deltaP = p - newP;
-            // Update the state/momentum
-            stepper.update(
-                state.stepping, stepper.position(state.stepping),
-                stepper.direction(state.stepping),
-                std::copysign(newP, stepper.momentum(state.stepping)),
-                stepper.time(state.stepping));
-          }
-          // Transfer this into energy loss straggling and apply to
-          // covariance:
-          // do that even if you had not applied energy loss due to
-          // the kineamtic limit to catch the cases of deltE < MOP/MPV
-          if (state.stepping.covTransport) {
-            // Calculate the straggling
-            const double sigmaQoverP =
-                mProperties.thickness() * eLoss.second / (lbeta * p * p);
-            // Save the material interaction
-            mInteraction.sigmaQoP2 = sigmaQoverP * sigmaQoverP;
-
-            // Good in any case for positive direction
-            if (state.stepping.navDir == forward) {
-              state.stepping.cov(eQOP, eQOP) +=
-                  state.stepping.navDir * sigmaQoverP * sigmaQoverP;
-            } else {
-              // Check that covariance entry doesn't become negative
-              double sEqop = state.stepping.cov(eQOP, eQOP);
-              if (sEqop > sigmaQoverP * sigmaQoverP) {
-                state.stepping.cov(eQOP, eQOP) +=
-                    state.stepping.navDir * mInteraction.sigmaQoP2;
-              }
-            }
-          }
+          energyloss(state,
+                     stepper,
+                     state.stepping,
+                     p,
+                     m,
+                     E,
+                     dE,
+                     sigmaE,
+                     mInteraction);
         }
 
         // This doesn't cost anything - do it regardless
@@ -278,12 +245,7 @@ struct MaterialInteractor {
     }
   }
 
-  /// Pure observer interface
-  /// This does not apply to the surface collector
-  template <typename propagator_state_t>
-  void operator()(propagator_state_t& /*state*/) const {}
-
- private:
+private:
   /// The private propagation debug logging
   ///
   /// It needs to be fed by a lambda function that returns a string,

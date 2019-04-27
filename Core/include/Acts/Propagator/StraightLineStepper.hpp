@@ -136,10 +136,6 @@ class StraightLineStepper {
     std::reference_wrapper<const GeometryContext> geoContext;
   };
 
-  /// Always use the same propagation state type, independently of the initial
-  /// track parameter type and of the target surface
-  using state_type = State;
-
   /// Return parameter types depend on the propagation mode:
   /// - when propagating to a surface we return BoundParameters
   /// - otherwise CurvilinearParameters
@@ -187,6 +183,31 @@ class StraightLineStepper {
   bool surfaceReached(const State& state, const Surface* surface) const {
     return surface->isOnSurface(state.geoContext, position(state),
                                 direction(state), true);
+  }
+
+  /// @brief Calculates the stepSize of the state in navigator
+  /// @param [in] state State is the Stepper state
+  /// @param [in] surface Surface that is tested
+  /// @param [in] navigator options
+  /// @param [in] navigator corrections
+  //
+  /// targetSurface method
+  template <typename options_t, typename corrector_t>
+  auto
+  targetSurface(State&             state,
+                const Surface*     surface,
+                const options_t&   navOpts,
+                const corrector_t& navCorr) const -> SurfaceIntersection
+  {
+    // Intersect the surface
+    auto surfaceIntersect = surface->surfaceIntersectionEstimate(
+        state.geoContext, state.pos, state.dir, navOpts, navCorr);
+    if (surfaceIntersect) {
+      // update the stepsize
+      double ssize = surfaceIntersect.intersection.pathLength;
+      updateStepSize(state, navCorr, ssize, true);
+    }
+    return surfaceIntersect;
   }
 
   /// Create and return the bound state at the current position
@@ -428,6 +449,29 @@ class StraightLineStepper {
     }
     // Store The global and bound jacobian (duplication for the moment)
     state.jacobian = jacFull * state.jacobian;
+  }
+
+  /// updateStepSize method
+  void
+  updateStepSize(State&                           state,
+                 const VoidIntersectionCorrector& navCorr,
+                 double                           navigationStep,
+                 bool                             release = false) const
+  {
+    state.stepSize.update(navigationStep, cstep::actor, release);
+    if (state.pathAccumulated == 0) navCorr(state.stepSize);
+  }
+
+  void
+  updateStepSize(State& state, double stepSize, cstep::Type type) const
+  {
+    state.stepSize.update(stepSize, type);
+  }
+
+  void
+  releaseStep(State& state, cstep::Type type) const
+  {
+    state.stepSize.release(type);
   }
 
   /// Perform a straight line propagation step

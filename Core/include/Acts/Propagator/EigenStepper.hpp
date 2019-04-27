@@ -63,6 +63,8 @@ class EigenStepper {
   using BoundState = std::tuple<BoundParameters, Jacobian, double>;
   using CurvilinearState = std::tuple<CurvilinearParameters, Jacobian, double>;
 
+  using SurfaceIntersection = ObjectIntersection<Surface>;
+
   /// @brief State for track parameter propagation
   ///
   /// It contains the stepping information and is provided thread local
@@ -182,6 +184,10 @@ class EigenStepper {
     } stepData;
   };
 
+  /// Always use the same propagation state type, independently of the initial
+  /// track parameter type and of the target surface
+  using state_type = State;
+
   /// Return parameter types depend on the propagation mode:
   /// - when propagating to a surface we usually return BoundParameters
   /// - otherwise CurvilinearParameters
@@ -227,6 +233,20 @@ class EigenStepper {
     return surface->isOnSurface(state.geoContext, position(state),
                                 direction(state), true);
   }
+
+  /// @brief Calculates the stepSize of the state in navigator
+  /// @param [in] state State is the Stepper state
+  /// @param [in] surface Surface that is tested
+  /// @param [in] navigator options
+  /// @param [in] navigator corrections
+  //
+  /// @return Boolean statement if there is an intersection
+  template <typename options_t>
+  SurfaceIntersection
+  targetSurface(State&           state,
+                const Surface*   surface,
+                const options_t& navOpts,
+                const Corrector& navCorr) const;
 
   /// Create and return the bound state at the current position
   ///
@@ -279,8 +299,11 @@ class EigenStepper {
               const Vector3D& udirection, double up, double time) const;
 
   /// Return a corrector
-  corrector_t corrector(State& state) const {
-    return corrector_t(state.startPos, state.startDir, state.pathAccumulated);
+  template <typename state_type_t>
+  Corrector
+  corrector(state_type_t& state) const
+  {
+    return Corrector(state.startPos, state.startDir, state.pathAccumulated);
   }
 
   /// Method for on-demand transport of the covariance
@@ -307,6 +330,30 @@ class EigenStepper {
   /// @note no check is done if the position is actually on the surface
   void covarianceTransport(State& state, const Surface& surface,
                            bool reinitialize = true) const;
+
+  /// This method updates the constrained step size
+  ///
+  /// @param[in,out] state The state object for the step length
+  /// @param[in] Corrector& navigator corrections
+  /// @param[in] stepSize the step size
+  /// @param[in] release flag steers if the step is released first
+  void
+  updateStepSize(State&           state,
+                 const Corrector& navCorr,
+                 double           stepSize,
+                 bool             release = false) const;
+  void
+  releaseStep(State& state, cstep::Type type = cstep::actor) const;
+
+  /// This method call at the Standard abort
+  //
+  /// @param[in,out] state The state object for the step length
+  /// @param[in] step the step size
+  /// @param[in] default update the aborter stepsize
+  void
+  updateStepSize(State&      state,
+                 double      stepSize,
+                 cstep::Type type = cstep::aborter) const;
 
   /// Perform a Runge-Kutta track parameter propagation step
   ///

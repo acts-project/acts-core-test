@@ -16,8 +16,22 @@ namespace Acts {
 /// The information to be writtern out per hit surface
 struct SurfaceHit {
   const Surface* surface = nullptr;
-  Vector3D position;
-  Vector3D direction;
+  Vector3D       position;
+  Vector3D       direction;
+  bool
+  operator==(const SurfaceHit& others) const
+  {
+    if (fabs((this->direction - others.direction).norm()) > 1e-10) {
+      return false;
+    }
+    if (fabs((this->position - others.position).norm()) > 1e-10) {
+      return false;
+    }
+    if (this->surface != others.surface) {
+      return false;
+    }
+    return true;
+  }
 };
 
 /// A Surface Collector struct

@@ -53,6 +53,21 @@ target_link_libraries (KalmanExtrapolatorTests PRIVATE ActsCore ActsTestsCommonH
 add_test(NAME KalmanExtrapolatorUnitTests COMMAND KalmanExtrapolatorTests)
 acts_add_test_to_cdash_project (PROJECT ACore TEST KalmanExtrapolatorUnitTests TARGETS KalmanExtrapolatorTests)
 
+add_executable (MultiPropagatorTests MultiPropagatorTests.cpp)
+target_link_libraries (MultiPropagatorTests PRIVATE ActsCore ActsTestsCommonHelpers ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+add_test(NAME MultiPropagatorUnitTests COMMAND MultiPropagatorTests)
+acts_add_test_to_cdash_project (PROJECT ACore TEST MultiPropagatorUnitTests TARGETS MultiPropagatorTests)
+
+add_executable (MultiComponentExtrapolatorTests MultiComponentExtrapolatorTests.cpp)
+target_link_libraries (MultiComponentExtrapolatorTests PRIVATE ActsCore ActsTestsCommonHelpers ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+add_test(NAME MultiComponentExtrapolatorUnitTests COMMAND MultiComponentExtrapolatorTests)
+acts_add_test_to_cdash_project (PROJECT ACore TEST MultiComponentExtrapolatorUnitTests TARGETS MultiComponentExtrapolatorTests)
+
+add_executable (MultiMaterialInteractionTests MultiMaterialInteractionTests.cpp)
+target_link_libraries (MultiMaterialInteractionTests PRIVATE ActsCore ActsTestsCommonHelpers ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+add_test(NAME MultiMaterialInteractionUnitTests COMMAND MultiMaterialInteractionTests)
+acts_add_test_to_cdash_project (PROJECT ACore TEST MultiMaterialInteractionUnitTests TARGETS MultiMaterialInteractionTests)
+
 # these tests rely on the Legacy code
 if (ACTS_BUILD_LEGACY)
   add_executable (JacobianTests JacobianTests.cpp)
