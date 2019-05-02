@@ -122,7 +122,8 @@ class Navigator {
     undefined = 0,
     surfaceTarget = 1,
     layerTarget = 2,
-    boundaryTarget = 3
+    boundaryTarget = 3,
+    endOfWorldReached = 4
   };
 
   /// Constructor with shared tracking geometry
@@ -320,6 +321,7 @@ class Navigator {
           // Navigation break & release navigation stepping
           state.navigation.navigationBreak = true;
           state.stepping.stepSize.release(Cstep::actor);
+          state.navigation.navigationStage = Stage::endOfWorldReached;
           return;
         } else {
           debugLog(state, [&] { return std::string("Volume updated."); });

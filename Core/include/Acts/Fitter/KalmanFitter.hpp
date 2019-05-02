@@ -20,8 +20,10 @@
 #include "Acts/MagneticField/MagneticFieldContext.hpp"
 #include "Acts/Propagator/AbortList.hpp"
 #include "Acts/Propagator/ActionList.hpp"
+#include "Acts/Propagator/Navigator.hpp"
 #include "Acts/Propagator/Propagator.hpp"
 #include "Acts/Propagator/detail/ConstrainedStep.hpp"
+#include "Acts/Propagator/detail/DebugOutputActor.hpp"
 #include "Acts/Propagator/detail/StandardAborters.hpp"
 #include "Acts/Utilities/CalibrationContext.hpp"
 #include "Acts/Utilities/Definitions.hpp"
@@ -160,8 +162,9 @@ class KalmanFitter {
     // Create the ActionList and AbortList
     using KalmanActor = Actor<source_link_t, parameters_t>;
     using KalmanResult = typename KalmanActor::result_type;
-    using Actors = ActionList<KalmanActor>;
-    using Aborters = AbortList<>;
+    using DebugOutput = detail::DebugOutputActor;
+    using Actors = ActionList<KalmanActor, DebugOutput>;
+    using Aborters = AbortList<detail::EndOfWorldReached>;
 
     // Create relevant options for the propagation options
     PropagatorOptions<Actors, Aborters> kalmanOptions(
@@ -285,12 +288,13 @@ class KalmanFitter {
       }
 
       // Finalization:
-      // - When all track states have been handled
-      if (result.processedStates == inputMeasurements.size() and
-          not result.smoothed) {
+      // - When propagation reaches the endOfWorld
+      if (state.navigation.navigationStage ==
+              Navigator::Stage::endOfWorldReached and
+          result.processedStates > 0 and not result.smoothed) {
         // -> Sort the track states (as now the path length is set)
         // -> Call the smoothing
-        // -> Set a stop condition when all track states have been handled
+        // -> Set a stop condition when propagation reaches the endOfWorld
         finalize(state, stepper, result);
       }
       // Post-finalization:
@@ -388,7 +392,7 @@ class KalmanFitter {
       std::sort(result.fittedStates.begin(), result.fittedStates.end(),
                 plSorter);
       // Screen output for debugging
-      ACTS_VERBOSE("Apply smoothing on " << result.fittedStates.size()
+      ACTS_VERBOSE("Apply smoothing on " << result.processedStates
                                          << " filtered track states.");
       // Smooth the track states and obtain the last smoothed track parameters
       const auto& smoothedPars =
