@@ -48,6 +48,7 @@ struct MaterialInteraction {
 /// This is a plugin to the Propagator that
 /// performs material interaction on the currentSurface
 /// of the Propagagor state
+template <int InteractorMode_t>
 struct MaterialInteractor {
   // Configuration for this MaterialInteractor
 
@@ -127,9 +128,21 @@ struct MaterialInteractor {
         });
         mStage = preUpdate;
       } else {
-        debugLog(state, [&] {
-          return std::string("Update while pass through: full mode.");
-        });
+        if (InteractorMode_t == postInteraction) {
+          mStage = postUpdate;
+          debugLog(state, [&] {
+            return std::string("Update while pass through: post-update mode.");
+          });
+        } else if (InteractorMode_t == preInteraction) {
+          mStage = preUpdate;
+          debugLog(state, [&] {
+            return std::string("Update while pass through: pre-update mode.");
+          });
+        } else if (InteractorMode_t == fullInteraction) {
+          debugLog(state, [&] {
+            return std::string("Update while pass through: full mode.");
+          });
+        }
       }
 
       // Get the surface material & properties from them and continue if you
@@ -310,7 +323,7 @@ struct MaterialInteractor {
 };
 
 /// Using some short hands for Recorded Material
-using RecordedMaterial = MaterialInteractor::result_type;
+using RecordedMaterial = MaterialInteractor<fullInteraction>::result_type;
 
 /// And recorded material track
 /// - this is start:  position, start momentum
