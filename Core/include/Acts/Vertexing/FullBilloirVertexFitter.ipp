@@ -113,7 +113,7 @@ Acts::FullBilloirVertexFitter<bfield_t, input_track_t, propagator_t>::fit(
         trackMomenta.push_back(Vector3D(phi, theta, qop));
       }
 
-      auto result = m_cfg.linFactory.linearizeTrack(
+      auto result = m_cfg.trackLinearizer.linearizeTrack(
           vFitterOptions.geoContext, vFitterOptions.magFieldContext,
           &trackParams, linPoint, m_cfg.propagator);
       if (result.ok()) {

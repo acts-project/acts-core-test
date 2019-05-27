@@ -19,8 +19,8 @@
 
 namespace Acts {
 
-/// @class LinearizedTrackFactory
-/// Linearizes the measurement equation (dependance of track
+/// @class HelicalTrackLinearizer
+/// Linearizes the measurement equation (dependence of track
 /// parameters on the vertex position and track momentum at vertex)
 /// at the vicinity of the user-provided linearization point.
 ///
@@ -43,7 +43,7 @@ namespace Acts {
 template <typename bfield_t, typename propagator_t,
           typename action_list_t = ActionList<>,
           typename aborter_list_t = AbortList<>>
-class LinearizedTrackFactory {
+class HelicalTrackLinearizer {
  public:
   struct Config {
     bfield_t bField;
@@ -53,7 +53,7 @@ class LinearizedTrackFactory {
   /// @brief Constructor with bfield_t
   ///
   /// @param config Configuration object
-  LinearizedTrackFactory(const Config& config) : m_cfg(config) {}
+  HelicalTrackLinearizer(const Config& config) : m_cfg(config) {}
 
   /// @brief Function that linearizes BoundParameters at
   /// given linearization point
@@ -78,4 +78,4 @@ class LinearizedTrackFactory {
 
 }  // namespace Acts
 
-#include "LinearizedTrackFactory.ipp"
+#include "HelicalTrackLinearizer.ipp"

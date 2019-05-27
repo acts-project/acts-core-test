@@ -4,11 +4,11 @@ target_link_libraries (FullBilloirVertexFitterTests PRIVATE ActsCore ActsTestsCo
 add_test (NAME FullBilloirVertexFitterUnitTests COMMAND FullBilloirVertexFitterTests)
 acts_add_test_to_cdash_project (PROJECT ACore TEST FullBilloirVertexFitterUnitTests TARGETS FullBilloirVertexFitterTests)
 
-add_executable (LinearizedTrackFactoryTests LinearizedTrackFactoryTests.cpp)
-target_include_directories (LinearizedTrackFactoryTests PRIVATE ${Boost_INCLUDE_DIRS})
-target_link_libraries (LinearizedTrackFactoryTests PRIVATE ActsCore ActsTestsCommonHelpers ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
-add_test (NAME LinearizedTrackFactoryUnitTests COMMAND LinearizedTrackFactoryTests)
-acts_add_test_to_cdash_project (PROJECT ACore TEST LinearizedTrackFactoryUnitTests TARGETS LinearizedTrackFactoryTests)
+add_executable (TrackLinearizerTests TrackLinearizerTests.cpp)
+target_include_directories (TrackLinearizerTests PRIVATE ${Boost_INCLUDE_DIRS})
+target_link_libraries (TrackLinearizerTests PRIVATE ActsCore ActsTestsCommonHelpers ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+add_test (NAME TrackLinearizerUnitTests COMMAND TrackLinearizerTests)
+acts_add_test_to_cdash_project (PROJECT ACore TEST TrackLinearizerUnitTests TARGETS TrackLinearizerTests)
 
 add_executable (TrackToVertexIPEstimatorTests TrackToVertexIPEstimatorTests.cpp)
 target_include_directories (TrackToVertexIPEstimatorTests PRIVATE ${Boost_INCLUDE_DIRS})

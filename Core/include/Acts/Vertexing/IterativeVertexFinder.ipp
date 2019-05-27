@@ -247,7 +247,7 @@ Acts::IterativeVertexFinder<bfield_t, input_track_t, propagator_t, vfitter_t>::
         const BoundParameters& params, const Vertex<input_track_t>& vertex,
         const VertexFinderOptions<input_track_t>& vFinderOptions) const {
   // Linearize track
-  auto result = m_cfg.linFactory.linearizeTrack(
+  auto result = m_cfg.trackLinearizer.linearizeTrack(
       vFinderOptions.geoContext, vFinderOptions.magFieldContext, &params,
       vertex.fullPosition(), m_cfg.propagator);
   if (!result.ok()) {
