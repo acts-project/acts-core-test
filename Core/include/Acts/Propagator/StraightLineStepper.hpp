@@ -69,7 +69,7 @@ class StraightLineStepper {
                    std::reference_wrapper<const MagneticFieldContext> /*mctx*/,
                    const parameters_t& par, NavigationDirection ndir = forward,
                    double ssize = std::numeric_limits<double>::max())
-        : pos(par.position()),
+        : pos(par.spacePoint()),
           dir(par.momentum().normalized()),
           p(par.momentum().norm()),
           q(par.charge()),
@@ -77,13 +77,14 @@ class StraightLineStepper {
           navDir(ndir),
           stepSize(ndir * std::abs(ssize)),
           geoContext(gctx) {
+	  VectorHelpers::time(pos) = 0.;
       if (par.covariance()) {
         // Get the reference surface for navigation
         const auto& surface = par.referenceSurface();
         // set the covariance transport flag to true and copy
         covTransport = true;
         cov = BoundSymMatrix(*par.covariance());
-        surface.initJacobianToGlobal(gctx, jacToGlobal, pos, dir,
+        surface.initJacobianToGlobal(gctx, jacToGlobal, VectorHelpers::position(pos), dir,
                                      par.parameters());
       }
     }
@@ -104,8 +105,8 @@ class StraightLineStepper {
     bool covTransport = false;
     Covariance cov = Covariance::Zero();
 
-    /// Global particle position
-    Vector3D pos = Vector3D(0., 0., 0.);
+    /// Global particle position and ellapsed time
+    SpacePointVector pos = SpacePointVector::Zero();
 
     /// Momentum direction (normalized)
     Vector3D dir = Vector3D(1., 0., 0.);
@@ -120,8 +121,6 @@ class StraightLineStepper {
     /// machine precision related errors
     /// Starting time
     const double t0;
-    /// Propagated time
-    double dt = 0.;
 
     /// Navigation direction, this is needed for searching
     NavigationDirection navDir;
@@ -164,7 +163,7 @@ class StraightLineStepper {
   }
 
   /// Global particle position accessor
-  Vector3D position(const State& state) const { return state.pos; }
+  Vector3D position(const State& state) const { return VectorHelpers::position(state.pos); }
 
   /// Momentum direction accessor
   Vector3D direction(const State& state) const { return state.dir; }
@@ -176,7 +175,7 @@ class StraightLineStepper {
   double charge(const State& state) const { return state.q; }
 
   /// Time access
-  double time(const State& state) const { return state.t0 + state.dt; }
+  double time(const State& state) const { return state.t0 + VectorHelpers::time(state.pos); }
 
   /// Tests if the state reached a surface
   ///
@@ -212,9 +211,9 @@ class StraightLineStepper {
       covPtr = std::make_unique<const Covariance>(state.cov);
     }
     // Create the bound parameters
-    BoundParameters parameters(state.geoContext, std::move(covPtr), state.pos,
+    BoundParameters parameters(state.geoContext, std::move(covPtr), SpacePointVector(0., 0., 0., state.t0) + state.pos,
                                state.p * state.dir, state.q,
-                               state.t0 + state.dt, surface.getSharedPtr());
+                               surface.getSharedPtr());
     // Create the bound state
     BoundState bState{std::move(parameters), state.jacobian,
                       state.pathAccumulated};
@@ -246,9 +245,8 @@ class StraightLineStepper {
       covPtr = std::make_unique<const Covariance>(state.cov);
     }
     // Create the curvilinear parameters
-    CurvilinearParameters parameters(std::move(covPtr), state.pos,
-                                     state.p * state.dir, state.q,
-                                     state.t0 + state.dt);
+    CurvilinearParameters parameters(std::move(covPtr), SpacePointVector(0., 0., 0., state.t0) + state.pos,
+                                     state.p * state.dir, state.q);
     // Create the bound state
     CurvilinearState curvState{std::move(parameters), state.jacobian,
                                state.pathAccumulated};
@@ -266,10 +264,9 @@ class StraightLineStepper {
   /// @param [in] pars Parameters that will be written into @p state
   void update(State& state, const BoundParameters& pars) const {
     const auto& mom = pars.momentum();
-    state.pos = pars.position();
+    state.pos = pars.spacePoint();
     state.dir = mom.normalized();
     state.p = mom.norm();
-    state.dt = pars.time();
 
     if (pars.covariance() != nullptr) {
       state.cov = (*(pars.covariance()));
@@ -282,13 +279,11 @@ class StraightLineStepper {
   /// @param [in] uposition the updated position
   /// @param [in] udirection the updated direction
   /// @param [in] up the updated momentum value
-  /// @param [in] time the updated time value
-  void update(State& state, const Vector3D& uposition,
-              const Vector3D& udirection, double up, double time) const {
+  void update(State& state, const SpacePointVector& uposition,
+              const Vector3D& udirection, double up) const {
     state.pos = uposition;
     state.dir = udirection;
     state.p = up;
-    state.dt = time;
   }
 
   /// Return a corrector
@@ -399,12 +394,12 @@ class StraightLineStepper {
     FreeToBoundMatrix jacToLocal = FreeToBoundMatrix::Zero();
     // initalize the jacobian to local, returns the transposed ref frame
     auto rframeT = surface.initJacobianToLocal(state.geoContext, jacToLocal,
-                                               state.pos, state.dir);
+                                               position(state), state.dir);
     // Update the jacobian with the transport from the steps
     state.jacToGlobal = state.jacTransport * state.jacToGlobal;
     // calculate the form factors for the derivatives
     const BoundRowVector sVec = surface.derivativeFactors(
-        state.geoContext, state.pos, state.dir, rframeT, state.jacToGlobal);
+        state.geoContext, position(state), state.dir, rframeT, state.jacToGlobal);
     // the full jacobian is ([to local] jacobian) * ([transport] jacobian)
     const Jacobian jacFull =
         jacToLocal * (state.jacToGlobal - state.derivative * sVec);
@@ -420,12 +415,12 @@ class StraightLineStepper {
       state.derivative = FreeVector::Zero();
       // fill the jacobian to global for next transport
       Vector2D loc{0., 0.};
-      surface.globalToLocal(state.geoContext, state.pos, state.dir, loc);
+      surface.globalToLocal(state.geoContext, position(state), state.dir, loc);
       BoundVector pars;
       pars << loc[eLOC_0], loc[eLOC_1], phi(state.dir), theta(state.dir),
-          state.q / state.p, state.t0 + state.dt;
+          state.q / state.p, time(state);
       surface.initJacobianToGlobal(state.geoContext, state.jacToGlobal,
-                                   state.pos, state.dir, pars);
+                                   position(state), state.dir, pars);
     }
     // Store The global and bound jacobian (duplication for the moment)
     state.jacobian = jacFull * state.jacobian;
@@ -448,8 +443,7 @@ class StraightLineStepper {
     // time propagates along distance as 1/b = sqrt(1 + m²/p²)
     const auto dtds = std::hypot(1, state.options.mass / state.stepping.p);
     // Update the track parameters according to the equations of motion
-    state.stepping.pos += h * state.stepping.dir;
-    state.stepping.dt += h * dtds;
+    state.stepping.pos += h * SpacePointVector(state.stepping.dir.x(), state.stepping.dir.y(), state.stepping.dir.z(), dtds);
     // Propagate the jacobian
     if (state.stepping.covTransport) {
       // The step transport matrix in global coordinates

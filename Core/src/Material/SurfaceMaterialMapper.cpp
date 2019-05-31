@@ -148,8 +148,9 @@ void Acts::SurfaceMaterialMapper::finalizeMaps(State& mState) const {
 void Acts::SurfaceMaterialMapper::mapMaterialTrack(
     State& mState, const RecordedMaterialTrack& mTrack) const {
   // Neutral curvilinear parameters
-  NeutralCurvilinearParameters start(nullptr, mTrack.first.first,
-                                     mTrack.first.second, 0.);
+  SpacePointVector spacePoint(mTrack.first.first.x(), mTrack.first.first.y(), mTrack.first.first.z(), 0.);
+  NeutralCurvilinearParameters start(nullptr, spacePoint,
+                                     mTrack.first.second);
 
   // Prepare Action list and abort list
   using DebugOutput = detail::DebugOutputActor;

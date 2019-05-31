@@ -56,10 +56,13 @@ class SingleTrackParameters : public TrackParametersBase {
   SingleTrackParameters<ChargePolicy>* clone() const override = 0;
 
   /// @copydoc TrackParametersBase::position
-  ActsVectorD<3> position() const final { return m_vPosition; }
+  ActsVectorD<3> position() const final { return VectorHelpers::position(m_vPosition); }
 
   /// @copydoc TrackParametersBase::momentum
   ActsVectorD<3> momentum() const final { return m_vMomentum; }
+
+  /// @copydoc TrackparametersBase::spacePoint
+  SpacePointVector spacePoint() const final { return m_vPosition; }
 
   /// @brief equality operator
   ///
@@ -72,7 +75,6 @@ class SingleTrackParameters : public TrackParametersBase {
     }
 
     return (m_oChargePolicy == casted->m_oChargePolicy &&
-            m_oTime == casted->m_oTime &&
             m_oParameters == casted->m_oParameters &&
             m_vPosition == casted->m_vPosition &&
             m_vMomentum == casted->m_vMomentum);
@@ -82,7 +84,7 @@ class SingleTrackParameters : public TrackParametersBase {
   double charge() const final { return m_oChargePolicy.getCharge(); }
 
   /// @copydoc TrackParametersBase::time
-  double time() const final { return m_oTime; }
+  double time() const final { return VectorHelpers::time(m_vPosition); }
 
   /// @copydoc TrackParametersBase::getParameterSet
   const FullParameterSet& getParameterSet() const final {
@@ -99,12 +101,11 @@ class SingleTrackParameters : public TrackParametersBase {
   template <typename T = ChargePolicy,
             std::enable_if_t<std::is_same<T, ChargedPolicy>::value, int> = 0>
   SingleTrackParameters(CovPtr_t cov, const ParVector_t& parValues,
-                        const ActsVectorD<3>& position,
+                        const SpacePointVector& position,
                         const ActsVectorD<3>& momentum)
       : TrackParametersBase(),
         m_oChargePolicy(
             detail::coordinate_transformation::parameters2charge(parValues)),
-        m_oTime(detail::coordinate_transformation::parameters2time(parValues)),
         m_oParameters(std::move(cov), parValues),
         m_vPosition(position),
         m_vMomentum(momentum) {}
@@ -118,11 +119,10 @@ class SingleTrackParameters : public TrackParametersBase {
   template <typename T = ChargePolicy,
             std::enable_if_t<std::is_same<T, NeutralPolicy>::value, int> = 0>
   SingleTrackParameters(CovPtr_t cov, const ParVector_t& parValues,
-                        const ActsVectorD<3>& position,
+                        const SpacePointVector& position,
                         const ActsVectorD<3>& momentum)
       : TrackParametersBase(),
         m_oChargePolicy(),
-        m_oTime(detail::coordinate_transformation::parameters2time(parValues)),
         m_oParameters(std::move(cov), parValues),
         m_vPosition(position),
         m_vMomentum(momentum) {}
@@ -142,7 +142,6 @@ class SingleTrackParameters : public TrackParametersBase {
     // check for self-assignment
     if (this != &rhs) {
       m_oChargePolicy = rhs.m_oChargePolicy;
-      m_oTime = rhs.m_oTime;
       m_oParameters = rhs.m_oParameters;
       m_vPosition = rhs.m_vPosition;
       m_vMomentum = rhs.m_vMomentum;
@@ -159,7 +158,6 @@ class SingleTrackParameters : public TrackParametersBase {
     // check for self-assignment
     if (this != &rhs) {
       m_oChargePolicy = std::move(rhs.m_oChargePolicy);
-      m_oTime = std::move(rhs.m_oTime);
       m_oParameters = std::move(rhs.m_oParameters);
       m_vPosition = std::move(rhs.m_vPosition);
       m_vMomentum = std::move(rhs.m_vMomentum);
@@ -184,8 +182,6 @@ class SingleTrackParameters : public TrackParametersBase {
                                const T& /*unused*/) {
     m_vMomentum = detail::coordinate_transformation::parameters2globalMomentum(
         getParameterSet().getParameters());
-    m_oTime = detail::coordinate_transformation::parameters2time(
-        getParameterSet().getParameters());
   }
 
   /// @brief update global position from current parameter values
@@ -200,10 +196,9 @@ class SingleTrackParameters : public TrackParametersBase {
 
   ChargePolicy m_oChargePolicy;    ///< charge policy object distinguishing
                                    /// between charged and neutral tracks
-  double m_oTime;                  ///< time of the track parametrisation
   FullParameterSet m_oParameters;  ///< ParameterSet object holding the
                                    /// parameter values and covariance matrix
-  ActsVectorD<3> m_vPosition;      ///< 3D vector with global position
+  SpacePointVector m_vPosition;      ///< 3D vector with global position
   ActsVectorD<3> m_vMomentum;      ///< 3D vector with global momentum
 };
 }  // namespace Acts

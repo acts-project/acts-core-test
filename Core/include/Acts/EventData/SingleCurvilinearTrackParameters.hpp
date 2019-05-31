@@ -39,15 +39,15 @@ class SingleCurvilinearTrackParameters
   /// @param[in] dCharge The charge of this track parameterisation
   template <typename T = ChargePolicy,
             std::enable_if_t<std::is_same<T, ChargedPolicy>::value, int> = 0>
-  SingleCurvilinearTrackParameters(CovPtr_t cov, const ActsVectorD<3>& position,
+  SingleCurvilinearTrackParameters(CovPtr_t cov, const SpacePointVector& position,
                                    const ActsVectorD<3>& momentum,
-                                   double dCharge, double dTime)
+                                   double dCharge)
       : SingleTrackParameters<ChargePolicy>(
             std::move(cov),
             detail::coordinate_transformation::global2curvilinear(
-                position, momentum, dCharge, dTime),
+                position, momentum, dCharge),
             position, momentum),
-        m_upSurface(Surface::makeShared<PlaneSurface>(position, momentum)) {}
+        m_upSurface(Surface::makeShared<PlaneSurface>(VectorHelpers::position(position), momentum)) {}
 
   /// @brief constructor for curvilienear representation
   /// This is the constructor from global parameters, enabled only
@@ -58,14 +58,14 @@ class SingleCurvilinearTrackParameters
   /// @param[in] momentum The global momentum of this track parameterisation
   template <typename T = ChargePolicy,
             std::enable_if_t<std::is_same<T, NeutralPolicy>::value, int> = 0>
-  SingleCurvilinearTrackParameters(CovPtr_t cov, const ActsVectorD<3>& position,
-                                   const ActsVectorD<3>& momentum, double dTime)
+  SingleCurvilinearTrackParameters(CovPtr_t cov, const SpacePointVector& position,
+                                   const ActsVectorD<3>& momentum)
       : SingleTrackParameters<ChargePolicy>(
             std::move(cov),
             detail::coordinate_transformation::global2curvilinear(
-                position, momentum, 0, dTime),
+                position, momentum, 0),
             position, momentum),
-        m_upSurface(Surface::makeShared<PlaneSurface>(position, momentum)) {}
+        m_upSurface(Surface::makeShared<PlaneSurface>(VectorHelpers::position(position), momentum)) {}
 
   /// @brief copy constructor - charged/neutral
   /// @param[in] copy The source parameters

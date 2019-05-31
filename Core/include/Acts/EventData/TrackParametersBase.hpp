@@ -61,11 +61,16 @@ class TrackParametersBase {
   ///
   /// @return 3D vector with global position
   virtual ActsVectorD<3> position() const = 0;
-
+  
   /// @brief access momentum in global coordinate system
   ///
   /// @return 3D vector with global momentum
   virtual ActsVectorD<3> momentum() const = 0;
+
+  /// @brief access position and time in global coordinate system
+  ///
+  /// @return space point vector with global position and time
+  virtual SpacePointVector spacePoint() const = 0;
 
   /// @brief access track parameters
   ///

@@ -74,14 +74,13 @@ class SingleBoundTrackParameters : public SingleTrackParameters<ChargePolicy> {
   template <typename T = ChargePolicy,
             std::enable_if_t<std::is_same<T, ChargedPolicy>::value, int> = 0>
   SingleBoundTrackParameters(const GeometryContext& gctx, CovPtr_t cov,
-                             const ActsVectorD<3>& position,
+                             const SpacePointVector& position,
                              const ActsVectorD<3>& momentum, double dCharge,
-                             double dTime,
                              std::shared_ptr<const Surface> surface)
       : SingleTrackParameters<ChargePolicy>(
             std::move(cov),
             detail::coordinate_transformation::global2parameters(
-                gctx, position, momentum, dCharge, dTime, *surface),
+                gctx, position, momentum, dCharge, *surface),
             position, momentum),
         m_pSurface(std::move(surface)) {
     assert(m_pSurface);
@@ -134,13 +133,13 @@ class SingleBoundTrackParameters : public SingleTrackParameters<ChargePolicy> {
   template <typename T = ChargePolicy,
             std::enable_if_t<std::is_same<T, NeutralPolicy>::value, int> = 0>
   SingleBoundTrackParameters(const GeometryContext& gctx, CovPtr_t cov,
-                             const ActsVectorD<3>& position,
-                             const ActsVectorD<3>& momentum, double dTime,
+                             const SpacePointVector& position,
+                             const ActsVectorD<3>& momentum,
                              std::shared_ptr<const Surface> surface)
       : SingleTrackParameters<ChargePolicy>(
             std::move(cov),
             detail::coordinate_transformation::global2parameters(
-                gctx, position, momentum, 0, dTime, *surface),
+                gctx, position, momentum, 0, *surface),
             position, momentum),
         m_pSurface(std::move(surface)) {}
 
