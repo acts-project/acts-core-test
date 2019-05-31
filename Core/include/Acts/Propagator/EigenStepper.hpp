@@ -201,6 +201,9 @@ class EigenStepper {
     return m_bField.getField(pos, state.fieldCache);
   }
 
+  /// Global particle space point accessor
+  SpacePointVector spacePoint(const State& state) const { return state.pos; }
+
   /// Global particle position accessor
   Vector3D position(const State& state) const { return VectorHelpers::position(state.pos); }
 

@@ -35,6 +35,7 @@ namespace concept {
   using curvilinear_state_t = typename T::CurvilinearState;
 
   METHOD_TRAIT(get_field_t, getField);
+  METHOD_TRAIT(spacepoint_t, spacePoint);
   METHOD_TRAIT(position_t, position);
   METHOD_TRAIT(direction_t, direction);
   METHOD_TRAIT(momentum_t, momentum);
@@ -89,6 +90,8 @@ namespace concept {
         static_assert(get_field_exists, "getField method not found");
         constexpr static bool position_exists = has_method<const S, Vector3D, position_t, const state&>;
         static_assert(position_exists, "position method not found");
+        constexpr static bool spacepoint_exists = has_method<const S, SpacePointVector, spacepoint_t, const state&>;
+        static_assert(spacepoint_exists, "space point method not found");
         constexpr static bool direction_exists = has_method<const S, Vector3D, direction_t, const state&>;
         static_assert(direction_exists, "direction method not found");
         constexpr static bool momentum_exists = has_method<const S, double, momentum_t, const state&>;
@@ -119,6 +122,7 @@ namespace concept {
                                               curvilinear_state_exists,
                                               return_type_exists,
                                               get_field_exists,
+                                              spacepoint_exists,
                                               position_exists,
                                               direction_exists,
                                               momentum_exists,

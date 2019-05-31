@@ -48,6 +48,22 @@ class SingleCurvilinearTrackParameters
                 position, momentum, dCharge),
             position, momentum),
         m_upSurface(Surface::makeShared<PlaneSurface>(VectorHelpers::position(position), momentum)) {}
+        
+        
+  /// @brief constructor for curvilienear representation
+  /// This is the constructor from global parameters, enabled only
+  /// for charged representations.
+  ///
+  /// @param[in] cov The covariance matrix w.r.t. curvilinear frame
+  /// @param[in] position The global position of this track parameterisation
+  /// @param[in] momentum The global momentum of this track parameterisation
+  /// @param[in] dCharge The charge of this track parameterisation
+  template <typename T = ChargePolicy,
+            std::enable_if_t<std::is_same<T, ChargedPolicy>::value, int> = 0>
+  SingleCurvilinearTrackParameters(CovPtr_t cov, const Vector3D& position,
+                                   const ActsVectorD<3>& momentum,
+                                   double dCharge, double time)
+      : SingleCurvilinearTrackParameters<ChargePolicy>(std::move(cov), SpacePointVector(position.x(), position.y(), position.z(), time), momentum, dCharge) {}
 
   /// @brief constructor for curvilienear representation
   /// This is the constructor from global parameters, enabled only
@@ -66,7 +82,20 @@ class SingleCurvilinearTrackParameters
                 position, momentum, 0),
             position, momentum),
         m_upSurface(Surface::makeShared<PlaneSurface>(VectorHelpers::position(position), momentum)) {}
-
+        
+  /// @brief constructor for curvilienear representation
+  /// This is the constructor from global parameters, enabled only
+  /// for charged representations.
+  ///
+  /// @param[in] cov The covariance matrix w.r.t. curvilinear frame
+  /// @param[in] position The global position of this track parameterisation
+  /// @param[in] momentum The global momentum of this track parameterisation
+  template <typename T = ChargePolicy,
+            std::enable_if_t<std::is_same<T, NeutralPolicy>::value, int> = 0>
+  SingleCurvilinearTrackParameters(CovPtr_t cov, const Vector3D& position,
+                                   const ActsVectorD<3>& momentum, double time)
+      : SingleCurvilinearTrackParameters<ChargePolicy>(std::move(cov), SpacePointVector(position.x(), position.y(), position.z(), time), momentum) {}
+      
   /// @brief copy constructor - charged/neutral
   /// @param[in] copy The source parameters
   SingleCurvilinearTrackParameters(
