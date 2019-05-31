@@ -18,8 +18,8 @@ namespace Acts {
 namespace Test {
 
 template <typename Parameter>
-void consistencyCheck(const Parameter& pars, const Vector3D& position,
-                      const Vector3D& momentum, double charge, double time,
+void consistencyCheck(const Parameter& pars, const SpacePointVector& position,
+                      const Vector3D& momentum, double charge,
                       std::array<double, BoundParsDim> values) {
   // check parameter vector
   CHECK_CLOSE_ABS(pars.parameters()[eLOC_0], values[0], s_onSurfaceTolerance);
@@ -29,10 +29,10 @@ void consistencyCheck(const Parameter& pars, const Vector3D& position,
   CHECK_CLOSE_REL(pars.parameters()[eQOP], values[4], 1e-6);
   CHECK_CLOSE_ABS(pars.parameters()[eT], values[5], 1e-6);
   // check global parameters
-  CHECK_CLOSE_REL(pars.position(), position, 1e-6);
+  CHECK_CLOSE_REL(pars.position(), VectorHelpers::position(position), 1e-6);
   CHECK_CLOSE_REL(pars.momentum(), momentum, 1e-6);
   BOOST_CHECK_EQUAL(pars.charge(), charge);
-  CHECK_CLOSE_REL(pars.time(), time, 1e-6);
+  CHECK_CLOSE_REL(pars.time(), VectorHelpers::time(position), 1e-6);
 }
 }  // namespace Test
 }  // namespace Acts

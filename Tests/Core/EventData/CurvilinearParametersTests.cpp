@@ -34,7 +34,8 @@ BOOST_AUTO_TEST_CASE(curvilinear_initialization) {
   GeometryContext tgContext = GeometryContext();
 
   // some position and momentum
-  Vector3D pos(1.34_mm, 2.34_mm, 3.45_mm);
+  Vector3D pos(1.34_mm, 2.34_mm, 3.45_mm, 1_s);
+  Vector3D pos3D = VectorHelpers::position(pos);
   Vector3D mom(1000_GeV, 1000_GeV, -0.100_GeV);
   Vector3D dir(mom.normalized());
   Vector3D z_axis_global(0., 0., 1.);
@@ -49,27 +50,27 @@ BOOST_AUTO_TEST_CASE(curvilinear_initialization) {
   const double oOp = 1. / mom.norm();
 
   // check parameters
-  consistencyCheck(curvilinear_pos, pos, mom, +1_e, 1_s,
-                   {0., 0., fphi, ftheta, oOp, 1_s});
-  consistencyCheck(curvilinear_neg, pos, mom, -1_e, 2.5_s,
-                   {0., 0., fphi, ftheta, -oOp, 2.5_s});
-  consistencyCheck(curvilinear_neut, pos, mom, 0., 33.33_s,
-                   {0., 0., fphi, ftheta, oOp, 33.33_s});
+  consistencyCheck(curvilinear_pos, pos, mom, +1_e,
+                   {{0., 0., fphi, ftheta, oOp, 1_s}});
+  consistencyCheck(curvilinear_neg, pos, mom, -1_e,
+                   {{0., 0., fphi, ftheta, -oOp, 1_s}});
+  consistencyCheck(curvilinear_neut, pos, mom, 0.,
+                   {{0., 0., fphi, ftheta, oOp, 1_s}});
 
   // check that the created surface is at the position
-  CHECK_CLOSE_REL(curvilinear_pos.referenceSurface().center(tgContext), pos,
+  CHECK_CLOSE_REL(curvilinear_pos.referenceSurface().center(tgContext), VectorHelpers::position(pos),
                   1e-6);
-  CHECK_CLOSE_REL(curvilinear_neg.referenceSurface().center(tgContext), pos,
+  CHECK_CLOSE_REL(curvilinear_neg.referenceSurface().center(tgContext), VectorHelpers::position(pos),
                   1e-6);
-  CHECK_CLOSE_REL(curvilinear_neut.referenceSurface().center(tgContext), pos,
+  CHECK_CLOSE_REL(curvilinear_neut.referenceSurface().center(tgContext), VectorHelpers::position(pos),
                   1e-6);
 
   // check that the z-axis of the created surface is along momentum direction
-  CHECK_CLOSE_REL(curvilinear_pos.referenceSurface().normal(tgContext, pos),
+  CHECK_CLOSE_REL(curvilinear_pos.referenceSurface().normal(tgContext, pos3D),
                   dir, 1e-6);
-  CHECK_CLOSE_REL(curvilinear_neg.referenceSurface().normal(tgContext, pos),
+  CHECK_CLOSE_REL(curvilinear_neg.referenceSurface().normal(tgContext, pos3D),
                   dir, 1e-6);
-  CHECK_CLOSE_REL(curvilinear_neut.referenceSurface().normal(tgContext, pos),
+  CHECK_CLOSE_REL(curvilinear_neut.referenceSurface().normal(tgContext, pos3D),
                   dir, 1e-6);
 
   // check the reference frame of curvilinear parameters
