@@ -22,8 +22,8 @@ auto Acts::EigenStepper<B, C, E, A>::boundState(State& state,
     covPtr = std::make_unique<const Covariance>(state.cov);
   }
   // Create the bound parameters
-  BoundParameters parameters(state.geoContext, std::move(covPtr), state.pos,
-                             state.p * state.dir, state.q, state.t0 + state.dt,
+  BoundParameters parameters(state.geoContext, std::move(covPtr), SpacePointVector(0., 0., 0., state.t0) + state.pos,
+                             state.p * state.dir, state.q,
                              surface.getSharedPtr());
   // Create the bound state
   BoundState bState{std::move(parameters), state.jacobian,
@@ -47,9 +47,8 @@ auto Acts::EigenStepper<B, C, E, A>::curvilinearState(State& state,
     covPtr = std::make_unique<const Covariance>(state.cov);
   }
   // Create the curvilinear parameters
-  CurvilinearParameters parameters(std::move(covPtr), state.pos,
-                                   state.p * state.dir, state.q,
-                                   state.t0 + state.dt);
+  CurvilinearParameters parameters(std::move(covPtr), SpacePointVector(0., 0., 0., state.t0) + state.pos,
+                                   state.p * state.dir, state.q);
   // Create the bound state
   CurvilinearState curvState{std::move(parameters), state.jacobian,
                              state.pathAccumulated};
@@ -65,10 +64,9 @@ template <typename B, typename C, typename E, typename A>
 void Acts::EigenStepper<B, C, E, A>::update(State& state,
                                             const BoundParameters& pars) const {
   const auto& mom = pars.momentum();
-  state.pos = pars.position();
+  state.pos = pars.spacePoint();
   state.dir = mom.normalized();
   state.p = mom.norm();
-  state.dt = pars.time();
   if (pars.covariance() != nullptr) {
     state.cov = (*(pars.covariance()));
   }
@@ -76,13 +74,12 @@ void Acts::EigenStepper<B, C, E, A>::update(State& state,
 
 template <typename B, typename C, typename E, typename A>
 void Acts::EigenStepper<B, C, E, A>::update(State& state,
-                                            const Vector3D& uposition,
+                                            const SpacePointVector& uposition,
                                             const Vector3D& udirection,
-                                            double up, double time) const {
+                                            double up) const {
   state.pos = uposition;
   state.dir = udirection;
   state.p = up;
-  state.dt = time;
 }
 
 template <typename B, typename C, typename E, typename A>
@@ -169,12 +166,12 @@ void Acts::EigenStepper<B, C, E, A>::covarianceTransport(
   FreeToBoundMatrix jacToLocal = FreeToBoundMatrix::Zero();
   // initalize the jacobian to local, returns the transposed ref frame
   auto rframeT = surface.initJacobianToLocal(state.geoContext, jacToLocal,
-                                             state.pos, state.dir);
+                                             position(state), state.dir);
   // Update the jacobian with the transport from the steps
   state.jacToGlobal = state.jacTransport * state.jacToGlobal;
   // calculate the form factors for the derivatives
   const BoundRowVector sVec = surface.derivativeFactors(
-      state.geoContext, state.pos, state.dir, rframeT, state.jacToGlobal);
+      state.geoContext, position(state), state.dir, rframeT, state.jacToGlobal);
   // the full jacobian is ([to local] jacobian) * ([transport] jacobian)
   const Jacobian jacFull =
       jacToLocal * (state.jacToGlobal - state.derivative * sVec);
@@ -190,11 +187,11 @@ void Acts::EigenStepper<B, C, E, A>::covarianceTransport(
     state.derivative = FreeVector::Zero();
     // fill the jacobian to global for next transport
     Vector2D loc{0., 0.};
-    surface.globalToLocal(state.geoContext, state.pos, state.dir, loc);
+    surface.globalToLocal(state.geoContext, position(state), state.dir, loc);
     BoundVector pars;
     pars << loc[eLOC_0], loc[eLOC_1], phi(state.dir), theta(state.dir),
-        state.q / state.p, state.t0 + state.dt;
-    surface.initJacobianToGlobal(state.geoContext, state.jacToGlobal, state.pos,
+        state.q / state.p, time(state);
+    surface.initJacobianToGlobal(state.geoContext, state.jacToGlobal, position(state),
                                  state.dir, pars);
   }
   // Store The global and bound jacobian (duplication for the moment)
@@ -211,7 +208,7 @@ Acts::Result<double> Acts::EigenStepper<B, C, E, A>::step(
   double h2, half_h;
 
   // First Runge-Kutta point (at current position)
-  sd.B_first = getField(state.stepping, state.stepping.pos);
+  sd.B_first = getField(state.stepping, position(state.stepping));
   if (!state.stepping.extension.validExtensionForStep(state, *this) ||
       !state.stepping.extension.k1(state, *this, sd.k1, sd.B_first)) {
     return 0.;
@@ -228,7 +225,7 @@ Acts::Result<double> Acts::EigenStepper<B, C, E, A>::step(
 
     // Second Runge-Kutta point
     const Vector3D pos1 =
-        state.stepping.pos + half_h * state.stepping.dir + h2 * 0.125 * sd.k1;
+        position(state.stepping) + half_h * state.stepping.dir + h2 * 0.125 * sd.k1;
     sd.B_middle = getField(state.stepping, pos1);
     if (!state.stepping.extension.k2(state, *this, sd.k2, sd.B_middle, half_h,
                                      sd.k1)) {
@@ -243,7 +240,7 @@ Acts::Result<double> Acts::EigenStepper<B, C, E, A>::step(
 
     // Last Runge-Kutta point
     const Vector3D pos2 =
-        state.stepping.pos + h * state.stepping.dir + h2 * 0.5 * sd.k3;
+        position(state.stepping) + h * state.stepping.dir + h2 * 0.5 * sd.k3;
     sd.B_last = getField(state.stepping, pos2);
     if (!state.stepping.extension.k4(state, *this, sd.k4, sd.B_last, h,
                                      sd.k3)) {
@@ -300,7 +297,7 @@ Acts::Result<double> Acts::EigenStepper<B, C, E, A>::step(
   }
 
   // Update the track parameters according to the equations of motion
-  state.stepping.pos +=
+  state.stepping.pos.template head<3>() +=
       h * state.stepping.dir + h2 / 6. * (sd.k1 + sd.k2 + sd.k3);
   state.stepping.dir += h / 6. * (sd.k1 + 2. * (sd.k2 + sd.k3) + sd.k4);
   state.stepping.dir /= state.stepping.dir.norm();

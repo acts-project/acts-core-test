@@ -85,7 +85,7 @@ class EigenStepper {
                    std::reference_wrapper<const MagneticFieldContext> mctx,
                    const parameters_t& par, NavigationDirection ndir = forward,
                    double ssize = std::numeric_limits<double>::max())
-        : pos(par.position()),
+        : pos(par.spacePoint()),
           dir(par.momentum().normalized()),
           p(par.momentum().norm()),
           q(par.charge()),
@@ -94,8 +94,9 @@ class EigenStepper {
           stepSize(ndir * std::abs(ssize)),
           fieldCache(mctx),
           geoContext(gctx) {
+	  pos[3] = 0.;
       // remember the start parameters
-      startPos = pos;
+      startPos = VectorHelpers::position(pos);
       startDir = dir;
       // Init the jacobian matrix if needed
       if (par.covariance()) {
@@ -104,19 +105,19 @@ class EigenStepper {
         // set the covariance transport flag to true and copy
         covTransport = true;
         cov = BoundSymMatrix(*par.covariance());
-        surface.initJacobianToGlobal(gctx, jacToGlobal, pos, dir,
+        surface.initJacobianToGlobal(gctx, jacToGlobal, VectorHelpers::position(pos), dir,
                                      par.parameters());
       }
     }
 
     /// Global start particle position
-    Vector3D startPos = Vector3D(0., 0., 0.);
+    Vector3D startPos = Vector3D::Zero();
 
     /// Momentum start direction (normalized)
     Vector3D startDir = Vector3D(1., 0., 0.);
 
-    /// Global particle position
-    Vector3D pos = Vector3D(0., 0., 0.);
+    /// Global particle position and ellapsed time
+    SpacePointVector pos = SpacePointVector::Zero();
 
     /// Momentum direction (normalized)
     Vector3D dir = Vector3D(1., 0., 0.);
@@ -130,8 +131,6 @@ class EigenStepper {
     /// @note The time is split into a starting and a propagated time to avoid
     /// machine precision related errors Starting time
     const double t0;
-    /// Propagated time
-    double dt = 0.;
 
     /// Navigation direction, this is needed for searching
     NavigationDirection navDir;
@@ -203,7 +202,7 @@ class EigenStepper {
   }
 
   /// Global particle position accessor
-  Vector3D position(const State& state) const { return state.pos; }
+  Vector3D position(const State& state) const { return VectorHelpers::position(state.pos); }
 
   /// Momentum direction accessor
   Vector3D direction(const State& state) const { return state.dir; }
@@ -215,7 +214,7 @@ class EigenStepper {
   double charge(const State& state) const { return state.q; }
 
   /// Time access
-  double time(const State& state) const { return state.t0 + state.dt; }
+  double time(const State& state) const { return state.t0 + VectorHelpers::time(state.pos); }
 
   /// Tests if the state reached a surface
   ///
@@ -275,8 +274,8 @@ class EigenStepper {
   /// @param [in] uposition the updated position
   /// @param [in] udirection the updated direction
   /// @param [in] up the updated momentum value
-  void update(State& state, const Vector3D& uposition,
-              const Vector3D& udirection, double up, double time) const;
+  void update(State& state, const SpacePointVector& uposition,
+              const Vector3D& udirection, double up) const;
 
   /// Return a corrector
   corrector_t corrector(State& state) const {
