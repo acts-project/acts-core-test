@@ -85,6 +85,30 @@ class SingleBoundTrackParameters : public SingleTrackParameters<ChargePolicy> {
         m_pSurface(std::move(surface)) {
     assert(m_pSurface);
   }
+  
+  /// @brief Constructor of track parameters bound to a surface
+  /// This is the constructor from global parameters, enabled only
+  /// for charged representations.
+  ///
+  /// The transformations declared in the coordinate_transformation
+  /// yield the local parameters
+  ///
+  /// @param[in] gctx is the Context object that is forwarded to the surface
+  ///            for local to global coordinate transformation
+  /// @param[in] cov The covaraniance matrix (optional, can be nullptr)
+  ///            it is given in the curvilinear frame
+  /// @param[in] position The global position of the track parameterisation
+  /// @param[in] momentum The global momentum of the track parameterisation
+  /// @param[in] dCharge The charge of the particle track parameterisation
+  /// @param[in] surface The reference surface the parameters are bound to
+  template <typename T = ChargePolicy,
+            std::enable_if_t<std::is_same<T, ChargedPolicy>::value, int> = 0>
+  SingleBoundTrackParameters(const GeometryContext& gctx, CovPtr_t cov,
+                             const Vector3D& position,
+                             const ActsVectorD<3>& momentum, double dCharge, double time,
+                             std::shared_ptr<const Surface> surface)
+      : SingleBoundTrackParameters<ChargePolicy>(gctx, std::move(cov), SpacePointVector(position.x(), position.y(), position.z(), time), momentum, dCharge, surface){
+  }
 
   /// @brief Constructor of track parameters bound to a surface
   /// This is the constructor from global parameters, enabled only
@@ -142,6 +166,32 @@ class SingleBoundTrackParameters : public SingleTrackParameters<ChargePolicy> {
                 gctx, position, momentum, 0, *surface),
             position, momentum),
         m_pSurface(std::move(surface)) {}
+        
+        
+  /// @brief Constructor of track parameters bound to a surface
+  /// This is the constructor from global parameters, enabled only
+  /// for neutral representations.
+  ///
+  /// The transformations declared in the coordinate_transformation
+  /// yield the local parameters
+  ///
+  ///
+  /// @param[in] gctx is the Context object that is forwarded to the surface
+  ///            for local to global coordinate transformation
+  /// @param[in] cov The covaraniance matrix (optional, can be nullptr)
+  ///            it is given in the curvilinear frame
+  /// @param[in] position The global position of the track parameterisation
+  /// @param[in] momentum The global momentum of the track parameterisation
+  /// @param[in] dCharge The charge of the particle track parameterisation
+  /// @param[in] surface The reference surface the parameters are bound to
+  template <typename T = ChargePolicy,
+            std::enable_if_t<std::is_same<T, NeutralPolicy>::value, int> = 0>
+  SingleBoundTrackParameters(const GeometryContext& gctx, CovPtr_t cov,
+                             const Vector3D& position,
+                             const ActsVectorD<3>& momentum, double time,
+                             std::shared_ptr<const Surface> surface)
+      : SingleBoundTrackParameters<ChargePolicy>(gctx, std::move(cov), SpacePointVector(position.x(), position.y(), position.z(), time), momentum, surface)
+           {}
 
   /// @brief copy constructor  - charged/neutral
   /// @param[in] copy The source parameters

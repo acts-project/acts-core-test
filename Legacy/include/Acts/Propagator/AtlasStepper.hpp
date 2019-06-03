@@ -316,6 +316,10 @@ class AtlasStepper {
     return state.field;
   }
 
+  SpacePointVector spacePoint(const State& state) const {
+    return SpacePointVector(state.pVector[0], state.pVector[1], state.pVector[2], state.pVector[3]);
+  }
+
   Vector3D position(const State& state) const {
     return Vector3D(state.pVector[0], state.pVector[1], state.pVector[2]);
   }
@@ -591,13 +595,13 @@ class AtlasStepper {
   /// @param uposition the updated position
   /// @param udirection the updated direction
   /// @param p the updated momentum value
-  void update(State& state, const Vector3D& uposition,
-              const Vector3D& udirection, double up, double time) const {
+  void update(State& state, const SpacePointVector& uposition,
+              const Vector3D& udirection, double up) const {
     // update the vector
     state.pVector[0] = uposition[0];
     state.pVector[1] = uposition[1];
     state.pVector[2] = uposition[2];
-    state.pVector[3] = time;
+    state.pVector[3] = uposition[3];
     state.pVector[4] = udirection[0];
     state.pVector[5] = udirection[1];
     state.pVector[6] = udirection[2];
