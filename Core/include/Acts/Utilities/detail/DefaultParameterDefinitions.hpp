@@ -131,6 +131,6 @@ struct par_type<ParDef::eQOP> {
 
 template <>
 struct par_type<ParDef::eT> {
-  using type = unbound_parameter;
+  using type = local_parameter;
 };
 }  // namespace Acts
