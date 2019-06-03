@@ -59,8 +59,8 @@ struct PropagatorState {
     /// This is a simple cache struct to mimic the
     /// Stepper cache in the propagation
     struct State {
-      /// Position
-      Vector3D pos = Vector3D(0., 0., 0.);
+      /// Position and time
+      SpacePointVector pos = SpacePointVector::Zero();
 
       /// Direction
       Vector3D dir = Vector3D(1., 0., 0.);
@@ -70,9 +70,6 @@ struct PropagatorState {
 
       /// Charge
       double q;
-
-      /// Time
-      double t;
 
       /// the navigation direction
       NavigationDirection navDir = forward;
@@ -85,7 +82,10 @@ struct PropagatorState {
     };
 
     /// Global particle position accessor
-    Vector3D position(const State& state) const { return state.pos; }
+    SpacePointVector spacePoint(const State& state) const { return state.pos; }
+    
+    /// Global particle position accessor
+    Vector3D position(const State& state) const { return state.pos.template head<3>(); }
 
     /// Momentum direction accessor
     Vector3D direction(const State& state) const { return state.dir; }
@@ -97,7 +97,7 @@ struct PropagatorState {
     double charge(const State& state) const { return state.q; }
 
     /// Time access
-    double time(const State& state) const { return state.t; }
+    double time(const State& state) const { return state.pos[3]; }
 
     /// Return a corrector
     VoidIntersectionCorrector corrector(State& /*unused*/) const {
@@ -114,7 +114,7 @@ struct PropagatorState {
       // suppress unused warning
       (void)reinitialize;
       BoundParameters parameters(tgContext, nullptr, state.pos,
-                                 state.p * state.dir, state.q, state.t,
+                                 state.p * state.dir, state.q,
                                  surface.getSharedPtr());
       BoundState bState{std::move(parameters), Jacobian::Identity(),
                         state.pathAccumulated};
@@ -125,7 +125,7 @@ struct PropagatorState {
                                       bool reinitialize = true) const {
       (void)reinitialize;
       CurvilinearParameters parameters(nullptr, state.pos, state.p * state.dir,
-                                       state.q, state.t);
+                                       state.q);
       // Create the bound state
       CurvilinearState curvState{std::move(parameters), Jacobian::Identity(),
                                  state.pathAccumulated};
@@ -134,9 +134,8 @@ struct PropagatorState {
 
     void update(State& /*state*/, const BoundParameters& /*pars*/) const {}
 
-    void update(State& /*state*/, const Vector3D& /*uposition*/,
-                const Vector3D& /*udirection*/, double /*up*/,
-                double /*time*/) const {}
+    void update(State& /*state*/, const SpacePointVector& /*uposition*/,
+                const Vector3D& /*udirection*/, double /*up*/) const {}
 
     void covarianceTransport(State& /*state*/,
                              bool /*reinitialize = false*/) const {}
@@ -190,7 +189,7 @@ struct PropagatorState {
 template <typename stepper_state_t>
 void step(stepper_state_t& sstate) {
   // update the cache position
-  sstate.pos = sstate.pos + sstate.stepSize * sstate.dir;
+  sstate.pos.template head<3>() += sstate.stepSize * sstate.dir;
   // create navigation parameters
   return;
 }
@@ -212,7 +211,7 @@ BOOST_AUTO_TEST_CASE(Navigator_methods) {
   navigator.resolvePassive = false;
 
   // position and direction vector
-  Vector3D position(0., 0., 0);
+  SpacePointVector position(0., 0., 0., 0.);
   Vector3D momentum(1., 1., 0);
 
   // the propagator cache
