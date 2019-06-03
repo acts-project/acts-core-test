@@ -369,3 +369,26 @@ bool Acts::MultiAdaptiveVertexFitter<
   }
   return true;
 }
+
+template <typename bfield_t, typename input_track_t, typename propagator_t>
+Acts::Result<void> Acts::MultiAdaptiveVertexFitter<
+    bfield_t, input_track_t,
+    propagator_t>::prepareVtxForFit(Vertex<input_track_t>& vtx,
+                                    const VertexFitterOptions<input_track_t>&
+                                        vFitterOptions) const {
+  const Vector3D& refPos = vtx.position();
+  auto& geoContext = vFitterOptions.geoContext;
+  auto& mfContext = vFitterOptions.magFieldContext;
+
+  // loop over all tracks at current vertex
+  for (auto& trkAtVtx : vtx.tracks()) {
+    auto res = m_cfg.ipEst.getParamsAtIP3d(
+        geoContext, mfContext, m_extractParameters(trkAtVtx.originalTrack),
+        refPos);
+    if (!res.ok()) {
+      return res.error();
+    }
+    // trkAtVtx.ip3dParams = std::move(**res);
+  }
+  return {};
+}
