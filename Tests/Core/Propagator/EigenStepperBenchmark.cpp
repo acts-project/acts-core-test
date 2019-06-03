@@ -16,6 +16,8 @@
 #include "Acts/Propagator/Propagator.hpp"
 #include "Acts/Utilities/Logger.hpp"
 #include "Acts/Utilities/Units.hpp"
+#include <fstream>
+#include <ctime>
 
 namespace po = boost::program_options;
 using namespace Acts;
@@ -94,7 +96,8 @@ int main(int argc, char* argv[]) {
     covPtr = std::make_unique<const Covariance>(cov);
   }
   CurvilinearParameters pars(std::move(covPtr), pos, mom, +1, 0.);
-
+std::vector<std::pair<double, float>> timing;
+const clock_t begin_time = clock();
   double totalPathLength = 0;
   for (unsigned int i = 0; i < toys; ++i) {
     auto r = propagator.propagate(pars, options).value();
@@ -103,6 +106,7 @@ int main(int argc, char* argv[]) {
                                     << r.endParameters->position().z()
                                     << ") in " << r.steps << " steps");
     totalPathLength += r.pathLength;
+timing.push_back(std::make_pair(totalPathLength, float( clock () - begin_time ) /  CLOCKS_PER_SEC));
   }
 
   ACTS_INFO("average path length = " << totalPathLength / toys / 1_mm << "mm");
