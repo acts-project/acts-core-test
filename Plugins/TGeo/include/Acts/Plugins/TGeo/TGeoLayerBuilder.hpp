@@ -54,7 +54,7 @@ public:
       : layerName("")
       , sensorName("")
       , localAxes("XZY")
-      , envelope(std::pair<double, double>(1., 1.))
+      , envelope(std::pair<double, double>(0.0, 0.0))
     {
     }
   };
@@ -69,6 +69,8 @@ public:
     double unit = 10;
     // set visibility flag
     bool setVisibility;
+    /// Build layer type 
+    int layerType = 0; // 1 real - 0 virtual
     // layer creator
     std::shared_ptr<const LayerCreator> layerCreator = nullptr;
     // configurations

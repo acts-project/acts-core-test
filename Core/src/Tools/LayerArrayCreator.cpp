@@ -106,6 +106,7 @@ Acts::LayerArrayCreator::layerArray(const GeometryContext& gctx,
                    << layerValue - 0.5 * layerThickness
                    << ". This should never happen. "
                       "Please check your geometry description.");
+        ACTS_ERROR("The layer thickness is given as: " << layerThickness);
       }
 
       // create the navigation layer surface from the layer
