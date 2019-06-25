@@ -69,8 +69,8 @@ public:
     double unit = 10;
     // set visibility flag
     bool setVisibility;
-    /// Build layer type 
-    int layerType = 0; // 1 real - 0 virtual
+    /// Build layer type
+    int layerType = 0;  // 1 real - 0 virtual
     // layer creator
     std::shared_ptr<const LayerCreator> layerCreator = nullptr;
     // configurations

@@ -122,9 +122,9 @@ Acts::TGeoLayerBuilder::buildLayers(const GeometryContext& gctx,
       // create the layer  - either way
       if (type == 0) {
         ProtoLayer pl(gctx, layerSurfaces);
-        if (m_cfg.layerType == 0){
-          pl.minR = 0.5*(pl.minR+pl.maxR);
-          pl.maxR = 0.5*(pl.minR+pl.maxR);
+        if (m_cfg.layerType == 0) {
+          pl.minR = 0.5 * (pl.minR + pl.maxR);
+          pl.maxR = 0.5 * (pl.minR + pl.maxR);
           pl.envR = {0., 0.};
           ACTS_INFO("Virtual layer - setting layer thickness to 0");
         } else {
@@ -136,9 +136,9 @@ Acts::TGeoLayerBuilder::buildLayers(const GeometryContext& gctx,
             gctx, layerSurfaces, layerCfg.binsLoc0, layerCfg.binsLoc1, pl));
       } else {
         ProtoLayer pl(gctx, layerSurfaces);
-        if (m_cfg.layerType == 0){
-          pl.minZ = 0.5*(pl.minZ+pl.maxZ);
-          pl.maxZ = 0.5*(pl.minZ+pl.maxZ);
+        if (m_cfg.layerType == 0) {
+          pl.minZ = 0.5 * (pl.minZ + pl.maxZ);
+          pl.maxZ = 0.5 * (pl.minZ + pl.maxZ);
           pl.envZ = {0., 0.};
           ACTS_INFO("Virtual layer - setting layer thickness to 0");
         } else {
