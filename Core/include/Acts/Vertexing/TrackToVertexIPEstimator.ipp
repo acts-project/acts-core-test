@@ -8,16 +8,23 @@
 
 #include "Acts/Surfaces/PerigeeSurface.hpp"
 
-template <typename input_track_t, typename propagator_t, typename action_list_t,
-          typename aborter_list_t>
+template <
+    typename input_track_t,
+    typename propagator_t,
+    typename action_list_t,
+    typename aborter_list_t>
 Acts::Result<std::unique_ptr<Acts::ImpactParametersAndSigma>>
 Acts::TrackToVertexIPEstimator<
-    input_track_t, propagator_t, action_list_t,
-    aborter_list_t>::estimate(const GeometryContext& gctx,
-                              const MagneticFieldContext& mctx,
-                              const BoundParameters& track,
-                              const Vertex<input_track_t>& vtx,
-                              const propagator_t& propagator) const {
+    input_track_t,
+    propagator_t,
+    action_list_t,
+    aborter_list_t>::
+    estimate(
+        const GeometryContext& gctx,
+        const MagneticFieldContext& mctx,
+        const BoundParameters& track,
+        const Vertex<input_track_t>& vtx,
+        const propagator_t& propagator) const {
   // estimating the d0 and its significance by propagating the trajectory state
   // towards
   // the vertex position. By this time the vertex should NOT contain this
@@ -28,8 +35,8 @@ Acts::TrackToVertexIPEstimator<
   const std::shared_ptr<PerigeeSurface> perigeeSurface =
       Surface::makeShared<PerigeeSurface>(lp);
 
-  PropagatorOptions<action_list_t, aborter_list_t> propagatorOptions(gctx,
-                                                                     mctx);
+  PropagatorOptions<action_list_t, aborter_list_t> propagatorOptions(
+      gctx, mctx);
 
   // Do the propagation to linPoint
   auto result = propagator.propagate(track, *perigeeSurface, propagatorOptions);

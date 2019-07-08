@@ -34,7 +34,8 @@ struct DigitizationCell {
   /// calculate the energy deposit differently. Furthermore this allows to apply
   /// an energy cut, because the energy deposit can also be stored for digital
   /// readout.
-  virtual void addCell(const DigitizationCell& dc, bool analogueReadout) {
+  virtual void
+  addCell(const DigitizationCell& dc, bool analogueReadout) {
     if (analogueReadout) {
       data += dc.data;
     }
@@ -45,7 +46,10 @@ struct DigitizationCell {
   /// calculate the energy deposit differently. Furthermore this allows to apply
   /// an energy cut, because the energy deposit can also be stored for digital
   /// readout.
-  virtual double depositedEnergy() const { return data; }
+  virtual double
+  depositedEnergy() const {
+    return data;
+  }
 };
 
 /// @brief DigitizationStep for further handling
@@ -77,10 +81,14 @@ struct DigitizationStep {
   /// @param exitP is the exit position from the cell
   /// @param projectedPosition is the position on the readout surface
   /// @param cellPosition is the nominal position of the cell
-  DigitizationStep(double sl, double dl, const DigitizationCell& dc,
-                   const Vector3D& entryP, const Vector3D& exitP,
-                   const Vector2D& projectedPosition,
-                   const Vector2D& cellPosition)
+  DigitizationStep(
+      double sl,
+      double dl,
+      const DigitizationCell& dc,
+      const Vector3D& entryP,
+      const Vector3D& exitP,
+      const Vector2D& projectedPosition,
+      const Vector2D& cellPosition)
       : stepLength(sl),
         driftLength(dl),
         stepCell(dc),

@@ -34,8 +34,11 @@ struct Intersection {
   /// @param slength is the path length to the intersection
   /// @param svalid is a boolean indicating if intersection is valid
   /// @param dist is the distance to the closes surface boundary
-  Intersection(const Vector3D& sinter, double slength, bool svalid,
-               double dist = 0.)
+  Intersection(
+      const Vector3D& sinter,
+      double slength,
+      bool svalid,
+      double dist = 0.)
       : position(sinter), pathLength(slength), distance(dist), valid(svalid) {}
 
   /// Default constructor
@@ -49,7 +52,8 @@ struct Intersection {
   /// Smaller operator for sorting,
   /// - it respects the validity of the intersection
   /// @param si is the intersection for testing
-  bool operator<(const Intersection& si) const {
+  bool
+  operator<(const Intersection& si) const {
     if (!valid) {
       return false;
     }
@@ -64,7 +68,8 @@ struct Intersection {
   /// Greater operator for sorting,
   /// - it respects the validity of the intersection
   /// @param si is the intersection for testing
-  bool operator>(const Intersection& si) const {
+  bool
+  operator>(const Intersection& si) const {
     if (!valid) {
       return false;
     }
@@ -97,8 +102,10 @@ class ObjectIntersection {
   /// @param sInter is the intersection
   /// @param sObject is the object to be instersected
   /// @param dir is the direction of the intersection
-  ObjectIntersection(const Intersection& sInter, const object_t* sObject,
-                     NavigationDirection dir = forward)
+  ObjectIntersection(
+      const Intersection& sInter,
+      const object_t* sObject,
+      NavigationDirection dir = forward)
       : intersection(sInter),
         object(sObject),
         representation(sObject),
@@ -110,14 +117,16 @@ class ObjectIntersection {
   /// @brief smaller operator for ordering & sorting
   ///
   /// @param oi is the source intersection for comparison
-  bool operator<(const ObjectIntersection<object_t>& oi) const {
+  bool
+  operator<(const ObjectIntersection<object_t>& oi) const {
     return (intersection < oi.intersection);
   }
 
   /// @brief greater operator for ordering & sorting
   ///
   /// @param oi is the source intersection for comparison
-  bool operator>(const ObjectIntersection<object_t>& oi) const {
+  bool
+  operator>(const ObjectIntersection<object_t>& oi) const {
     return (intersection > oi.intersection);
   }
 };
@@ -144,9 +153,11 @@ class FullIntersection {
   /// @param sRepresentation is the surface representation of the object
   /// @param dir is the direction
   ///
-  FullIntersection(const Intersection& sInter, const object_t* sObject,
-                   const representation_t* sRepresentation,
-                   NavigationDirection dir = forward)
+  FullIntersection(
+      const Intersection& sInter,
+      const object_t* sObject,
+      const representation_t* sRepresentation,
+      NavigationDirection dir = forward)
       : intersection(sInter),
         object(sObject),
         representation(sRepresentation),
@@ -158,14 +169,16 @@ class FullIntersection {
   /// @brief smaller operator for ordering & sorting
   ///
   /// @param fi is the full intersection to be tested
-  bool operator<(const FullIntersection<object_t, representation_t>& fi) const {
+  bool
+  operator<(const FullIntersection<object_t, representation_t>& fi) const {
     return (intersection < fi.intersection);
   }
 
   /// @brief greater operator for ordering & sorting
   ///
   /// @param fi is the full intersection to be tested
-  bool operator>(const FullIntersection<object_t, representation_t>& fi) const {
+  bool
+  operator>(const FullIntersection<object_t, representation_t>& fi) const {
     return (intersection > fi.intersection);
   }
 };
@@ -179,7 +192,8 @@ struct SameSurfaceIntersection {
   /// @param i1 First intersection to test
   /// @param i2 Second intersection to test
   template <typename intersection_t>
-  bool operator()(const intersection_t& i1, const intersection_t& i2) const {
+  bool
+  operator()(const intersection_t& i1, const intersection_t& i2) const {
     return (i1.object == i2.object);
   }
 };
@@ -193,15 +207,17 @@ struct VoidIntersectionCorrector {
   VoidIntersectionCorrector() = default;
 
   // Void Corrector parameter constructor
-  VoidIntersectionCorrector(const Vector3D& /*unused*/,
-                            const Vector3D& /*unused*/, double /*unused*/) {}
+  VoidIntersectionCorrector(
+      const Vector3D& /*unused*/,
+      const Vector3D& /*unused*/,
+      double /*unused*/) {}
 
   /// Boolean() operator - returns false for void modifier
   explicit operator bool() const { return false; }
 
   /// empty correction interface
-  bool operator()(Vector3D& /*unused*/, Vector3D& /*unused*/,
-                  double /*unused*/) {
+  bool
+  operator()(Vector3D& /*unused*/, Vector3D& /*unused*/, double /*unused*/) {
     return false;
   }
 
@@ -209,7 +225,8 @@ struct VoidIntersectionCorrector {
   ///
   /// @stay put and don't do antyhing
   template <typename step_t>
-  bool operator()(step_t& /*unused*/) const {
+  bool
+  operator()(step_t& /*unused*/) const {
     return false;
   }
 };

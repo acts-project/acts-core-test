@@ -26,8 +26,9 @@ class ImpactPoint3dEstimator {
   /// @param refPos Position to calculate distance to
   ///
   /// @return Distance
-  double calculateDistance(const BoundParameters& params,
-                           const Vector3D& refPos) const;
+  double calculateDistance(
+      const BoundParameters& params,
+      const Vector3D& refPos) const;
 };
 
 }  // namespace Acts

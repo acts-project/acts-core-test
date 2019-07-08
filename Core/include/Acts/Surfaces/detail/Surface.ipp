@@ -10,19 +10,20 @@
 // Surface.ipp, Acts project
 ///////////////////////////////////////////////////////////////////
 
-inline const Vector3D Surface::center(const GeometryContext& gctx) const {
+inline const Vector3D
+Surface::center(const GeometryContext& gctx) const {
   // fast access via tranform matrix (and not translation())
   auto tMatrix = transform(gctx).matrix();
   return Vector3D(tMatrix(0, 3), tMatrix(1, 3), tMatrix(2, 3));
 }
 
-inline const Acts::Vector3D Surface::normal(const GeometryContext& gctx,
-                                            const Vector3D& /*unused*/) const {
+inline const Acts::Vector3D
+Surface::normal(const GeometryContext& gctx, const Vector3D& /*unused*/) const {
   return normal(gctx, s_origin2D);
 }
 
-inline const Transform3D& Surface::transform(
-    const GeometryContext& gctx) const {
+inline const Transform3D&
+Surface::transform(const GeometryContext& gctx) const {
   if (m_transform != nullptr) {
     return (*(m_transform.get()));
   }
@@ -32,22 +33,27 @@ inline const Transform3D& Surface::transform(
   return s_idTransform;
 }
 
-inline bool Surface::insideBounds(const Vector2D& locpos,
-                                  const BoundaryCheck& bcheck) const {
+inline bool
+Surface::insideBounds(const Vector2D& locpos, const BoundaryCheck& bcheck)
+    const {
   return bounds().inside(locpos, bcheck);
 }
 
-inline const RotationMatrix3D Surface::referenceFrame(
-    const GeometryContext& gctx, const Vector3D& /*unused*/,
+inline const RotationMatrix3D
+Surface::referenceFrame(
+    const GeometryContext& gctx,
+    const Vector3D& /*unused*/,
     const Vector3D& /*unused*/) const {
   return transform(gctx).matrix().block<3, 3>(0, 0);
 }
 
-inline void Surface::initJacobianToGlobal(const GeometryContext& gctx,
-                                          BoundToFreeMatrix& jacobian,
-                                          const Vector3D& gpos,
-                                          const Vector3D& dir,
-                                          const BoundVector& /*pars*/) const {
+inline void
+Surface::initJacobianToGlobal(
+    const GeometryContext& gctx,
+    BoundToFreeMatrix& jacobian,
+    const Vector3D& gpos,
+    const Vector3D& dir,
+    const BoundVector& /*pars*/) const {
   // The trigonometry required to convert the direction to spherical
   // coordinates and then compute the sines and cosines again can be
   // surprisingly expensive from a performance point of view.
@@ -79,9 +85,12 @@ inline void Surface::initJacobianToGlobal(const GeometryContext& gctx,
   jacobian(7, eQOP) = 1;
 }
 
-inline const RotationMatrix3D Surface::initJacobianToLocal(
-    const GeometryContext& gctx, FreeToBoundMatrix& jacobian,
-    const Vector3D& gpos, const Vector3D& dir) const {
+inline const RotationMatrix3D
+Surface::initJacobianToLocal(
+    const GeometryContext& gctx,
+    FreeToBoundMatrix& jacobian,
+    const Vector3D& gpos,
+    const Vector3D& dir) const {
   // Optimized trigonometry on the propagation direction
   const double x = dir(0);  // == cos(phi) * sin(theta)
   const double y = dir(1);  // == sin(phi) * sin(theta)
@@ -105,9 +114,12 @@ inline const RotationMatrix3D Surface::initJacobianToLocal(
   return rframeT;
 }
 
-inline const BoundRowVector Surface::derivativeFactors(
-    const GeometryContext& /*unused*/, const Vector3D& /*unused*/,
-    const Vector3D& dir, const RotationMatrix3D& rft,
+inline const BoundRowVector
+Surface::derivativeFactors(
+    const GeometryContext& /*unused*/,
+    const Vector3D& /*unused*/,
+    const Vector3D& dir,
+    const RotationMatrix3D& rft,
     const BoundToFreeMatrix& jac) const {
   // Create the normal and scale it with the projection onto the direction
   ActsRowVectorD<3> norm_vec = rft.template block<1, 3>(2, 0);
@@ -117,8 +129,11 @@ inline const BoundRowVector Surface::derivativeFactors(
 }
 
 template <typename parameters_t>
-bool Surface::isOnSurface(const GeometryContext& gctx, const parameters_t& pars,
-                          const BoundaryCheck& bcheck) const {
+bool
+Surface::isOnSurface(
+    const GeometryContext& gctx,
+    const parameters_t& pars,
+    const BoundaryCheck& bcheck) const {
   // surface pointer comparison as a first fast check (w/o transform)
   // @todo check if we can find a fast way that works for stepper state and
   // parameters
@@ -126,23 +141,28 @@ bool Surface::isOnSurface(const GeometryContext& gctx, const parameters_t& pars,
   return isOnSurface(gctx, pars.position(), pars.momentum(), bcheck);
 }
 
-inline const DetectorElementBase* Surface::associatedDetectorElement() const {
+inline const DetectorElementBase*
+Surface::associatedDetectorElement() const {
   return m_associatedDetElement;
 }
 
-inline const Layer* Surface::associatedLayer() const {
+inline const Layer*
+Surface::associatedLayer() const {
   return (m_associatedLayer);
 }
 
-inline const ISurfaceMaterial* Surface::surfaceMaterial() const {
+inline const ISurfaceMaterial*
+Surface::surfaceMaterial() const {
   return m_surfaceMaterial.get();
 }
 
-inline void Surface::assignSurfaceMaterial(
+inline void
+Surface::assignSurfaceMaterial(
     std::shared_ptr<const ISurfaceMaterial> material) {
   m_surfaceMaterial = std::move(material);
 }
 
-inline void Surface::associateLayer(const Layer& lay) {
+inline void
+Surface::associateLayer(const Layer& lay) {
   m_associatedLayer = (&lay);
 }

@@ -49,8 +49,12 @@ struct CylindricalTrackingGeometry {
 
   /// helper method for cylinder layer
   /// create the positions for module surfaces on a cylinder
-  std::vector<Vector3D> modulePositionsCylinder(
-      double radius, double zStagger, double moduleHalfLength, double lOverlap,
+  std::vector<Vector3D>
+  modulePositionsCylinder(
+      double radius,
+      double zStagger,
+      double moduleHalfLength,
+      double lOverlap,
       const std::pair<int, int>& binningSchema) {
     int nPhiBins = binningSchema.first;
     int nZbins = binningSchema.second;
@@ -71,15 +75,16 @@ struct CylindricalTrackingGeometry {
       for (size_t phiBin = 0; phiBin < size_t(nPhiBins); ++phiBin) {
         // calculate the current phi value
         double modulePhi = minPhi + phiBin * phiStep;
-        mPositions.push_back(Vector3D(moduleR * cos(modulePhi),
-                                      moduleR * sin(modulePhi), moduleZ));
+        mPositions.push_back(Vector3D(
+            moduleR * cos(modulePhi), moduleR * sin(modulePhi), moduleZ));
       }
     }
     return mPositions;
   }
 
   // @brief Call operator for the creation method of the tracking geometry
-  std::shared_ptr<const TrackingGeometry> operator()() {
+  std::shared_ptr<const TrackingGeometry>
+  operator()() {
     using namespace Acts::UnitLiterals;
 
     Logging::Level surfaceLLevel = Logging::INFO;
@@ -166,16 +171,16 @@ struct CylindricalTrackingGeometry {
       std::vector<std::shared_ptr<const Surface>> layerModules;
 
       // Module material from input
-      MaterialProperties moduleMaterialProperties(pcMaterial,
-                                                  pModuleThickness[ilp]);
+      MaterialProperties moduleMaterialProperties(
+          pcMaterial, pModuleThickness[ilp]);
       // Create a new surface material
       std::shared_ptr<const ISurfaceMaterial> moduleMaterialPtr =
           std::shared_ptr<const ISurfaceMaterial>(
               new Acts::HomogeneousSurfaceMaterial(moduleMaterialProperties));
 
       // The rectangle bounds for all modules
-      auto mBounds = std::make_shared<RectangleBounds>(pModuleHalfX[ilp],
-                                                       pModuleHalfY[ilp]);
+      auto mBounds = std::make_shared<RectangleBounds>(
+          pModuleHalfX[ilp], pModuleHalfY[ilp]);
       // Create the module centers
       auto moduleCenters = modulePositionsCylinder(
           pLayerRadii[ilp], 2_mm, pModuleHalfY[ilp], 5_mm, pLayerBinning[ilp]);
@@ -184,13 +189,17 @@ struct CylindricalTrackingGeometry {
         // The association transform
         double modulePhi = VectorHelpers::phi(mCenter);
         // Local z axis is the normal vector
-        Vector3D moduleLocalZ(cos(modulePhi + pModuleTiltPhi[ilp]),
-                              sin(modulePhi + pModuleTiltPhi[ilp]), 0.);
+        Vector3D moduleLocalZ(
+            cos(modulePhi + pModuleTiltPhi[ilp]),
+            sin(modulePhi + pModuleTiltPhi[ilp]),
+            0.);
         // Local y axis is the global z axis
         Vector3D moduleLocalY(0., 0., 1);
         // Local x axis the normal to local y,z
-        Vector3D moduleLocalX(-sin(modulePhi + pModuleTiltPhi[ilp]),
-                              cos(modulePhi + pModuleTiltPhi[ilp]), 0.);
+        Vector3D moduleLocalX(
+            -sin(modulePhi + pModuleTiltPhi[ilp]),
+            cos(modulePhi + pModuleTiltPhi[ilp]),
+            0.);
         // Create the RotationMatrix
         RotationMatrix3D moduleRotation;
         moduleRotation.col(0) = moduleLocalX;
@@ -198,11 +207,13 @@ struct CylindricalTrackingGeometry {
         moduleRotation.col(2) = moduleLocalZ;
         // Get the moduleTransform
         std::shared_ptr<Transform3D> mModuleTransform =
-            std::make_shared<Transform3D>(Translation3D(mCenter) *
-                                          moduleRotation);
+            std::make_shared<Transform3D>(
+                Translation3D(mCenter) * moduleRotation);
         // Create the detector element
         auto detElement = std::make_unique<const DetectorElementStub>(
-            mModuleTransform, mBounds, pModuleThickness[ilp],
+            mModuleTransform,
+            mBounds,
+            pModuleThickness[ilp],
             moduleMaterialPtr);
 
         layerModules.push_back(detElement->surface().getSharedPtr());
@@ -212,8 +223,11 @@ struct CylindricalTrackingGeometry {
       ProtoLayer protoLayer(geoContext, layerModules);
       protoLayer.envR = {0.5, 0.5};
       auto pLayer = layerCreator->cylinderLayer(
-          geoContext, std::move(layerModules), pLayerBinning[ilp].first,
-          pLayerBinning[ilp].second, protoLayer);
+          geoContext,
+          std::move(layerModules),
+          pLayerBinning[ilp].first,
+          pLayerBinning[ilp].second,
+          protoLayer);
       auto approachSurfaces = pLayer->approachDescriptor()->containedSurfaces();
       auto mutableOuterSurface =
           const_cast<Acts::Surface*>(approachSurfaces.at(1));
@@ -224,14 +238,18 @@ struct CylindricalTrackingGeometry {
     }  // loop over layers
 
     // layer array
-    auto pLayerArray = layerArrayCreator->layerArray(geoContext, pLayers, 25.,
-                                                     300., arbitrary, binR);
+    auto pLayerArray = layerArrayCreator->layerArray(
+        geoContext, pLayers, 25., 300., arbitrary, binR);
     auto pVolumeBounds =
         std::make_shared<const CylinderVolumeBounds>(25., 300., 1100.);
     // create the Tracking volume
-    auto pVolume = TrackingVolume::create(nullptr, pVolumeBounds, nullptr,
-                                          std::move(pLayerArray), nullptr,
-                                          "Pixel::Barrel");
+    auto pVolume = TrackingVolume::create(
+        nullptr,
+        pVolumeBounds,
+        nullptr,
+        std::move(pLayerArray),
+        nullptr,
+        "Pixel::Barrel");
 
     // The combined volume
     auto detectorVolume = cylinderVolumeHelper->createContainerTrackingVolume(

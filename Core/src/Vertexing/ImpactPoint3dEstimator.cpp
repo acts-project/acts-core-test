@@ -8,8 +8,10 @@
 
 #include "Acts/Vertexing/ImpactPoint3dEstimator.hpp"
 
-double Acts::ImpactPoint3dEstimator::calculateDistance(
-    const BoundParameters& params, const Vector3D& refPos) const {
+double
+Acts::ImpactPoint3dEstimator::calculateDistance(
+    const BoundParameters& params,
+    const Vector3D& refPos) const {
   // normalized momentum
   const Vector3D normMomentum = params.momentum().normalized();
 

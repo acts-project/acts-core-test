@@ -48,8 +48,13 @@ class MaterialProperties {
   /// @param averageZ is the average atomic number
   /// @param averageRho is the average density in g/mm3
   /// @param thickness is the thickness of the material
-  MaterialProperties(float Xo, float Lo, float averageA, float averageZ,
-                     float averageRho, float thickness);
+  MaterialProperties(
+      float Xo,
+      float Lo,
+      float averageA,
+      float averageZ,
+      float averageRho,
+      float thickness);
 
   /// Constructor - for full Material class
   ///
@@ -61,8 +66,9 @@ class MaterialProperties {
   ///
   /// @param matLayers The vector of pairs of material and thickness
   /// @param unitThickness Boolean to set compound is set to unit thickness
-  MaterialProperties(const std::vector<MaterialProperties>& matLayers,
-                     bool unitThickness = true);
+  MaterialProperties(
+      const std::vector<MaterialProperties>& matLayers,
+      bool unitThickness = true);
 
   /// Copy Constructor
   ///
@@ -158,54 +164,65 @@ class MaterialProperties {
   float m_dInL0{0.};      //!< thickness in units of nucl. interaction length
 };
 
-inline const Material& MaterialProperties::material() const {
+inline const Material&
+MaterialProperties::material() const {
   return m_material;
 }
 
-inline float MaterialProperties::thicknessInX0() const {
+inline float
+MaterialProperties::thicknessInX0() const {
   return m_dInX0;
 }
 
-inline float MaterialProperties::thicknessInL0() const {
+inline float
+MaterialProperties::thicknessInL0() const {
   return m_dInL0;
 }
 
-inline float MaterialProperties::thickness() const {
+inline float
+MaterialProperties::thickness() const {
   return m_thickness;
 }
 
-inline float MaterialProperties::zOverAtimesRho() const {
+inline float
+MaterialProperties::zOverAtimesRho() const {
   return m_material.zOverAtimesRho();
 }
 
-inline float MaterialProperties::averageX0() const {
+inline float
+MaterialProperties::averageX0() const {
   return m_material.X0();
 }
 
-inline float MaterialProperties::averageL0() const {
+inline float
+MaterialProperties::averageL0() const {
   return m_material.L0();
 }
 
-inline float MaterialProperties::averageA() const {
+inline float
+MaterialProperties::averageA() const {
   return m_material.A();
 }
 
-inline float MaterialProperties::averageZ() const {
+inline float
+MaterialProperties::averageZ() const {
   return m_material.Z();
 }
 
-inline float MaterialProperties::averageRho() const {
+inline float
+MaterialProperties::averageRho() const {
   return m_material.rho();
 }
 
-inline bool MaterialProperties::operator==(
-    const MaterialProperties& mprop) const {
-  return (m_material == mprop.m_material && m_dInX0 == mprop.m_dInX0 &&
-          m_dInL0 == mprop.m_dInL0);
+inline bool
+MaterialProperties::operator==(const MaterialProperties& mprop) const {
+  return (
+      m_material == mprop.m_material && m_dInX0 == mprop.m_dInX0 &&
+      m_dInL0 == mprop.m_dInL0);
 }
 
-inline bool MaterialProperties::operator!=(
-    const MaterialProperties& mprop) const {
+inline bool
+MaterialProperties::operator!=(const MaterialProperties& mprop) const {
   return (!operator==(mprop));
 }
 

@@ -14,18 +14,19 @@
 #include "Acts/Material/MaterialProperties.hpp"
 
 Acts::HomogeneousSurfaceMaterial::HomogeneousSurfaceMaterial(
-    const MaterialProperties& full, double splitFactor)
+    const MaterialProperties& full,
+    double splitFactor)
     : ISurfaceMaterial(splitFactor), m_fullMaterial(full) {}
 
-Acts::HomogeneousSurfaceMaterial& Acts::HomogeneousSurfaceMaterial::operator*=(
-    double scale) {
+Acts::HomogeneousSurfaceMaterial&
+Acts::HomogeneousSurfaceMaterial::operator*=(double scale) {
   // scale the sub properties
   m_fullMaterial *= scale;
   return (*this);
 }
 
-std::ostream& Acts::HomogeneousSurfaceMaterial::toStream(
-    std::ostream& sl) const {
+std::ostream&
+Acts::HomogeneousSurfaceMaterial::toStream(std::ostream& sl) const {
   sl << "Acts::HomogeneousSurfaceMaterial : " << std::endl;
   sl << "   - fullMaterial : " << m_fullMaterial << std::endl;
   sl << "   - split factor : " << m_splitFactor << std::endl;

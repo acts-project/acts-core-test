@@ -49,7 +49,8 @@ class DetectorElementStub : public DetectorElementBase {
   /// @param material is the (optional) Surface material associated to it
   DetectorElementStub(
       std::shared_ptr<const Transform3D> transform,
-      std::shared_ptr<const PlanarBounds> pBounds, double thickness,
+      std::shared_ptr<const PlanarBounds> pBounds,
+      double thickness,
       std::shared_ptr<const ISurfaceMaterial> material = nullptr)
       : DetectorElementBase(),
         m_elementTransform(std::move(transform)),
@@ -68,7 +69,8 @@ class DetectorElementStub : public DetectorElementBase {
   /// @param material is the (optional) Surface material associated to it
   DetectorElementStub(
       std::shared_ptr<const Transform3D> transform,
-      std::shared_ptr<const LineBounds> lBounds, double thickness,
+      std::shared_ptr<const LineBounds> lBounds,
+      double thickness,
       std::shared_ptr<const ISurfaceMaterial> material = nullptr)
       : DetectorElementBase(),
         m_elementTransform(std::move(transform)),
@@ -104,16 +106,18 @@ class DetectorElementStub : public DetectorElementBase {
   double m_elementThickness{0.};
 };
 
-inline const Transform3D& DetectorElementStub::transform(
-    const GeometryContext& /*gctx*/) const {
+inline const Transform3D&
+DetectorElementStub::transform(const GeometryContext& /*gctx*/) const {
   return *m_elementTransform;
 }
 
-inline const Surface& DetectorElementStub::surface() const {
+inline const Surface&
+DetectorElementStub::surface() const {
   return *m_elementSurface;
 }
 
-inline double DetectorElementStub::thickness() const {
+inline double
+DetectorElementStub::thickness() const {
   return m_elementThickness;
 }
 }  // namespace Test

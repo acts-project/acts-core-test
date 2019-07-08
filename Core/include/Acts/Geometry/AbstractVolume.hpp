@@ -55,8 +55,9 @@ class AbstractVolume : public Volume {
   ///
   /// @param htrans is the transform 3D the positions the volume in global frame
   /// @param volbounds is the boundary definition
-  AbstractVolume(std::shared_ptr<const Transform3D> htrans,
-                 VolumeBoundsPtr volbounds);
+  AbstractVolume(
+      std::shared_ptr<const Transform3D> htrans,
+      VolumeBoundsPtr volbounds);
 
   /// Copy constructor - deleted
   AbstractVolume(const AbstractVolume& vol) = delete;

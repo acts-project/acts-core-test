@@ -21,11 +21,14 @@ namespace Acts {
 
 /// Sort function which sorts dd4hep::DetElement by their ID
 /// @param[in][out] det the dd4hep::DetElements to be sorted
-void sortDetElementsByID(std::vector<dd4hep::DetElement>& det) {
-  sort(det.begin(), det.end(),
-       [](const dd4hep::DetElement& a, const dd4hep::DetElement& b) {
-         return (a.id() < b.id());
-       });
+void
+sortDetElementsByID(std::vector<dd4hep::DetElement>& det) {
+  sort(
+      det.begin(),
+      det.end(),
+      [](const dd4hep::DetElement& a, const dd4hep::DetElement& b) {
+        return (a.id() < b.id());
+      });
 }
 
 /// @brief Global method which creates the TrackingGeometry from DD4hep input
@@ -83,8 +86,10 @@ void sortDetElementsByID(std::vector<dd4hep::DetElement>& det) {
 std::unique_ptr<const TrackingGeometry> convertDD4hepDetector(
     dd4hep::DetElement worldDetElement,
     Logging::Level loggingLevel = Logging::Level::INFO,
-    BinningType bTypePhi = equidistant, BinningType bTypeR = equidistant,
-    BinningType bTypeZ = equidistant, double layerEnvelopeR = UnitConstants::mm,
+    BinningType bTypePhi = equidistant,
+    BinningType bTypeR = equidistant,
+    BinningType bTypeZ = equidistant,
+    double layerEnvelopeR = UnitConstants::mm,
     double layerEnvelopeZ = UnitConstants::mm,
     double defaultLayerThickness = UnitConstants::fm,
     const std::function<void(std::vector<dd4hep::DetElement>& detectors)>&
@@ -133,8 +138,10 @@ std::unique_ptr<const TrackingGeometry> convertDD4hepDetector(
 std::shared_ptr<const CylinderVolumeBuilder> volumeBuilder_dd4hep(
     dd4hep::DetElement subDetector,
     Logging::Level loggingLevel = Logging::Level::INFO,
-    BinningType bTypePhi = equidistant, BinningType bTypeR = equidistant,
-    BinningType bTypeZ = equidistant, double layerEnvelopeR = UnitConstants::mm,
+    BinningType bTypePhi = equidistant,
+    BinningType bTypeR = equidistant,
+    BinningType bTypeZ = equidistant,
+    double layerEnvelopeR = UnitConstants::mm,
     double layerEnvelopeZ = UnitConstants::mm,
     double defaultLayerThickness = UnitConstants::fm);
 
@@ -150,8 +157,9 @@ std::shared_ptr<const CylinderVolumeHelper> cylinderVolumeHelper_dd4hep(
 /// detectors should be collected
 /// @param [out] subdetectors the DD4hep::DetElements of the sub detectors
 /// contained by detElement
-void collectSubDetectors_dd4hep(dd4hep::DetElement& detElement,
-                                std::vector<dd4hep::DetElement>& subdetectors);
+void collectSubDetectors_dd4hep(
+    dd4hep::DetElement& detElement,
+    std::vector<dd4hep::DetElement>& subdetectors);
 
 /// Method internally used by convertDD4hepDetector to collect all volumes of a
 /// compound detector
@@ -159,14 +167,16 @@ void collectSubDetectors_dd4hep(dd4hep::DetElement& detElement,
 /// compounds should be collected
 /// @param [out] compounds the DD4hep::DetElements of the compounds contained by
 /// detElement
-void collectCompounds_dd4hep(dd4hep::DetElement& detElement,
-                             std::vector<dd4hep::DetElement>& compounds);
+void collectCompounds_dd4hep(
+    dd4hep::DetElement& detElement,
+    std::vector<dd4hep::DetElement>& compounds);
 
 /// Method internally used by convertDD4hepDetector
 /// @param [in] detElement the dd4hep::DetElement of the volume of which the
 /// layers should be collected
 /// @param [out] layers the DD4hep::DetElements of the layers contained by
 /// detElement
-void collectLayers_dd4hep(dd4hep::DetElement& detElement,
-                          std::vector<dd4hep::DetElement>& layers);
+void collectLayers_dd4hep(
+    dd4hep::DetElement& detElement,
+    std::vector<dd4hep::DetElement>& layers);
 }  // namespace Acts

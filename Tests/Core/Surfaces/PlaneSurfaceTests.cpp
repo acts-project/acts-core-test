@@ -121,38 +121,40 @@ BOOST_AUTO_TEST_CASE(PlaneSurfaceProperties) {
 
   CHECK_CLOSE_OR_SMALL(
       planeSurfaceObject->referenceFrame(tgContext, globalPosition, momentum),
-      expectedFrame, 1e-6, 1e-9);
+      expectedFrame,
+      1e-6,
+      1e-9);
   //
   /// Test normal, given 3D position
   Vector3D normal3D(0., 0., 1.);
   BOOST_CHECK_EQUAL(planeSurfaceObject->normal(tgContext), normal3D);
   //
   /// Test bounds
-  BOOST_CHECK_EQUAL(planeSurfaceObject->bounds().type(),
-                    SurfaceBounds::Rectangle);
+  BOOST_CHECK_EQUAL(
+      planeSurfaceObject->bounds().type(), SurfaceBounds::Rectangle);
 
   /// Test localToGlobal
   Vector2D localPosition{1.5, 1.7};
-  planeSurfaceObject->localToGlobal(tgContext, localPosition, momentum,
-                                    globalPosition);
+  planeSurfaceObject->localToGlobal(
+      tgContext, localPosition, momentum, globalPosition);
   //
   // expected position is the translated one
-  Vector3D expectedPosition{1.5 + translation.x(), 1.7 + translation.y(),
-                            translation.z()};
+  Vector3D expectedPosition{
+      1.5 + translation.x(), 1.7 + translation.y(), translation.z()};
 
   CHECK_CLOSE_REL(globalPosition, expectedPosition, 1e-2);
   //
   /// Testing globalToLocal
-  planeSurfaceObject->globalToLocal(tgContext, globalPosition, momentum,
-                                    localPosition);
+  planeSurfaceObject->globalToLocal(
+      tgContext, globalPosition, momentum, localPosition);
   Vector2D expectedLocalPosition{1.5, 1.7};
 
   CHECK_CLOSE_REL(localPosition, expectedLocalPosition, 1e-2);
 
   /// Test isOnSurface
   Vector3D offSurface{0, 1, -2.};
-  BOOST_CHECK(planeSurfaceObject->isOnSurface(tgContext, globalPosition,
-                                              momentum, true));
+  BOOST_CHECK(planeSurfaceObject->isOnSurface(
+      tgContext, globalPosition, momentum, true));
   BOOST_CHECK(
       !planeSurfaceObject->isOnSurface(tgContext, offSurface, momentum, true));
   //
@@ -172,8 +174,8 @@ BOOST_AUTO_TEST_CASE(PlaneSurfaceProperties) {
   //                 0.01);
   //
   /// Test name
-  BOOST_CHECK_EQUAL(planeSurfaceObject->name(),
-                    std::string("Acts::PlaneSurface"));
+  BOOST_CHECK_EQUAL(
+      planeSurfaceObject->name(), std::string("Acts::PlaneSurface"));
   //
   /// Test dump
   // TODO 2017-04-12 msmk: check how to correctly check output

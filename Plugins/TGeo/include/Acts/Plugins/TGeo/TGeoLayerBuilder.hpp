@@ -75,9 +75,10 @@ class TGeoLayerBuilder : public ILayerBuilder {
   /// Constructor
   /// @param config is the configuration struct
   /// @param logger the local logging instance
-  TGeoLayerBuilder(const Config& config,
-                   std::unique_ptr<const Logger> logger =
-                       getDefaultLogger("LayerArrayCreator", Logging::INFO));
+  TGeoLayerBuilder(
+      const Config& config,
+      std::unique_ptr<const Logger> logger =
+          getDefaultLogger("LayerArrayCreator", Logging::INFO));
 
   /// Destructor
   ~TGeoLayerBuilder() override;
@@ -122,7 +123,10 @@ class TGeoLayerBuilder : public ILayerBuilder {
   Config m_cfg;
 
   /// Private access to the logger
-  const Logger& logger() const { return *m_logger; }
+  const Logger&
+  logger() const {
+    return *m_logger;
+  }
 
   /// logging instance
   std::unique_ptr<const Logger> m_logger;
@@ -136,16 +140,20 @@ class TGeoLayerBuilder : public ILayerBuilder {
   void resolveSensitive(
       const GeometryContext& gctx,
       std::vector<std::shared_ptr<const Surface>>& layerSurfaces,
-      TGeoVolume* tgVolume, TGeoNode* tgNode, const TGeoMatrix& tgTransform,
-      const LayerConfig& layerConfig, int type, bool correctBranch = false,
+      TGeoVolume* tgVolume,
+      TGeoNode* tgNode,
+      const TGeoMatrix& tgTransform,
+      const LayerConfig& layerConfig,
+      int type,
+      bool correctBranch = false,
       const std::string& offset = "");
 
   /// Private helper method : build layers
   /// @param gcts the geometry context of this call
   /// @param layers is goint to be filled
   /// @param type is the indication which ones to build -1 | 0 | 1
-  void buildLayers(const GeometryContext& gctx, LayerVector& layers,
-                   int type = 0);
+  void
+  buildLayers(const GeometryContext& gctx, LayerVector& layers, int type = 0);
 
   /// Private helper method : match string with wildcards
   /// @param wc is the one with the potential wildcard
@@ -153,7 +161,8 @@ class TGeoLayerBuilder : public ILayerBuilder {
   bool match(const char* first, const char* second) const;
 };
 
-inline TGeoLayerBuilder::Config TGeoLayerBuilder::getConfiguration() const {
+inline TGeoLayerBuilder::Config
+TGeoLayerBuilder::getConfiguration() const {
   return m_cfg;
 }
 
@@ -162,14 +171,15 @@ TGeoLayerBuilder::detectorElements() const {
   return m_elementStore;
 }
 
-inline const std::string& TGeoLayerBuilder::identification() const {
+inline const std::string&
+TGeoLayerBuilder::identification() const {
   return m_cfg.configurationName;
 }
 
 // The main function that checks if two given strings
 // match. The first string may contain wildcard characters
-inline bool TGeoLayerBuilder::match(const char* first,
-                                    const char* second) const {
+inline bool
+TGeoLayerBuilder::match(const char* first, const char* second) const {
   // If we reach at the end of both strings, we are done
   if (*first == '\0' && *second == '\0') {
     return true;

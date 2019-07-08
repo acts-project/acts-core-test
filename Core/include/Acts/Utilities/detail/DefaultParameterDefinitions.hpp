@@ -112,15 +112,27 @@ struct par_type<ParDef::eLOC_1> {
 
 template <>
 struct par_type<ParDef::ePHI> {
-  static constexpr double pMin() { return -M_PI; }
-  static constexpr double pMax() { return M_PI; }
+  static constexpr double
+  pMin() {
+    return -M_PI;
+  }
+  static constexpr double
+  pMax() {
+    return M_PI;
+  }
   using type = cyclic_parameter<double, pMin, pMax>;
 };
 
 template <>
 struct par_type<ParDef::eTHETA> {
-  static constexpr double pMin() { return 0; }
-  static constexpr double pMax() { return M_PI; }
+  static constexpr double
+  pMin() {
+    return 0;
+  }
+  static constexpr double
+  pMax() {
+    return M_PI;
+  }
   using type = bound_parameter<double, pMin, pMax>;
 };
 

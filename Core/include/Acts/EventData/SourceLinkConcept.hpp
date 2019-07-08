@@ -31,8 +31,9 @@ namespace concept {
   struct SourceLinkConcept {
     constexpr static bool comparison_works =
         identical_to<bool, comparable_t, T>;
-    static_assert(comparison_works,
-                  "Source link does not implement equality operator");
+    static_assert(
+        comparison_works,
+        "Source link does not implement equality operator");
 
     constexpr static bool surface_method_exists =
         converts_to<const Surface&, surface_method_t, T>;

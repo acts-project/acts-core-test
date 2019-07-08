@@ -104,8 +104,11 @@ class CylinderVolumeBounds : public VolumeBounds {
   /// @param router is the outer radius of the cylinder
   /// @param haphi is the half opening angle
   /// @param halez is the half length in z
-  CylinderVolumeBounds(double rinner, double router, double haphi,
-                       double halez);
+  CylinderVolumeBounds(
+      double rinner,
+      double router,
+      double haphi,
+      double halez);
 
   /// Constructor - from cylinder bounds and thickness
   ///
@@ -152,9 +155,10 @@ class CylinderVolumeBounds : public VolumeBounds {
   /// @param envelope Optional envelope to add / subtract from min/max
   /// @param entity Entity to associate this bounding box with
   /// @return Constructed bounding box
-  Volume::BoundingBox boundingBox(const Transform3D* trf = nullptr,
-                                  const Vector3D& envelope = {0, 0, 0},
-                                  const Volume* entity = nullptr) const final;
+  Volume::BoundingBox boundingBox(
+      const Transform3D* trf = nullptr,
+      const Vector3D& envelope = {0, 0, 0},
+      const Volume* entity = nullptr) const final;
 
   /// Binning offset - overloaded for some R-binning types
   ///
@@ -190,8 +194,9 @@ class CylinderVolumeBounds : public VolumeBounds {
   /// Draw this cylinder to a given helper
   /// @param helper The helper instance
   /// @param transform An additional transform, default is identity
-  void draw(IVisualization& helper,
-            const Transform3D& transform = Transform3D::Identity()) const;
+  void draw(
+      IVisualization& helper,
+      const Transform3D& transform = Transform3D::Identity()) const;
 
  private:
   /// templated dumpT method
@@ -222,12 +227,13 @@ class CylinderVolumeBounds : public VolumeBounds {
   static const double s_numericalStable;
 };
 
-inline CylinderVolumeBounds* CylinderVolumeBounds::clone() const {
+inline CylinderVolumeBounds*
+CylinderVolumeBounds::clone() const {
   return new CylinderVolumeBounds(*this);
 }
 
-inline bool CylinderVolumeBounds::inside(const Vector3D& pos,
-                                         double tol) const {
+inline bool
+CylinderVolumeBounds::inside(const Vector3D& pos, double tol) const {
   using VectorHelpers::perp;
   using VectorHelpers::phi;
   double ros = perp(pos);
@@ -259,33 +265,40 @@ inline double CylinderVolumeBounds::binningBorder(BinningValue bValue)
   return VolumeBounds::binningBorder(bValue);
 }
 
-inline double CylinderVolumeBounds::innerRadius() const {
+inline double
+CylinderVolumeBounds::innerRadius() const {
   return m_valueStore.at(bv_innerRadius);
 }
 
-inline double CylinderVolumeBounds::outerRadius() const {
+inline double
+CylinderVolumeBounds::outerRadius() const {
   return m_valueStore.at(bv_outerRadius);
 }
 
-inline double CylinderVolumeBounds::mediumRadius() const {
+inline double
+CylinderVolumeBounds::mediumRadius() const {
   return 0.5 *
          (m_valueStore.at(bv_innerRadius) + m_valueStore.at(bv_outerRadius));
 }
 
-inline double CylinderVolumeBounds::deltaRadius() const {
+inline double
+CylinderVolumeBounds::deltaRadius() const {
   return (m_valueStore.at(bv_outerRadius) - m_valueStore.at(bv_innerRadius));
 }
 
-inline double CylinderVolumeBounds::halfPhiSector() const {
+inline double
+CylinderVolumeBounds::halfPhiSector() const {
   return m_valueStore.at(bv_halfPhiSector);
 }
 
-inline double CylinderVolumeBounds::halflengthZ() const {
+inline double
+CylinderVolumeBounds::halflengthZ() const {
   return m_valueStore.at(bv_halfZ);
 }
 
 template <class T>
-T& CylinderVolumeBounds::dumpT(T& tstream) const {
+T&
+CylinderVolumeBounds::dumpT(T& tstream) const {
   tstream << std::setiosflags(std::ios::fixed);
   tstream << std::setprecision(5);
   tstream << "Acts::CylinderVolumeBounds: (rMin, rMax, halfPhi, halfZ) = ";

@@ -28,7 +28,8 @@ namespace Test {
 BOOST_AUTO_TEST_SUITE(Surfaces)
 /// Unit test for creating compliant/non-compliant TriangleBounds object
 BOOST_AUTO_TEST_CASE(TriangleBoundsConstruction) {
-  std::array<Vector2D, 3> vertices({{Vector2D(1., 1.), Vector2D(4., 1.),
+  std::array<Vector2D, 3> vertices({{Vector2D(1., 1.),
+                                     Vector2D(4., 1.),
                                      Vector2D(4., 5.)}});  // 3-4-5 triangle
   // test default construction
   // TriangleBounds defaultConstructedTriangleBounds;  //deleted
@@ -44,7 +45,8 @@ BOOST_AUTO_TEST_CASE(TriangleBoundsConstruction) {
 
 /// Unit tests for TriangleBounds properties
 BOOST_AUTO_TEST_CASE(TriangleBoundsProperties) {
-  std::array<Vector2D, 3> vertices({{Vector2D(1., 1.), Vector2D(4., 1.),
+  std::array<Vector2D, 3> vertices({{Vector2D(1., 1.),
+                                     Vector2D(4., 1.),
                                      Vector2D(4., 5.)}});  // 3-4-5 triangle
   /// Test clone
   TriangleBounds triangleBoundsObject(vertices);
@@ -59,11 +61,14 @@ BOOST_AUTO_TEST_CASE(TriangleBoundsProperties) {
   Vector2D origin(0., 0.);
   Vector2D outside(30., 1.);
   Vector2D inTriangle(2., 1.5);
-  CHECK_CLOSE_REL(triangleBoundsObject.distanceToBoundary(origin),
-                  std::sqrt(2.),
-                  1e-6);  // makes sense
-  CHECK_CLOSE_REL(triangleBoundsObject.distanceToBoundary(outside), 26.,
-                  1e-6);  // ok
+  CHECK_CLOSE_REL(
+      triangleBoundsObject.distanceToBoundary(origin),
+      std::sqrt(2.),
+      1e-6);  // makes sense
+  CHECK_CLOSE_REL(
+      triangleBoundsObject.distanceToBoundary(outside),
+      26.,
+      1e-6);  // ok
   //
   /// Test vertices : fail; there are in fact 6 vertices (10.03.2017)
   std::array<Vector2D, 3> expectedVertices = vertices;
@@ -71,12 +76,12 @@ BOOST_AUTO_TEST_CASE(TriangleBoundsProperties) {
       "Following two tests fail because the triangle has six vertices");
   BOOST_CHECK_EQUAL(triangleBoundsObject.vertices().size(), (size_t)3);
   for (size_t i = 0; i < 3; i++) {
-    CHECK_CLOSE_REL(triangleBoundsObject.vertices().at(i),
-                    expectedVertices.at(i), 1e-6);
+    CHECK_CLOSE_REL(
+        triangleBoundsObject.vertices().at(i), expectedVertices.at(i), 1e-6);
   }
   /// Test boundingBox NOTE: Bounding box too big
-  BOOST_CHECK_EQUAL(triangleBoundsObject.boundingBox(),
-                    RectangleBounds(4., 5.));
+  BOOST_CHECK_EQUAL(
+      triangleBoundsObject.boundingBox(), RectangleBounds(4., 5.));
   //
 
   //
@@ -94,7 +99,8 @@ BOOST_AUTO_TEST_CASE(TriangleBoundsProperties) {
 }
 /// Unit test for testing TriangleBounds assignment
 BOOST_AUTO_TEST_CASE(TriangleBoundsAssignment) {
-  std::array<Vector2D, 3> vertices({{Vector2D(1., 1.), Vector2D(4., 1.),
+  std::array<Vector2D, 3> vertices({{Vector2D(1., 1.),
+                                     Vector2D(4., 1.),
                                      Vector2D(4., 5)}});  // 3-4-5 triangle
   std::array<Vector2D, 3> invalid(
       {{Vector2D(-1, -1), Vector2D(-1, -1), Vector2D(-1, -1)}});
@@ -108,8 +114,10 @@ BOOST_AUTO_TEST_CASE(TriangleBoundsAssignment) {
   const auto& assignedVertices = assignedTriangleBoundsObject.vertices();
   const auto& originalVertices = triangleBoundsObject.vertices();
   BOOST_CHECK_EQUAL_COLLECTIONS(
-      assignedVertices.cbegin(), assignedVertices.cend(),
-      originalVertices.cbegin(), originalVertices.cend());
+      assignedVertices.cbegin(),
+      assignedVertices.cend(),
+      originalVertices.cbegin(),
+      originalVertices.cend());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

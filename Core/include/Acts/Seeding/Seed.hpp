@@ -18,13 +18,22 @@ class Seed {
   /////////////////////////////////////////////////////////////////////////////////
 
  public:
-  Seed(const SpacePoint& b, const SpacePoint& m, const SpacePoint& u,
-       float vertex);
+  Seed(
+      const SpacePoint& b,
+      const SpacePoint& m,
+      const SpacePoint& u,
+      float vertex);
   Seed(const Seed&) = default;
   Seed& operator=(const Seed&);
 
-  const std::vector<const SpacePoint*>& sp() const { return m_spacepoints; }
-  double z() const { return m_zvertex; }
+  const std::vector<const SpacePoint*>&
+  sp() const {
+    return m_spacepoints;
+  }
+  double
+  z() const {
+    return m_zvertex;
+  }
 
  private:
   std::vector<const SpacePoint*> m_spacepoints;
@@ -36,8 +45,11 @@ class Seed {
 ///////////////////////////////////////////////////////////////////////////////
 
 template <typename SpacePoint>
-Seed<SpacePoint>::Seed(const SpacePoint& b, const SpacePoint& m,
-                       const SpacePoint& u, float vertex) {
+Seed<SpacePoint>::Seed(
+    const SpacePoint& b,
+    const SpacePoint& m,
+    const SpacePoint& u,
+    float vertex) {
   m_zvertex = vertex;
   m_spacepoints.push_back(&b);
   m_spacepoints.push_back(&m);

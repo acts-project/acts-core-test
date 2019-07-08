@@ -119,15 +119,16 @@ BOOST_AUTO_TEST_CASE(linearized_track_factory_test) {
     (*covMat) << resD0 * resD0, 0., 0., 0., 0., 0., 0., resZ0 * resZ0, 0., 0.,
         0., 0., 0., 0., resPh * resPh, 0., 0., 0., 0., 0., 0., resTh * resTh,
         0., 0., 0., 0., 0., 0., resQp * resQp, 0., 0., 0., 0., 0., 0., 1.;
-    tracks.push_back(BoundParameters(tgContext, std::move(covMat), paramVec,
-                                     perigeeSurface));
+    tracks.push_back(BoundParameters(
+        tgContext, std::move(covMat), paramVec, perigeeSurface));
   }
 
-  LinearizedTrackFactory<ConstantBField,
-                         Propagator<EigenStepper<ConstantBField>>>::Config
-      ltConfig(bField);
-  LinearizedTrackFactory<ConstantBField,
-                         Propagator<EigenStepper<ConstantBField>>>
+  LinearizedTrackFactory<
+      ConstantBField,
+      Propagator<EigenStepper<ConstantBField>>>::Config ltConfig(bField);
+  LinearizedTrackFactory<
+      ConstantBField,
+      Propagator<EigenStepper<ConstantBField>>>
       linFactory(ltConfig);
 
   BoundVector vecBoundZero = BoundVector::Zero();
@@ -138,11 +139,14 @@ BOOST_AUTO_TEST_CASE(linearized_track_factory_test) {
       ActsMatrixD<BoundParsDim, 3>::Zero();
 
   for (const BoundParameters& parameters : tracks) {
-    LinearizedTrack linTrack =
-        linFactory
-            .linearizeTrack(tgContext, mfContext, &parameters,
-                            SpacePointVector::Zero(), propagator)
-            .value();
+    LinearizedTrack linTrack = linFactory
+                                   .linearizeTrack(
+                                       tgContext,
+                                       mfContext,
+                                       &parameters,
+                                       SpacePointVector::Zero(),
+                                       propagator)
+                                   .value();
 
     BOOST_CHECK_NE(linTrack.parametersAtPCA, vecBoundZero);
     BOOST_CHECK_NE(linTrack.covarianceAtPCA, matBoundZero);
@@ -162,11 +166,12 @@ BOOST_AUTO_TEST_CASE(linearized_track_factory_empty_test) {
   // Set up propagator with void navigator
   Propagator<EigenStepper<ConstantBField>> propagator(stepper);
 
-  LinearizedTrackFactory<ConstantBField,
-                         Propagator<EigenStepper<ConstantBField>>>::Config
-      ltConfig(bField);
-  LinearizedTrackFactory<ConstantBField,
-                         Propagator<EigenStepper<ConstantBField>>>
+  LinearizedTrackFactory<
+      ConstantBField,
+      Propagator<EigenStepper<ConstantBField>>>::Config ltConfig(bField);
+  LinearizedTrackFactory<
+      ConstantBField,
+      Propagator<EigenStepper<ConstantBField>>>
       linFactory(ltConfig);
 
   BoundVector vecBoundZero = BoundVector::Zero();
@@ -176,11 +181,14 @@ BOOST_AUTO_TEST_CASE(linearized_track_factory_empty_test) {
   ActsMatrixD<BoundParsDim, 3> matBound2MomZero =
       ActsMatrixD<BoundParsDim, 3>::Zero();
 
-  LinearizedTrack linTrack =
-      linFactory
-          .linearizeTrack(tgContext, mfContext, nullptr,
-                          SpacePointVector(1., 2., 3., 4.), propagator)
-          .value();
+  LinearizedTrack linTrack = linFactory
+                                 .linearizeTrack(
+                                     tgContext,
+                                     mfContext,
+                                     nullptr,
+                                     SpacePointVector(1., 2., 3., 4.),
+                                     propagator)
+                                 .value();
 
   BOOST_CHECK_EQUAL(linTrack.parametersAtPCA, vecBoundZero);
   BOOST_CHECK_EQUAL(linTrack.covarianceAtPCA, matBoundZero);

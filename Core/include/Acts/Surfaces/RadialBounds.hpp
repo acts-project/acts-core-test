@@ -105,19 +105,23 @@ class RadialBounds : public DiscBounds {
   Vector2D shifted(const Vector2D& lpos) const;
 };
 
-inline double RadialBounds::rMin() const {
+inline double
+RadialBounds::rMin() const {
   return m_rMin;
 }
 
-inline double RadialBounds::rMax() const {
+inline double
+RadialBounds::rMax() const {
   return m_rMax;
 }
 
-inline double RadialBounds::averagePhi() const {
+inline double
+RadialBounds::averagePhi() const {
   return m_avgPhi;
 }
 
-inline double RadialBounds::halfPhiSector() const {
+inline double
+RadialBounds::halfPhiSector() const {
   return m_halfPhi;
 }
 

@@ -40,15 +40,21 @@ class ConeLayer : virtual public ConeSurface, public Layer {
   /// @todo chage od and ad to unique_ptr
   ///
   /// @return is a shared pointer to a layer
-  static MutableLayerPtr create(
+  static MutableLayerPtr
+  create(
       std::shared_ptr<const Transform3D> transform,
       std::shared_ptr<const ConeBounds> cbounds,
-      std::unique_ptr<SurfaceArray> surfaceArray, double thickness = 0.,
+      std::unique_ptr<SurfaceArray> surfaceArray,
+      double thickness = 0.,
       std::unique_ptr<ApproachDescriptor> ad = nullptr,
       LayerType laytyp = Acts::active) {
     return MutableLayerPtr(new ConeLayer(
-        std::move(transform), std::move(cbounds), std::move(surfaceArray),
-        thickness, std::move(ad), laytyp));
+        std::move(transform),
+        std::move(cbounds),
+        std::move(surfaceArray),
+        thickness,
+        std::move(ad),
+        laytyp));
   }
 
   /// Default Constructor - delete
@@ -80,11 +86,13 @@ class ConeLayer : virtual public ConeSurface, public Layer {
   /// @param laytyp is the layer type
   ///
   /// @todo chage od and ad to unique_ptr
-  ConeLayer(std::shared_ptr<const Transform3D> transform,
-            std::shared_ptr<const ConeBounds> cbounds,
-            std::unique_ptr<SurfaceArray> surfaceArray, double thickness = 0.,
-            std::unique_ptr<ApproachDescriptor> ade = nullptr,
-            LayerType laytyp = Acts::active);
+  ConeLayer(
+      std::shared_ptr<const Transform3D> transform,
+      std::shared_ptr<const ConeBounds> cbounds,
+      std::unique_ptr<SurfaceArray> surfaceArray,
+      double thickness = 0.,
+      std::unique_ptr<ApproachDescriptor> ade = nullptr,
+      LayerType laytyp = Acts::active);
 
   /// Private copy constructor with shift, called by create(args*)
   ///

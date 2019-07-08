@@ -35,9 +35,9 @@ Acts::SpacePointGridCreator::createGrid(
   // divide 2pi by angle delta to get number of phi-bins
   // size is always 2pi even for regions of interest
   int phiBins = std::floor(2 * M_PI / (outerAngle - innerAngle));
-  Acts::detail::Axis<detail::AxisType::Equidistant,
-                     detail::AxisBoundaryType::Closed>
-      phiAxis(-M_PI, M_PI, phiBins);
+  Acts::detail::
+      Axis<detail::AxisType::Equidistant, detail::AxisBoundaryType::Closed>
+          phiAxis(-M_PI, M_PI, phiBins);
 
   // TODO: can probably be optimized using smaller z bins
   // and returning (multiple) neighbors only in one z-direction for forward

@@ -26,9 +26,10 @@ class IExperimentCuts {
   /// @param middle middle space point of the current seed
   /// @param top top space point of the current seed
   /// @return seed weight to be added to the seed's weight
-  virtual float seedWeight(const InternalSpacePoint<SpacePoint>& bottom,
-                           const InternalSpacePoint<SpacePoint>& middle,
-                           const InternalSpacePoint<SpacePoint>& top) const = 0;
+  virtual float seedWeight(
+      const InternalSpacePoint<SpacePoint>& bottom,
+      const InternalSpacePoint<SpacePoint>& middle,
+      const InternalSpacePoint<SpacePoint>& top) const = 0;
   /// @param weight the current seed weight
   /// @param bottom bottom space point of the current seed
   /// @param middle middle space point of the current seed
@@ -36,7 +37,8 @@ class IExperimentCuts {
   /// @return true if the seed should be kept, false if the seed should be
   /// discarded
   virtual bool singleSeedCut(
-      float weight, const InternalSpacePoint<SpacePoint>& bottom,
+      float weight,
+      const InternalSpacePoint<SpacePoint>& bottom,
       const InternalSpacePoint<SpacePoint>& middle,
       const InternalSpacePoint<SpacePoint>& top) const = 0;
 

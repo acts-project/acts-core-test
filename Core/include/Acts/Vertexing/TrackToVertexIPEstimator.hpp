@@ -30,9 +30,11 @@ struct ImpactParametersAndSigma {
   double PVsigmaz0SinTheta = 0.;
 };
 
-template <typename input_track_t, typename propagator_t,
-          typename action_list_t = ActionList<>,
-          typename aborter_list_t = AbortList<>>
+template <
+    typename input_track_t,
+    typename propagator_t,
+    typename action_list_t = ActionList<>,
+    typename aborter_list_t = AbortList<>>
 
 /// @class TrackToVertexIPEstimator estimates the impact parameters and their
 /// errors of a given track w.r.t. a vertex
@@ -41,9 +43,9 @@ class TrackToVertexIPEstimator {
   /// @brief Default constructor
   ///
   /// @param logger Logging instance
-  TrackToVertexIPEstimator(std::unique_ptr<const Logger> logger =
-                               getDefaultLogger("TrackToVertexIPEstimator",
-                                                Logging::INFO))
+  TrackToVertexIPEstimator(
+      std::unique_ptr<const Logger> logger =
+          getDefaultLogger("TrackToVertexIPEstimator", Logging::INFO))
       : m_logger(std::move(logger)) {}
 
   /// @brief Move constructor
@@ -60,8 +62,10 @@ class TrackToVertexIPEstimator {
   /// @param vtx Vertex the track belongs to
   /// @param propagator Propagator
   Result<std::unique_ptr<ImpactParametersAndSigma>> estimate(
-      const GeometryContext& gctx, const MagneticFieldContext& mctx,
-      const BoundParameters& track, const Vertex<input_track_t>& vtx,
+      const GeometryContext& gctx,
+      const MagneticFieldContext& mctx,
+      const BoundParameters& track,
+      const Vertex<input_track_t>& vtx,
       const propagator_t& propagator) const;
 
  private:
@@ -69,7 +73,10 @@ class TrackToVertexIPEstimator {
   std::unique_ptr<const Logger> m_logger;
 
   /// Private access to logging instance
-  const Logger& logger() const { return *m_logger; }
+  const Logger&
+  logger() const {
+    return *m_logger;
+  }
 };
 
 }  // namespace Acts

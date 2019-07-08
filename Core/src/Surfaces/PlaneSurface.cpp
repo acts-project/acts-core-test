@@ -23,9 +23,10 @@
 Acts::PlaneSurface::PlaneSurface(const PlaneSurface& other)
     : GeometryObject(), Surface(other), m_bounds(other.m_bounds) {}
 
-Acts::PlaneSurface::PlaneSurface(const GeometryContext& gctx,
-                                 const PlaneSurface& other,
-                                 const Transform3D& transf)
+Acts::PlaneSurface::PlaneSurface(
+    const GeometryContext& gctx,
+    const PlaneSurface& other,
+    const Transform3D& transf)
     : GeometryObject(),
       Surface(gctx, other, transf),
       m_bounds(other.m_bounds) {}
@@ -60,11 +61,13 @@ Acts::PlaneSurface::PlaneSurface(
   throw_assert(pbounds, "PlaneBounds must not be nullptr");
 }
 
-Acts::PlaneSurface::PlaneSurface(std::shared_ptr<const Transform3D> htrans,
-                                 std::shared_ptr<const PlanarBounds> pbounds)
+Acts::PlaneSurface::PlaneSurface(
+    std::shared_ptr<const Transform3D> htrans,
+    std::shared_ptr<const PlanarBounds> pbounds)
     : Surface(std::move(htrans)), m_bounds(std::move(pbounds)) {}
 
-Acts::PlaneSurface& Acts::PlaneSurface::operator=(const PlaneSurface& other) {
+Acts::PlaneSurface&
+Acts::PlaneSurface::operator=(const PlaneSurface& other) {
   if (this != &other) {
     Surface::operator=(other);
     m_bounds = other.m_bounds;
@@ -72,47 +75,58 @@ Acts::PlaneSurface& Acts::PlaneSurface::operator=(const PlaneSurface& other) {
   return *this;
 }
 
-Acts::Surface::SurfaceType Acts::PlaneSurface::type() const {
+Acts::Surface::SurfaceType
+Acts::PlaneSurface::type() const {
   return Surface::Plane;
 }
 
-void Acts::PlaneSurface::localToGlobal(const GeometryContext& gctx,
-                                       const Vector2D& lpos,
-                                       const Vector3D& /*gmom*/,
-                                       Vector3D& gpos) const {
+void
+Acts::PlaneSurface::localToGlobal(
+    const GeometryContext& gctx,
+    const Vector2D& lpos,
+    const Vector3D& /*gmom*/,
+    Vector3D& gpos) const {
   Vector3D loc3Dframe(lpos[Acts::eLOC_X], lpos[Acts::eLOC_Y], 0.);
   /// the chance that there is no transform is almost 0, let's apply it
   gpos = transform(gctx) * loc3Dframe;
 }
 
-bool Acts::PlaneSurface::globalToLocal(const GeometryContext& gctx,
-                                       const Vector3D& gpos,
-                                       const Vector3D& /*gmom*/,
-                                       Acts::Vector2D& lpos) const {
+bool
+Acts::PlaneSurface::globalToLocal(
+    const GeometryContext& gctx,
+    const Vector3D& gpos,
+    const Vector3D& /*gmom*/,
+    Acts::Vector2D& lpos) const {
   /// the chance that there is no transform is almost 0, let's apply it
   Vector3D loc3Dframe = (transform(gctx).inverse()) * gpos;
   lpos = Vector2D(loc3Dframe.x(), loc3Dframe.y());
-  return ((loc3Dframe.z() * loc3Dframe.z() >
-           s_onSurfaceTolerance * s_onSurfaceTolerance)
-              ? false
-              : true);
+  return (
+      (loc3Dframe.z() * loc3Dframe.z() >
+       s_onSurfaceTolerance * s_onSurfaceTolerance)
+          ? false
+          : true);
 }
 
-std::string Acts::PlaneSurface::name() const {
+std::string
+Acts::PlaneSurface::name() const {
   return "Acts::PlaneSurface";
 }
 
-std::shared_ptr<Acts::PlaneSurface> Acts::PlaneSurface::clone(
-    const GeometryContext& gctx, const Transform3D& shift) const {
+std::shared_ptr<Acts::PlaneSurface>
+Acts::PlaneSurface::clone(const GeometryContext& gctx, const Transform3D& shift)
+    const {
   return std::shared_ptr<PlaneSurface>(this->clone_impl(gctx, shift));
 }
 
-Acts::PlaneSurface* Acts::PlaneSurface::clone_impl(
-    const GeometryContext& gctx, const Transform3D& shift) const {
+Acts::PlaneSurface*
+Acts::PlaneSurface::clone_impl(
+    const GeometryContext& gctx,
+    const Transform3D& shift) const {
   return new PlaneSurface(gctx, *this, shift);
 }
 
-const Acts::SurfaceBounds& Acts::PlaneSurface::bounds() const {
+const Acts::SurfaceBounds&
+Acts::PlaneSurface::bounds() const {
   if (m_bounds) {
     return (*m_bounds.get());
   }

@@ -128,8 +128,10 @@ class Layer : public virtual GeometryObject {
   ///
   /// @return boolean that indicates success of the operation
   template <typename parameters_t>
-  bool onLayer(const GeometryContext& gctx, const parameters_t& pars,
-               const BoundaryCheck& bcheck = true) const;
+  bool onLayer(
+      const GeometryContext& gctx,
+      const parameters_t& pars,
+      const BoundaryCheck& bcheck = true) const;
 
   /// geometrical isOnLayer() method
   ///
@@ -140,8 +142,10 @@ class Layer : public virtual GeometryObject {
   /// @param bcheck is the boundary check directive
   ///
   /// @return boolean that indicates success of the operation
-  virtual bool isOnLayer(const GeometryContext& gctx, const Vector3D& gp,
-                         const BoundaryCheck& bcheck = true) const;
+  virtual bool isOnLayer(
+      const GeometryContext& gctx,
+      const Vector3D& gp,
+      const BoundaryCheck& bcheck = true) const;
 
   /// Return method for the approach descriptor, can be nullptr
   const ApproachDescriptor* approachDescriptor() const;
@@ -155,9 +159,12 @@ class Layer : public virtual GeometryObject {
   ///
   /// @return a boolean whether the layer is accepted for processing
   template <typename options_t>
-  bool resolve(const options_t& options) const {
-    return resolve(options.resolveSensitive, options.resolveMaterial,
-                   options.resolvePassive);
+  bool
+  resolve(const options_t& options) const {
+    return resolve(
+        options.resolveSensitive,
+        options.resolveMaterial,
+        options.resolvePassive);
   }
 
   /// Accept layer according to the following collection directives
@@ -167,8 +174,10 @@ class Layer : public virtual GeometryObject {
   /// @param resolvePassive is the prescription to find all passive surfaces
   ///
   /// @return a boolean whether the layer is accepted for processing
-  virtual bool resolve(bool resolveSensitive, bool resolveMaterial,
-                       bool resolvePassive) const;
+  virtual bool resolve(
+      bool resolveSensitive,
+      bool resolveMaterial,
+      bool resolvePassive) const;
 
   /// @brief Decompose Layer into (compatible) surfaces
   ///
@@ -182,11 +191,14 @@ class Layer : public virtual GeometryObject {
   /// @tparam corrector_t is an (optional) intersection corrector
   ///
   /// @return list of intersection of surfaces on the layer
-  template <typename options_t,
-            typename corrector_t = VoidIntersectionCorrector>
+  template <
+      typename options_t,
+      typename corrector_t = VoidIntersectionCorrector>
   std::vector<SurfaceIntersection> compatibleSurfaces(
-      const GeometryContext& gctx, const Vector3D& position,
-      const Vector3D& momentum, const options_t& options,
+      const GeometryContext& gctx,
+      const Vector3D& position,
+      const Vector3D& momentum,
+      const options_t& options,
       const corrector_t& corrfnc = corrector_t()) const;
 
   /// @brief Decompose Layer into (compatible) surfaces
@@ -201,10 +213,13 @@ class Layer : public virtual GeometryObject {
   /// @tparam corrector_t is an (optional) intersection corrector
   ///
   /// @return list of intersection of surfaces on the layer
-  template <typename parameters_t, typename options_t,
-            typename corrector_t = VoidIntersectionCorrector>
+  template <
+      typename parameters_t,
+      typename options_t,
+      typename corrector_t = VoidIntersectionCorrector>
   std::vector<SurfaceIntersection> compatibleSurfaces(
-      const GeometryContext& gctx, const parameters_t& parameters,
+      const GeometryContext& gctx,
+      const parameters_t& parameters,
       const options_t& options,
       const corrector_t& corrfnc = corrector_t()) const;
 
@@ -223,10 +238,13 @@ class Layer : public virtual GeometryObject {
   /// @tparam corrector_t is an (optional) intersection corrector
   ///
   /// @return the Surface intersection of the approach surface
-  template <typename parameters_t, typename options_t,
-            typename corrector_t = VoidIntersectionCorrector>
+  template <
+      typename parameters_t,
+      typename options_t,
+      typename corrector_t = VoidIntersectionCorrector>
   const SurfaceIntersection surfaceOnApproach(
-      const GeometryContext& gctx, const parameters_t& parameters,
+      const GeometryContext& gctx,
+      const parameters_t& parameters,
       const options_t& options,
       const corrector_t& corrfnc = corrector_t()) const;
 
@@ -245,11 +263,14 @@ class Layer : public virtual GeometryObject {
   /// @tparam corrector_t is an (optional) intersection corrector
   ///
   /// @return the Surface intersection of the approach surface
-  template <typename options_t,
-            typename corrector_t = VoidIntersectionCorrector>
+  template <
+      typename options_t,
+      typename corrector_t = VoidIntersectionCorrector>
   const SurfaceIntersection surfaceOnApproach(
-      const GeometryContext& gctx, const Vector3D& position,
-      const Vector3D& direction, const options_t& options,
+      const GeometryContext& gctx,
+      const Vector3D& position,
+      const Vector3D& direction,
+      const options_t& options,
       const corrector_t& corrfnc = corrector_t()) const;
 
   /// Fast navigation to next layer
@@ -259,8 +280,10 @@ class Layer : public virtual GeometryObject {
   /// @param mom is the direction for the search
   ///
   /// @return the pointer to the next layer
-  const Layer* nextLayer(const GeometryContext& gctx, const Vector3D& gp,
-                         const Vector3D& mom) const;
+  const Layer* nextLayer(
+      const GeometryContext& gctx,
+      const Vector3D& gp,
+      const Vector3D& mom) const;
 
   /// get the confining TrackingVolume
   ///
@@ -282,9 +305,11 @@ class Layer : public virtual GeometryObject {
   /// @param thickness is the normal thickness of the Layer
   /// @param ades oapproach descriptor
   /// @param laytyp is the layer type if active or passive
-  Layer(std::unique_ptr<SurfaceArray> surfaceArray, double thickness = 0.,
-        std::unique_ptr<ApproachDescriptor> ades = nullptr,
-        LayerType laytyp = passive);
+  Layer(
+      std::unique_ptr<SurfaceArray> surfaceArray,
+      double thickness = 0.,
+      std::unique_ptr<ApproachDescriptor> ades = nullptr,
+      LayerType laytyp = passive);
 
   ///  private method to set enclosing TrackingVolume, called by friend class
   /// only
@@ -346,8 +371,9 @@ class Layer : public virtual GeometryObject {
   ///        optionally the surface material to where they belong
   /// @param layerID is the geometry id of the volume
   ///                as calculated by the TrackingGeometry
-  void closeGeometry(const IMaterialDecorator* materialDecorator,
-                     const GeometryID& layerID);
+  void closeGeometry(
+      const IMaterialDecorator* materialDecorator,
+      const GeometryID& layerID);
 };
 
 /// Layers are constructedd with shared_ptr factories, hence the layer array is

@@ -90,8 +90,10 @@ BOOST_AUTO_TEST_CASE(iterative_finder_test) {
     // Set up propagator with void navigator
     Propagator<EigenStepper<ConstantBField>> propagator(stepper);
 
-    typedef FullBilloirVertexFitter<ConstantBField, BoundParameters,
-                                    Propagator<EigenStepper<ConstantBField>>>
+    typedef FullBilloirVertexFitter<
+        ConstantBField,
+        BoundParameters,
+        Propagator<EigenStepper<ConstantBField>>>
         BilloirFitter;
 
     // Set up Billoir Vertex Fitter
@@ -102,8 +104,10 @@ BOOST_AUTO_TEST_CASE(iterative_finder_test) {
         = std::make_unique<BilloirFitter>(vertexFitterCfg);
 
     // Vertex Finder
-    typedef IterativeVertexFinder<ConstantBField, BoundParameters,
-                                  Propagator<EigenStepper<ConstantBField>>>
+    typedef IterativeVertexFinder<
+        ConstantBField,
+        BoundParameters,
+        Propagator<EigenStepper<ConstantBField>>>
         VertexFinder;
     VertexFinder::Config cfg(bField, std::move(bFitterPtr), propagator);
     cfg.reassignTracksAfterFirstFit = true;
@@ -170,8 +174,8 @@ BOOST_AUTO_TEST_CASE(iterative_finder_test) {
             0., 0., 0., 0., 0., 0., res_ph * res_ph, 0., 0., 0., 0., 0., 0.,
             res_th * res_th, 0., 0., 0., 0., 0., 0., res_qp * res_qp, 0., 0.,
             0., 0., 0., 0., 1.;
-        auto params = BoundParameters(tgContext, std::move(covMat), paramVec,
-                                      perigeeSurface);
+        auto params = BoundParameters(
+            tgContext, std::move(covMat), paramVec, perigeeSurface);
         tracks.push_back(params);
 
         TrackAtVertex<BoundParameters> trAtVt(0., params, params);

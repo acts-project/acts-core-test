@@ -65,8 +65,10 @@ BOOST_AUTO_TEST_CASE(LineBoundsProperties) {
       lineBoundsObject.inside(atRadius, trueBoundaryCheckWithTolerance));
 
   /// test for distanceToBoundary
-  CHECK_CLOSE_REL(lineBoundsObject.distanceToBoundary(unitR), 1.,
-                  1e-6);  // why?
+  CHECK_CLOSE_REL(
+      lineBoundsObject.distanceToBoundary(unitR),
+      1.,
+      1e-6);  // why?
 
   /// test for r()
   BOOST_CHECK_EQUAL(lineBoundsObject.r(), nominalRadius);
@@ -88,8 +90,8 @@ BOOST_AUTO_TEST_CASE(LineBoundsAssignment) {
   LineBounds assignedLineBounds;
   assignedLineBounds = lineBoundsObject;
   BOOST_CHECK_EQUAL(assignedLineBounds.r(), lineBoundsObject.r());
-  BOOST_CHECK_EQUAL(assignedLineBounds.halflengthZ(),
-                    lineBoundsObject.halflengthZ());
+  BOOST_CHECK_EQUAL(
+      assignedLineBounds.halflengthZ(), lineBoundsObject.halflengthZ());
 }
 BOOST_AUTO_TEST_SUITE_END()
 

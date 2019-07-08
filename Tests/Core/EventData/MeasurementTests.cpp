@@ -32,8 +32,8 @@ BOOST_AUTO_TEST_CASE(measurement_initialization) {
 
   ActsSymMatrixD<2> cov;
   cov << 0.04, 0, 0, 0.1;
-  MeasurementType<ParDef::eLOC_0, ParDef::eLOC_1> m(cylinder, {},
-                                                    std::move(cov), -0.1, 0.45);
+  MeasurementType<ParDef::eLOC_0, ParDef::eLOC_1> m(
+      cylinder, {}, std::move(cov), -0.1, 0.45);
 
   std::default_random_engine generator(42);
 
@@ -66,8 +66,8 @@ BOOST_AUTO_TEST_CASE(measurement_initialization) {
   std::vector<MeasurementType<ParDef::eLOC_0, ParDef::eLOC_1>> caMeasurements{
       std::move(mcCopy), std::move(mcAssigned)};
 
-  auto plane = Surface::makeShared<PlaneSurface>(Vector3D(0., 0., 0.),
-                                                 Vector3D(1., 0., 0.));
+  auto plane = Surface::makeShared<PlaneSurface>(
+      Vector3D(0., 0., 0.), Vector3D(1., 0., 0.));
   ActsSymMatrixD<1> covp;
   covp << 0.01;
   MeasurementType<ParDef::eLOC_0> mp(plane, {}, std::move(covp), 0.1);

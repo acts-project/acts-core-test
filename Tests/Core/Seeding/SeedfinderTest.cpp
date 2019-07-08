@@ -23,7 +23,8 @@
 #include <sstream>
 #include <utility>
 
-std::vector<const SpacePoint*> readFile(std::string filename) {
+std::vector<const SpacePoint*>
+readFile(std::string filename) {
   std::string line;
   int layer;
   std::vector<const SpacePoint*> readSP;
@@ -62,7 +63,8 @@ std::vector<const SpacePoint*> readFile(std::string filename) {
   return readSP;
 }
 
-int main() {
+int
+main() {
   std::vector<const SpacePoint*> spVec = readFile("sp.txt");
   std::cout << "size of read SP: " << spVec.size() << std::endl;
 
@@ -105,7 +107,8 @@ int main() {
       spVec.begin(), spVec.end(), ct, bottomBinFinder, topBinFinder);
   auto start = std::chrono::system_clock::now();
   for (Acts::SeedfinderStateIterator<SpacePoint> it = state.begin();
-       !(it == state.end()); ++it) {
+       !(it == state.end());
+       ++it) {
     a.createSeedsForRegion(it, state);
   }
   auto end = std::chrono::system_clock::now();

@@ -63,20 +63,30 @@ GeometryContext tgContext = GeometryContext();
 /// guaranteed to be in on the readout/counter plane
 BOOST_DATA_TEST_CASE(
     readout_counter_test,
-    bdata::random((bdata::seed = 0,
-                   bdata::distribution = std::uniform_real_distribution<>(
-                       -halfX + sguardX, halfX - sguardX))) ^
-        bdata::random((bdata::seed = 1,
-                       bdata::distribution = std::uniform_real_distribution<>(
-                           -halfX + sguardX, halfX - sguardX))) ^
-        bdata::random((bdata::seed = 2,
-                       bdata::distribution =
-                           std::uniform_real_distribution<>(-halfY, halfY))) ^
-        bdata::random((bdata::seed = 3,
-                       bdata::distribution =
-                           std::uniform_int_distribution<>(-halfY, halfY))) ^
+    bdata::random(
+        (bdata::seed = 0,
+         bdata::distribution = std::uniform_real_distribution<>(
+             -halfX + sguardX,
+             halfX - sguardX))) ^
+        bdata::random(
+            (bdata::seed = 1,
+             bdata::distribution = std::uniform_real_distribution<>(
+                 -halfX + sguardX,
+                 halfX - sguardX))) ^
+        bdata::random(
+            (bdata::seed = 2,
+             bdata::distribution =
+                 std::uniform_real_distribution<>(-halfY, halfY))) ^
+        bdata::random(
+            (bdata::seed = 3,
+             bdata::distribution =
+                 std::uniform_int_distribution<>(-halfY, halfY))) ^
         bdata::xrange(ntests),
-    entryX, entryY, exitX, exitY, index) {
+    entryX,
+    entryY,
+    exitX,
+    exitY,
+    index) {
   // avoid warning with void
   (void)index;
 

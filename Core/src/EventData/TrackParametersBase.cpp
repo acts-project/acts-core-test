@@ -13,7 +13,8 @@
 #include "Acts/EventData/TrackParametersBase.hpp"
 
 namespace Acts {
-std::ostream& TrackParametersBase::print(std::ostream& sl) const {
+std::ostream&
+TrackParametersBase::print(std::ostream& sl) const {
   // set stream output format
   auto old_precision = sl.precision(7);
   auto old_flags = sl.setf(std::ios::fixed);

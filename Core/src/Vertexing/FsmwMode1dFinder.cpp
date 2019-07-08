@@ -15,7 +15,8 @@
 Acts::FsmwMode1dFinder::FsmwMode1dFinder(double firstFraction, double fraction)
     : m_firstFraction(firstFraction), m_fraction(fraction) {}
 
-Acts::Result<double> Acts::FsmwMode1dFinder::getMode(
+Acts::Result<double>
+Acts::FsmwMode1dFinder::getMode(
     std::vector<std::pair<double, double>> inputVector) const {
   if (inputVector.empty()) {
     return VertexingError::EmptyInput;
@@ -26,10 +27,12 @@ Acts::Result<double> Acts::FsmwMode1dFinder::getMode(
 
   // first of all order the vector according to the double value
 
-  std::sort(inputVector.begin(), inputVector.end(),
-            [](std::pair<double, double> a, std::pair<double, double> b) {
-              return a.first < b.first;
-            });
+  std::sort(
+      inputVector.begin(),
+      inputVector.end(),
+      [](std::pair<double, double> a, std::pair<double, double> b) {
+        return a.first < b.first;
+      });
 
   // begin to consider a certain number of elements according to the fraction
   auto begin = inputVector.begin();

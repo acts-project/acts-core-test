@@ -21,10 +21,13 @@ using namespace Acts;
 
 constexpr int NTESTS = 2 << 15;
 // trapezoidal area
-static const Vector2D POLY[] = {
-    {0.4, 0.25}, {0.6, 0.25}, {0.8, 0.75}, {0.2, 0.75}};
+static const Vector2D POLY[] = {{0.4, 0.25},
+                                {0.6, 0.25},
+                                {0.8, 0.75},
+                                {0.2, 0.75}};
 
-std::vector<Vector2D> make_random_points() {
+std::vector<Vector2D>
+make_random_points() {
   std::mt19937 rng(42);
   std::uniform_real_distribution<double> axis(0, 1);
 
@@ -59,7 +62,8 @@ std::vector<Vector2D> make_random_points() {
 //  return check.TestKDOPKDOP(limits, limitsErr);
 //}
 
-inline bool isInside(const Vector2D& point, const BoundaryCheck& check) {
+inline bool
+isInside(const Vector2D& point, const BoundaryCheck& check) {
   return check.isInside(point, POLY);
 }
 
@@ -71,7 +75,8 @@ struct StopWatch {
 
   StopWatch() : start(Clock::now()) {}
 
-  void finish(size_t n_trials, const char* name) {
+  void
+  finish(size_t n_trials, const char* name) {
     auto stop = Clock::now();
     std::chrono::duration<double, std::micro> total = stop - start;
     std::chrono::duration<double, std::micro> perTrial =
@@ -84,7 +89,8 @@ struct StopWatch {
   }
 };
 
-int main(int /*argc*/, char** /*argv[]*/) {
+int
+main(int /*argc*/, char** /*argv[]*/) {
   using std::cout;
 
   // absolute check w/o tolerance

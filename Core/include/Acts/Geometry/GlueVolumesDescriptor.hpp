@@ -37,9 +37,9 @@ class GlueVolumesDescriptor {
   /// Constructor - with arguments
   ///
   /// @param gvs are the glue volume arrays mapped to the volume faces
-  GlueVolumesDescriptor(
-      const std::map<BoundarySurfaceFace,
-                     std::shared_ptr<const TrackingVolumeArray>>& gvs);
+  GlueVolumesDescriptor(const std::map<
+                        BoundarySurfaceFace,
+                        std::shared_ptr<const TrackingVolumeArray>>& gvs);
 
   /// Desctructor
   ~GlueVolumesDescriptor() = default;
@@ -47,8 +47,9 @@ class GlueVolumesDescriptor {
   ///
   /// @param bsf is the boundary surface face where the volume array is attached
   /// @param gvs is the array of volumes to be attached
-  void registerGlueVolumes(Acts::BoundarySurfaceFace bsf,
-                           std::shared_ptr<const TrackingVolumeArray> gvs);
+  void registerGlueVolumes(
+      Acts::BoundarySurfaceFace bsf,
+      std::shared_ptr<const TrackingVolumeArray> gvs);
 
   /// Retrieve the glue volumes
   ///

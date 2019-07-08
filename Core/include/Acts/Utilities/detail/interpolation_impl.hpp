@@ -36,10 +36,10 @@ namespace detail {
 template <typename Point1, typename Point2, typename Point3, typename Value>
 struct can_interpolate {
   template <typename C>
-  static auto value_type_test(C* c)
-      -> decltype(C(std::declval<double>() * std::declval<C>() +
-                    std::declval<double>() * std::declval<C>()),
-                  std::true_type());
+  static auto value_type_test(C* c) -> decltype(
+      C(std::declval<double>() * std::declval<C>() +
+        std::declval<double>() * std::declval<C>()),
+      std::true_type());
   template <typename C>
   static std::false_type value_type_test(...);
 
@@ -50,14 +50,14 @@ struct can_interpolate {
   static std::false_type point_type_test(...);
 
   static const bool value =
-      std::is_same<std::true_type,
-                   decltype(value_type_test<Value>(nullptr))>::value and
-      std::is_same<std::true_type,
-                   decltype(point_type_test<Point1>(nullptr))>::value and
-      std::is_same<std::true_type,
-                   decltype(point_type_test<Point2>(nullptr))>::value and
-      std::is_same<std::true_type,
-                   decltype(point_type_test<Point3>(nullptr))>::value;
+      std::is_same<std::true_type, decltype(value_type_test<Value>(nullptr))>::
+          value and
+      std::is_same<std::true_type, decltype(point_type_test<Point1>(nullptr))>::
+          value and
+      std::is_same<std::true_type, decltype(point_type_test<Point2>(nullptr))>::
+          value and
+      std::is_same<std::true_type, decltype(point_type_test<Point3>(nullptr))>::
+          value;
 };
 
 /// @brief determine number of dimension from power of 2
@@ -94,17 +94,30 @@ struct get_dimension<2u> {
 /// - @c N is the number of hyper box corners which is \f$2^d\f$ where \f$d\f$
 /// is the dimensionality of the hyper box. The dimensionality must be
 /// consistent with the provided @c Point types.
-template <typename T, class Point1, class Point2, class Point3, size_t D,
-          size_t N>
+template <
+    typename T,
+    class Point1,
+    class Point2,
+    class Point3,
+    size_t D,
+    size_t N>
 struct interpolate_impl;
 
 /// @cond
 // recursive implementation of linear interpolation in multiple dimensions
-template <typename T, class Point1, class Point2, class Point3, size_t D,
-          size_t N>
+template <
+    typename T,
+    class Point1,
+    class Point2,
+    class Point3,
+    size_t D,
+    size_t N>
 struct interpolate_impl {
-  static T run(const Point1& pos, const Point2& lowerLeft,
-               const Point3& upperRight, const std::array<T, N>& fields) {
+  static T
+  run(const Point1& pos,
+      const Point2& lowerLeft,
+      const Point3& upperRight,
+      const std::array<T, N>& fields) {
     // get distance to lower boundary relative to total bin width
     const double f = (pos[D] - lowerLeft[D]) / (upperRight[D] - lowerLeft[D]);
 
@@ -121,8 +134,11 @@ struct interpolate_impl {
 // simple linear interpolation in 1D
 template <typename T, class Point1, class Point2, class Point3, size_t D>
 struct interpolate_impl<T, Point1, Point2, Point3, D, 2u> {
-  static T run(const Point1& pos, const Point2& lowerLeft,
-               const Point3& upperRight, const std::array<T, 2u>& fields) {
+  static T
+  run(const Point1& pos,
+      const Point2& lowerLeft,
+      const Point3& upperRight,
+      const std::array<T, 2u>& fields) {
     // get distance to lower boundary relative to total bin width
     const double f = (pos[D] - lowerLeft[D]) / (upperRight[D] - lowerLeft[D]);
 

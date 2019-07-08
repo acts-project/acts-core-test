@@ -56,7 +56,8 @@ class Result {
    * @param other The other result instance, rvalue reference
    * @return The assigned instance
    */
-  Result<T, E>& operator=(Result<T, E>&& other) {
+  Result<T, E>&
+  operator=(Result<T, E>&& other) {
     m_var = std::move(other.m_var);
     return *this;
   }
@@ -75,10 +76,13 @@ class Result {
    * @param value The potential value, could be an actual valid value or an
    * error.
    */
-  template <typename T2, typename _E = E, typename _T = T,
-            typename = std::enable_if_t<!std::is_same_v<_T, _E> &&
-                                        !std::is_constructible_v<_T, _E> &&
-                                        !std::is_constructible_v<_E, _T>>>
+  template <
+      typename T2,
+      typename _E = E,
+      typename _T = T,
+      typename = std::enable_if_t<
+          !std::is_same_v<_T, _E> && !std::is_constructible_v<_T, _E> &&
+          !std::is_constructible_v<_E, _T>>>
   Result(T2 value) noexcept : m_var(std::move(value)) {}
 
   /**
@@ -90,11 +94,15 @@ class Result {
    * error.
    * @return The assigned instance
    */
-  template <typename T2, typename _E = E, typename _T = T,
-            typename = std::enable_if_t<!std::is_same_v<_T, _E> &&
-                                        !std::is_constructible_v<_T, _E> &&
-                                        !std::is_constructible_v<_E, _T>>>
-  Result<T, E>& operator=(T2 value) noexcept {
+  template <
+      typename T2,
+      typename _E = E,
+      typename _T = T,
+      typename = std::enable_if_t<
+          !std::is_same_v<_T, _E> && !std::is_constructible_v<_T, _E> &&
+          !std::is_constructible_v<_E, _T>>>
+  Result<T, E>&
+  operator=(T2 value) noexcept {
     m_var = std::move(value);
     return *this;
   }
@@ -104,7 +112,8 @@ class Result {
    * @param value The valid value to assign. Will not be converted to E.
    * @return Initialized result object
    */
-  static Result<T, E> success(T value) {
+  static Result<T, E>
+  success(T value) {
     return Result<T, E>(
         std::variant<T, E>{std::in_place_index<0>, std::move(value)});
   }
@@ -114,7 +123,8 @@ class Result {
    * @param value The error to assign. Will not be converted to T.
    * @return Initialized result object
    */
-  static Result<T, E> failure(E error) {
+  static Result<T, E>
+  failure(E error) {
     return Result<T, E>(
         std::variant<T, E>{std::in_place_index<1>, std::move(error)});
   }
@@ -123,7 +133,10 @@ class Result {
    * Checks whether this result contains a valid value, and no error.
    * @return bool Whether result contains an error or not.
    */
-  bool ok() const noexcept { return m_var.index() == 0; }
+  bool
+  ok() const noexcept {
+    return m_var.index() == 0;
+  }
 
   /**
    * Returns a reference into the variant to the valid value.
@@ -137,21 +150,30 @@ class Result {
    * @note If `res.ok()` this method will abort (noexcept)
    * @return Reference to the error
    */
-  E& error() & noexcept { return std::get<E>(m_var); }
+  E&
+      error() &
+      noexcept {
+    return std::get<E>(m_var);
+  }
 
   /**
    * Returns the error by-value.
    * @note If `res.ok()` this method will abort (noexcept)
    * @return The error
    */
-  E error() && noexcept { return std::move(std::get<E>(m_var)); }
+  E
+      error() &&
+      noexcept {
+    return std::move(std::get<E>(m_var));
+  }
 
   /**
    * Retrieves the valid value from the result object.
    * @note This is the lvalue version, returns a reference to the value
    * @return The valid value as a reference
    */
-  T& value() & {
+  T&
+  value() & {
     if (m_var.index() != 0) {
       if constexpr (std::is_same_v<E, std::error_code>) {
         std::stringstream ss;
@@ -173,7 +195,8 @@ class Result {
    * by-value and moves out of the variant.
    * @return The valid value by value, moved out of the variant.
    */
-  T value() && {
+  T
+  value() && {
     if (m_var.index() != 0) {
       if constexpr (std::is_same_v<E, std::error_code>) {
         std::stringstream ss;
@@ -234,7 +257,8 @@ class Result<void, E> {
    * Move assignment operator
    * @param other The other result object, rvalue ref
    */
-  Result<void, E>& operator=(Result<void, E>&& other) noexcept {
+  Result<void, E>&
+  operator=(Result<void, E>&& other) noexcept {
     m_opt = std::move(other.m_opt);
     return *this;
   }
@@ -254,7 +278,8 @@ class Result<void, E> {
    * @return The assigned instance
    */
   template <typename E2>
-  Result<void, E>& operator=(E2 error) {
+  Result<void, E>&
+  operator=(E2 error) {
     m_opt = std::move(error);
     return *this;
   }
@@ -263,14 +288,18 @@ class Result<void, E> {
    * Static factory function to initialize the result in the ok state.
    * @return Result object, in ok state
    */
-  static Result<void, E> success() { return Result<void, E>(); }
+  static Result<void, E>
+  success() {
+    return Result<void, E>();
+  }
 
   /**
    * Static factory function to initialize the result in the error state.
    * @param error The errorr to initialize with.
    * @return Result object, in error state.
    */
-  static Result<void, E> failure(E error) {
+  static Result<void, E>
+  failure(E error) {
     return Result<void, E>(std::move(error));
   }
 
@@ -278,21 +307,32 @@ class Result<void, E> {
    * Checks whether this result is in the ok state, and no error.
    * @return bool Whether result contains an error or not.
    */
-  bool ok() const noexcept { return !m_opt; }
+  bool
+  ok() const noexcept {
+    return !m_opt;
+  }
 
   /**
    * Returns a reference to the error stored in the result.
    * @note If `res.ok()` this method will abort (noexcept)
    * @return Reference to the error
    */
-  E& error() & noexcept { return *m_opt; }
+  E&
+      error() &
+      noexcept {
+    return *m_opt;
+  }
 
   /**
    * Returns the error by-value.
    * @note If `res.ok()` this method will abort (noexcept)
    * @return Reference to the error
    */
-  E error() && noexcept { return std::move(*m_opt); }
+  E
+      error() &&
+      noexcept {
+    return std::move(*m_opt);
+  }
 
  private:
   std::optional<E> m_opt;

@@ -34,10 +34,12 @@ MagneticFieldContext mfContext = MagneticFieldContext();
 /// @param nnomal The nominal normal direction
 /// @param angleT Rotation around the norminal normal
 /// @param angleU Roation around the original U axis
-std::shared_ptr<Transform3D> createPlanarTransform(const Vector3D& nposition,
-                                                   const Vector3D& nnormal,
-                                                   double angleT,
-                                                   double angleU) {
+std::shared_ptr<Transform3D>
+createPlanarTransform(
+    const Vector3D& nposition,
+    const Vector3D& nnormal,
+    double angleT,
+    double angleU) {
   // the rotation of the destination surface
   Vector3D T = nnormal.normalized();
   Vector3D U = std::abs(T.dot(Vector3D::UnitZ())) < 0.99
@@ -65,9 +67,11 @@ std::shared_ptr<Transform3D> createPlanarTransform(const Vector3D& nposition,
 /// @param nnomal The nominal normal direction
 /// @param angleT Rotation around the norminal normal
 /// @param angleU Roation around the original U axis
-std::shared_ptr<Transform3D> createCylindricTransform(const Vector3D& nposition,
-                                                      double angleX,
-                                                      double angleY) {
+std::shared_ptr<Transform3D>
+createCylindricTransform(
+    const Vector3D& nposition,
+    double angleX,
+    double angleY) {
   Transform3D ctransform;
   ctransform.setIdentity();
   ctransform.pretranslate(nposition);
@@ -77,12 +81,17 @@ std::shared_ptr<Transform3D> createCylindricTransform(const Vector3D& nposition,
 }
 
 template <typename Propagator_type>
-Vector3D constant_field_propagation(const Propagator_type& propagator,
-                                    double pT, double phi, double theta,
-                                    double charge, double time, double Bz,
-                                    double disttol = 0.1 *
-                                                     Acts::UnitConstants::um,
-                                    bool debug = false) {
+Vector3D
+constant_field_propagation(
+    const Propagator_type& propagator,
+    double pT,
+    double phi,
+    double theta,
+    double charge,
+    double time,
+    double Bz,
+    double disttol = 0.1 * Acts::UnitConstants::um,
+    bool debug = false) {
   using namespace Acts::UnitLiterals;
   namespace VH = VectorHelpers;
 
@@ -162,11 +171,17 @@ Vector3D constant_field_propagation(const Propagator_type& propagator,
 }
 
 template <typename Propagator_type>
-void foward_backward(const Propagator_type& propagator, double pT, double phi,
-                     double theta, double charge, double plimit,
-                     double disttol = 1 * Acts::UnitConstants::um,
-                     double momtol = 10 * Acts::UnitConstants::keV,
-                     bool debug = false) {
+void
+foward_backward(
+    const Propagator_type& propagator,
+    double pT,
+    double phi,
+    double theta,
+    double charge,
+    double plimit,
+    double disttol = 1 * Acts::UnitConstants::um,
+    double momtol = 10 * Acts::UnitConstants::keV,
+    bool debug = false) {
   using namespace Acts::UnitLiterals;
 
   // setup propagation options
@@ -233,10 +248,19 @@ void foward_backward(const Propagator_type& propagator, double pT, double phi,
 
 // test propagation to cylinder
 template <typename Propagator_type>
-std::pair<Vector3D, double> to_cylinder(
-    const Propagator_type& propagator, double pT, double phi, double theta,
-    double charge, double plimit, double rand1, double rand2, double /*rand3*/,
-    bool covtransport = false, bool debug = false) {
+std::pair<Vector3D, double>
+to_cylinder(
+    const Propagator_type& propagator,
+    double pT,
+    double phi,
+    double theta,
+    double charge,
+    double plimit,
+    double rand1,
+    double rand2,
+    double /*rand3*/,
+    bool covtransport = false,
+    bool debug = false) {
   using namespace Acts::UnitLiterals;
 
   // setup propagation options
@@ -282,8 +306,8 @@ std::pair<Vector3D, double> to_cylinder(
     start = new CurvilinearParameters(std::move(covPtr), pos, mom, q, time);
 
   // The transform at the destination
-  auto seTransform = createCylindricTransform(Vector3D(0., 0., 0.),
-                                              0.05 * rand1, 0.05 * rand2);
+  auto seTransform = createCylindricTransform(
+      Vector3D(0., 0., 0.), 0.05 * rand1, 0.05 * rand2);
   auto endSurface = Surface::makeShared<CylinderSurface>(
       seTransform, plimit, std::numeric_limits<double>::max());
 
@@ -300,10 +324,20 @@ std::pair<Vector3D, double> to_cylinder(
 
 // test propagation to most surfaces
 template <typename Propagator_type, typename Surface_type>
-std::pair<Vector3D, double> to_surface(
-    const Propagator_type& propagator, double pT, double phi, double theta,
-    double charge, double plimit, double rand1, double rand2, double rand3,
-    bool planar = true, bool covtransport = false, bool debug = false) {
+std::pair<Vector3D, double>
+to_surface(
+    const Propagator_type& propagator,
+    double pT,
+    double phi,
+    double theta,
+    double charge,
+    double plimit,
+    double rand1,
+    double rand2,
+    double rand3,
+    bool planar = true,
+    bool covtransport = false,
+    bool debug = false) {
   using namespace Acts::UnitLiterals;
   using DebugOutput = detail::DebugOutputActor;
 
@@ -352,12 +386,13 @@ std::pair<Vector3D, double> to_surface(
   const auto& tp_s = result_s.endParameters;
 
   // The transform at the destination
-  auto seTransform = planar
-                         ? createPlanarTransform(tp_s->position(),
-                                                 tp_s->momentum().normalized(),
-                                                 0.1 * rand3, 0.1 * rand1)
-                         : createCylindricTransform(tp_s->position(),
-                                                    0.05 * rand1, 0.05 * rand2);
+  auto seTransform = planar ? createPlanarTransform(
+                                  tp_s->position(),
+                                  tp_s->momentum().normalized(),
+                                  0.1 * rand3,
+                                  0.1 * rand1)
+                            : createCylindricTransform(
+                                  tp_s->position(), 0.05 * rand1, 0.05 * rand2);
 
   auto endSurface = Surface::makeShared<Surface_type>(seTransform, nullptr);
   // Increase the path limit - to be safe hitting the surface
@@ -393,10 +428,16 @@ std::pair<Vector3D, double> to_surface(
 }
 
 template <typename Propagator_type>
-void covariance_curvilinear(const Propagator_type& propagator, double pT,
-                            double phi, double theta, double charge,
-                            double plimit, double reltol = 1e-3,
-                            bool debug = false) {
+void
+covariance_curvilinear(
+    const Propagator_type& propagator,
+    double pT,
+    double phi,
+    double theta,
+    double charge,
+    double plimit,
+    double reltol = 1e-3,
+    bool debug = false) {
   using namespace Acts::UnitLiterals;
 
   covariance_validation_fixture<Propagator_type> fixture(propagator);
@@ -448,13 +489,25 @@ void covariance_curvilinear(const Propagator_type& propagator, double pT,
   CHECK_CLOSE_COVARIANCE(calculated_cov, obtained_cov, reltol);
 }
 
-template <typename Propagator_type, typename StartSurface_type,
-          typename DestSurface_type>
-void covariance_bound(const Propagator_type& propagator, double pT, double phi,
-                      double theta, double charge, double plimit, double rand1,
-                      double rand2, double rand3, bool startPlanar = true,
-                      bool destPlanar = true, double reltol = 1e-3,
-                      bool debug = false) {
+template <
+    typename Propagator_type,
+    typename StartSurface_type,
+    typename DestSurface_type>
+void
+covariance_bound(
+    const Propagator_type& propagator,
+    double pT,
+    double phi,
+    double theta,
+    double charge,
+    double plimit,
+    double rand1,
+    double rand2,
+    double rand3,
+    bool startPlanar = true,
+    bool destPlanar = true,
+    double reltol = 1e-3,
+    bool debug = false) {
   using namespace Acts::UnitLiterals;
 
   covariance_validation_fixture<Propagator_type> fixture(propagator);
@@ -496,22 +549,24 @@ void covariance_bound(const Propagator_type& propagator, double pT, double phi,
   const auto& tp_c = result_c.endParameters;
 
   auto ssTransform =
-      startPlanar ? createPlanarTransform(pos, mom.normalized(), 0.1 * rand1,
-                                          0.1 * rand2)
+      startPlanar ? createPlanarTransform(
+                        pos, mom.normalized(), 0.1 * rand1, 0.1 * rand2)
                   : createCylindricTransform(pos, 0.05 * rand1, 0.05 * rand2);
   auto seTransform = destPlanar
-                         ? createPlanarTransform(tp_c->position(),
-                                                 tp_c->momentum().normalized(),
-                                                 0.1 * rand3, 0.1 * rand1)
-                         : createCylindricTransform(tp_c->position(),
-                                                    0.05 * rand1, 0.05 * rand2);
+                         ? createPlanarTransform(
+                               tp_c->position(),
+                               tp_c->momentum().normalized(),
+                               0.1 * rand3,
+                               0.1 * rand1)
+                         : createCylindricTransform(
+                               tp_c->position(), 0.05 * rand1, 0.05 * rand2);
 
   auto startSurface =
       Surface::makeShared<StartSurface_type>(ssTransform, nullptr);
-  BoundParameters start(tgContext, std::move(covPtr), pos, mom, q, time,
-                        startSurface);
-  BoundParameters start_wo_c(tgContext, nullptr, pos, mom, q, time,
-                             startSurface);
+  BoundParameters start(
+      tgContext, std::move(covPtr), pos, mom, q, time, startSurface);
+  BoundParameters start_wo_c(
+      tgContext, nullptr, pos, mom, q, time, startSurface);
 
   // increase the path limit - to be safe hitting the surface
   options.pathLimit *= 2;

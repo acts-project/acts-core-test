@@ -31,8 +31,11 @@ Acts::ZScanVertexFinder<bfield_t, input_track_t, propagator_t>::find(
     if (useConstraint &&
         vFinderOptions.vertexConstraint.covariance()(0, 0) != 0) {
       auto estRes = m_cfg.ipEstimator.estimate(
-          vFinderOptions.geoContext, vFinderOptions.magFieldContext, params,
-          vFinderOptions.vertexConstraint, m_cfg.propagator);
+          vFinderOptions.geoContext,
+          vFinderOptions.magFieldContext,
+          params,
+          vFinderOptions.vertexConstraint,
+          m_cfg.propagator);
       if (estRes.ok()) {
         ipas = std::move(*estRes);
       } else {
@@ -49,9 +52,9 @@ Acts::ZScanVertexFinder<bfield_t, input_track_t, propagator_t>::find(
       double chi2IP = std::pow(ipas->IPd0 / ipas->sigmad0, 2);
 
       if (!m_cfg.disableAllWeights) {
-        z0AndWeight.second =
-            1. / (1. + std::exp((chi2IP - m_cfg.constraintcutoff) /
-                                m_cfg.constrainttemp));
+        z0AndWeight.second = 1. / (1. + std::exp(
+                                            (chi2IP - m_cfg.constraintcutoff) /
+                                            m_cfg.constrainttemp));
         // overflow protection
         if (!std::isnormal(z0AndWeight.second)) {
           z0AndWeight.second = 0.;
@@ -97,9 +100,11 @@ Acts::ZScanVertexFinder<bfield_t, input_track_t, propagator_t>::find(
   }
 
   // constraint x()/y() equals 0 if no constraint
-  SpacePointVector output(vFinderOptions.vertexConstraint.position().x(),
-                          vFinderOptions.vertexConstraint.position().y(),
-                          ZResult, vFinderOptions.vertexConstraint.time());
+  SpacePointVector output(
+      vFinderOptions.vertexConstraint.position().x(),
+      vFinderOptions.vertexConstraint.position().y(),
+      ZResult,
+      vFinderOptions.vertexConstraint.time());
   Vertex<input_track_t> vtxResult = Vertex<input_track_t>(output);
 
   // Vector to be filled with one single vertex

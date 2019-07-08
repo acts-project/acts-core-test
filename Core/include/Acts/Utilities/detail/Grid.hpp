@@ -71,7 +71,8 @@ class Grid final {
   ///       Therefore, the look-up will never fail.
   //
   template <class Point>
-  reference atPosition(const Point& point) {
+  reference
+  atPosition(const Point& point) {
     return m_values.at(globalBinFromPosition(point));
   }
 
@@ -90,7 +91,8 @@ class Grid final {
   /// @note The look-up considers under-/overflow bins along each axis.
   ///       Therefore, the look-up will never fail.
   template <class Point>
-  const_reference atPosition(const Point& point) const {
+  const_reference
+  atPosition(const Point& point) const {
     return m_values.at(globalBinFromPosition(point));
   }
 
@@ -99,14 +101,20 @@ class Grid final {
   /// @param  [in] bin global bin number
   /// @return reference to value stored in bin containing the given
   ///         point
-  reference at(size_t bin) { return m_values.at(bin); }
+  reference
+  at(size_t bin) {
+    return m_values.at(bin);
+  }
 
   /// @brief access value stored in bin with given global bin number
   ///
   /// @param  [in] bin global bin number
   /// @return const-reference to value stored in bin containing the given
   ///         point
-  const_reference at(size_t bin) const { return m_values.at(bin); }
+  const_reference
+  at(size_t bin) const {
+    return m_values.at(bin);
+  }
 
   /// @brief access value stored in bin with given local bin numbers
   ///
@@ -116,7 +124,8 @@ class Grid final {
   ///
   /// @pre All local bin indices must be a valid index for the corresponding
   ///      axis (including the under-/overflow bin for this axis).
-  reference atLocalBins(const index_t& localBins) {
+  reference
+  atLocalBins(const index_t& localBins) {
     return m_values.at(globalBinFromLocalBins(localBins));
   }
 
@@ -128,7 +137,8 @@ class Grid final {
   ///
   /// @pre All local bin indices must be a valid index for the corresponding
   ///      axis (including the under-/overflow bin for this axis).
-  const_reference atLocalBins(const index_t& localBins) const {
+  const_reference
+  atLocalBins(const index_t& localBins) const {
     return m_values.at(globalBinFromLocalBins(localBins));
   }
 
@@ -144,15 +154,18 @@ class Grid final {
   ///      dimensions where d is dimensionality of the grid. It must lie
   ///      within the grid range (i.e. not within a under-/overflow bin).
   template <class Point>
-  detail::GlobalNeighborHoodIndices<DIM> closestPointsIndices(
-      const Point& position) const {
+  detail::GlobalNeighborHoodIndices<DIM>
+  closestPointsIndices(const Point& position) const {
     return rawClosestPointsIndices(localBinsFromPosition(position));
   }
 
   /// @brief dimensionality of grid
   ///
   /// @return number of axes spanning the grid
-  static constexpr size_t dimensions() { return DIM; }
+  static constexpr size_t
+  dimensions() {
+    return DIM;
+  }
 
   /// @brief get center position of bin with given local bin numbers
   ///
@@ -161,7 +174,8 @@ class Grid final {
   ///
   /// @pre All local bin indices must be a valid index for the corresponding
   ///      axis (excluding the under-/overflow bins for each axis).
-  std::array<double, DIM> binCenter(const index_t& localBins) const {
+  std::array<double, DIM>
+  binCenter(const index_t& localBins) const {
     return grid_helper::getBinCenter(localBins, m_axes);
   }
 
@@ -177,7 +191,8 @@ class Grid final {
   ///      dimensions where d is dimensionality of the grid.
   /// @note This could be a under-/overflow bin along one or more axes.
   template <class Point>
-  size_t globalBinFromPosition(const Point& point) const {
+  size_t
+  globalBinFromPosition(const Point& point) const {
     return globalBinFromLocalBins(localBinsFromPosition(point));
   }
 
@@ -188,7 +203,8 @@ class Grid final {
   ///
   /// @pre All local bin indices must be a valid index for the corresponding
   ///      axis (including the under-/overflow bin for this axis).
-  size_t globalBinFromLocalBins(const index_t& localBins) const {
+  size_t
+  globalBinFromLocalBins(const index_t& localBins) const {
     return grid_helper::getGlobalBin(localBins, m_axes);
   }
 
@@ -205,7 +221,8 @@ class Grid final {
   ///      dimensions where d is dimensionality of the grid.
   /// @note This could be a under-/overflow bin along one or more axes.
   template <class Point>
-  index_t localBinsFromPosition(const Point& point) const {
+  index_t
+  localBinsFromPosition(const Point& point) const {
     return grid_helper::getLocalBinIndices(point, m_axes);
   }
 
@@ -217,7 +234,8 @@ class Grid final {
   ///
   /// @note Local bin indices can contain under-/overflow bins along the
   ///       corresponding axis.
-  index_t localBinsFromGlobalBin(size_t bin) const {
+  index_t
+  localBinsFromGlobalBin(size_t bin) const {
     return grid_helper::getLocalBinIndices(bin, m_axes);
   }
 
@@ -228,7 +246,8 @@ class Grid final {
   ///
   /// @pre @c localBins must only contain valid bin indices (excluding
   ///      underflow bins).
-  point_t lowerLeftBinEdge(const index_t& localBins) const {
+  point_t
+  lowerLeftBinEdge(const index_t& localBins) const {
     return grid_helper::getLowerLeftBinEdge(localBins, m_axes);
   }
 
@@ -239,7 +258,8 @@ class Grid final {
   ///
   /// @pre @c localBins must only contain valid bin indices (excluding
   ///      overflow bins).
-  point_t upperRightBinEdge(const index_t& localBins) const {
+  point_t
+  upperRightBinEdge(const index_t& localBins) const {
     return grid_helper::getUpperRightBinEdge(localBins, m_axes);
   }
 
@@ -248,24 +268,34 @@ class Grid final {
   /// @return array giving the number of bins along all axes
   ///
   /// @note Not including under- and overflow bins
-  index_t numLocalBins() const { return grid_helper::getNBins(m_axes); }
+  index_t
+  numLocalBins() const {
+    return grid_helper::getNBins(m_axes);
+  }
 
   /// @brief get the minimum value of all axes of one grid
   ///
   /// @return array returning the minima of all given axes
-  point_t minPosition() const { return grid_helper::getMin(m_axes); }
+  point_t
+  minPosition() const {
+    return grid_helper::getMin(m_axes);
+  }
 
   /// @brief get the maximum value of all axes of one grid
   ///
   /// @return array returning the maxima of all given axes
-  point_t maxPosition() const { return grid_helper::getMax(m_axes); }
+  point_t
+  maxPosition() const {
+    return grid_helper::getMax(m_axes);
+  }
 
   /// @brief set all overflow and underflow bins to a certain value
   ///
   /// @param [in] value value to be inserted in every overflow and underflow
   ///                   bin of the grid.
   ///
-  void setExteriorBins(const value_type& value) {
+  void
+  setExteriorBins(const value_type& value) {
     for (size_t index : grid_helper::exteriorBinIndices(m_axes)) {
       at(index) = value;
     }
@@ -297,10 +327,15 @@ class Grid final {
   /// @note Bin values are interpreted as being the field values at the
   /// lower-left corner of the corresponding hyper-box.
   template <
-      class Point, typename U = T,
+      class Point,
+      typename U = T,
       typename = std::enable_if_t<can_interpolate<
-          Point, std::array<double, DIM>, std::array<double, DIM>, U>::value>>
-  T interpolate(const Point& point) const {
+          Point,
+          std::array<double, DIM>,
+          std::array<double, DIM>,
+          U>::value>>
+  T
+  interpolate(const Point& point) const {
     // there are 2^DIM corner points used during the interpolation
     constexpr size_t nCorners = 1 << DIM;
 
@@ -321,8 +356,11 @@ class Grid final {
       neighbors.at(i++) = at(index);
     }
 
-    return Acts::interpolate(point, lowerLeftBinEdge(llIndices),
-                             upperRightBinEdge(llIndices), neighbors);
+    return Acts::interpolate(
+        point,
+        lowerLeftBinEdge(llIndices),
+        upperRightBinEdge(llIndices),
+        neighbors);
   }
 
   /// @brief check whether given point is inside grid limits
@@ -337,7 +375,8 @@ class Grid final {
   ///       is a valid bin, i.e. it is neither a underflow nor an overflow bin
   ///       along any axis.
   template <class Point>
-  bool isInside(const Point& position) const {
+  bool
+  isInside(const Point& position) const {
     return grid_helper::isInside(position, m_axes);
   }
 
@@ -356,8 +395,8 @@ class Grid final {
   ///       Ignoring the truncation of the neighborhood size reaching beyond
   ///       over-/underflow bins, the neighborhood is of size \f$2 \times
   ///       \text{size}+1\f$ along each dimension.
-  detail::GlobalNeighborHoodIndices<DIM> neighborHoodIndices(
-      const index_t& localBins, size_t size = 1u) const {
+  detail::GlobalNeighborHoodIndices<DIM>
+  neighborHoodIndices(const index_t& localBins, size_t size = 1u) const {
     return grid_helper::neighborHoodIndices(localBins, size, m_axes);
   }
 
@@ -366,15 +405,19 @@ class Grid final {
   /// @return total number of bins in the grid
   ///
   /// @note This number contains under-and overflow bins along all axes.
-  size_t size() const {
+  size_t
+  size() const {
     index_t nBinsArray = numLocalBins();
     // add under-and overflow bins for each axis and multiply all bins
     return std::accumulate(
-        nBinsArray.begin(), nBinsArray.end(), 1,
+        nBinsArray.begin(),
+        nBinsArray.end(),
+        1,
         [](const size_t& a, const size_t& b) { return a * (b + 2); });
   }
 
-  std::array<const IAxis*, DIM> axes() const {
+  std::array<const IAxis*, DIM>
+  axes() const {
     return grid_helper::getAxes(m_axes);
   }
 
@@ -387,8 +430,8 @@ class Grid final {
   // Part of closestPointsIndices that goes after local bins resolution.
   // Used as an interpolation performance optimization, but not exposed as it
   // doesn't make that much sense from an API design standpoint.
-  detail::GlobalNeighborHoodIndices<DIM> rawClosestPointsIndices(
-      const index_t& localBins) const {
+  detail::GlobalNeighborHoodIndices<DIM>
+  rawClosestPointsIndices(const index_t& localBins) const {
     return grid_helper::closestPointsIndices(localBins, m_axes);
   }
 };

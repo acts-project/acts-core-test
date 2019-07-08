@@ -43,15 +43,18 @@ GeometryContext tgContext = GeometryContext();
 ///
 BOOST_DATA_TEST_CASE(
     bound_to_plane_test,
-    bdata::random((bdata::seed = 1240,
-                   bdata::distribution =
-                       std::uniform_real_distribution<>(-1000., 1000.))) ^
-        bdata::random((bdata::seed = 2351,
-                       bdata::distribution =
-                           std::uniform_real_distribution<>(-1000., 1000.))) ^
-        bdata::random((bdata::seed = 3412,
-                       bdata::distribution =
-                           std::uniform_real_distribution<>(-1000., 1000.))) ^
+    bdata::random(
+        (bdata::seed = 1240,
+         bdata::distribution =
+             std::uniform_real_distribution<>(-1000., 1000.))) ^
+        bdata::random(
+            (bdata::seed = 2351,
+             bdata::distribution =
+                 std::uniform_real_distribution<>(-1000., 1000.))) ^
+        bdata::random(
+            (bdata::seed = 3412,
+             bdata::distribution =
+                 std::uniform_real_distribution<>(-1000., 1000.))) ^
         bdata::random((
             bdata::seed = 5732,
             bdata::distribution = std::uniform_real_distribution<>(0., M_PI))) ^
@@ -62,7 +65,13 @@ BOOST_DATA_TEST_CASE(
             bdata::seed = 1295,
             bdata::distribution = std::uniform_real_distribution<>(0., M_PI))) ^
         bdata::xrange(100),
-    x, y, z, a, b, c, index) {
+    x,
+    y,
+    z,
+    a,
+    b,
+    c,
+    index) {
   (void)index;
   Vector3D center{x, y, z};
   auto transform = std::make_shared<Transform3D>();
@@ -96,25 +105,27 @@ BOOST_DATA_TEST_CASE(
   BoundParameters ataPlane_from_pars(tgContext, nullptr, pars, pSurface);
   consistencyCheck(ataPlane_from_pars, pos, mom, 1., 21., pars_array);
   // constructor from global parameters
-  BoundParameters ataPlane_from_global(tgContext, nullptr, pos, mom, 1., 21.,
-                                       pSurface);
+  BoundParameters ataPlane_from_global(
+      tgContext, nullptr, pos, mom, 1., 21., pSurface);
   consistencyCheck(ataPlane_from_global, pos, mom, 1., 21., pars_array);
   // constructor for neutral parameters
-  NeutralBoundParameters n_ataPlane_from_pars(tgContext, nullptr, pars,
-                                              pSurface);
+  NeutralBoundParameters n_ataPlane_from_pars(
+      tgContext, nullptr, pars, pSurface);
   consistencyCheck(n_ataPlane_from_pars, pos, mom, 0., 21., pars_array);
   // constructor for neutral global parameters
-  NeutralBoundParameters n_ataPlane_from_global(tgContext, nullptr, pos, mom,
-                                                21., pSurface);
+  NeutralBoundParameters n_ataPlane_from_global(
+      tgContext, nullptr, pos, mom, 21., pSurface);
   consistencyCheck(n_ataPlane_from_global, pos, mom, 0., 21., pars_array);
 
   // check shared ownership of same surface
   BOOST_CHECK_EQUAL(&ataPlane_from_pars.referenceSurface(), pSurface.get());
-  BOOST_CHECK_EQUAL(&ataPlane_from_pars.referenceSurface(),
-                    &ataPlane_from_global.referenceSurface());
+  BOOST_CHECK_EQUAL(
+      &ataPlane_from_pars.referenceSurface(),
+      &ataPlane_from_global.referenceSurface());
   BOOST_CHECK_EQUAL(&n_ataPlane_from_pars.referenceSurface(), pSurface.get());
-  BOOST_CHECK_EQUAL(&n_ataPlane_from_pars.referenceSurface(),
-                    &n_ataPlane_from_global.referenceSurface());
+  BOOST_CHECK_EQUAL(
+      &n_ataPlane_from_pars.referenceSurface(),
+      &n_ataPlane_from_global.referenceSurface());
   BOOST_CHECK_EQUAL(pSurface.use_count(), 5);
 
   // check that the reference frame is the rotation matrix
@@ -141,8 +152,9 @@ BOOST_DATA_TEST_CASE(
   ataPlane_from_pars.set<Acts::eQOP>(tgContext, uqop);
   ataPlane_from_pars.set<Acts::eT>(tgContext, ut);
   // we should have a new updated momentum
-  Vector3D umomentum = 40. * Vector3D(cos(uphi) * sin(utheta),
-                                      sin(uphi) * sin(utheta), cos(utheta));
+  Vector3D umomentum =
+      40. *
+      Vector3D(cos(uphi) * sin(utheta), sin(uphi) * sin(utheta), cos(utheta));
 
   CHECK_CLOSE_REL(umomentum, ataPlane_from_pars.momentum(), 1e-6);
 }
@@ -151,15 +163,18 @@ BOOST_DATA_TEST_CASE(
 ///
 BOOST_DATA_TEST_CASE(
     bound_to_disc_test,
-    bdata::random((bdata::seed = 9810,
-                   bdata::distribution =
-                       std::uniform_real_distribution<>(-1000., 1000.))) ^
-        bdata::random((bdata::seed = 1221,
-                       bdata::distribution =
-                           std::uniform_real_distribution<>(-1000., 1000.))) ^
-        bdata::random((bdata::seed = 12132,
-                       bdata::distribution =
-                           std::uniform_real_distribution<>(-1000., 1000.))) ^
+    bdata::random(
+        (bdata::seed = 9810,
+         bdata::distribution =
+             std::uniform_real_distribution<>(-1000., 1000.))) ^
+        bdata::random(
+            (bdata::seed = 1221,
+             bdata::distribution =
+                 std::uniform_real_distribution<>(-1000., 1000.))) ^
+        bdata::random(
+            (bdata::seed = 12132,
+             bdata::distribution =
+                 std::uniform_real_distribution<>(-1000., 1000.))) ^
         bdata::random((
             bdata::seed = 16783,
             bdata::distribution = std::uniform_real_distribution<>(0., M_PI))) ^
@@ -170,7 +185,13 @@ BOOST_DATA_TEST_CASE(
             bdata::seed = 77615,
             bdata::distribution = std::uniform_real_distribution<>(0., M_PI))) ^
         bdata::xrange(100),
-    x, y, z, a, b, c, index) {
+    x,
+    y,
+    z,
+    a,
+    b,
+    c,
+    index) {
   (void)index;
   Vector3D center{x, y, z};
   auto transform = std::make_shared<Transform3D>();
@@ -202,25 +223,27 @@ BOOST_DATA_TEST_CASE(
   BoundParameters ataDisc_from_pars(tgContext, nullptr, pars, dSurface);
   consistencyCheck(ataDisc_from_pars, pos, mom, 1., 21., pars_array);
   // constructor from global parameters
-  BoundParameters ataDisc_from_global(tgContext, nullptr, pos, mom, 1., 21.,
-                                      dSurface);
+  BoundParameters ataDisc_from_global(
+      tgContext, nullptr, pos, mom, 1., 21., dSurface);
   consistencyCheck(ataDisc_from_global, pos, mom, 1., 21., pars_array);
   // constructor for neutral parameters
-  NeutralBoundParameters n_ataDisc_from_pars(tgContext, nullptr, pars,
-                                             dSurface);
+  NeutralBoundParameters n_ataDisc_from_pars(
+      tgContext, nullptr, pars, dSurface);
   consistencyCheck(n_ataDisc_from_pars, pos, mom, 0., 21., pars_array);
   // constructor for neutral global parameters
-  NeutralBoundParameters n_ataDisc_from_global(tgContext, nullptr, pos, mom,
-                                               21., dSurface);
+  NeutralBoundParameters n_ataDisc_from_global(
+      tgContext, nullptr, pos, mom, 21., dSurface);
   consistencyCheck(n_ataDisc_from_global, pos, mom, 0., 21., pars_array);
 
   // check shared ownership of same surface
   BOOST_CHECK_EQUAL(&ataDisc_from_pars.referenceSurface(), dSurface.get());
-  BOOST_CHECK_EQUAL(&ataDisc_from_pars.referenceSurface(),
-                    &ataDisc_from_global.referenceSurface());
+  BOOST_CHECK_EQUAL(
+      &ataDisc_from_pars.referenceSurface(),
+      &ataDisc_from_global.referenceSurface());
   BOOST_CHECK_EQUAL(&n_ataDisc_from_pars.referenceSurface(), dSurface.get());
-  BOOST_CHECK_EQUAL(&n_ataDisc_from_pars.referenceSurface(),
-                    &n_ataDisc_from_global.referenceSurface());
+  BOOST_CHECK_EQUAL(
+      &n_ataDisc_from_pars.referenceSurface(),
+      &n_ataDisc_from_global.referenceSurface());
   BOOST_CHECK_EQUAL(dSurface.use_count(), 5);
 
   // check that the reference frame is the
@@ -234,15 +257,18 @@ BOOST_DATA_TEST_CASE(
 ///
 BOOST_DATA_TEST_CASE(
     bound_to_cylinder_test,
-    bdata::random((bdata::seed = 39810,
-                   bdata::distribution =
-                       std::uniform_real_distribution<>(-1000., 1000.))) ^
-        bdata::random((bdata::seed = 21221,
-                       bdata::distribution =
-                           std::uniform_real_distribution<>(-1000., 1000.))) ^
-        bdata::random((bdata::seed = 62132,
-                       bdata::distribution =
-                           std::uniform_real_distribution<>(-1000., 1000.))) ^
+    bdata::random(
+        (bdata::seed = 39810,
+         bdata::distribution =
+             std::uniform_real_distribution<>(-1000., 1000.))) ^
+        bdata::random(
+            (bdata::seed = 21221,
+             bdata::distribution =
+                 std::uniform_real_distribution<>(-1000., 1000.))) ^
+        bdata::random(
+            (bdata::seed = 62132,
+             bdata::distribution =
+                 std::uniform_real_distribution<>(-1000., 1000.))) ^
         bdata::random((
             bdata::seed = 91683,
             bdata::distribution = std::uniform_real_distribution<>(0., M_PI))) ^
@@ -253,7 +279,13 @@ BOOST_DATA_TEST_CASE(
             bdata::seed = 72615,
             bdata::distribution = std::uniform_real_distribution<>(0., M_PI))) ^
         bdata::xrange(100),
-    x, y, z, a, b, c, index) {
+    x,
+    y,
+    z,
+    a,
+    b,
+    c,
+    index) {
   (void)index;
 
   Vector3D center{x, y, z};
@@ -292,26 +324,28 @@ BOOST_DATA_TEST_CASE(
   BoundParameters ataCylinder_from_pars(tgContext, nullptr, pars, cSurface);
   consistencyCheck(ataCylinder_from_pars, pos, mom, 1., 21., pars_array);
   // constructor from global parameters
-  BoundParameters ataCylinder_from_global(tgContext, nullptr, pos, mom, 1., 21.,
-                                          cSurface);
+  BoundParameters ataCylinder_from_global(
+      tgContext, nullptr, pos, mom, 1., 21., cSurface);
   consistencyCheck(ataCylinder_from_global, pos, mom, 1., 21., pars_array);
   // constructor for neutral parameters
-  NeutralBoundParameters n_ataCylinder_from_pars(tgContext, nullptr, pars,
-                                                 cSurface);
+  NeutralBoundParameters n_ataCylinder_from_pars(
+      tgContext, nullptr, pars, cSurface);
   consistencyCheck(n_ataCylinder_from_pars, pos, mom, 0., 21., pars_array);
   // constructor for neutral global parameters
-  NeutralBoundParameters n_ataCylinder_from_global(tgContext, nullptr, pos, mom,
-                                                   21., cSurface);
+  NeutralBoundParameters n_ataCylinder_from_global(
+      tgContext, nullptr, pos, mom, 21., cSurface);
   consistencyCheck(n_ataCylinder_from_global, pos, mom, 0., 21., pars_array);
 
   // check shared ownership of same surface
   BOOST_CHECK_EQUAL(&ataCylinder_from_pars.referenceSurface(), cSurface.get());
-  BOOST_CHECK_EQUAL(&ataCylinder_from_pars.referenceSurface(),
-                    &ataCylinder_from_global.referenceSurface());
-  BOOST_CHECK_EQUAL(&n_ataCylinder_from_pars.referenceSurface(),
-                    cSurface.get());
-  BOOST_CHECK_EQUAL(&n_ataCylinder_from_pars.referenceSurface(),
-                    &n_ataCylinder_from_global.referenceSurface());
+  BOOST_CHECK_EQUAL(
+      &ataCylinder_from_pars.referenceSurface(),
+      &ataCylinder_from_global.referenceSurface());
+  BOOST_CHECK_EQUAL(
+      &n_ataCylinder_from_pars.referenceSurface(), cSurface.get());
+  BOOST_CHECK_EQUAL(
+      &n_ataCylinder_from_pars.referenceSurface(),
+      &n_ataCylinder_from_global.referenceSurface());
   BOOST_CHECK_EQUAL(cSurface.use_count(), 5);
 
   auto pPosition = ataCylinder_from_pars.position();
@@ -325,8 +359,8 @@ BOOST_DATA_TEST_CASE(
   refframe.col(1) = transverse_y;
   refframe.col(2) = normal_at_intersect;
   // check if the manually constructed reference frame is the provided one
-  CHECK_CLOSE_REL(ataCylinder_from_pars.referenceFrame(tgContext), refframe,
-                  1e-6);
+  CHECK_CLOSE_REL(
+      ataCylinder_from_pars.referenceFrame(tgContext), refframe, 1e-6);
 }
 
 /// @brief Unit test for parameters at the perigee
@@ -336,12 +370,14 @@ BOOST_DATA_TEST_CASE(
     bdata::random(
         (bdata::seed = 3980,
          bdata::distribution = std::uniform_real_distribution<>(-10., 10.))) ^
-        bdata::random((bdata::seed = 2221,
-                       bdata::distribution =
-                           std::uniform_real_distribution<>(-10., 10.))) ^
-        bdata::random((bdata::seed = 2132,
-                       bdata::distribution =
-                           std::uniform_real_distribution<>(-10., 10.))) ^
+        bdata::random(
+            (bdata::seed = 2221,
+             bdata::distribution =
+                 std::uniform_real_distribution<>(-10., 10.))) ^
+        bdata::random(
+            (bdata::seed = 2132,
+             bdata::distribution =
+                 std::uniform_real_distribution<>(-10., 10.))) ^
         bdata::random((
             bdata::seed = 9183,
             bdata::distribution = std::uniform_real_distribution<>(0., 0.05))) ^
@@ -349,7 +385,12 @@ BOOST_DATA_TEST_CASE(
             bdata::seed = 3947,
             bdata::distribution = std::uniform_real_distribution<>(0., 0.05))) ^
         bdata::xrange(100),
-    x, y, z, a, b, index) {
+    x,
+    y,
+    z,
+    a,
+    b,
+    index) {
   (void)index;
   Vector3D center{x, y, z};
   auto transform = std::make_shared<Transform3D>();
@@ -375,25 +416,27 @@ BOOST_DATA_TEST_CASE(
   auto mom = ataPerigee_from_pars.momentum();
   consistencyCheck(ataPerigee_from_pars, pos, mom, 1., 21., pars_array);
   // constructor from global parameters
-  BoundParameters ataPerigee_from_global(tgContext, nullptr, pos, mom, 1., 21.,
-                                         pSurface);
+  BoundParameters ataPerigee_from_global(
+      tgContext, nullptr, pos, mom, 1., 21., pSurface);
   consistencyCheck(ataPerigee_from_global, pos, mom, 1., 21., pars_array);
   // constructor for neutral parameters
-  NeutralBoundParameters n_ataPerigee_from_pars(tgContext, nullptr, pars,
-                                                pSurface);
+  NeutralBoundParameters n_ataPerigee_from_pars(
+      tgContext, nullptr, pars, pSurface);
   consistencyCheck(n_ataPerigee_from_pars, pos, mom, 0., 21., pars_array);
   // constructor for neutral global parameters
-  NeutralBoundParameters n_ataPerigee_from_global(tgContext, nullptr, pos, mom,
-                                                  21., pSurface);
+  NeutralBoundParameters n_ataPerigee_from_global(
+      tgContext, nullptr, pos, mom, 21., pSurface);
   consistencyCheck(n_ataPerigee_from_global, pos, mom, 0., 21., pars_array);
 
   // check shared ownership of same surface
   BOOST_CHECK_EQUAL(&ataPerigee_from_pars.referenceSurface(), pSurface.get());
-  BOOST_CHECK_EQUAL(&ataPerigee_from_pars.referenceSurface(),
-                    &ataPerigee_from_global.referenceSurface());
+  BOOST_CHECK_EQUAL(
+      &ataPerigee_from_pars.referenceSurface(),
+      &ataPerigee_from_global.referenceSurface());
   BOOST_CHECK_EQUAL(&n_ataPerigee_from_pars.referenceSurface(), pSurface.get());
-  BOOST_CHECK_EQUAL(&n_ataPerigee_from_pars.referenceSurface(),
-                    &n_ataPerigee_from_global.referenceSurface());
+  BOOST_CHECK_EQUAL(
+      &n_ataPerigee_from_pars.referenceSurface(),
+      &n_ataPerigee_from_global.referenceSurface());
   BOOST_CHECK_EQUAL(pSurface.use_count(), 5);
 }
 
@@ -401,15 +444,18 @@ BOOST_DATA_TEST_CASE(
 ///
 BOOST_DATA_TEST_CASE(
     bound_to_line_test,
-    bdata::random((bdata::seed = 73980,
-                   bdata::distribution =
-                       std::uniform_real_distribution<>(-1000., 1000.))) ^
-        bdata::random((bdata::seed = 21221,
-                       bdata::distribution =
-                           std::uniform_real_distribution<>(-1000., 1000.))) ^
-        bdata::random((bdata::seed = 62992,
-                       bdata::distribution =
-                           std::uniform_real_distribution<>(-1000., 1000.))) ^
+    bdata::random(
+        (bdata::seed = 73980,
+         bdata::distribution =
+             std::uniform_real_distribution<>(-1000., 1000.))) ^
+        bdata::random(
+            (bdata::seed = 21221,
+             bdata::distribution =
+                 std::uniform_real_distribution<>(-1000., 1000.))) ^
+        bdata::random(
+            (bdata::seed = 62992,
+             bdata::distribution =
+                 std::uniform_real_distribution<>(-1000., 1000.))) ^
         bdata::random((
             bdata::seed = 900683,
             bdata::distribution = std::uniform_real_distribution<>(0., M_PI))) ^
@@ -420,7 +466,13 @@ BOOST_DATA_TEST_CASE(
             bdata::seed = 1972615,
             bdata::distribution = std::uniform_real_distribution<>(0., M_PI))) ^
         bdata::xrange(100),
-    x, y, z, a, b, c, index) {
+    x,
+    y,
+    z,
+    a,
+    b,
+    c,
+    index) {
   using namespace Acts::UnitLiterals;
 
   (void)index;
@@ -450,25 +502,27 @@ BOOST_DATA_TEST_CASE(
   auto mom = ataLine_from_pars.momentum();
   consistencyCheck(ataLine_from_pars, pos, mom, 1., 21., pars_array);
   // constructor from global parameters
-  BoundParameters ataLine_from_global(tgContext, nullptr, pos, mom, 1., 21.,
-                                      sSurface);
+  BoundParameters ataLine_from_global(
+      tgContext, nullptr, pos, mom, 1., 21., sSurface);
   consistencyCheck(ataLine_from_global, pos, mom, 1., 21., pars_array);
   // constructor for neutral parameters
-  NeutralBoundParameters n_ataLine_from_pars(tgContext, nullptr, pars,
-                                             sSurface);
+  NeutralBoundParameters n_ataLine_from_pars(
+      tgContext, nullptr, pars, sSurface);
   consistencyCheck(n_ataLine_from_pars, pos, mom, 0., 21., pars_array);
   // constructor for neutral global parameters
-  NeutralBoundParameters n_ataLine_from_global(tgContext, nullptr, pos, mom,
-                                               21., sSurface);
+  NeutralBoundParameters n_ataLine_from_global(
+      tgContext, nullptr, pos, mom, 21., sSurface);
   consistencyCheck(n_ataLine_from_global, pos, mom, 0., 21., pars_array);
 
   // check shared ownership of same surface
   BOOST_CHECK_EQUAL(&ataLine_from_pars.referenceSurface(), sSurface.get());
-  BOOST_CHECK_EQUAL(&ataLine_from_pars.referenceSurface(),
-                    &ataLine_from_global.referenceSurface());
+  BOOST_CHECK_EQUAL(
+      &ataLine_from_pars.referenceSurface(),
+      &ataLine_from_global.referenceSurface());
   BOOST_CHECK_EQUAL(&n_ataLine_from_pars.referenceSurface(), sSurface.get());
-  BOOST_CHECK_EQUAL(&n_ataLine_from_pars.referenceSurface(),
-                    &n_ataLine_from_global.referenceSurface());
+  BOOST_CHECK_EQUAL(
+      &n_ataLine_from_pars.referenceSurface(),
+      &n_ataLine_from_global.referenceSurface());
   BOOST_CHECK_EQUAL(sSurface.use_count(), 5);
 }
 }  // namespace Test

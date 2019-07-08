@@ -69,11 +69,13 @@ class ZScanVertexFinder {
   ///
   /// @param cfg Configuration object
   /// @param logger The logging instance
-  template <typename T = input_track_t,
-            std::enable_if_t<std::is_same<T, BoundParameters>::value, int> = 0>
-  ZScanVertexFinder(Config cfg,
-                    std::unique_ptr<const Logger> logger =
-                        getDefaultLogger("ZScanVertexFinder", Logging::INFO))
+  template <
+      typename T = input_track_t,
+      std::enable_if_t<std::is_same<T, BoundParameters>::value, int> = 0>
+  ZScanVertexFinder(
+      Config cfg,
+      std::unique_ptr<const Logger> logger =
+          getDefaultLogger("ZScanVertexFinder", Logging::INFO))
       : m_cfg(std::move(cfg)),
         m_extractParameters([](T params) { return params; }),
         m_logger(std::move(logger)) {}
@@ -83,10 +85,11 @@ class ZScanVertexFinder {
   /// @param cfg Configuration object
   /// @param func Function extracting BoundParameters from input_track_t object
   /// @param logger Logging instance
-  ZScanVertexFinder(Config cfg,
-                    std::function<BoundParameters(input_track_t)> func,
-                    std::unique_ptr<const Logger> logger =
-                        getDefaultLogger("ZScanVertexFinder", Logging::INFO))
+  ZScanVertexFinder(
+      Config cfg,
+      std::function<BoundParameters(input_track_t)> func,
+      std::unique_ptr<const Logger> logger =
+          getDefaultLogger("ZScanVertexFinder", Logging::INFO))
       : m_cfg(std::move(cfg)),
         m_extractParameters(func),
         m_logger(std::move(logger)) {}
@@ -118,7 +121,10 @@ class ZScanVertexFinder {
   std::unique_ptr<const Logger> m_logger;
 
   /// Private access to logging instance
-  const Logger& logger() const { return *m_logger; }
+  const Logger&
+  logger() const {
+    return *m_logger;
+  }
 };
 
 }  // namespace Acts

@@ -52,8 +52,9 @@ BOOST_AUTO_TEST_CASE(GenericApproachDescriptorConstruction) {
 }
 
 /// Unit test for testing GenericApproachDescriptor properties
-BOOST_AUTO_TEST_CASE(GenericApproachDescriptorProperties,
-                     *utf::expected_failures(1)) {
+BOOST_AUTO_TEST_CASE(
+    GenericApproachDescriptorProperties,
+    *utf::expected_failures(1)) {
   Vector3D origin{
       0.,
       0.,
@@ -72,15 +73,15 @@ BOOST_AUTO_TEST_CASE(GenericApproachDescriptorProperties,
   SurfaceIntersection surfIntersection = approachDescriptor.approachSurface(
       tgContext, origin, zDir, forward, bcheck);
   double expectedIntersection = 20.0;  // property of SurfaceStub
-  CHECK_CLOSE_REL(surfIntersection.intersection.pathLength,
-                  expectedIntersection, 1e-6);
+  CHECK_CLOSE_REL(
+      surfIntersection.intersection.pathLength, expectedIntersection, 1e-6);
   // containedSurfaces()
-  BOOST_CHECK_EQUAL(approachDescriptor.containedSurfaces().size(),
-                    someSurfaces.size());
+  BOOST_CHECK_EQUAL(
+      approachDescriptor.containedSurfaces().size(), someSurfaces.size());
 
   for (size_t i = 0; i < someSurfaces.size(); i++) {
-    BOOST_CHECK_EQUAL(approachDescriptor.containedSurfaces().at(i),
-                      someSurfaces.at(i).get());
+    BOOST_CHECK_EQUAL(
+        approachDescriptor.containedSurfaces().at(i), someSurfaces.at(i).get());
   }
 }
 

@@ -52,7 +52,8 @@ class ITrackingVolumeBuilder {
   ///
   /// @return shared pointer to a newly created TrackingVolume
   virtual MutableTrackingVolumePtr trackingVolume(
-      const GeometryContext& gctx, TrackingVolumePtr insideVolume = nullptr,
+      const GeometryContext& gctx,
+      TrackingVolumePtr insideVolume = nullptr,
       VolumeBoundsPtr outsideBounds = nullptr) const = 0;
 };
 

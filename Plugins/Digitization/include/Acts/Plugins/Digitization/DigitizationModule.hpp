@@ -52,10 +52,13 @@ class DigitizationModule {
   /// @param halfThickness is the half thickness of the module
   /// @param readoutDirection is the readout drift direction
   /// @param lorentzAngle is the lorentz drift angle
-  DigitizationModule(std::shared_ptr<const Segmentation> moduleSegmentation,
-                     double halfThickness, int readoutDirection,
-                     double lorentzAngle, double energyThreshold = 0.,
-                     bool analogue = false);
+  DigitizationModule(
+      std::shared_ptr<const Segmentation> moduleSegmentation,
+      double halfThickness,
+      int readoutDirection,
+      double lorentzAngle,
+      double energyThreshold = 0.,
+      bool analogue = false);
 
   /// Virtual Destructor
   virtual ~DigitizationModule() = default;
@@ -99,16 +102,18 @@ class DigitizationModule {
   /// @param end is the end position of the step
   ///
   /// @return stepSurfaces are the surfaces to test
-  const SurfacePtrVector stepSurfaces(const Vector3D& start,
-                                      const Vector3D& end) const;
+  const SurfacePtrVector stepSurfaces(
+      const Vector3D& start,
+      const Vector3D& end) const;
 
   /// Fill the associated digitsation cell from this start and end position,
   /// correct for lorentz effect if needed
   ///
   /// @param start is the start position of the step
   /// @param end is the end position of the step
-  const DigitizationStep digitizationStep(const Vector3D& start,
-                                          const Vector3D& end) const;
+  const DigitizationStep digitizationStep(
+      const Vector3D& start,
+      const Vector3D& end) const;
 
   /// Return the bounding surfaces inlcuding top and bottom
   const SurfacePtrVector& boundarySurfaces() const;
@@ -142,47 +147,55 @@ class DigitizationModule {
   SurfacePtrVector m_segmentationSurfacesY;
 };
 
-inline double DigitizationModule::halfThickness() const {
+inline double
+DigitizationModule::halfThickness() const {
   return m_halfThickness;
 }
 
-inline int DigitizationModule::readoutDirection() const {
+inline int
+DigitizationModule::readoutDirection() const {
   return m_readoutDirection;
 }
 
-inline double DigitizationModule::lorentzAngle() const {
+inline double
+DigitizationModule::lorentzAngle() const {
   return m_lorentzAngle;
 }
 
-inline double DigitizationModule::energyThreshold() const {
+inline double
+DigitizationModule::energyThreshold() const {
   return m_energyThreshold;
 }
 
-inline bool DigitizationModule::analogue() const {
+inline bool
+DigitizationModule::analogue() const {
   return m_analogue;
 }
 
-inline const Segmentation& DigitizationModule::segmentation() const {
+inline const Segmentation&
+DigitizationModule::segmentation() const {
   return (*(m_segmentation.get()));
 }
 
-inline const SurfacePtrVector& DigitizationModule::boundarySurfaces() const {
+inline const SurfacePtrVector&
+DigitizationModule::boundarySurfaces() const {
   return m_boundarySurfaces;
 }
 
-inline const SurfacePtrVector& DigitizationModule::segmentationSurfacesX()
-    const {
+inline const SurfacePtrVector&
+DigitizationModule::segmentationSurfacesX() const {
   return m_segmentationSurfacesX;
 }
 
-inline const SurfacePtrVector& DigitizationModule::segmentationSurfacesY()
-    const {
+inline const SurfacePtrVector&
+DigitizationModule::segmentationSurfacesY() const {
   return m_segmentationSurfacesY;
 }
 
-inline const DigitizationStep DigitizationModule::digitizationStep(
-    const Vector3D& start, const Vector3D& end) const {
-  return m_segmentation->digitizationStep(start, end, m_halfThickness,
-                                          m_readoutDirection, m_lorentzAngle);
+inline const DigitizationStep
+DigitizationModule::digitizationStep(const Vector3D& start, const Vector3D& end)
+    const {
+  return m_segmentation->digitizationStep(
+      start, end, m_halfThickness, m_readoutDirection, m_lorentzAngle);
 }
 }  // namespace Acts

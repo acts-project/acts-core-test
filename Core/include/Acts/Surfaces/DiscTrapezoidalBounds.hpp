@@ -51,9 +51,13 @@ class DiscTrapezoidalBounds : public DiscBounds {
   /// @param minR inner radius
   /// @param avephi average phi value
   /// @param stereo optional stero angle applied
-  DiscTrapezoidalBounds(double minhalfx, double maxhalfx, double maxR,
-                        double minR, double avephi = M_PI_2,
-                        double stereo = 0.);
+  DiscTrapezoidalBounds(
+      double minhalfx,
+      double maxhalfx,
+      double maxR,
+      double minR,
+      double avephi = M_PI_2,
+      double stereo = 0.);
 
   ~DiscTrapezoidalBounds() override;
 
@@ -68,8 +72,8 @@ class DiscTrapezoidalBounds : public DiscBounds {
   /// if only tol0 is given and additional in the phi sector is tol1 is given
   /// @param lpos is the local position to be checked (in polar coordinates)
   /// @param bcheck is the boundary check directive
-  bool inside(const Vector2D& lpos,
-              const BoundaryCheck& bcheck = true) const final;
+  bool inside(const Vector2D& lpos, const BoundaryCheck& bcheck = true)
+      const final;
 
   /// Minimal distance to boundary
   /// @param lpos is the local position to be checked (in polar coordinates)
@@ -114,43 +118,52 @@ class DiscTrapezoidalBounds : public DiscBounds {
   ActsMatrixD<2, 2> jacobianToLocalXY(const Vector2D& lpos) const;
 };
 
-inline double DiscTrapezoidalBounds::rMin() const {
+inline double
+DiscTrapezoidalBounds::rMin() const {
   return m_rMin;
 }
 
-inline double DiscTrapezoidalBounds::rMax() const {
+inline double
+DiscTrapezoidalBounds::rMax() const {
   return m_rMax;
 }
 
-inline double DiscTrapezoidalBounds::minHalflengthX() const {
+inline double
+DiscTrapezoidalBounds::minHalflengthX() const {
   return m_minHalfX;
 }
 
-inline double DiscTrapezoidalBounds::maxHalflengthX() const {
+inline double
+DiscTrapezoidalBounds::maxHalflengthX() const {
   return m_maxHalfX;
 }
 
-inline double DiscTrapezoidalBounds::averagePhi() const {
+inline double
+DiscTrapezoidalBounds::averagePhi() const {
   return m_avgPhi;
 }
 
-inline double DiscTrapezoidalBounds::stereo() const {
+inline double
+DiscTrapezoidalBounds::stereo() const {
   return m_stereo;
 }
 
-inline double DiscTrapezoidalBounds::halfPhiSector() const {
+inline double
+DiscTrapezoidalBounds::halfPhiSector() const {
   auto minHalfPhi = std::asin(m_minHalfX / m_rMin);
   auto maxHalfPhi = std::asin(m_maxHalfX / m_rMax);
   return std::max(minHalfPhi, maxHalfPhi);
 }
 
-inline double DiscTrapezoidalBounds::rCenter() const {
+inline double
+DiscTrapezoidalBounds::rCenter() const {
   auto hmin = std::sqrt(m_rMin * m_rMin - m_minHalfX * m_minHalfX);
   auto hmax = std::sqrt(m_rMax * m_rMax - m_maxHalfX * m_maxHalfX);
   return (hmin + hmax) / 2.0;
 }
 
-inline double DiscTrapezoidalBounds::halflengthY() const {
+inline double
+DiscTrapezoidalBounds::halflengthY() const {
   auto hmin = std::sqrt(m_rMin * m_rMin - m_minHalfX * m_minHalfX);
   auto hmax = std::sqrt(m_rMax * m_rMax - m_maxHalfX * m_maxHalfX);
   return (hmax - hmin) / 2.0;

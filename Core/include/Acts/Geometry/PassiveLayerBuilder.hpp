@@ -54,9 +54,10 @@ class PassiveLayerBuilder : public ILayerBuilder {
   ///
   /// @param plConfig is the ocnfiguration struct that steers behavior
   /// @param logger logging instance
-  PassiveLayerBuilder(const Config& plConfig,
-                      std::unique_ptr<const Logger> logger = getDefaultLogger(
-                          "PassiveLayerBuilder", Logging::INFO));
+  PassiveLayerBuilder(
+      const Config& plConfig,
+      std::unique_ptr<const Logger> logger =
+          getDefaultLogger("PassiveLayerBuilder", Logging::INFO));
 
   /// Destructor
   ~PassiveLayerBuilder() override = default;
@@ -87,7 +88,8 @@ class PassiveLayerBuilder : public ILayerBuilder {
 
   /// Name identification
   /// @return the string based identification
-  const std::string& identification() const override {
+  const std::string&
+  identification() const override {
     return m_cfg.layerIdentification;
   }
 
@@ -118,14 +120,17 @@ class PassiveLayerBuilder : public ILayerBuilder {
   /// @return  the layers at positive side
   const LayerVector endcapLayers(const GeometryContext& gctx, int side) const;
 
-  const Logger& logger() const { return *m_logger; }
+  const Logger&
+  logger() const {
+    return *m_logger;
+  }
 
   /// logging instance
   std::unique_ptr<const Logger> m_logger;
 };
 
-inline PassiveLayerBuilder::Config PassiveLayerBuilder::getConfiguration()
-    const {
+inline PassiveLayerBuilder::Config
+PassiveLayerBuilder::getConfiguration() const {
   return m_cfg;
 }
 

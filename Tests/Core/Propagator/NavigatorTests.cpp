@@ -85,73 +85,107 @@ struct PropagatorState {
     };
 
     /// Global particle position accessor
-    Vector3D position(const State& state) const { return state.pos; }
+    Vector3D
+    position(const State& state) const {
+      return state.pos;
+    }
 
     /// Momentum direction accessor
-    Vector3D direction(const State& state) const { return state.dir; }
+    Vector3D
+    direction(const State& state) const {
+      return state.dir;
+    }
 
     /// Momentum accessor
-    double momentum(const State& state) const { return state.p; }
+    double
+    momentum(const State& state) const {
+      return state.p;
+    }
 
     /// Charge access
-    double charge(const State& state) const { return state.q; }
+    double
+    charge(const State& state) const {
+      return state.q;
+    }
 
     /// Time access
-    double time(const State& state) const { return state.t; }
+    double
+    time(const State& state) const {
+      return state.t;
+    }
 
     /// Return a corrector
-    VoidIntersectionCorrector corrector(State& /*unused*/) const {
+    VoidIntersectionCorrector
+    corrector(State& /*unused*/) const {
       return VoidIntersectionCorrector();
     }
 
-    bool surfaceReached(const State& state, const Surface* surface) const {
-      return surface->isOnSurface(tgContext, position(state), direction(state),
-                                  true);
+    bool
+    surfaceReached(const State& state, const Surface* surface) const {
+      return surface->isOnSurface(
+          tgContext, position(state), direction(state), true);
     }
 
-    BoundState boundState(State& state, const Surface& surface,
-                          bool reinitialize = true) const {
+    BoundState
+    boundState(State& state, const Surface& surface, bool reinitialize = true)
+        const {
       // suppress unused warning
       (void)reinitialize;
-      BoundParameters parameters(tgContext, nullptr, state.pos,
-                                 state.p * state.dir, state.q, state.t,
-                                 surface.getSharedPtr());
-      BoundState bState{std::move(parameters), Jacobian::Identity(),
-                        state.pathAccumulated};
+      BoundParameters parameters(
+          tgContext,
+          nullptr,
+          state.pos,
+          state.p * state.dir,
+          state.q,
+          state.t,
+          surface.getSharedPtr());
+      BoundState bState{
+          std::move(parameters), Jacobian::Identity(), state.pathAccumulated};
       return bState;
     }
 
-    CurvilinearState curvilinearState(State& state,
-                                      bool reinitialize = true) const {
+    CurvilinearState
+    curvilinearState(State& state, bool reinitialize = true) const {
       (void)reinitialize;
-      CurvilinearParameters parameters(nullptr, state.pos, state.p * state.dir,
-                                       state.q, state.t);
+      CurvilinearParameters parameters(
+          nullptr, state.pos, state.p * state.dir, state.q, state.t);
       // Create the bound state
-      CurvilinearState curvState{std::move(parameters), Jacobian::Identity(),
-                                 state.pathAccumulated};
+      CurvilinearState curvState{
+          std::move(parameters), Jacobian::Identity(), state.pathAccumulated};
       return curvState;
     }
 
-    void update(State& /*state*/, const BoundParameters& /*pars*/) const {}
+    void
+    update(State& /*state*/, const BoundParameters& /*pars*/) const {}
 
-    void update(State& /*state*/, const Vector3D& /*uposition*/,
-                const Vector3D& /*udirection*/, double /*up*/,
-                double /*time*/) const {}
+    void
+    update(
+        State& /*state*/,
+        const Vector3D& /*uposition*/,
+        const Vector3D& /*udirection*/,
+        double /*up*/,
+        double /*time*/) const {}
 
-    void covarianceTransport(State& /*state*/,
-                             bool /*reinitialize = false*/) const {}
+    void
+    covarianceTransport(State& /*state*/, bool /*reinitialize = false*/) const {
+    }
 
-    void covarianceTransport(State& /*unused*/, const Surface& /*surface*/,
-                             bool /*reinitialize = false*/) const {}
+    void
+    covarianceTransport(
+        State& /*unused*/,
+        const Surface& /*surface*/,
+        bool /*reinitialize = false*/) const {}
 
-    Vector3D getField(State& /*state*/, const Vector3D& /*pos*/) const {
+    Vector3D
+    getField(State& /*state*/, const Vector3D& /*pos*/) const {
       // get the field from the cell
       return Vector3D(0., 0., 0.);
     }
   };
 
-  static_assert(StepperConcept<Stepper>,
-                "Dummy stepper does not fulfill concept");
+  static_assert(
+      StepperConcept<Stepper>,
+      "Dummy stepper does not fulfill concept");
 
   /// emulate the options template
   struct Options {
@@ -188,7 +222,8 @@ struct PropagatorState {
 };
 
 template <typename stepper_state_t>
-void step(stepper_state_t& sstate) {
+void
+step(stepper_state_t& sstate) {
   // update the cache position
   sstate.pos = sstate.pos + sstate.stepSize * sstate.dir;
   // create navigation parameters
@@ -239,8 +274,8 @@ BOOST_AUTO_TEST_CASE(Navigator_methods) {
   // Check that the currentVolume is set
   BOOST_CHECK_NE(state.navigation.currentVolume, nullptr);
   // Check that the currentVolume is the startVolume
-  BOOST_CHECK_EQUAL(state.navigation.currentVolume,
-                    state.navigation.startVolume);
+  BOOST_CHECK_EQUAL(
+      state.navigation.currentVolume, state.navigation.startVolume);
   // Check that the currentSurface is reset to:
   BOOST_CHECK_EQUAL(state.navigation.currentSurface, nullptr);
   // No layer has been found
@@ -250,14 +285,14 @@ BOOST_AUTO_TEST_CASE(Navigator_methods) {
   // A layer has been found
   BOOST_CHECK_EQUAL(state.navigation.navLayers.size(), 1);
   // The iterator should points to the begin
-  BOOST_CHECK(state.navigation.navLayerIter ==
-              state.navigation.navLayers.begin());
+  BOOST_CHECK(
+      state.navigation.navLayerIter == state.navigation.navLayers.begin());
   // Cache the beam pipe radius
   double beamPipeRadius =
       perp(state.navigation.navLayerIter->intersection.position);
   // step size has been updated
-  CHECK_CLOSE_ABS(state.stepping.stepSize, beamPipeRadius,
-                  s_onSurfaceTolerance);
+  CHECK_CLOSE_ABS(
+      state.stepping.stepSize, beamPipeRadius, s_onSurfaceTolerance);
   if (debug) {
     std::cout << "<<< Test 1a >>> initialize at "
               << toString(state.stepping.pos) << std::endl;
@@ -273,8 +308,8 @@ BOOST_AUTO_TEST_CASE(Navigator_methods) {
   // STATUS
   navigator.status(state, stepper);
   // Check that the currentVolume is the still startVolume
-  BOOST_CHECK_EQUAL(state.navigation.currentVolume,
-                    state.navigation.startVolume);
+  BOOST_CHECK_EQUAL(
+      state.navigation.currentVolume, state.navigation.startVolume);
   // The layer number has not changed
   BOOST_CHECK_EQUAL(state.navigation.navLayers.size(), 1);
   // The iterator still points to the begin

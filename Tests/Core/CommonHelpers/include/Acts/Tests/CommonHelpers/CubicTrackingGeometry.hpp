@@ -57,7 +57,8 @@ struct CubicTrackingGeometry {
   }
 
   /// Call operator to build the standard cubic tracking geometry
-  std::shared_ptr<const TrackingGeometry> operator()() {
+  std::shared_ptr<const TrackingGeometry>
+  operator()() {
     using namespace UnitLiterals;
 
     // Set translation vectors
@@ -78,7 +79,9 @@ struct CubicTrackingGeometry {
       trafo.translation() = translations[i];
       // Create the detector element
       auto detElement = std::make_unique<const DetectorElementStub>(
-          std::make_shared<const Transform3D>(trafo), rBounds, 1._um,
+          std::make_shared<const Transform3D>(trafo),
+          rBounds,
+          1._um,
           surfaceMaterial);
       // And remember the surface
       surfaces[i] = detElement->surface().getSharedPtr();
@@ -94,8 +97,11 @@ struct CubicTrackingGeometry {
 
       std::unique_ptr<SurfaceArray> surArray(new SurfaceArray(surfaces[i]));
 
-      layers[i] = PlaneLayer::create(std::make_shared<const Transform3D>(trafo),
-                                     rBounds, std::move(surArray), 1._mm);
+      layers[i] = PlaneLayer::create(
+          std::make_shared<const Transform3D>(trafo),
+          rBounds,
+          std::move(surArray),
+          1._mm);
 
       auto mutableSurface = const_cast<Surface*>(surfaces[i].get());
       mutableSurface->associateLayer(*layers[i]);
@@ -116,12 +122,20 @@ struct CubicTrackingGeometry {
     layVec.push_back(layers[0]);
     layVec.push_back(layers[1]);
     std::unique_ptr<const LayerArray> layArr1(layArrCreator.layerArray(
-        geoContext, layVec, -2_m - 1._mm, -1._m + 1._mm, BinningType::arbitrary,
+        geoContext,
+        layVec,
+        -2_m - 1._mm,
+        -1._m + 1._mm,
+        BinningType::arbitrary,
         BinningValue::binX));
 
     auto trackVolume1 = TrackingVolume::create(
-        std::make_shared<const Transform3D>(trafoVol1), boundsVol, nullptr,
-        std::move(layArr1), nullptr, "Volume 1");
+        std::make_shared<const Transform3D>(trafoVol1),
+        boundsVol,
+        nullptr,
+        std::move(layArr1),
+        nullptr,
+        "Volume 1");
     trackVolume1->sign(GeometrySignature::Global);
 
     // Build volume for surfaces with positive x-values
@@ -131,23 +145,35 @@ struct CubicTrackingGeometry {
     layVec.clear();
     for (i = 2; i < 6; i++)
       layVec.push_back(layers[i]);
-    std::unique_ptr<const LayerArray> layArr2(
-        layArrCreator.layerArray(geoContext, layVec, 1._m - 2._mm, 2._m + 2._mm,
-                                 BinningType::arbitrary, BinningValue::binX));
+    std::unique_ptr<const LayerArray> layArr2(layArrCreator.layerArray(
+        geoContext,
+        layVec,
+        1._m - 2._mm,
+        2._m + 2._mm,
+        BinningType::arbitrary,
+        BinningValue::binX));
 
     auto trackVolume2 = TrackingVolume::create(
-        std::make_shared<const Transform3D>(trafoVol2), boundsVol, nullptr,
-        std::move(layArr2), nullptr, "Volume 2");
+        std::make_shared<const Transform3D>(trafoVol2),
+        boundsVol,
+        nullptr,
+        std::move(layArr2),
+        nullptr,
+        "Volume 2");
 
     trackVolume2->sign(GeometrySignature::Global);
 
     // Glue volumes
     trackVolume2->glueTrackingVolume(
-        geoContext, BoundarySurfaceFace::negativeFaceYZ, trackVolume1,
+        geoContext,
+        BoundarySurfaceFace::negativeFaceYZ,
+        trackVolume1,
         BoundarySurfaceFace::positiveFaceYZ);
 
     trackVolume1->glueTrackingVolume(
-        geoContext, BoundarySurfaceFace::positiveFaceYZ, trackVolume2,
+        geoContext,
+        BoundarySurfaceFace::positiveFaceYZ,
+        trackVolume2,
         BoundarySurfaceFace::negativeFaceYZ);
 
     // Build world volume
@@ -170,9 +196,11 @@ struct CubicTrackingGeometry {
     std::shared_ptr<const TrackingVolumeArray> trVolArr(
         new BinnedArrayXD<TrackingVolumePtr>(tapVec, std::move(bu)));
 
-    MutableTrackingVolumePtr mtvpWorld(
-        TrackingVolume::create(std::make_shared<const Transform3D>(trafoWorld),
-                               worldVol, trVolArr, "World"));
+    MutableTrackingVolumePtr mtvpWorld(TrackingVolume::create(
+        std::make_shared<const Transform3D>(trafoWorld),
+        worldVol,
+        trVolArr,
+        "World"));
 
     mtvpWorld->sign(GeometrySignature::Global);
 

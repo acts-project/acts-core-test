@@ -59,20 +59,29 @@ struct Stepper {
   ///                 the magnetic field cell is used (and potentially
   ///                 updated)
   /// @param [in] pos is the field position
-  Vector3D getField(SteppingState& /*unused*/,
-                    const Vector3D& /*unused*/) const {
+  Vector3D
+  getField(SteppingState& /*unused*/, const Vector3D& /*unused*/) const {
     // get the field from the cell
     return field;
   }
 
   /// Access method - position
-  Vector3D position(const SteppingState& state) const { return state.pos; }
+  Vector3D
+  position(const SteppingState& state) const {
+    return state.pos;
+  }
 
   /// Access method - direction
-  Vector3D direction(const SteppingState& state) const { return state.dir; }
+  Vector3D
+  direction(const SteppingState& state) const {
+    return state.dir;
+  }
 
   /// Access method - momentum
-  double momentum(const SteppingState& state) const { return state.p; }
+  double
+  momentum(const SteppingState& state) const {
+    return state.p;
+  }
 };
 
 /// @brief mockup of navigation state
@@ -108,11 +117,14 @@ BOOST_DATA_TEST_CASE(
     bdata::random(
         (bdata::seed = 21,
          bdata::distribution = std::uniform_real_distribution<>(-M_PI, M_PI))) ^
-        bdata::random((bdata::seed = 22,
-                       bdata::distribution =
-                           std::uniform_real_distribution<>(-M_PI, M_PI))) ^
+        bdata::random(
+            (bdata::seed = 22,
+             bdata::distribution =
+                 std::uniform_real_distribution<>(-M_PI, M_PI))) ^
         bdata::xrange(1),
-    phi, deltaPhi, index) {
+    phi,
+    deltaPhi,
+    index) {
   (void)index;
   (void)deltaPhi;
 
@@ -144,20 +156,27 @@ const int skip = 0;
 // stops where expected
 BOOST_DATA_TEST_CASE(
     propagator_loop_protection_test,
-    bdata::random((bdata::seed = 20,
-                   bdata::distribution =
-                       std::uniform_real_distribution<>(0.5_GeV, 10_GeV))) ^
-        bdata::random((bdata::seed = 21,
-                       bdata::distribution =
-                           std::uniform_real_distribution<>(-M_PI, M_PI))) ^
-        bdata::random((bdata::seed = 22,
-                       bdata::distribution =
-                           std::uniform_real_distribution<>(1.0, M_PI - 1.0))) ^
+    bdata::random(
+        (bdata::seed = 20,
+         bdata::distribution =
+             std::uniform_real_distribution<>(0.5_GeV, 10_GeV))) ^
+        bdata::random(
+            (bdata::seed = 21,
+             bdata::distribution =
+                 std::uniform_real_distribution<>(-M_PI, M_PI))) ^
+        bdata::random(
+            (bdata::seed = 22,
+             bdata::distribution =
+                 std::uniform_real_distribution<>(1.0, M_PI - 1.0))) ^
         bdata::random(
             (bdata::seed = 23,
              bdata::distribution = std::uniform_int_distribution<>(0, 1))) ^
         bdata::xrange(ntests),
-    pT, phi, theta, charge, index) {
+    pT,
+    phi,
+    theta,
+    charge,
+    index) {
   if (index < skip) {
     return;
   }

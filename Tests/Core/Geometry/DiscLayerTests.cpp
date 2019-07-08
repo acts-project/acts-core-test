@@ -73,8 +73,8 @@ BOOST_AUTO_TEST_CASE(DiscLayerConstruction) {
   auto adPtr = ad.get();
   auto pDiscLayerWithApproachDescriptor =
       DiscLayer::create(pTransform, pDisc, nullptr, thickness, std::move(ad));
-  BOOST_CHECK_EQUAL(pDiscLayerWithApproachDescriptor->approachDescriptor(),
-                    adPtr);
+  BOOST_CHECK_EQUAL(
+      pDiscLayerWithApproachDescriptor->approachDescriptor(), adPtr);
   // with the layerType specified...
   auto pDiscLayerWithLayerType = DiscLayer::create(
       pTransform, pDisc, nullptr, thickness, std::move(ad), LayerType::passive);
@@ -89,8 +89,9 @@ BOOST_AUTO_TEST_CASE(DiscLayerProperties /*, *utf::expected_failures(1)*/) {
   auto pDisc = std::make_shared<const RadialBounds>(minRad, maxRad);
   auto pDiscLayer = DiscLayer::create(pTransform, pDisc);
   // auto planeSurface = pDiscLayer->surfaceRepresentation();
-  BOOST_CHECK_EQUAL(pDiscLayer->surfaceRepresentation().name(),
-                    std::string("Acts::DiscSurface"));
+  BOOST_CHECK_EQUAL(
+      pDiscLayer->surfaceRepresentation().name(),
+      std::string("Acts::DiscSurface"));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

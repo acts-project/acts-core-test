@@ -20,8 +20,9 @@ namespace Acts {
 template <typename T = double>
 class ObjHelper : public IVisualization {
  public:
-  static_assert(std::is_same_v<T, double> || std::is_same_v<T, float>,
-                "Use either double or float");
+  static_assert(
+      std::is_same_v<T, double> || std::is_same_v<T, float>,
+      "Use either double or float");
 
   /**
    * Stored value type, should be double or float
@@ -41,8 +42,9 @@ class ObjHelper : public IVisualization {
   /**
    * @copydoc Acts::IVisualization::vertex()
    */
-  void vertex(const Vector3D& vtx,
-              IVisualization::color_type color = {0, 0, 0}) override {
+  void
+  vertex(const Vector3D& vtx, IVisualization::color_type color = {0, 0, 0})
+      override {
     (void)color;  // suppress unused warning
     m_vertices.push_back(vtx.template cast<value_type>());
   }
@@ -51,8 +53,11 @@ class ObjHelper : public IVisualization {
    * @copydoc Acts::IVisualization::line()
    * @note This function ist not implemented for the OBJ format.
    */
-  void line(const Vector3D& /*a*/, const Vector3D& /*b*/,
-            IVisualization::color_type color = {0, 0, 0}) override {
+  void
+  line(
+      const Vector3D& /*a*/,
+      const Vector3D& /*b*/,
+      IVisualization::color_type color = {0, 0, 0}) override {
     (void)color;  // suppress unused warning
     // not implemented
     throw std::runtime_error("Line not implemented for OBJ");
@@ -61,8 +66,10 @@ class ObjHelper : public IVisualization {
   /**
    * @copydoc Acts::IVisualization::face()
    */
-  void face(const std::vector<Vector3D>& vtxs,
-            IVisualization::color_type color = {0, 0, 0}) override {
+  void
+  face(
+      const std::vector<Vector3D>& vtxs,
+      IVisualization::color_type color = {0, 0, 0}) override {
     (void)color;  // suppress unused warning
     face_type idxs;
     idxs.reserve(vtxs.size());
@@ -76,7 +83,8 @@ class ObjHelper : public IVisualization {
   /**
    * @copydoc Acts::IVisualization::write()
    */
-  void write(std::ostream& os) const override {
+  void
+  write(std::ostream& os) const override {
     for (const vertex_type& vtx : m_vertices) {
       os << "v " << vtx.x() << " " << vtx.y() << " " << vtx.z() << "\n";
     }
@@ -93,7 +101,8 @@ class ObjHelper : public IVisualization {
   /**
    * @copydoc Acts::IVisualization::clear()
    */
-  void clear() override {
+  void
+  clear() override {
     m_vertices.clear();
     m_faces.clear();
   }

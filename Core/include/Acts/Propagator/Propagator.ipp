@@ -8,7 +8,8 @@
 
 template <typename S, typename N>
 template <typename result_t, typename propagator_state_t>
-auto Acts::Propagator<S, N>::propagate_impl(propagator_state_t& state) const
+auto
+Acts::Propagator<S, N>::propagate_impl(propagator_state_t& state) const
     -> Result<result_t> {
   result_t result;
 
@@ -81,11 +82,15 @@ auto Acts::Propagator<S, N>::propagate_impl(propagator_state_t& state) const
 }
 
 template <typename S, typename N>
-template <typename parameters_t, typename action_list_t,
-          typename aborter_list_t,
-          template <typename, typename> class propagator_options_t,
-          typename path_aborter_t>
-auto Acts::Propagator<S, N>::propagate(
+template <
+    typename parameters_t,
+    typename action_list_t,
+    typename aborter_list_t,
+    template <typename, typename>
+    class propagator_options_t,
+    typename path_aborter_t>
+auto
+Acts::Propagator<S, N>::propagate(
     const parameters_t& start,
     const propagator_options_t<action_list_t, aborter_list_t>& options) const
     -> Result<action_list_t_result_t<
@@ -98,8 +103,9 @@ auto Acts::Propagator<S, N>::propagate(
   // Type of the full propagation result, including output from actions
   using ResultType = action_list_t_result_t<ReturnParameterType, action_list_t>;
 
-  static_assert(std::is_copy_constructible<ReturnParameterType>::value,
-                "return track parameter type must be copy-constructible");
+  static_assert(
+      std::is_copy_constructible<ReturnParameterType>::value,
+      "return track parameter type must be copy-constructible");
 
   // Initialize the propagation result object
 
@@ -115,8 +121,11 @@ auto Acts::Propagator<S, N>::propagate(
   StateType state(start, eOptions);
 
   static_assert(
-      concept ::has_method<const S, Result<double>, concept ::Stepper::step_t,
-                           StateType&>,
+      concept ::has_method<
+          const S,
+          Result<double>,
+          concept ::Stepper::step_t,
+          StateType&>,
       "Step method of the Stepper is not compatible with the propagator "
       "state");
 
@@ -148,12 +157,19 @@ auto Acts::Propagator<S, N>::propagate(
 }
 
 template <typename S, typename N>
-template <typename parameters_t, typename surface_t, typename action_list_t,
-          typename aborter_list_t,
-          template <typename, typename> class propagator_options_t,
-          typename target_aborter_t, typename path_aborter_t>
-auto Acts::Propagator<S, N>::propagate(
-    const parameters_t& start, const surface_t& target,
+template <
+    typename parameters_t,
+    typename surface_t,
+    typename action_list_t,
+    typename aborter_list_t,
+    template <typename, typename>
+    class propagator_options_t,
+    typename target_aborter_t,
+    typename path_aborter_t>
+auto
+Acts::Propagator<S, N>::propagate(
+    const parameters_t& start,
+    const surface_t& target,
     const propagator_options_t<action_list_t, aborter_list_t>& options) const
     -> Result<action_list_t_result_t<
         typename S::template return_parameter_type<parameters_t, surface_t>,
@@ -181,8 +197,11 @@ auto Acts::Propagator<S, N>::propagate(
   state.navigation.targetSurface = &target;
 
   static_assert(
-      concept ::has_method<const S, Result<double>, concept ::Stepper::step_t,
-                           StateType&>,
+      concept ::has_method<
+          const S,
+          Result<double>,
+          concept ::Stepper::step_t,
+          StateType&>,
       "Step method of the Stepper is not compatible with the propagator "
       "state");
 
@@ -215,7 +234,8 @@ auto Acts::Propagator<S, N>::propagate(
 
 template <typename S, typename N>
 template <typename propagator_state_t>
-void Acts::Propagator<S, N>::debugLog(
+void
+Acts::Propagator<S, N>::debugLog(
     propagator_state_t& state,
     const std::function<std::string()>& logAction) const {
   if (state.options.debug) {

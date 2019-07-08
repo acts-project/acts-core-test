@@ -40,17 +40,20 @@ class Vertex {
   /// @param position Vertex position
   /// @param covariance Position covariance matrix
   /// @param tracks Vector of tracks associated with the vertex
-  Vertex(const Vector3D& position, const ActsSymMatrixD<3>& covariance,
-         std::vector<TrackAtVertex<input_track_t>>& tracks);
+  Vertex(
+      const Vector3D& position,
+      const ActsSymMatrixD<3>& covariance,
+      std::vector<TrackAtVertex<input_track_t>>& tracks);
 
   /// @brief Vertex constructor
   ///
   /// @param position Full vertex position
   /// @param covariance 4x4 covariance matrix
   /// @param tracks Vector of tracks associated with the vertex
-  Vertex(const SpacePointVector& position,
-         const SpacePointSymMatrix& covariance,
-         std::vector<TrackAtVertex<input_track_t>>& tracks);
+  Vertex(
+      const SpacePointVector& position,
+      const SpacePointSymMatrix& covariance,
+      std::vector<TrackAtVertex<input_track_t>>& tracks);
 
   /// @return Returns 3-position
   Vector3D position() const;

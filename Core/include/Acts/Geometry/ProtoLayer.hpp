@@ -52,8 +52,9 @@ struct ProtoLayer {
   ///
   /// @param gctx The current geometry context object, e.g. alignment
   /// @param surfaces The vector of surfaces to consider
-  ProtoLayer(const GeometryContext& gctx,
-             const std::vector<const Surface*>& surfaces);
+  ProtoLayer(
+      const GeometryContext& gctx,
+      const std::vector<const Surface*>& surfaces);
 
   /// Constructor
   ///
@@ -63,8 +64,9 @@ struct ProtoLayer {
   ///
   /// @param gctx The current geometry context object, e.g. alignment
   /// @param surfaces The vector of surfaces to consider
-  ProtoLayer(const GeometryContext& gctx,
-             const std::vector<std::shared_ptr<const Surface>>& surfaces);
+  ProtoLayer(
+      const GeometryContext& gctx,
+      const std::vector<std::shared_ptr<const Surface>>& surfaces);
 
   // normal empty constructor
   ProtoLayer() = default;
@@ -84,7 +86,8 @@ struct ProtoLayer {
   ///
   /// @param gctx The current geometry context object, e.g. alignment
   /// @param surfaces The surfaces to build this protolayer out of
-  void measure(const GeometryContext& gctx,
-               const std::vector<const Surface*>& surfaces);
+  void measure(
+      const GeometryContext& gctx,
+      const std::vector<const Surface*>& surfaces);
 };
 }  // namespace Acts

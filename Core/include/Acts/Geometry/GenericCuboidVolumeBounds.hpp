@@ -63,9 +63,10 @@ class GenericCuboidVolumeBounds : public VolumeBounds {
    * @param entity Entity to associate this bounding box with
    * @return Constructed bounding box
    */
-  Volume::BoundingBox boundingBox(const Transform3D* trf = nullptr,
-                                  const Vector3D& envelope = {0, 0, 0},
-                                  const Volume* entity = nullptr) const final;
+  Volume::BoundingBox boundingBox(
+      const Transform3D* trf = nullptr,
+      const Vector3D& envelope = {0, 0, 0},
+      const Volume* entity = nullptr) const final;
 
   ///
   /// @param sl is the output stream to be written into
@@ -76,8 +77,9 @@ class GenericCuboidVolumeBounds : public VolumeBounds {
    * @param helper The visualizatin helper
    * @param transform Optional transformation matrix
    */
-  void draw(IVisualization& helper,
-            const Transform3D& transform = Transform3D::Identity()) const;
+  void draw(
+      IVisualization& helper,
+      const Transform3D& transform = Transform3D::Identity()) const;
 
  private:
   std::array<Vector3D, 8> m_vertices;

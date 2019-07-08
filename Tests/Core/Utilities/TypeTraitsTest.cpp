@@ -30,15 +30,24 @@ METHOD_TRAIT(foo_method_t, foo);
 METHOD_TRAIT(bar_method_t, bar);
 
 struct E {
-  int bar(const double&) { return 5; }
+  int
+  bar(const double&) {
+    return 5;
+  }
 };
 
 struct E2 {
-  int bar(const double&) const { return 5; }
+  int
+  bar(const double&) const {
+    return 5;
+  }
 };
 
 class E3 {
-  int bar(const double&) { return 5; }
+  int
+  bar(const double&) {
+    return 5;
+  }
 };
 
 BOOST_AUTO_TEST_CASE(TypeTraitsMethods) {
@@ -57,8 +66,8 @@ BOOST_AUTO_TEST_CASE(TypeTraitsMethods) {
   // E does not have method const method with correct signature otherwise
   // This test ensures a non-const method does not qualify for a
   // check for a method on the const type
-  static_assert(!has_method<const E, int, bar_method_t, const double&>,
-                "failed");
+  static_assert(
+      !has_method<const E, int, bar_method_t, const double&>, "failed");
   // E does not have a foo method
   static_assert(!has_method<E, int, foo_method_t, const double&>, "failed");
 
@@ -69,8 +78,8 @@ BOOST_AUTO_TEST_CASE(TypeTraitsMethods) {
   // requirement
   static_assert(!has_method<E2, int, bar_method_t, const double&>, "failed");
   // E2 has method of signature int bar(const double&) const
-  static_assert(has_method<const E2, int, bar_method_t, const double&>,
-                "failed");
+  static_assert(
+      has_method<const E2, int, bar_method_t, const double&>, "failed");
   // E2 does not have method taking non-ref const double
   static_assert(!has_method<E2, int, bar_method_t, const double>, "failed");
   // E2 does not have method taking non-const ref double
@@ -78,11 +87,11 @@ BOOST_AUTO_TEST_CASE(TypeTraitsMethods) {
   // E2 does not have method taking plain double
   static_assert(!has_method<E2, int, bar_method_t, double>, "failed");
   // E2 does not have method with char return type
-  static_assert(!has_method<const E2, char, bar_method_t, const double&>,
-                "failed");
+  static_assert(
+      !has_method<const E2, char, bar_method_t, const double&>, "failed");
   // E2 does not have foo method
-  static_assert(!has_method<const E2, int, foo_method_t, const double&>,
-                "failed");
+  static_assert(
+      !has_method<const E2, int, foo_method_t, const double&>, "failed");
 
   // E3 does have a method like int bar(const double&) but is private
   static_assert(!has_method<E3, int, bar_method_t, const double&>, "failed");
@@ -181,11 +190,12 @@ using meta_t = typename T::template meta<void, void>;
 
 // combine it into a concept
 template <typename T>
-constexpr bool SomeConcept =
-    require<has_method<T, double, foo_method_t, double, int>,
-            has_method<const T, bool, bar_method_t, double&&>,
-            has_member<T, member_t, bool>, exists<nested_t, T>,
-            exists<meta_t, T>>;
+constexpr bool SomeConcept = require<
+    has_method<T, double, foo_method_t, double, int>,
+    has_method<const T, bool, bar_method_t, double&&>,
+    has_member<T, member_t, bool>,
+    exists<nested_t, T>,
+    exists<meta_t, T>>;
 
 struct A {
   bool member;
@@ -195,9 +205,15 @@ struct A {
   template <typename U, typename V>
   struct meta {};
 
-  double foo(double, int) { return 5; }
+  double
+  foo(double, int) {
+    return 5;
+  }
 
-  bool bar(double&&) const { return true; }
+  bool
+  bar(double&&) const {
+    return true;
+  }
 };
 
 struct A2 {
@@ -208,23 +224,38 @@ struct A2 {
   template <typename U>
   struct meta {};
 
-  double foo(double, int) { return 5; }
+  double
+  foo(double, int) {
+    return 5;
+  }
 
-  bool bar(double&&) const { return true; }
+  bool
+  bar(double&&) const {
+    return true;
+  }
 };
 
 struct B {
   bool different;
 
-  int foo(double) { return 5; }
+  int
+  foo(double) {
+    return 5;
+  }
 };
 
 struct C {
-  double foo(int) { return 5; }
+  double
+  foo(int) {
+    return 5;
+  }
 };
 
 struct D {
-  double bar(double) { return 5; }
+  double
+  bar(double) {
+    return 5;
+  }
 };
 
 BOOST_AUTO_TEST_CASE(TypeTraitsConcepts) {

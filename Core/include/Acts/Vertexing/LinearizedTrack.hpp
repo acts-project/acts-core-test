@@ -44,13 +44,15 @@ struct LinearizedTrack {
 
   LinearizedTrack() = default;
 
-  LinearizedTrack(const BoundVector& paramsAtPCA,
-                  const BoundSymMatrix& parCovarianceAtPCA,
-                  const SpacePointVector& linPoint,
-                  const SpacePointToBoundMatrix& posJacobian,
-                  const ActsMatrixD<BoundParsDim, 3>& momJacobian,
-                  const SpacePointVector& position, const Vector3D& momentum,
-                  const BoundVector& constTerm)
+  LinearizedTrack(
+      const BoundVector& paramsAtPCA,
+      const BoundSymMatrix& parCovarianceAtPCA,
+      const SpacePointVector& linPoint,
+      const SpacePointToBoundMatrix& posJacobian,
+      const ActsMatrixD<BoundParsDim, 3>& momJacobian,
+      const SpacePointVector& position,
+      const Vector3D& momentum,
+      const BoundVector& constTerm)
       : parametersAtPCA(paramsAtPCA),
         covarianceAtPCA(parCovarianceAtPCA),
         linearizationPoint(linPoint),

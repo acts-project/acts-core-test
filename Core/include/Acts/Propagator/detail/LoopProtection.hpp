@@ -23,7 +23,8 @@ struct LoopProtection {
   /// @param [in,out] state State object provided for the call
   /// @param [in] stepper Stepper used
   template <typename state_t, typename stepper_t>
-  void operator()(state_t& state, const stepper_t& stepper) const {
+  void
+  operator()(state_t& state, const stepper_t& stepper) const {
     // Estimate the loop protection limit
     if (state.options.loopProtection) {
       // Get the field at the start position

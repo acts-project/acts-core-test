@@ -23,7 +23,8 @@ Acts::AccumulatedSurfaceMaterial::AccumulatedSurfaceMaterial(double splitFactor)
 
 // Binned Material constructor with split factor
 Acts::AccumulatedSurfaceMaterial::AccumulatedSurfaceMaterial(
-    const BinUtility& binUtility, double splitFactor)
+    const BinUtility& binUtility,
+    double splitFactor)
     : m_binUtility(binUtility), m_splitFactor(splitFactor) {
   size_t bins0 = m_binUtility.bins(0);
   size_t bins1 = m_binUtility.bins(1);
@@ -32,8 +33,11 @@ Acts::AccumulatedSurfaceMaterial::AccumulatedSurfaceMaterial(
 }
 
 // Assign a material properites object
-std::array<size_t, 3> Acts::AccumulatedSurfaceMaterial::accumulate(
-    const Vector2D& lp, const MaterialProperties& mp, double pathCorrection) {
+std::array<size_t, 3>
+Acts::AccumulatedSurfaceMaterial::accumulate(
+    const Vector2D& lp,
+    const MaterialProperties& mp,
+    double pathCorrection) {
   if (m_binUtility.dimensions() == 0) {
     m_accumulatedMaterial[0][0].accumulate(mp, pathCorrection);
     return {0, 0, 0};
@@ -45,8 +49,11 @@ std::array<size_t, 3> Acts::AccumulatedSurfaceMaterial::accumulate(
 }
 
 // Assign a material properites object
-std::array<size_t, 3> Acts::AccumulatedSurfaceMaterial::accumulate(
-    const Vector3D& gp, const MaterialProperties& mp, double pathCorrection) {
+std::array<size_t, 3>
+Acts::AccumulatedSurfaceMaterial::accumulate(
+    const Vector3D& gp,
+    const MaterialProperties& mp,
+    double pathCorrection) {
   if (m_binUtility.dimensions() == 0) {
     m_accumulatedMaterial[0][0].accumulate(mp, pathCorrection);
     return {0, 0, 0};
@@ -57,7 +64,8 @@ std::array<size_t, 3> Acts::AccumulatedSurfaceMaterial::accumulate(
 }
 
 // Average the information accumulated during one event
-void Acts::AccumulatedSurfaceMaterial::trackAverage(
+void
+Acts::AccumulatedSurfaceMaterial::trackAverage(
     const std::vector<std::array<size_t, 3>>& trackBins) {
   // The touched bins are known, so you can access them directly
   if (not trackBins.empty()) {

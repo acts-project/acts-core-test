@@ -45,10 +45,11 @@ struct KalmanFitterOptions {
   /// @param mctx The magnetic context for this fit
   /// @param cctx The calibration context for this fit
   /// @param rSurface The reference surface for the fit to be expressed at
-  KalmanFitterOptions(std::reference_wrapper<const GeometryContext> gctx,
-                      std::reference_wrapper<const MagneticFieldContext> mctx,
-                      std::reference_wrapper<const CalibrationContext> cctx,
-                      const Surface* rSurface = nullptr)
+  KalmanFitterOptions(
+      std::reference_wrapper<const GeometryContext> gctx,
+      std::reference_wrapper<const MagneticFieldContext> mctx,
+      std::reference_wrapper<const CalibrationContext> cctx,
+      const Surface* rSurface = nullptr)
       : geoContext(gctx),
         magFieldContext(mctx),
         calibrationContext(cctx),
@@ -100,11 +101,13 @@ struct KalmanFitterOptions {
 /// set of track states into a given track/track particle class
 ///
 /// The void components are provided mainly for unit testing.
-template <typename propagator_t, typename updator_t = VoidKalmanUpdator,
-          typename smoother_t = VoidKalmanSmoother,
-          typename calibrator_t = VoidMeasurementCalibrator,
-          typename input_converter_t = VoidKalmanComponents,
-          typename output_converter_t = VoidKalmanComponents>
+template <
+    typename propagator_t,
+    typename updator_t = VoidKalmanUpdator,
+    typename smoother_t = VoidKalmanSmoother,
+    typename calibrator_t = VoidMeasurementCalibrator,
+    typename input_converter_t = VoidKalmanComponents,
+    typename output_converter_t = VoidKalmanComponents>
 class KalmanFitter {
  public:
   /// Shorthand definition
@@ -114,11 +117,12 @@ class KalmanFitter {
   KalmanFitter() = delete;
 
   /// Constructor from arguments
-  KalmanFitter(propagator_t pPropagator,
-               std::unique_ptr<const Logger> logger =
-                   getDefaultLogger("KalmanFilter", Logging::INFO),
-               input_converter_t pInputCnv = input_converter_t(),
-               output_converter_t pOutputCnv = output_converter_t())
+  KalmanFitter(
+      propagator_t pPropagator,
+      std::unique_ptr<const Logger> logger =
+          getDefaultLogger("KalmanFilter", Logging::INFO),
+      input_converter_t pInputCnv = input_converter_t(),
+      output_converter_t pOutputCnv = output_converter_t())
       : m_propagator(std::move(pPropagator)),
         m_inputConverter(std::move(pInputCnv)),
         m_outputConverter(std::move(pOutputCnv)),
@@ -140,13 +144,17 @@ class KalmanFitter {
   /// the fit.
   ///
   /// @return the output as an output track
-  template <typename source_link_t, typename start_parameters_t,
-            typename parameters_t = BoundParameters>
-  auto fit(const std::vector<source_link_t>& sourcelinks,
-           const start_parameters_t& sParameters,
-           const KalmanFitterOptions& kfOptions) const {
-    static_assert(SourceLinkConcept<source_link_t>,
-                  "Source link does not fulfill SourceLinkConcept");
+  template <
+      typename source_link_t,
+      typename start_parameters_t,
+      typename parameters_t = BoundParameters>
+  auto
+  fit(const std::vector<source_link_t>& sourcelinks,
+      const start_parameters_t& sParameters,
+      const KalmanFitterOptions& kfOptions) const {
+    static_assert(
+        SourceLinkConcept<source_link_t>,
+        "Source link does not fulfill SourceLinkConcept");
 
     // To be able to find measurements later, we put them into a map
     // We need to copy input SourceLinks anyways, so the map can own them.
@@ -195,7 +203,10 @@ class KalmanFitter {
   output_converter_t m_outputConverter;
 
   /// Logger getter to support macros
-  const Logger& logger() const { return *m_logger; }
+  const Logger&
+  logger() const {
+    return *m_logger;
+  }
 
   /// Owned logging instance
   std::unique_ptr<const Logger> m_logger;
@@ -213,8 +224,10 @@ class KalmanFitter {
     using TrackStateType = TrackState<source_link_t, parameters_t>;
 
     /// Explicit constructor with updator and calibrator
-    Actor(updator_t pUpdator = updator_t(), smoother_t pSmoother = smoother_t(),
-          calibrator_t pCalibrator = calibrator_t())
+    Actor(
+        updator_t pUpdator = updator_t(),
+        smoother_t pSmoother = smoother_t(),
+        calibrator_t pCalibrator = calibrator_t())
         : m_updator(std::move(pUpdator)),
           m_smoother(std::move(pSmoother)),
           m_calibrator(std::move(pCalibrator)) {}
@@ -260,8 +273,11 @@ class KalmanFitter {
     /// @param stepper The stepper in use
     /// @param result is the mutable result state object
     template <typename propagator_state_t, typename stepper_t>
-    void operator()(propagator_state_t& state, const stepper_t& stepper,
-                    result_type& result) const {
+    void
+    operator()(
+        propagator_state_t& state,
+        const stepper_t& stepper,
+        result_type& result) const {
       // Initialization:
       // - Only when track states are not set
       if (!result.initialized) {
@@ -316,8 +332,11 @@ class KalmanFitter {
     /// @param stepper The stepper in use
     /// @param result is the mutable result state object
     template <typename propagator_state_t, typename stepper_t>
-    void initialize(propagator_state_t& /*state*/, const stepper_t& /*stepper*/,
-                    result_type& /*result*/) const {}
+    void
+    initialize(
+        propagator_state_t& /*state*/,
+        const stepper_t& /*stepper*/,
+        result_type& /*result*/) const {}
 
     /// @brief Kalman actor operation : update
     ///
@@ -329,22 +348,29 @@ class KalmanFitter {
     /// @param stepper The stepper in use
     /// @param result The mutable result state object
     template <typename propagator_state_t, typename stepper_t>
-    void filter(const Surface* surface, propagator_state_t& state,
-                const stepper_t& stepper, result_type& result) const {
+    void
+    filter(
+        const Surface* surface,
+        propagator_state_t& state,
+        const stepper_t& stepper,
+        result_type& result) const {
       // Try to find the surface in the measurement surfaces
       auto sourcelink_it = inputMeasurements.find(surface);
       if (sourcelink_it != inputMeasurements.end()) {
         // Screen output message
-        ACTS_VERBOSE("Measurement surface " << surface->geoID().toString()
-                                            << " detected.");
+        ACTS_VERBOSE(
+            "Measurement surface " << surface->geoID().toString()
+                                   << " detected.");
 
         // create track state on the vector from sourcelink
         result.fittedStates.emplace_back(sourcelink_it->second);
         TrackStateType& trackState = result.fittedStates.back();
 
         // Transport & bind the state to the current surface
-        std::tuple<BoundParameters,
-                   typename TrackStateType::Parameters::CovMatrix_t, double>
+        std::tuple<
+            BoundParameters,
+            typename TrackStateType::Parameters::CovMatrix_t,
+            double>
             boundState = stepper.boundState(state.stepping, *surface, true);
         // Fill the track state
         trackState.parameter.predicted = std::get<0>(boundState);
@@ -354,8 +380,9 @@ class KalmanFitter {
         // If the update is successful, set covariance and
         if (m_updator(state.geoContext, trackState)) {
           // Update the stepping state
-          ACTS_VERBOSE("Filtering step successful, updated parameters are : \n"
-                       << *trackState.parameter.filtered);
+          ACTS_VERBOSE(
+              "Filtering step successful, updated parameters are : \n"
+              << *trackState.parameter.filtered);
           // update stepping state using filtered parameters
           // after kalman update
           stepper.update(state.stepping, *trackState.parameter.filtered);
@@ -378,18 +405,22 @@ class KalmanFitter {
     /// @param stepper The stepper in use
     /// @param result is the mutable result state object
     template <typename propagator_state_t, typename stepper_t>
-    void finalize(propagator_state_t& state, const stepper_t& stepper,
-                  result_type& result) const {
+    void
+    finalize(
+        propagator_state_t& state,
+        const stepper_t& stepper,
+        result_type& result) const {
       // Remember you smoothed the track states
       result.smoothed = true;
 
       // Sort the TrackStates according to the path length
       TrackStatePathLengthSorter plSorter;
-      std::sort(result.fittedStates.begin(), result.fittedStates.end(),
-                plSorter);
+      std::sort(
+          result.fittedStates.begin(), result.fittedStates.end(), plSorter);
       // Screen output for debugging
-      ACTS_VERBOSE("Apply smoothing on " << result.fittedStates.size()
-                                         << " filtered track states.");
+      ACTS_VERBOSE(
+          "Apply smoothing on " << result.fittedStates.size()
+                                << " filtered track states.");
       // Smooth the track states and obtain the last smoothed track parameters
       const auto& smoothedPars =
           m_smoother(state.geoContext, result.fittedStates);
@@ -411,7 +442,10 @@ class KalmanFitter {
     const Logger* m_logger;
 
     /// Getter for the logger, to support logging macros
-    const Logger& logger() const { return *m_logger; }
+    const Logger&
+    logger() const {
+      return *m_logger;
+    }
 
     /// The Kalman updator
     updator_t m_updator;

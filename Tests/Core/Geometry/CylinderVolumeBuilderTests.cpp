@@ -22,12 +22,18 @@ namespace Acts {
 namespace Test {
 
 /// Unit test for testing the wraps() function of the CylinderVolumeBuilder
-BOOST_DATA_TEST_CASE(CylinderVolumeBuilder_wraps,
-                     bdata::random(-11., -15.) ^ bdata::random(11., 15.) ^
-                         bdata::random(-10., 10.) ^ bdata::random(0., 4.) ^
-                         bdata::random(11., 15.) ^ bdata::random(10., 15.) ^
-                         bdata::xrange(100),
-                     left, right, central, inner, outer, length, index) {
+BOOST_DATA_TEST_CASE(
+    CylinderVolumeBuilder_wraps,
+    bdata::random(-11., -15.) ^ bdata::random(11., 15.) ^
+        bdata::random(-10., 10.) ^ bdata::random(0., 4.) ^
+        bdata::random(11., 15.) ^ bdata::random(10., 15.) ^ bdata::xrange(100),
+    left,
+    right,
+    central,
+    inner,
+    outer,
+    length,
+    index) {
   (void)index;
   // inner volume
   VolumeConfig innerConfig;
@@ -98,12 +104,18 @@ BOOST_DATA_TEST_CASE(CylinderVolumeBuilder_wraps,
 
 /// Unit test for testing the contains(), containsInR() and containsInZ()
 /// function of the CylinderVolumeBuilder
-BOOST_DATA_TEST_CASE(CylinderVolumeBuilder_containes,
-                     bdata::random(-11., -15.) ^ bdata::random(11., 15.) ^
-                         bdata::random(-10., 10.) ^ bdata::random(0., 4.) ^
-                         bdata::random(10., 15.) ^ bdata::random(10., 15.) ^
-                         bdata::xrange(100),
-                     left, right, central, inner, outer, length, index) {
+BOOST_DATA_TEST_CASE(
+    CylinderVolumeBuilder_containes,
+    bdata::random(-11., -15.) ^ bdata::random(11., 15.) ^
+        bdata::random(-10., 10.) ^ bdata::random(0., 4.) ^
+        bdata::random(10., 15.) ^ bdata::random(10., 15.) ^ bdata::xrange(100),
+    left,
+    right,
+    central,
+    inner,
+    outer,
+    length,
+    index) {
   (void)index;
   // inner volume
   VolumeConfig innerConfig;
@@ -185,10 +197,12 @@ BOOST_DATA_TEST_CASE(CylinderVolumeBuilder_containes,
 
 /// Unit test for testing the coverlapsInR()
 /// function of the CylinderVolumeBuilder
-BOOST_DATA_TEST_CASE(CylinderVolumeBuilder_overlapsInR,
-                     bdata::random(0., 4.) ^ bdata::random(11., 15.) ^
-                         bdata::xrange(100),
-                     inner, outer, index) {
+BOOST_DATA_TEST_CASE(
+    CylinderVolumeBuilder_overlapsInR,
+    bdata::random(0., 4.) ^ bdata::random(11., 15.) ^ bdata::xrange(100),
+    inner,
+    outer,
+    index) {
   (void)index;
   // reference volume
   VolumeConfig Config0;
@@ -247,10 +261,14 @@ BOOST_DATA_TEST_CASE(CylinderVolumeBuilder_overlapsInR,
 
 /// Unit test for testing the coverlapsInZ()
 /// function of the CylinderVolumeBuilder
-BOOST_DATA_TEST_CASE(CylinderVolumeBuilder_overlapsInZ,
-                     bdata::random(-11., -15.) ^ bdata::random(11., 15.) ^
-                         bdata::random(0., 4.) ^ bdata::xrange(100),
-                     left, right, inner, index) {
+BOOST_DATA_TEST_CASE(
+    CylinderVolumeBuilder_overlapsInZ,
+    bdata::random(-11., -15.) ^ bdata::random(11., 15.) ^
+        bdata::random(0., 4.) ^ bdata::xrange(100),
+    left,
+    right,
+    inner,
+    index) {
   (void)index;
   // inner volume
   VolumeConfig Config0;

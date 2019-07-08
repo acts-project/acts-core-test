@@ -10,24 +10,27 @@
 // DiscSurface.ipp, Acts project
 ///////////////////////////////////////////////////////////////////
 
-inline const Vector2D DiscSurface::localPolarToCartesian(
-    const Vector2D& lpolar) const {
-  return Vector2D(lpolar[eLOC_R] * cos(lpolar[eLOC_PHI]),
-                  lpolar[eLOC_R] * sin(lpolar[eLOC_PHI]));
+inline const Vector2D
+DiscSurface::localPolarToCartesian(const Vector2D& lpolar) const {
+  return Vector2D(
+      lpolar[eLOC_R] * cos(lpolar[eLOC_PHI]),
+      lpolar[eLOC_R] * sin(lpolar[eLOC_PHI]));
 }
 
-inline const Vector2D DiscSurface::localCartesianToPolar(
-    const Vector2D& lcart) const {
+inline const Vector2D
+DiscSurface::localCartesianToPolar(const Vector2D& lcart) const {
   return Vector2D(
       sqrt(lcart[eLOC_X] * lcart[eLOC_X] + lcart[eLOC_Y] * lcart[eLOC_Y]),
       atan2(lcart[eLOC_Y], lcart[eLOC_X]));
 }
 
-inline void DiscSurface::initJacobianToGlobal(const GeometryContext& gctx,
-                                              BoundToFreeMatrix& jacobian,
-                                              const Vector3D& gpos,
-                                              const Vector3D& dir,
-                                              const BoundVector& pars) const {
+inline void
+DiscSurface::initJacobianToGlobal(
+    const GeometryContext& gctx,
+    BoundToFreeMatrix& jacobian,
+    const Vector3D& gpos,
+    const Vector3D& dir,
+    const BoundVector& pars) const {
   // The trigonometry required to convert the direction to spherical
   // coordinates and then compute the sines and cosines again can be
   // surprisingly expensive from a performance point of view.
@@ -69,9 +72,12 @@ inline void DiscSurface::initJacobianToGlobal(const GeometryContext& gctx,
   jacobian(7, eQOP) = 1;
 }
 
-inline const RotationMatrix3D DiscSurface::initJacobianToLocal(
-    const GeometryContext& gctx, FreeToBoundMatrix& jacobian,
-    const Vector3D& gpos, const Vector3D& dir) const {
+inline const RotationMatrix3D
+DiscSurface::initJacobianToLocal(
+    const GeometryContext& gctx,
+    FreeToBoundMatrix& jacobian,
+    const Vector3D& gpos,
+    const Vector3D& dir) const {
   using VectorHelpers::perp;
   using VectorHelpers::phi;
   // Optimized trigonometry on the propagation direction
@@ -106,9 +112,13 @@ inline const RotationMatrix3D DiscSurface::initJacobianToLocal(
   return rframeT;
 }
 
-inline Intersection DiscSurface::intersectionEstimate(
-    const GeometryContext& gctx, const Vector3D& gpos, const Vector3D& gdir,
-    NavigationDirection navDir, const BoundaryCheck& bcheck,
+inline Intersection
+DiscSurface::intersectionEstimate(
+    const GeometryContext& gctx,
+    const Vector3D& gpos,
+    const Vector3D& gdir,
+    NavigationDirection navDir,
+    const BoundaryCheck& bcheck,
     CorrFnc correct) const {
   // minimize the call to transform()
   const auto& tMatrix = transform(gctx).matrix();
@@ -147,21 +157,26 @@ inline Intersection DiscSurface::intersectionEstimate(
   return Intersection(solution, path, valid);
 }
 
-inline const Vector3D DiscSurface::normal(const GeometryContext& gctx,
-                                          const Vector2D& /*unused*/) const {
+inline const Vector3D
+DiscSurface::normal(const GeometryContext& gctx, const Vector2D& /*unused*/)
+    const {
   // fast access via tranform matrix (and not rotation())
   const auto& tMatrix = transform(gctx).matrix();
   return Vector3D(tMatrix(0, 2), tMatrix(1, 2), tMatrix(2, 2));
 }
 
-inline const Vector3D DiscSurface::binningPosition(
-    const GeometryContext& gctx, BinningValue /*unused*/) const {
+inline const Vector3D
+DiscSurface::binningPosition(
+    const GeometryContext& gctx,
+    BinningValue /*unused*/) const {
   return center(gctx);
 }
 
-inline double DiscSurface::pathCorrection(const GeometryContext& gctx,
-                                          const Vector3D& pos,
-                                          const Vector3D& mom) const {
+inline double
+DiscSurface::pathCorrection(
+    const GeometryContext& gctx,
+    const Vector3D& pos,
+    const Vector3D& mom) const {
   /// we can ignore the global position here
   return 1. / std::abs(Surface::normal(gctx, pos).dot(mom.normalized()));
 }

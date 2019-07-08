@@ -44,12 +44,16 @@ namespace Acts {
 namespace IntegrationTest {
 
 // Create a mapper from the a text file
-InterpolatedBFieldMap::FieldMapper<3, 3> readFieldXYZ(
-    std::function<size_t(std::array<size_t, 3> binsXYZ,
-                         std::array<size_t, 3> nBinsXYZ)>
+InterpolatedBFieldMap::FieldMapper<3, 3>
+readFieldXYZ(
+    std::function<
+        size_t(std::array<size_t, 3> binsXYZ, std::array<size_t, 3> nBinsXYZ)>
         localToGlobalBin,
-    std::string fieldMapFile = "Field.txt", double lengthUnit = 1.,
-    double BFieldUnit = 1., size_t nPoints = 100000, bool firstOctant = false) {
+    std::string fieldMapFile = "Field.txt",
+    double lengthUnit = 1.,
+    double BFieldUnit = 1.,
+    size_t nPoints = 100000,
+    bool firstOctant = false) {
   /// [1] Read in field map file
   // Grid position points in x, y and z
   std::vector<double> xPos;
@@ -81,13 +85,20 @@ InterpolatedBFieldMap::FieldMapper<3, 3> readFieldXYZ(
   }
   map_file.close();
 
-  return fieldMapperXYZ(localToGlobalBin, xPos, yPos, zPos, bField, lengthUnit,
-                        BFieldUnit, firstOctant);
+  return fieldMapperXYZ(
+      localToGlobalBin,
+      xPos,
+      yPos,
+      zPos,
+      bField,
+      lengthUnit,
+      BFieldUnit,
+      firstOctant);
 }
 
 // create a bfiel map from a mapper
-std::shared_ptr<const InterpolatedBFieldMap> atlasBField(
-    std::string fieldMapFile = "Field.txt") {
+std::shared_ptr<const InterpolatedBFieldMap>
+atlasBField(std::string fieldMapFile = "Field.txt") {
   // Declare the mapper
   concept ::AnyFieldLookup<> mapper;
   double lengthUnit = UnitConstants::mm;
@@ -95,10 +106,13 @@ std::shared_ptr<const InterpolatedBFieldMap> atlasBField(
   // read the field x,y,z from a text file
   mapper = readFieldXYZ(
       [](std::array<size_t, 3> binsXYZ, std::array<size_t, 3> nBinsXYZ) {
-        return (binsXYZ.at(0) * (nBinsXYZ.at(1) * nBinsXYZ.at(2)) +
-                binsXYZ.at(1) * nBinsXYZ.at(2) + binsXYZ.at(2));
+        return (
+            binsXYZ.at(0) * (nBinsXYZ.at(1) * nBinsXYZ.at(2)) +
+            binsXYZ.at(1) * nBinsXYZ.at(2) + binsXYZ.at(2));
       },
-      fieldMapFile, lengthUnit, BFieldUnit);
+      fieldMapFile,
+      lengthUnit,
+      BFieldUnit);
   // create the config
   InterpolatedBFieldMap::Config config;
   config.scale = 1.;

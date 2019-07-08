@@ -39,9 +39,10 @@ template <typename external_spacepoint_t>
 template <typename spacepoint_iterator_t>
 Acts::SeedfinderState<external_spacepoint_t>
 Seedfinder<external_spacepoint_t>::initState(
-    spacepoint_iterator_t spBegin, spacepoint_iterator_t spEnd,
-    std::function<Acts::Vector2D(const external_spacepoint_t&, float, float,
-                                 float)>
+    spacepoint_iterator_t spBegin,
+    spacepoint_iterator_t spEnd,
+    std::function<
+        Acts::Vector2D(const external_spacepoint_t&, float, float, float)>
         covTool,
     std::shared_ptr<Acts::IBinFinder<external_spacepoint_t>> bottomBinFinder,
     std::shared_ptr<Acts::IBinFinder<external_spacepoint_t>> topBinFinder)
@@ -134,7 +135,8 @@ Seedfinder<external_spacepoint_t>::initState(
 }
 
 template <typename external_spacepoint_t>
-void Seedfinder<external_spacepoint_t>::createSeedsForRegion(
+void
+Seedfinder<external_spacepoint_t>::createSeedsForRegion(
     SeedfinderStateIterator<external_spacepoint_t> it,
     Acts::SeedfinderState<external_spacepoint_t>& state) const {
   for (size_t spIndex = 0; spIndex < it.currentBin->size(); spIndex++) {
@@ -228,7 +230,8 @@ void Seedfinder<external_spacepoint_t>::createSeedsForRegion(
     std::vector<float> impactParameters;
 
     std::vector<std::pair<
-        float, std::unique_ptr<const InternalSeed<external_spacepoint_t>>>>
+        float,
+        std::unique_ptr<const InternalSeed<external_spacepoint_t>>>>
         seedsPerSpM;
     size_t numBotSP = compatBottomSP.size();
     size_t numTopSP = compatTopSP.size();
@@ -338,25 +341,33 @@ void Seedfinder<external_spacepoint_t>::createSeedsForRegion(
       }
       if (!topSpVec.empty()) {
         std::vector<std::pair<
-            float, std::unique_ptr<const InternalSeed<external_spacepoint_t>>>>
+            float,
+            std::unique_ptr<const InternalSeed<external_spacepoint_t>>>>
             sameTrackSeeds;
         sameTrackSeeds = std::move(m_config.seedFilter->filterSeeds_2SpFixed(
-            *compatBottomSP[b], *spM, topSpVec, curvatures, impactParameters,
+            *compatBottomSP[b],
+            *spM,
+            topSpVec,
+            curvatures,
+            impactParameters,
             Zob));
-        seedsPerSpM.insert(seedsPerSpM.end(),
-                           std::make_move_iterator(sameTrackSeeds.begin()),
-                           std::make_move_iterator(sameTrackSeeds.end()));
+        seedsPerSpM.insert(
+            seedsPerSpM.end(),
+            std::make_move_iterator(sameTrackSeeds.begin()),
+            std::make_move_iterator(sameTrackSeeds.end()));
       }
     }
-    m_config.seedFilter->filterSeeds_1SpFixed(seedsPerSpM,
-                                              state.outputVec[it.outputIndex]);
+    m_config.seedFilter->filterSeeds_1SpFixed(
+        seedsPerSpM, state.outputVec[it.outputIndex]);
   }
 }
 
 template <typename external_spacepoint_t>
-void Seedfinder<external_spacepoint_t>::transformCoordinates(
+void
+Seedfinder<external_spacepoint_t>::transformCoordinates(
     std::vector<const InternalSpacePoint<external_spacepoint_t>*>& vec,
-    const InternalSpacePoint<external_spacepoint_t>& spM, bool bottom,
+    const InternalSpacePoint<external_spacepoint_t>& spM,
+    bool bottom,
     std::vector<LinCircle>& linCircleVec) const {
   float xM = spM.x();
   float yM = spM.y();

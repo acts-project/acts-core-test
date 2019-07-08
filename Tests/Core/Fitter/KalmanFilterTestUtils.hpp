@@ -61,8 +61,9 @@ class MyExtrapolator {
 /// dummy class, returns measurement unchanged
 class NoCalibration {
  public:
-  std::unique_ptr<const FitMeas_t> operator()(const FitMeas_t& m,
-                                              const BoundParameters&) const;
+  std::unique_ptr<const FitMeas_t> operator()(
+      const FitMeas_t& m,
+      const BoundParameters&) const;
 };
 
 class CacheGenerator {
@@ -75,8 +76,9 @@ MyExtrapolator::MyExtrapolator(
     : m_exEngine(std::move(exEngine)){};
 
 /// wrapper around extrapolate call to exEngine, setting the right flags
-MyCache MyExtrapolator::operator()(const FitMeas_t& m,
-                                   const TrackParameters& tp) const {
+MyCache
+MyExtrapolator::operator()(const FitMeas_t& m, const TrackParameters& tp)
+    const {
   auto exCell = std::make_unique<ExtrapolationCell<TrackParameters>>(tp);
   exCell->addConfigurationMode(ExtrapolationMode::CollectJacobians);
   (*exCell).pathLimit = 500;
@@ -93,13 +95,13 @@ MyCache MyExtrapolator::operator()(const FitMeas_t& m,
   return c;
 };
 
-std::unique_ptr<const FitMeas_t> NoCalibration::operator()(
-    const FitMeas_t& m, const BoundParameters&) const {
+std::unique_ptr<const FitMeas_t>
+NoCalibration::operator()(const FitMeas_t& m, const BoundParameters&) const {
   return std::make_unique<const FitMeas_t>(m);
 };
 
-std::unique_ptr<KF::Step<long int>> CacheGenerator::operator()(
-    MyCache m) const {
+std::unique_ptr<KF::Step<long int>>
+CacheGenerator::operator()(MyCache m) const {
   auto step = std::make_unique<KF::Step<long int>>();
   step->setPredictedState(std::move(m.parameters));
   step->setJacobian(std::move(m.jacobian));
@@ -108,8 +110,8 @@ std::unique_ptr<KF::Step<long int>> CacheGenerator::operator()(
 };
 
 /// set up extrapolation
-std::shared_ptr<IExtrapolationEngine> initExtrapolator(
-    const std::shared_ptr<const TrackingGeometry>& geo) {
+std::shared_ptr<IExtrapolationEngine>
+initExtrapolator(const std::shared_ptr<const TrackingGeometry>& geo) {
   auto propConfig = RungeKuttaEngine<>::Config();
   propConfig.fieldService = std::make_shared<ConstantBField>(0, 0, 2_T);
   auto propEngine = std::make_shared<RungeKuttaEngine<>>(propConfig);

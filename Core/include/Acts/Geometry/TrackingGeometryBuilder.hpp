@@ -45,7 +45,8 @@ class TrackingGeometryBuilder : public ITrackingGeometryBuilder {
   struct Config {
     /// The list of tracking volume builders
     std::vector<std::function<std::shared_ptr<TrackingVolume>(
-        const GeometryContext& gctx, const TrackingVolumePtr&,
+        const GeometryContext& gctx,
+        const TrackingVolumePtr&,
         const VolumeBoundsPtr&)>>
         trackingVolumeBuilders;
 
@@ -60,10 +61,10 @@ class TrackingGeometryBuilder : public ITrackingGeometryBuilder {
   ///
   /// @param [in] cgbConfig is the configuration struct for this builder
   /// @param [in] logger logging instance
-  TrackingGeometryBuilder(const Config& cgbConfig,
-                          std::unique_ptr<const Logger> logger =
-                              getDefaultLogger("TrackingGeometryBuilder",
-                                               Logging::INFO));
+  TrackingGeometryBuilder(
+      const Config& cgbConfig,
+      std::unique_ptr<const Logger> logger =
+          getDefaultLogger("TrackingGeometryBuilder", Logging::INFO));
 
   /// Destructor
   ~TrackingGeometryBuilder() override = default;
@@ -94,7 +95,10 @@ class TrackingGeometryBuilder : public ITrackingGeometryBuilder {
   Config m_cfg;
 
   /// Private access method to the logger
-  const Logger& logger() const { return *m_logger; }
+  const Logger&
+  logger() const {
+    return *m_logger;
+  }
 
   /// the logging instance
   std::unique_ptr<const Logger> m_logger;

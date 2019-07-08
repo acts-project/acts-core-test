@@ -222,52 +222,63 @@ class ActsExtension : public IActsExtension {
   std::shared_ptr<const DigitizationModule> m_digitizationModule{nullptr};
 };
 
-inline bool ActsExtension::isBeampipe() const {
+inline bool
+ActsExtension::isBeampipe() const {
   return m_cfg.isBeampipe;
 }
 
-inline bool ActsExtension::isBarrel() const {
+inline bool
+ActsExtension::isBarrel() const {
   return m_cfg.isBarrel;
 }
 
-inline bool ActsExtension::isEndcap() const {
+inline bool
+ActsExtension::isEndcap() const {
   return m_cfg.isEndcap;
 }
 
-inline bool ActsExtension::isLayer() const {
+inline bool
+ActsExtension::isLayer() const {
   return m_cfg.isLayer;
 }
 
-inline bool ActsExtension::hasSupportMaterial() const {
+inline bool
+ActsExtension::hasSupportMaterial() const {
   if ((m_cfg.materialBins1 > 0) || (m_cfg.materialBins2 > 0)) {
     return true;
   }
   return false;
 }
 
-inline std::pair<size_t, size_t> ActsExtension::materialBins() const {
-  std::pair<size_t, size_t> materialBins(m_cfg.materialBins1,
-                                         m_cfg.materialBins2);
+inline std::pair<size_t, size_t>
+ActsExtension::materialBins() const {
+  std::pair<size_t, size_t> materialBins(
+      m_cfg.materialBins1, m_cfg.materialBins2);
   return (materialBins);
 }
 
-inline Acts::LayerMaterialPos ActsExtension::layerMaterialPosition() const {
+inline Acts::LayerMaterialPos
+ActsExtension::layerMaterialPosition() const {
   return m_cfg.layerMaterialPosition;
 }
 
-inline const std::string ActsExtension::axes() const {
+inline const std::string
+ActsExtension::axes() const {
   return m_cfg.axes;
 }
 
-inline bool ActsExtension::buildEnvelope() const {
+inline bool
+ActsExtension::buildEnvelope() const {
   return ((m_cfg.envelopeR > 0.) && (m_cfg.envelopeZ > 0.));
 }
 
-inline double ActsExtension::envelopeR() const {
+inline double
+ActsExtension::envelopeR() const {
   return (m_cfg.envelopeR);
 }
 
-inline double ActsExtension::envelopeZ() const {
+inline double
+ActsExtension::envelopeZ() const {
   return (m_cfg.envelopeR);
 }
 

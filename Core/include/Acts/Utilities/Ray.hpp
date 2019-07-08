@@ -36,15 +36,24 @@ class Ray {
 
   /// Getter for the origin
   /// @return The origin
-  const vertex_type& origin() const { return m_origin; }
+  const vertex_type&
+  origin() const {
+    return m_origin;
+  }
 
   /// Getter for the direction
   /// @return The direction
-  const vertex_type& dir() const { return m_dir; }
+  const vertex_type&
+  dir() const {
+    return m_dir;
+  }
 
   /// Getter for the element wise inverse of the direction.
   /// @return The element wise inverse.
-  const vertex_array_type& idir() const { return m_idir; }
+  const vertex_array_type&
+  idir() const {
+    return m_idir;
+  }
 
   /// Transforms this ray using a given transform and returns a new instance
   /// @param trf The transform to apply
@@ -73,7 +82,8 @@ class Ray {
 /// @param ray The ray to write to @p os
 /// @return The outstream given in @p os
 template <typename T, size_t D>
-std::ostream& operator<<(std::ostream& os, const Ray<T, D>& ray) {
+std::ostream&
+operator<<(std::ostream& os, const Ray<T, D>& ray) {
   ray.dump(os);
   return os;
 }

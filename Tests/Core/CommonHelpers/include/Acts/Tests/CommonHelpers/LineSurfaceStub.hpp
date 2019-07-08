@@ -20,18 +20,22 @@ class LineSurfaceStub : public LineSurface {
  public:
   LineSurfaceStub() = delete;
   //
-  LineSurfaceStub(std::shared_ptr<const Transform3D> htrans, double radius,
-                  double halfz)
+  LineSurfaceStub(
+      std::shared_ptr<const Transform3D> htrans,
+      double radius,
+      double halfz)
       : GeometryObject(), LineSurface(htrans, radius, halfz) { /* nop */
   }
   //
-  LineSurfaceStub(std::shared_ptr<const Transform3D> htrans,
-                  std::shared_ptr<const LineBounds> lbounds = nullptr)
+  LineSurfaceStub(
+      std::shared_ptr<const Transform3D> htrans,
+      std::shared_ptr<const LineBounds> lbounds = nullptr)
       : GeometryObject(), LineSurface(htrans, lbounds) { /*nop */
   }
   //
-  LineSurfaceStub(std::shared_ptr<const LineBounds> lbounds,
-                  const DetectorElementBase& detelement)
+  LineSurfaceStub(
+      std::shared_ptr<const LineBounds> lbounds,
+      const DetectorElementBase& detelement)
       : GeometryObject(), LineSurface(lbounds, detelement) { /* nop */
   }
 
@@ -40,27 +44,36 @@ class LineSurfaceStub : public LineSurface {
       : GeometryObject(), LineSurface(ls) { /* nop */
   }
   //
-  LineSurfaceStub(const GeometryContext& gctx, const LineSurfaceStub& ls,
-                  const Transform3D& t)
+  LineSurfaceStub(
+      const GeometryContext& gctx,
+      const LineSurfaceStub& ls,
+      const Transform3D& t)
       : GeometryObject(), LineSurface(gctx, ls, t) { /* nop */
   }
   /// pure virtual functions of baseclass implemented here
-  std::shared_ptr<LineSurfaceStub> clone(const GeometryContext& /*gctx*/,
-                                         const Transform3D& /*unused*/) const {
+  std::shared_ptr<LineSurfaceStub>
+  clone(const GeometryContext& /*gctx*/, const Transform3D& /*unused*/) const {
     return nullptr;
   }
 
   /// Return method for the Surface type to avoid dynamic casts
-  SurfaceType type() const final { return Surface::Straw; }
+  SurfaceType
+  type() const final {
+    return Surface::Straw;
+  }
 
   /// Simply return true to show object exists and is callable
-  bool constructedOk() const { return true; }
+  bool
+  constructedOk() const {
+    return true;
+  }
 
   using Surface::normal;
 
  private:
-  Surface* clone_impl(const GeometryContext& /*gctx*/,
-                      const Transform3D& /*unused*/) const {
+  Surface*
+  clone_impl(const GeometryContext& /*gctx*/, const Transform3D& /*unused*/)
+      const {
     return nullptr;
   }
 };

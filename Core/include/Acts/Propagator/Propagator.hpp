@@ -62,8 +62,9 @@ struct PropagatorResult : private detail::Extendable<result_list...> {
 /// @tparam aborter_list_t List of abort conditions tested after each
 ///    propagation step using the current propagation and stepper state
 ///
-template <typename action_list_t = ActionList<>,
-          typename aborter_list_t = AbortList<>>
+template <
+    typename action_list_t = ActionList<>,
+    typename aborter_list_t = AbortList<>>
 struct PropagatorOptions {
   /// Delete default contructor
   PropagatorOptions() = delete;
@@ -73,8 +74,9 @@ struct PropagatorOptions {
       const PropagatorOptions<action_list_t, aborter_list_t>& po) = default;
 
   /// PropagatorOptions with context
-  PropagatorOptions(std::reference_wrapper<const GeometryContext> gctx,
-                    std::reference_wrapper<const MagneticFieldContext> mctx)
+  PropagatorOptions(
+      std::reference_wrapper<const GeometryContext> gctx,
+      std::reference_wrapper<const MagneticFieldContext> mctx)
       : geoContext(gctx), magFieldContext(mctx) {}
 
   /// @brief Expand the Options with extended aborters
@@ -83,8 +85,8 @@ struct PropagatorOptions {
   ///
   /// @param aborters The new aborter list to be used (internally)
   template <typename extended_aborter_list_t>
-  PropagatorOptions<action_list_t, extended_aborter_list_t> extend(
-      extended_aborter_list_t aborters) const {
+  PropagatorOptions<action_list_t, extended_aborter_list_t>
+  extend(extended_aborter_list_t aborters) const {
     PropagatorOptions<action_list_t, extended_aborter_list_t> eoptions(
         geoContext, magFieldContext);
     // Copy the options over
@@ -197,10 +199,12 @@ class Propagator final {
   using BoundState = std::tuple<BoundParameters, Jacobian, double>;
   using CurvilinearState = std::tuple<CurvilinearParameters, Jacobian, double>;
 
-  static_assert(StepperStateConcept<typename stepper_t::State>,
-                "Stepper does not fulfill stepper concept.");
-  static_assert(StepperConcept<stepper_t>,
-                "Stepper does not fulfill stepper concept.");
+  static_assert(
+      StepperStateConcept<typename stepper_t::State>,
+      "Stepper does not fulfill stepper concept.");
+  static_assert(
+      StepperConcept<stepper_t>,
+      "Stepper does not fulfill stepper concept.");
 
  public:
   /// Type of the stepper in use for public scope
@@ -238,8 +242,12 @@ class Propagator final {
     template <typename parameters_t>
     State(const parameters_t& start, const propagator_options_t& topts)
         : options(topts),
-          stepping(topts.geoContext, topts.magFieldContext, start,
-                   topts.direction, topts.maxStepSize),
+          stepping(
+              topts.geoContext,
+              topts.magFieldContext,
+              start,
+              topts.direction,
+              topts.maxStepSize),
           geoContext(topts.geoContext) {
       // Setting the start surface
       navigation.startSurface = &start.referenceSurface();
@@ -331,10 +339,13 @@ class Propagator final {
   /// @return Propagation result containing the propagation status, final
   ///         track parameters, and output of actions (if they produce any)
   ///
-  template <typename parameters_t, typename action_list_t,
-            typename aborter_list_t,
-            template <typename, typename> class propagator_options_t,
-            typename path_aborter_t = detail::PathLimitReached>
+  template <
+      typename parameters_t,
+      typename action_list_t,
+      typename aborter_list_t,
+      template <typename, typename>
+      class propagator_options_t,
+      typename path_aborter_t = detail::PathLimitReached>
   Result<action_list_t_result_t<
       typename stepper_t::template return_parameter_type<parameters_t>,
       action_list_t>>
@@ -361,17 +372,22 @@ class Propagator final {
   ///
   /// @return Propagation result containing the propagation status, final
   ///         track parameters, and output of actions (if they produce any)
-  template <typename parameters_t, typename surface_t, typename action_list_t,
-            typename aborter_list_t,
-            template <typename, typename> class propagator_options_t,
-            typename target_aborter_t = detail::SurfaceReached,
-            typename path_aborter_t = detail::PathLimitReached>
-  Result<
-      action_list_t_result_t<typename stepper_t::template return_parameter_type<
-                                 parameters_t, surface_t>,
-                             action_list_t>>
+  template <
+      typename parameters_t,
+      typename surface_t,
+      typename action_list_t,
+      typename aborter_list_t,
+      template <typename, typename>
+      class propagator_options_t,
+      typename target_aborter_t = detail::SurfaceReached,
+      typename path_aborter_t = detail::PathLimitReached>
+  Result<action_list_t_result_t<
+      typename stepper_t::
+          template return_parameter_type<parameters_t, surface_t>,
+      action_list_t>>
   propagate(
-      const parameters_t& start, const surface_t& target,
+      const parameters_t& start,
+      const surface_t& target,
       const propagator_options_t<action_list_t, aborter_list_t>& options) const;
 
  private:
@@ -392,8 +408,9 @@ class Propagator final {
   /// @param state the propagator state for the debug flag, prefix/length
   /// @param logAction is a callable function that returns a stremable object
   template <typename propagator_state_t>
-  void debugLog(propagator_state_t& state,
-                const std::function<std::string()>& logAction) const;
+  void debugLog(
+      propagator_state_t& state,
+      const std::function<std::string()>& logAction) const;
 };
 
 }  // namespace Acts

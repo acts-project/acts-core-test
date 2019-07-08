@@ -29,7 +29,8 @@ Acts::TrackingVolume::TrackingVolume()
       m_name("undefined") {}
 
 Acts::TrackingVolume::TrackingVolume(
-    std::shared_ptr<const Transform3D> htrans, VolumeBoundsPtr volbounds,
+    std::shared_ptr<const Transform3D> htrans,
+    VolumeBoundsPtr volbounds,
     const std::shared_ptr<const TrackingVolumeArray>& containedVolumeArray,
     const std::string& volumeName)
     : Volume(std::move(htrans), std::move(volbounds)),
@@ -44,7 +45,8 @@ Acts::TrackingVolume::TrackingVolume(
 
 // constructor for arguments
 Acts::TrackingVolume::TrackingVolume(
-    std::shared_ptr<const Transform3D> htrans, VolumeBoundsPtr volumeBounds,
+    std::shared_ptr<const Transform3D> htrans,
+    VolumeBoundsPtr volumeBounds,
     std::shared_ptr<const IVolumeMaterial> volumeMaterial,
     std::unique_ptr<const LayerArray> staticLayerArray,
     std::shared_ptr<const TrackingVolumeArray> containedVolumeArray,
@@ -60,7 +62,8 @@ Acts::TrackingVolume::TrackingVolume(
 
 // constructor for arguments
 Acts::TrackingVolume::TrackingVolume(
-    std::shared_ptr<const Transform3D> htrans, VolumeBoundsPtr volbounds,
+    std::shared_ptr<const Transform3D> htrans,
+    VolumeBoundsPtr volbounds,
     std::vector<std::unique_ptr<Volume::BoundingBox>> boxStore,
     std::vector<std::unique_ptr<const Volume>> descendants,
     const Volume::BoundingBox* top,
@@ -84,8 +87,10 @@ Acts::TrackingVolume::~TrackingVolume() {
   delete m_glueVolumeDescriptor;
 }
 
-const Acts::TrackingVolume* Acts::TrackingVolume::lowestTrackingVolume(
-    const GeometryContext& /*gctx*/, const Vector3D& gp) const {
+const Acts::TrackingVolume*
+Acts::TrackingVolume::lowestTrackingVolume(
+    const GeometryContext& /*gctx*/,
+    const Vector3D& gp) const {
   // confined static volumes - highest hierarchy
   if (m_confinedVolumes) {
     return (m_confinedVolumes->object(gp).get());
@@ -95,8 +100,8 @@ const Acts::TrackingVolume* Acts::TrackingVolume::lowestTrackingVolume(
   return this;
 }
 
-void Acts::TrackingVolume::sign(GeometrySignature geosign,
-                                GeometryType geotype) {
+void
+Acts::TrackingVolume::sign(GeometrySignature geosign, GeometryType geotype) {
   // never overwrite what is already signed, that's a crime
   if (m_geometrySignature == Unsigned) {
     m_geometrySignature = geosign;
@@ -119,7 +124,8 @@ Acts::TrackingVolume::boundarySurfaces() const {
   return (m_boundarySurfaces);
 }
 
-void Acts::TrackingVolume::createBoundarySurfaces() {
+void
+Acts::TrackingVolume::createBoundarySurfaces() {
   // transform Surfaces To BoundarySurfaces
   std::vector<std::shared_ptr<const Surface>> surfaces =
       Volume::volumeBounds().decomposeToSurfaces(m_transform.get());
@@ -137,15 +143,17 @@ void Acts::TrackingVolume::createBoundarySurfaces() {
     TrackingVolume* outer = (inner) != nullptr ? nullptr : this;
     // create the boundary surface
     m_boundarySurfaces.push_back(
-        std::make_shared<const BoundarySurfaceT<TrackingVolume>>(std::move(sf),
-                                                                 inner, outer));
+        std::make_shared<const BoundarySurfaceT<TrackingVolume>>(
+            std::move(sf), inner, outer));
     // increase the counter
     ++sfCounter;
   }
 }
 
-void Acts::TrackingVolume::glueTrackingVolume(
-    const GeometryContext& gctx, BoundarySurfaceFace bsfMine,
+void
+Acts::TrackingVolume::glueTrackingVolume(
+    const GeometryContext& gctx,
+    BoundarySurfaceFace bsfMine,
     const std::shared_ptr<TrackingVolume>& neighbor,
     BoundarySurfaceFace bsfNeighbor) {
   // find the connection of the two tracking volumes : binR returns the center
@@ -176,8 +184,10 @@ void Acts::TrackingVolume::glueTrackingVolume(
   }
 }
 
-void Acts::TrackingVolume::glueTrackingVolumes(
-    const GeometryContext& gctx, BoundarySurfaceFace bsfMine,
+void
+Acts::TrackingVolume::glueTrackingVolumes(
+    const GeometryContext& gctx,
+    BoundarySurfaceFace bsfMine,
     const std::shared_ptr<TrackingVolumeArray>& neighbors,
     BoundarySurfaceFace bsfNeighbor) {
   // find the connection of the two tracking volumes : binR returns the center
@@ -214,26 +224,29 @@ void Acts::TrackingVolume::glueTrackingVolumes(
   }
 }
 
-void Acts::TrackingVolume::updateBoundarySurface(
+void
+Acts::TrackingVolume::updateBoundarySurface(
     BoundarySurfaceFace bsf,
     std::shared_ptr<const BoundarySurfaceT<TrackingVolume>> bs) {
   m_boundarySurfaces.at(bsf) = std::move(bs);
 }
 
-void Acts::TrackingVolume::registerGlueVolumeDescriptor(
-    GlueVolumesDescriptor* gvd) {
+void
+Acts::TrackingVolume::registerGlueVolumeDescriptor(GlueVolumesDescriptor* gvd) {
   delete m_glueVolumeDescriptor;
   m_glueVolumeDescriptor = gvd;
 }
 
-Acts::GlueVolumesDescriptor& Acts::TrackingVolume::glueVolumesDescriptor() {
+Acts::GlueVolumesDescriptor&
+Acts::TrackingVolume::glueVolumesDescriptor() {
   if (m_glueVolumeDescriptor == nullptr) {
     m_glueVolumeDescriptor = new GlueVolumesDescriptor;
   }
   return (*m_glueVolumeDescriptor);
 }
 
-void Acts::TrackingVolume::synchronizeLayers(double envelope) const {
+void
+Acts::TrackingVolume::synchronizeLayers(double envelope) const {
   // case a : Layers exist
   // msgstream << MSG::VERBOSE << "  -> synchronizing Layer dimensions of
   // TrackingVolume '" << volumeName() << "'." << endreq;
@@ -267,7 +280,8 @@ void Acts::TrackingVolume::synchronizeLayers(double envelope) const {
   }
 }
 
-void Acts::TrackingVolume::interlinkLayers() {
+void
+Acts::TrackingVolume::interlinkLayers() {
   if (m_confinedLayers) {
     auto& layers = m_confinedLayers->arrayObjects();
 
@@ -297,9 +311,11 @@ void Acts::TrackingVolume::interlinkLayers() {
   }
 }
 
-void Acts::TrackingVolume::closeGeometry(
+void
+Acts::TrackingVolume::closeGeometry(
     const IMaterialDecorator* materialDecorator,
-    std::map<std::string, const TrackingVolume*>& volumeMap, size_t& vol) {
+    std::map<std::string, const TrackingVolume*>& volumeMap,
+    size_t& vol) {
   // insert the volume into the map
   volumeMap[volumeName()] = this;
 
@@ -377,7 +393,8 @@ void Acts::TrackingVolume::closeGeometry(
   }
 }
 
-void Acts::TrackingVolume::visitSurfaces(
+void
+Acts::TrackingVolume::visitSurfaces(
     const std::function<void(const Acts::Surface*)>& visitor) const {
   if (!m_confinedVolumes) {
     // no sub volumes => loop over the confined layers

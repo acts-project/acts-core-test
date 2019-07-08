@@ -31,8 +31,9 @@ class HomogeneousSurfaceMaterial : public ISurfaceMaterial {
   ///
   /// @param full are the full material properties
   /// @param splitFactor is the split for pre/post update
-  HomogeneousSurfaceMaterial(const MaterialProperties& full,
-                             double splitFactor = 1.);
+  HomogeneousSurfaceMaterial(
+      const MaterialProperties& full,
+      double splitFactor = 1.);
 
   /// Copy Constructor
   ///
@@ -86,8 +87,8 @@ class HomogeneousSurfaceMaterial : public ISurfaceMaterial {
   /// @param ib1 The bin at local 1 for retrieving the material
   ///
   /// @note the input parameter is ignored
-  const MaterialProperties& materialProperties(size_t ib0,
-                                               size_t ib1) const final;
+  const MaterialProperties& materialProperties(size_t ib0, size_t ib1)
+      const final;
 
   /// The inherited methods - for materialProperties access
   using ISurfaceMaterial::materialProperties;
@@ -105,22 +106,24 @@ class HomogeneousSurfaceMaterial : public ISurfaceMaterial {
   MaterialProperties m_fullMaterial = MaterialProperties();
 };
 
-inline const MaterialProperties& HomogeneousSurfaceMaterial::materialProperties(
-    const Vector2D& /*lp*/) const {
+inline const MaterialProperties&
+HomogeneousSurfaceMaterial::materialProperties(const Vector2D& /*lp*/) const {
   return (m_fullMaterial);
 }
 
-inline const MaterialProperties& HomogeneousSurfaceMaterial::materialProperties(
-    const Vector3D& /*gp*/) const {
+inline const MaterialProperties&
+HomogeneousSurfaceMaterial::materialProperties(const Vector3D& /*gp*/) const {
   return (m_fullMaterial);
 }
 
-inline const MaterialProperties& HomogeneousSurfaceMaterial::materialProperties(
-    size_t /*ib0*/, size_t /*ib1*/) const {
+inline const MaterialProperties&
+HomogeneousSurfaceMaterial::materialProperties(size_t /*ib0*/, size_t /*ib1*/)
+    const {
   return (m_fullMaterial);
 }
 
-inline bool HomogeneousSurfaceMaterial::operator==(
+inline bool
+HomogeneousSurfaceMaterial::operator==(
     const HomogeneousSurfaceMaterial& hsm) const {
   return (m_fullMaterial == hsm.m_fullMaterial);
 }

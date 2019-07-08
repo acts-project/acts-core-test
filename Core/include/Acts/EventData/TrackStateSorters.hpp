@@ -24,8 +24,10 @@ struct TrackStatePathLengthSorter {
    * @return bool
    */
   template <typename identifier_t, typename parameters_t>
-  bool operator()(const TrackState<identifier_t, parameters_t>& lhs,
-                  const TrackState<identifier_t, parameters_t>& rhs) {
+  bool
+  operator()(
+      const TrackState<identifier_t, parameters_t>& lhs,
+      const TrackState<identifier_t, parameters_t>& rhs) {
     return lhs.parameter.pathLength < rhs.parameter.pathLength;
   }
 };

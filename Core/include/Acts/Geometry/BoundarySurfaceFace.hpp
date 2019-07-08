@@ -63,7 +63,8 @@ enum BoundarySurfaceFace {
 /// @brief specify the inside/outside with respect to the normal vector
 enum BoundaryOrientation { insideVolume = -1, outsideVolume = 1 };
 
-inline std::ostream& operator<<(std::ostream& os, BoundarySurfaceFace& face) {
+inline std::ostream&
+operator<<(std::ostream& os, BoundarySurfaceFace& face) {
   os << "BoundarySurfaceFace::";
 
   switch (face) {

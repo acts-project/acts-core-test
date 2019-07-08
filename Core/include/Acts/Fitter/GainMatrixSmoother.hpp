@@ -27,8 +27,9 @@ class GainMatrixSmoother {
   ///
 
   template <typename track_states_t>
-  boost::optional<parameters_t> operator()(
-      const GeometryContext& gctx, track_states_t& filteredStates) const {
+  boost::optional<parameters_t>
+  operator()(const GeometryContext& gctx, track_states_t& filteredStates)
+      const {
     using namespace boost::adaptors;
 
     using track_state_t = typename track_states_t::value_type;
@@ -82,8 +83,10 @@ class GainMatrixSmoother {
 
       // Create smoothed track parameters
       ts.parameter.smoothed = parameters_t(
-          gctx, std::make_unique<CovMatrix_t>(std::move(smoothedCov)),
-          smoothedPars, ts.referenceSurface().getSharedPtr());
+          gctx,
+          std::make_unique<CovMatrix_t>(std::move(smoothedCov)),
+          smoothedPars,
+          ts.referenceSurface().getSharedPtr());
 
       // Point prev state to current state
       prev_ts = &ts;

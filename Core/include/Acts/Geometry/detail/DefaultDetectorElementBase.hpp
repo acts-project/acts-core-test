@@ -91,7 +91,8 @@ DetectorElementBase::neighbours() const {
   return m_neighbours;
 }
 
-inline void DetectorElementBase::registerBinmembers(
+inline void
+DetectorElementBase::registerBinmembers(
     std::vector<const DetectorElementBase*>& binmembers) {
   for (auto& bmember : binmembers) {
     // only fill if it's not yet registered
@@ -102,7 +103,8 @@ inline void DetectorElementBase::registerBinmembers(
   }
 }
 
-inline void DetectorElementBase::registerNeighbours(
+inline void
+DetectorElementBase::registerNeighbours(
     std::vector<const DetectorElementBase*>& neighbours) {
   for (auto& neighbour : neighbours) {
     // only fill if it's not yet registered

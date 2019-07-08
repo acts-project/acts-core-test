@@ -38,12 +38,13 @@ namespace Test {
 BOOST_AUTO_TEST_CASE(all_of_test) {
   using detail::all_of_v;
 
-  static_assert(not all_of_v<true, true, false>,
-                "all_of_v<true, true, false> failed");
-  static_assert(not all_of_v<false, true, true, false>,
-                "all_of_v<false, true, true, false> failed");
-  static_assert(all_of_v<true, true, true>,
-                "all_of_v<true, true, true> failed");
+  static_assert(
+      not all_of_v<true, true, false>, "all_of_v<true, true, false> failed");
+  static_assert(
+      not all_of_v<false, true, true, false>,
+      "all_of_v<false, true, true, false> failed");
+  static_assert(
+      all_of_v<true, true, true>, "all_of_v<true, true, true> failed");
   static_assert(all_of_v<true>, "all_of_v<true> failed");
   static_assert(not all_of_v<false>, "all_of_v<false> failed");
   static_assert(all_of_v<>, "all_of_v<> failed");
@@ -51,26 +52,37 @@ BOOST_AUTO_TEST_CASE(all_of_test) {
 
 BOOST_AUTO_TEST_CASE(hana_set_union_test) {
   // using first    = typename bm::set<float, int, char, bool>::type;
-  constexpr auto first = hana::make_set(hana::type_c<float>, hana::type_c<int>,
-                                        hana::type_c<char>, hana::type_c<bool>);
+  constexpr auto first = hana::make_set(
+      hana::type_c<float>,
+      hana::type_c<int>,
+      hana::type_c<char>,
+      hana::type_c<bool>);
   // using second   = typename bm::vector<long, int>::type;
   constexpr auto second = hana::make_set(hana::type_c<long>, hana::type_c<int>);
   constexpr auto found = hana::union_(first, second);
   // using found    = typename detail::boost_set_merger_t<first, second>;
   // using expected = typename bm::set<float, int, char, bool, long>::type;
-  constexpr auto expected =
-      hana::make_set(hana::type_c<float>, hana::type_c<int>, hana::type_c<char>,
-                     hana::type_c<bool>, hana::type_c<long>);
+  constexpr auto expected = hana::make_set(
+      hana::type_c<float>,
+      hana::type_c<int>,
+      hana::type_c<char>,
+      hana::type_c<bool>,
+      hana::type_c<long>);
 
   static_assert(found == expected, "union of hana::sets failed");
 }
 
 BOOST_AUTO_TEST_CASE(hana_set_to_tuple_test) {
-  constexpr auto a_set = hana::make_set(hana::type_c<float>, hana::type_c<int>,
-                                        hana::type_c<char>, hana::type_c<bool>);
-  constexpr auto h_tuple =
-      hana::make_tuple(hana::type_c<float>, hana::type_c<int>,
-                       hana::type_c<char>, hana::type_c<bool>);
+  constexpr auto a_set = hana::make_set(
+      hana::type_c<float>,
+      hana::type_c<int>,
+      hana::type_c<char>,
+      hana::type_c<bool>);
+  constexpr auto h_tuple = hana::make_tuple(
+      hana::type_c<float>,
+      hana::type_c<int>,
+      hana::type_c<char>,
+      hana::type_c<bool>);
 
   static_assert(hana::to<hana::tuple_tag>(a_set) == h_tuple, "not equal");
 
@@ -94,8 +106,9 @@ BOOST_AUTO_TEST_CASE(unpack_boost_set_as_template_test) {
 
   using expected = variadic_struct<float, int, char>;
 
-  static_assert(std::is_same<found, expected>::value,
-                "using boost::mpl::set for variadic templates failed");
+  static_assert(
+      std::is_same<found, expected>::value,
+      "using boost::mpl::set for variadic templates failed");
 
   static_assert(
       std::is_same<expected::tuple, std::tuple<float, int, char>>::value,
@@ -131,24 +144,26 @@ struct tuple_helper {
 BOOST_AUTO_TEST_CASE(type_collector_test) {
   // test some predicates
   static_assert(detail::has_result_type_v<traits1>, "Did not find result type");
-  static_assert(detail::has_result_type_v<traits2<false>>,
-                "Did not find result type");
-  static_assert(not detail::has_result_type_v<traits2<true>>,
-                "Did find result type");
+  static_assert(
+      detail::has_result_type_v<traits2<false>>, "Did not find result type");
+  static_assert(
+      not detail::has_result_type_v<traits2<true>>, "Did find result type");
 
   static_assert(detail::has_action_type_v<traits1>, "Did not find action type");
-  static_assert(detail::has_action_type_v<traits2<false>>,
-                "Did not find action type");
-  static_assert(detail::has_action_type_v<traits2<true>>,
-                "Did not find action type");
+  static_assert(
+      detail::has_action_type_v<traits2<false>>, "Did not find action type");
+  static_assert(
+      detail::has_action_type_v<traits2<true>>, "Did not find action type");
 
-  constexpr auto found_results =
-      detail::type_collector_t<detail::result_type_extractor, traits1,
-                               traits2<true>, traits2<false>>;
+  constexpr auto found_results = detail::type_collector_t<
+      detail::result_type_extractor,
+      traits1,
+      traits2<true>,
+      traits2<false>>;
   constexpr auto expected_results =
       hana::make_set(hana::type_c<int>, hana::type_c<bool>);
-  static_assert(found_results == expected_results,
-                "Didn't find expected results");
+  static_assert(
+      found_results == expected_results, "Didn't find expected results");
 
   // check unpack
   using found_results_tuple = decltype(
@@ -158,13 +173,15 @@ BOOST_AUTO_TEST_CASE(type_collector_test) {
       std::is_same<found_results_tuple, expected_results_tuple>::value,
       "Unpacked results tuple not correct");
 
-  constexpr auto found_actions =
-      detail::type_collector_t<detail::action_type_extractor, traits1,
-                               traits2<true>, traits2<false>>;
+  constexpr auto found_actions = detail::type_collector_t<
+      detail::action_type_extractor,
+      traits1,
+      traits2<true>,
+      traits2<false>>;
   constexpr auto expected_actions =
       hana::make_set(hana::type_c<char>, hana::type_c<float>);
-  static_assert(found_actions == expected_actions,
-                "Didn't find expected actions");
+  static_assert(
+      found_actions == expected_actions, "Didn't find expected actions");
 
   // check unpack
   using found_actions_tuple = decltype(
@@ -177,27 +194,28 @@ BOOST_AUTO_TEST_CASE(type_collector_test) {
 
 BOOST_AUTO_TEST_CASE(has_duplicates_test) {
   using detail::has_duplicates_v;
-  static_assert(has_duplicates_v<int, float, char, int>,
-                "has_duplicates_v failed");
-  static_assert(has_duplicates_v<int, int, char, float>,
-                "has_duplicates_v failed");
-  static_assert(has_duplicates_v<int, char, float, float>,
-                "has_duplicates_v failed");
-  static_assert(has_duplicates_v<int, char, char, float>,
-                "has_duplicates_v failed");
-  static_assert(not has_duplicates_v<int, bool, char, float>,
-                "has_duplicates_v failed");
+  static_assert(
+      has_duplicates_v<int, float, char, int>, "has_duplicates_v failed");
+  static_assert(
+      has_duplicates_v<int, int, char, float>, "has_duplicates_v failed");
+  static_assert(
+      has_duplicates_v<int, char, float, float>, "has_duplicates_v failed");
+  static_assert(
+      has_duplicates_v<int, char, char, float>, "has_duplicates_v failed");
+  static_assert(
+      not has_duplicates_v<int, bool, char, float>, "has_duplicates_v failed");
 }
 
 BOOST_AUTO_TEST_CASE(any_of_test) {
   using detail::any_of_v;
 
-  static_assert(any_of_v<true, true, false>,
-                "any_of_v<true, true, false> failed");
-  static_assert(any_of_v<false, true, true, false>,
-                "any_of_v<false, true, true, false> failed");
-  static_assert(any_of_v<true, true, true>,
-                "any_of_v<true, true, true> failed");
+  static_assert(
+      any_of_v<true, true, false>, "any_of_v<true, true, false> failed");
+  static_assert(
+      any_of_v<false, true, true, false>,
+      "any_of_v<false, true, true, false> failed");
+  static_assert(
+      any_of_v<true, true, true>, "any_of_v<true, true, true> failed");
   static_assert(not any_of_v<false, false>, "any_of_v<false, false> failed");
   static_assert(any_of_v<true>, "any_of_v<true> failed");
   static_assert(not any_of_v<false>, "any_of_v<false> failed");

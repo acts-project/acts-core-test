@@ -72,18 +72,20 @@ class IterativeVertexFinder {
     ///
     /// @note Initializes default LinearizedTrackFactory and ZScanVertexFinder
     /// as seed finder
-    Config(const bfield_t& bIn,
-           std::unique_ptr<IVertexFitter<input_track_t, propagator_t>> fitter,
-           const propagator_t& propagatorIn)
+    Config(
+        const bfield_t& bIn,
+        std::unique_ptr<IVertexFitter<input_track_t, propagator_t>> fitter,
+        const propagator_t& propagatorIn)
         : bField(bIn),
           vertexFitter(std::move(fitter)),
           linFactory(
               typename LinearizedTrackFactory<bfield_t, propagator_t>::Config(
                   bField)),
           propagator(propagatorIn),
-          zScanFinderCfg(
-              typename ZScanVertexFinder<bfield_t, BoundParameters,
-                                         propagator_t>::Config(propagator)),
+          zScanFinderCfg(typename ZScanVertexFinder<
+                         bfield_t,
+                         BoundParameters,
+                         propagator_t>::Config(propagator)),
           seedFinder(ZScanVertexFinder<bfield_t, BoundParameters, propagator_t>(
               std::move(zScanFinderCfg))) {}
 
@@ -133,11 +135,13 @@ class IterativeVertexFinder {
   ///
   /// @param cfg Configuration object
   /// @param logger The logging instance
-  template <typename T = input_track_t,
-            std::enable_if_t<std::is_same<T, BoundParameters>::value, int> = 0>
-  IterativeVertexFinder(Config& cfg,
-                        std::unique_ptr<const Logger> logger = getDefaultLogger(
-                            "IterativeVertexFinder", Logging::INFO))
+  template <
+      typename T = input_track_t,
+      std::enable_if_t<std::is_same<T, BoundParameters>::value, int> = 0>
+  IterativeVertexFinder(
+      Config& cfg,
+      std::unique_ptr<const Logger> logger =
+          getDefaultLogger("IterativeVertexFinder", Logging::INFO))
       : m_cfg(std::move(cfg)),
         m_extractParameters([](T params) { return params; }),
         m_logger(std::move(logger)) {}
@@ -147,10 +151,11 @@ class IterativeVertexFinder {
   /// @param cfg Configuration object
   /// @param func Function extracting BoundParameters from input_track_t object
   /// @param logger The logging instance
-  IterativeVertexFinder(Config& cfg,
-                        std::function<BoundParameters(input_track_t)> func,
-                        std::unique_ptr<const Logger> logger = getDefaultLogger(
-                            "IterativeVertexFinder", Logging::INFO))
+  IterativeVertexFinder(
+      Config& cfg,
+      std::function<BoundParameters(input_track_t)> func,
+      std::unique_ptr<const Logger> logger =
+          getDefaultLogger("IterativeVertexFinder", Logging::INFO))
       : m_cfg(std::move(cfg)),
         m_extractParameters(func),
         m_logger(std::move(logger)) {}
@@ -180,7 +185,10 @@ class IterativeVertexFinder {
   std::unique_ptr<const Logger> m_logger;
 
   /// Private access to logging instance
-  const Logger& logger() const { return *m_logger; }
+  const Logger&
+  logger() const {
+    return *m_logger;
+  }
 
   /// @brief Method that calls seed finder to retrieve a vertex seed
   ///
@@ -194,8 +202,9 @@ class IterativeVertexFinder {
   ///
   /// @param perigeesToFit Tracks to be removed from seedTracks
   /// @param seedTracks List to remove tracks from
-  void removeAllTracks(const std::vector<input_track_t>& perigeesToFit,
-                       std::vector<input_track_t>& seedTracks) const;
+  void removeAllTracks(
+      const std::vector<input_track_t>& perigeesToFit,
+      std::vector<input_track_t>& seedTracks) const;
 
   /// @brief Function for calculating how compatible
   /// a given track is to a given vertex
@@ -204,7 +213,8 @@ class IterativeVertexFinder {
   /// @param vertex Vertex
   /// @param vFinderOptions Vertex finder options
   Result<double> getCompatibility(
-      const BoundParameters& params, const Vertex<input_track_t>& vertex,
+      const BoundParameters& params,
+      const Vertex<input_track_t>& vertex,
       const VertexFinderOptions<input_track_t>& vFinderOptions) const;
 
   /// @brief Function that removes used tracks compatible with

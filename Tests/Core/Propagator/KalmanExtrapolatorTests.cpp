@@ -67,8 +67,11 @@ struct StepWiseActor {
   /// @param stepper The stepper in use
   /// @param result is the mutable result state object
   template <typename propagator_state_t, typename stepper_t>
-  void operator()(propagator_state_t& state, const stepper_t& stepper,
-                  result_type& result) const {
+  void
+  operator()(
+      propagator_state_t& state,
+      const stepper_t& stepper,
+      result_type& result) const {
     // Listen to the surface and create bound state where necessary
     auto surface = state.navigation.currentSurface;
     if (surface and surface->associatedDetectorElement()) {
@@ -98,8 +101,9 @@ struct StepWiseActor {
   /// @param state is the mutable propagator state object
   /// @param stepper Stepper used by the propagation
   template <typename propagator_state_t, typename stepper_t>
-  void operator()(propagator_state_t& /*state*/,
-                  const stepper_t& /*unused*/) const {}
+  void
+  operator()(propagator_state_t& /*state*/, const stepper_t& /*unused*/) const {
+  }
 };
 
 ///
@@ -132,8 +136,8 @@ BOOST_AUTO_TEST_CASE(kalman_extrapolator) {
 
   // The start position and start parameters
   Vector3D pos(-3_m, 0., 0.), mom(1_GeV, 0., 0);
-  SingleCurvilinearTrackParameters<ChargedPolicy> start(std::move(covPtr), pos,
-                                                        mom, 1., 42.);
+  SingleCurvilinearTrackParameters<ChargedPolicy> start(
+      std::move(covPtr), pos, mom, 1., 42.);
 
   // Create the ActionList and AbortList
   using StepWiseResult = StepWiseActor::result_type;

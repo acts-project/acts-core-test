@@ -24,7 +24,8 @@ Acts::IterativeVertexFinder<bfield_t, input_track_t, propagator_t>::find(
 
   // Construct the vertex fitter options from vertex finder options
   VertexFitterOptions<input_track_t> vFitterOptions(
-      vFinderOptions.geoContext, vFinderOptions.magFieldContext,
+      vFinderOptions.geoContext,
+      vFinderOptions.magFieldContext,
       vFinderOptions.vertexConstraint);
 
   // List of vertices to be filled below
@@ -48,8 +49,8 @@ Acts::IterativeVertexFinder<bfield_t, input_track_t, propagator_t>::find(
     std::vector<input_track_t> perigeesToFitSplitVertex;
 
     // Fill vector with tracks to fit, only compatible with seed:
-    fillPerigeesToFit(seedTracks, seedVertex, perigeesToFit,
-                      perigeesToFitSplitVertex);
+    fillPerigeesToFit(
+        seedTracks, seedVertex, perigeesToFit, perigeesToFitSplitVertex);
     ACTS_DEBUG("Perigees used for fit: " << perigeesToFit.size());
 
     /// Begin vertex fit
@@ -103,8 +104,13 @@ Acts::IterativeVertexFinder<bfield_t, input_track_t, propagator_t>::find(
         // but add tracks which may have been missed
 
         auto result = reassignTracksToNewVertex(
-            vertexCollection, currentVertex, perigeesToFit, seedTracks,
-            origTracks, vFitterOptions, vFinderOptions);
+            vertexCollection,
+            currentVertex,
+            perigeesToFit,
+            seedTracks,
+            origTracks,
+            vFitterOptions,
+            vFinderOptions);
         if (!result.ok()) {
           return result.error();
         }
@@ -113,8 +119,8 @@ Acts::IterativeVertexFinder<bfield_t, input_track_t, propagator_t>::find(
       }  // end reassignTracksAfterFirstFit case
          // still good vertex? might have changed in the meanwhile
       if (isGoodVertex) {
-        removeUsedCompatibleTracks(currentVertex, perigeesToFit, seedTracks,
-                                   vFinderOptions);
+        removeUsedCompatibleTracks(
+            currentVertex, perigeesToFit, seedTracks, vFinderOptions);
 
         ACTS_DEBUG(
             "Number of seed tracks after removal of compatible tracks "
@@ -131,8 +137,11 @@ Acts::IterativeVertexFinder<bfield_t, input_track_t, propagator_t>::find(
       if (!isGoodSplitVertex) {
         removeAllTracks(perigeesToFitSplitVertex, seedTracks);
       } else {
-        removeUsedCompatibleTracks(currentSplitVertex, perigeesToFitSplitVertex,
-                                   seedTracks, vFinderOptions);
+        removeUsedCompatibleTracks(
+            currentSplitVertex,
+            perigeesToFitSplitVertex,
+            seedTracks,
+            vFinderOptions);
       }
     }
     // Now fill vertex collection with vertex
@@ -151,8 +160,9 @@ Acts::IterativeVertexFinder<bfield_t, input_track_t, propagator_t>::find(
 }
 
 template <typename bfield_t, typename input_track_t, typename propagator_t>
-Acts::Result<Acts::Vertex<input_track_t>> Acts::
-    IterativeVertexFinder<bfield_t, input_track_t, propagator_t>::getVertexSeed(
+Acts::Result<Acts::Vertex<input_track_t>>
+Acts::IterativeVertexFinder<bfield_t, input_track_t, propagator_t>::
+    getVertexSeed(
         const std::vector<input_track_t>& seedTracks,
         const VertexFinderOptions<input_track_t>& vFinderOptions) const {
   auto res = m_cfg.seedFinder.find(seedTracks, vFinderOptions);
@@ -165,11 +175,12 @@ Acts::Result<Acts::Vertex<input_track_t>> Acts::
     }
     // current seed is last element in collection
     Vertex<input_track_t> seedVertex = vertexCollection.back();
-    ACTS_DEBUG("Seed found at position: ("
-               << seedVertex.fullPosition()[eX] << ", "
-               << seedVertex.fullPosition()[eY] << ", "
-               << seedVertex.fullPosition()[eZ] << ", " << seedVertex.time()
-               << "). Number of input tracks: " << seedTracks.size());
+    ACTS_DEBUG(
+        "Seed found at position: ("
+        << seedVertex.fullPosition()[eX] << ", "
+        << seedVertex.fullPosition()[eY] << ", "
+        << seedVertex.fullPosition()[eZ] << ", " << seedVertex.time()
+        << "). Number of input tracks: " << seedTracks.size());
     return seedVertex;
   } else {
     ACTS_DEBUG("No seed found. Number of input tracks: " << seedTracks.size());
@@ -178,9 +189,11 @@ Acts::Result<Acts::Vertex<input_track_t>> Acts::
 }
 
 template <typename bfield_t, typename input_track_t, typename propagator_t>
-void Acts::IterativeVertexFinder<bfield_t, input_track_t, propagator_t>::
-    removeAllTracks(const std::vector<input_track_t>& perigeesToFit,
-                    std::vector<input_track_t>& seedTracks) const {
+void
+Acts::IterativeVertexFinder<bfield_t, input_track_t, propagator_t>::
+    removeAllTracks(
+        const std::vector<input_track_t>& perigeesToFit,
+        std::vector<input_track_t>& seedTracks) const {
   auto seedBegin = seedTracks.begin();
   auto seedEnd = seedTracks.end();
 
@@ -209,12 +222,16 @@ template <typename bfield_t, typename input_track_t, typename propagator_t>
 Acts::Result<double>
 Acts::IterativeVertexFinder<bfield_t, input_track_t, propagator_t>::
     getCompatibility(
-        const BoundParameters& params, const Vertex<input_track_t>& vertex,
+        const BoundParameters& params,
+        const Vertex<input_track_t>& vertex,
         const VertexFinderOptions<input_track_t>& vFinderOptions) const {
   // Linearize track
   auto result = m_cfg.linFactory.linearizeTrack(
-      vFinderOptions.geoContext, vFinderOptions.magFieldContext, &params,
-      vertex.fullPosition(), m_cfg.propagator);
+      vFinderOptions.geoContext,
+      vFinderOptions.magFieldContext,
+      &params,
+      vertex.fullPosition(),
+      m_cfg.propagator);
   if (!result.ok()) {
     return result.error();
   }
@@ -279,7 +296,8 @@ Acts::IterativeVertexFinder<bfield_t, input_track_t, propagator_t>::
     // remove track from perigeesToFit if compatible
     found = false;
     for (auto perigeesToFitIter = perigeesToFitBegin;
-         perigeesToFitIter != perigeesToFitEnd; ++perigeesToFitIter) {
+         perigeesToFitIter != perigeesToFitEnd;
+         ++perigeesToFitIter) {
       if (m_extractParameters(*perigeesToFitIter) ==
           m_extractParameters(trackAtVtx.originalTrack)) {
         found = true;
@@ -296,8 +314,9 @@ Acts::IterativeVertexFinder<bfield_t, input_track_t, propagator_t>::
     }
   }  // end iteration over tracksAtVertex
 
-  ACTS_DEBUG("After removal of tracks belonging to vertex, "
-             << seedTracks.size() << " seed tracks left.");
+  ACTS_DEBUG(
+      "After removal of tracks belonging to vertex, " << seedTracks.size()
+                                                      << " seed tracks left.");
 
   // Now start considering outliers
   // perigeesToFit that are left here were below
@@ -309,8 +328,8 @@ Acts::IterativeVertexFinder<bfield_t, input_track_t, propagator_t>::
 
   for (const auto& myPerigeeToFit : perigeesToFit) {
     // calculate chi2 w.r.t. last fitted vertex
-    auto result = getCompatibility(m_extractParameters(myPerigeeToFit),
-                                   myVertex, vFinderOptions);
+    auto result = getCompatibility(
+        m_extractParameters(myPerigeeToFit), myVertex, vFinderOptions);
 
     if (!result.ok()) {
       return result.error();
@@ -337,7 +356,8 @@ Acts::IterativeVertexFinder<bfield_t, input_track_t, propagator_t>::
     } else {
       // Remove track from current vertex
       for (auto trackAtVtxIter = trackAtVtxBegin;
-           trackAtVtxIter != trackAtVtxEnd; ++trackAtVtxIter) {
+           trackAtVtxIter != trackAtVtxEnd;
+           ++trackAtVtxIter) {
         if (m_extractParameters(trackAtVtxIter->originalTrack) ==
             m_extractParameters(myPerigeeToFit)) {
           ACTS_DEBUG(
@@ -360,7 +380,8 @@ Acts::IterativeVertexFinder<bfield_t, input_track_t, propagator_t>::
 }
 
 template <typename bfield_t, typename input_track_t, typename propagator_t>
-void Acts::IterativeVertexFinder<bfield_t, input_track_t, propagator_t>::
+void
+Acts::IterativeVertexFinder<bfield_t, input_track_t, propagator_t>::
     fillPerigeesToFit(
         const std::vector<input_track_t>& perigeeList,
         const Vertex<input_track_t>& seedVertex,
@@ -378,8 +399,9 @@ void Acts::IterativeVertexFinder<bfield_t, input_track_t, propagator_t>::
     } else if (numberOfTracks <= 4 && !m_cfg.createSplitVertices) {
       perigeesToFitOut.push_back(sTrack);
       ++count;
-    } else if (numberOfTracks <= 4 * m_cfg.splitVerticesTrkInvFraction &&
-               m_cfg.createSplitVertices) {
+    } else if (
+        numberOfTracks <= 4 * m_cfg.splitVerticesTrkInvFraction &&
+        m_cfg.createSplitVertices) {
       // Only few tracks left, put them into fit regardless their position
       if (count % m_cfg.splitVerticesTrkInvFraction == 0) {
         perigeesToFitOut.push_back(sTrack);
@@ -396,8 +418,9 @@ void Acts::IterativeVertexFinder<bfield_t, input_track_t, propagator_t>::
       double distance =
           m_cfg.ipEst.calculateDistance(sTrackParams, seedVertex.position());
 
-      double error = sqrt((*(sTrackParams.covariance()))(eLOC_D0, eLOC_D0) +
-                          (*(sTrackParams.covariance()))(eLOC_Z0, eLOC_Z0));
+      double error = sqrt(
+          (*(sTrackParams.covariance()))(eLOC_D0, eLOC_D0) +
+          (*(sTrackParams.covariance()))(eLOC_Z0, eLOC_Z0));
 
       if (error == 0.) {
         ACTS_WARNING("Error is zero. Setting to 1.");
@@ -476,7 +499,8 @@ Acts::IterativeVertexFinder<bfield_t, input_track_t, propagator_t>::
         // delete it later
         // when all tracks used to fit current vertex are deleted
         seedTracks.push_back(*std::find_if(
-            origTracks.begin(), origTracks.end(),
+            origTracks.begin(),
+            origTracks.end(),
             [&trackPerigee, this](auto origTrack) {
               return trackPerigee == m_extractParameters(origTrack);
             }));
@@ -499,8 +523,9 @@ Acts::IterativeVertexFinder<bfield_t, input_track_t, propagator_t>::
     vertexIt.setTracksAtVertex(tracksAtVertex);
   }  // end loop over all vertices
 
-  ACTS_DEBUG("Added " << numberOfAddedTracks
-                      << " tracks from old (other) vertices for new fit");
+  ACTS_DEBUG(
+      "Added " << numberOfAddedTracks
+               << " tracks from old (other) vertices for new fit");
 
   // override current vertex with new fit
   // set first to default vertex to be able to check if still good vertex
@@ -535,18 +560,22 @@ Acts::IterativeVertexFinder<bfield_t, input_track_t, propagator_t>::
   if (!isGoodVertex) {
     removeAllTracks(perigeesToFit, seedTracks);
 
-    ACTS_DEBUG("Going to new  iteration with "
-               << seedTracks.size() << "seed tracks after BAD vertex.");
+    ACTS_DEBUG(
+        "Going to new  iteration with " << seedTracks.size()
+                                        << "seed tracks after BAD vertex.");
   }
 
   return Result<bool>::success(isGoodVertex);
 }
 
 template <typename bfield_t, typename input_track_t, typename propagator_t>
-int Acts::IterativeVertexFinder<bfield_t, input_track_t, propagator_t>::
+int
+Acts::IterativeVertexFinder<bfield_t, input_track_t, propagator_t>::
     countSignificantTracks(const Vertex<input_track_t>& vtx) const {
-  return std::count_if(vtx.tracks().begin(), vtx.tracks().end(),
-                       [this](TrackAtVertex<input_track_t> trk) {
-                         return trk.trackWeight > m_cfg.cutOffTrackWeight;
-                       });
+  return std::count_if(
+      vtx.tracks().begin(),
+      vtx.tracks().end(),
+      [this](TrackAtVertex<input_track_t> trk) {
+        return trk.trackWeight > m_cfg.cutOffTrackWeight;
+      });
 }

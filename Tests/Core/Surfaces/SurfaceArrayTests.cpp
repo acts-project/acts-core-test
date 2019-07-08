@@ -49,8 +49,12 @@ struct SurfaceArrayFixture {
   SurfaceArrayFixture() { BOOST_TEST_MESSAGE("setup fixture"); }
   ~SurfaceArrayFixture() { BOOST_TEST_MESSAGE("teardown fixture"); }
 
-  SrfVec fullPhiTestSurfacesEC(size_t n = 10, double shift = 0,
-                               double zbase = 0, double r = 10) {
+  SrfVec
+  fullPhiTestSurfacesEC(
+      size_t n = 10,
+      double shift = 0,
+      double zbase = 0,
+      double r = 10) {
     SrfVec res;
 
     double phiStep = 2 * M_PI / n;
@@ -76,9 +80,14 @@ struct SurfaceArrayFixture {
     return res;
   }
 
-  SrfVec fullPhiTestSurfacesBRL(int n = 10, double shift = 0, double zbase = 0,
-                                double incl = M_PI / 9., double w = 2,
-                                double h = 1.5) {
+  SrfVec
+  fullPhiTestSurfacesBRL(
+      int n = 10,
+      double shift = 0,
+      double zbase = 0,
+      double incl = M_PI / 9.,
+      double w = 2,
+      double h = 1.5) {
     SrfVec res;
 
     double phiStep = 2 * M_PI / n;
@@ -106,8 +115,11 @@ struct SurfaceArrayFixture {
     return res;
   }
 
-  SrfVec straightLineSurfaces(
-      size_t n = 10., double step = 3, const Vector3D& origin = {0, 0, 1.5},
+  SrfVec
+  straightLineSurfaces(
+      size_t n = 10.,
+      double step = 3,
+      const Vector3D& origin = {0, 0, 1.5},
       const Transform3D& pretrans = Transform3D::Identity(),
       const Vector3D& dir = {0, 0, 1}) {
     SrfVec res;
@@ -133,7 +145,8 @@ struct SurfaceArrayFixture {
     return res;
   }
 
-  SrfVec makeBarrel(int nPhi, int nZ, double w, double h) {
+  SrfVec
+  makeBarrel(int nPhi, int nZ, double w, double h) {
     double z0 = -(nZ - 1) * w;
     SrfVec res;
 
@@ -147,7 +160,8 @@ struct SurfaceArrayFixture {
     return res;
   }
 
-  void draw_surfaces(const SrfVec& surfaces, const std::string& fname) {
+  void
+  draw_surfaces(const SrfVec& surfaces, const std::string& fname) {
     std::ofstream os;
     os.open(fname);
 
@@ -200,13 +214,16 @@ BOOST_FIXTURE_TEST_CASE(SurfaceArray_create, SurfaceArrayFixture) {
   };
   double R = 10;
   auto itransform = [angleShift, R](const Vector2D& loc) {
-    return Vector3D(R * std::cos(loc[0] - angleShift),
-                    R * std::sin(loc[0] - angleShift), loc[1]);
+    return Vector3D(
+        R * std::cos(loc[0] - angleShift),
+        R * std::sin(loc[0] - angleShift),
+        loc[1]);
   };
 
   auto sl = std::make_unique<
       SurfaceArray::SurfaceGridLookup<decltype(phiAxis), decltype(zAxis)>>(
-      transform, itransform,
+      transform,
+      itransform,
       std::make_tuple(std::move(phiAxis), std::move(zAxis)));
   sl->fill(tgContext, brlRaw);
   SurfaceArray sa(std::move(sl), brl);
@@ -228,7 +245,8 @@ BOOST_FIXTURE_TEST_CASE(SurfaceArray_create, SurfaceArrayFixture) {
 
   auto sl2 = std::make_unique<
       SurfaceArray::SurfaceGridLookup<decltype(phiAxis), decltype(zAxis)>>(
-      transform, itransform,
+      transform,
+      itransform,
       std::make_tuple(std::move(phiAxis), std::move(zAxis)));
   // do NOT fill, only completebinning
   sl2->completeBinning(tgContext, brlRaw);

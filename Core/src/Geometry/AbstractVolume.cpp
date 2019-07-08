@@ -31,7 +31,8 @@ Acts::AbstractVolume::boundarySurfaces() const {
   return m_boundarySurfaces;
 }
 
-void Acts::AbstractVolume::createBoundarySurfaces() {
+void
+Acts::AbstractVolume::createBoundarySurfaces() {
   // transform Surfaces To BoundarySurfaces
   std::vector<std::shared_ptr<const Surface>> surfaces =
       Volume::volumeBounds().decomposeToSurfaces(m_transform.get());
@@ -49,8 +50,8 @@ void Acts::AbstractVolume::createBoundarySurfaces() {
     AbstractVolume* outer = (inner) != nullptr ? nullptr : this;
     // create the boundary surface
     BoundarySurfacePtr bSurface =
-        std::make_shared<const BoundarySurfaceT<AbstractVolume>>(std::move(sf),
-                                                                 inner, outer);
+        std::make_shared<const BoundarySurfaceT<AbstractVolume>>(
+            std::move(sf), inner, outer);
     m_boundarySurfaces.push_back(bSurface);
   }
 }

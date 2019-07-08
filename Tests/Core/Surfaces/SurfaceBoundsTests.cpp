@@ -35,17 +35,29 @@ class SurfaceBoundsStub : public SurfaceBounds {
   }
   ~SurfaceBoundsStub() override { /*nop*/
   }
-  SurfaceBounds* clone() const final { return nullptr; }
-  BoundsType type() const final { return SurfaceBounds::Other; }
-  std::vector<TDD_real_t> valueStore() const override { return m_values; }
-  bool inside(const Vector2D& /*lpos*/,
-              const BoundaryCheck& /*bcheck*/) const final {
+  SurfaceBounds*
+  clone() const final {
+    return nullptr;
+  }
+  BoundsType
+  type() const final {
+    return SurfaceBounds::Other;
+  }
+  std::vector<TDD_real_t>
+  valueStore() const override {
+    return m_values;
+  }
+  bool
+  inside(const Vector2D& /*lpos*/, const BoundaryCheck& /*bcheck*/)
+      const final {
     return true;
   }
-  double distanceToBoundary(const Vector2D& /*lpos*/) const final {
+  double
+  distanceToBoundary(const Vector2D& /*lpos*/) const final {
     return 10.;
   }
-  std::ostream& toStream(std::ostream& sl) const final {
+  std::ostream&
+  toStream(std::ostream& sl) const final {
     sl << "SurfaceBoundsStub";
     return sl;
   }
@@ -67,8 +79,11 @@ BOOST_AUTO_TEST_CASE(SurfaceBoundsProperties) {
   SurfaceBoundsStub surface(5);
   std::vector<TDD_real_t> reference{0, 1, 2, 3, 4};
   const auto& valueStore = surface.valueStore();
-  BOOST_CHECK_EQUAL_COLLECTIONS(reference.cbegin(), reference.cend(),
-                                valueStore.cbegin(), valueStore.cend());
+  BOOST_CHECK_EQUAL_COLLECTIONS(
+      reference.cbegin(),
+      reference.cend(),
+      valueStore.cbegin(),
+      valueStore.cend());
 }
 /// Unit test for testing SurfaceBounds properties
 BOOST_AUTO_TEST_CASE(SurfaceBoundsEquality) {
@@ -83,8 +98,10 @@ BOOST_AUTO_TEST_CASE(SurfaceBoundsEquality) {
   const auto& surfaceValueStore = surface.valueStore();
   const auto& assignedValueStore = assignedSurface.valueStore();
   BOOST_CHECK_EQUAL_COLLECTIONS(
-      surfaceValueStore.cbegin(), surfaceValueStore.cend(),
-      assignedValueStore.cbegin(), assignedValueStore.cend());
+      surfaceValueStore.cbegin(),
+      surfaceValueStore.cend(),
+      assignedValueStore.cbegin(),
+      assignedValueStore.cend());
 }
 BOOST_AUTO_TEST_SUITE_END()
 

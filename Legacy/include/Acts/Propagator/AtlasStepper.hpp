@@ -61,10 +61,12 @@ class AtlasStepper {
     /// @param[in] ndir The navigation direction w.r.t. parameters
     /// @param[in] ssize the steps size limitation
     template <typename Parameters>
-    State(std::reference_wrapper<const GeometryContext> gctx,
-          std::reference_wrapper<const MagneticFieldContext> mctx,
-          const Parameters& pars, NavigationDirection ndir = forward,
-          double ssize = std::numeric_limits<double>::max())
+    State(
+        std::reference_wrapper<const GeometryContext> gctx,
+        std::reference_wrapper<const MagneticFieldContext> mctx,
+        const Parameters& pars,
+        NavigationDirection ndir = forward,
+        double ssize = std::numeric_limits<double>::max())
         : state_ready(false),
           navDir(ndir),
           useJacobian(false),
@@ -310,31 +312,39 @@ class AtlasStepper {
   /// @param [in,out] state is the stepper state associated with the track
   ///                 the magnetic field cell is used (and potentially updated)
   /// @param [in] pos is the field position
-  Vector3D getField(State& state, const Vector3D& pos) const {
+  Vector3D
+  getField(State& state, const Vector3D& pos) const {
     // get the field from the cell
     state.field = m_bField.getField(pos, state.fieldCache);
     return state.field;
   }
 
-  Vector3D position(const State& state) const {
+  Vector3D
+  position(const State& state) const {
     return Vector3D(state.pVector[0], state.pVector[1], state.pVector[2]);
   }
 
-  Vector3D direction(const State& state) const {
+  Vector3D
+  direction(const State& state) const {
     return Vector3D(state.pVector[4], state.pVector[5], state.pVector[6]);
   }
 
-  double momentum(const State& state) const {
+  double
+  momentum(const State& state) const {
     return 1. / std::abs(state.pVector[7]);
   }
 
   /// Charge access
-  double charge(const State& state) const {
+  double
+  charge(const State& state) const {
     return state.pVector[7] > 0. ? 1. : -1.;
   }
 
   /// Time access
-  double time(const State& state) const { return state.t0 + state.pVector[3]; }
+  double
+  time(const State& state) const {
+    return state.t0 + state.pVector[3];
+  }
 
   /// Tests if the state reached a surface
   ///
@@ -342,9 +352,10 @@ class AtlasStepper {
   /// @param [in] surface Surface that is tested
   ///
   /// @return Boolean statement if surface is reached by state
-  bool surfaceReached(const State& state, const Surface* surface) const {
-    return surface->isOnSurface(state.geoContext, position(state),
-                                direction(state), true);
+  bool
+  surfaceReached(const State& state, const Surface* surface) const {
+    return surface->isOnSurface(
+        state.geoContext, position(state), direction(state), true);
   }
 
   /// Create and return the bound state at the current position
@@ -359,8 +370,8 @@ class AtlasStepper {
   ///   - the parameters at the surface
   ///   - the stepwise jacobian towards it
   ///   - and the path length (from start - for ordering)
-  BoundState boundState(State& state, const Surface& surface,
-                        bool /*unused*/) const {
+  BoundState
+  boundState(State& state, const Surface& surface, bool /*unused*/) const {
     // the convert method invalidates the state (in case it's reused)
     state.state_ready = false;
 
@@ -377,12 +388,17 @@ class AtlasStepper {
     }
 
     // Fill the end parameters
-    BoundParameters parameters(state.geoContext, std::move(cov), gp, mom,
-                               charge(state), state.t0 + state.pVector[3],
-                               surface.getSharedPtr());
+    BoundParameters parameters(
+        state.geoContext,
+        std::move(cov),
+        gp,
+        mom,
+        charge(state),
+        state.t0 + state.pVector[3],
+        surface.getSharedPtr());
 
-    return BoundState(std::move(parameters), state.jacobian,
-                      state.pathAccumulated);
+    return BoundState(
+        std::move(parameters), state.jacobian, state.pathAccumulated);
   }
 
   /// Create and return a curvilinear state at the current position
@@ -396,7 +412,8 @@ class AtlasStepper {
   ///   - the curvilinear parameters at given position
   ///   - the stepweise jacobian towards it
   ///   - and the path length (from start - for ordering)
-  CurvilinearState curvilinearState(State& state, bool /*unused*/) const {
+  CurvilinearState
+  curvilinearState(State& state, bool /*unused*/) const {
     // the convert method invalidates the state (in case it's reused)
     state.state_ready = false;
     //
@@ -410,18 +427,19 @@ class AtlasStepper {
       cov = std::make_unique<const Covariance>(state.cov);
     }
 
-    CurvilinearParameters parameters(std::move(cov), gp, mom, charge(state),
-                                     state.t0 + state.pVector[3]);
+    CurvilinearParameters parameters(
+        std::move(cov), gp, mom, charge(state), state.t0 + state.pVector[3]);
 
-    return CurvilinearState(std::move(parameters), state.jacobian,
-                            state.pathAccumulated);
+    return CurvilinearState(
+        std::move(parameters), state.jacobian, state.pathAccumulated);
   }
 
   /// The state update method
   ///
   /// @param [in,out] state The stepper state for
   /// @param [in] pars The new track parameters at start
-  void update(State& state, const BoundParameters& pars) const {
+  void
+  update(State& state, const BoundParameters& pars) const {
     // state is ready - noting to do
     if (state.state_ready) {
       return;
@@ -591,8 +609,13 @@ class AtlasStepper {
   /// @param uposition the updated position
   /// @param udirection the updated direction
   /// @param p the updated momentum value
-  void update(State& state, const Vector3D& uposition,
-              const Vector3D& udirection, double up, double time) const {
+  void
+  update(
+      State& state,
+      const Vector3D& uposition,
+      const Vector3D& udirection,
+      double up,
+      double time) const {
     // update the vector
     state.pVector[0] = uposition[0];
     state.pVector[1] = uposition[1];
@@ -605,7 +628,8 @@ class AtlasStepper {
   }
 
   /// Return a corrector
-  VoidIntersectionCorrector corrector(State& /*unused*/) const {
+  VoidIntersectionCorrector
+  corrector(State& /*unused*/) const {
     return VoidIntersectionCorrector();
   }
 
@@ -618,7 +642,8 @@ class AtlasStepper {
   /// reinitialized at the new position
   ///
   /// @return the full transport jacobian
-  void covarianceTransport(State& state, bool /*unused*/) const {
+  void
+  covarianceTransport(State& state, bool /*unused*/) const {
     double P[59];
     for (unsigned int i = 0; i < 59; ++i) {
       P[i] = state.pVector[i];
@@ -768,8 +793,9 @@ class AtlasStepper {
   /// @param [in] surface is the surface to which the covariance is forwarded to
   /// @param [in] reinitialize is a flag to steer whether the state should be
   /// reinitialized at the new position
-  void covarianceTransport(State& state, const Surface& surface,
-                           bool /*unused*/) const {
+  void
+  covarianceTransport(State& state, const Surface& surface, bool /*unused*/)
+      const {
     Acts::Vector3D gp(state.pVector[0], state.pVector[1], state.pVector[2]);
     Acts::Vector3D mom(state.pVector[4], state.pVector[5], state.pVector[6]);
     mom /= std::abs(state.pVector[7]);
@@ -936,7 +962,8 @@ class AtlasStepper {
     if (surface.type() == Surface::Disc) {
       // the vector from the disc surface to the p
       const auto& sfc = surface.center(state.geoContext);
-      double d[3] = {state.pVector[0] - sfc(0), state.pVector[1] - sfc(1),
+      double d[3] = {state.pVector[0] - sfc(0),
+                     state.pVector[1] - sfc(1),
                      state.pVector[2] - sfc(2)};
       // this needs the transformation to polar coordinates
       double RC = d[0] * Ax[0] + d[1] * Ax[1] + d[2] * Ax[2];
@@ -1021,7 +1048,8 @@ class AtlasStepper {
   ///
   /// @param state is the provided stepper state (caller keeps thread locality)
   template <typename propagator_state_t>
-  Result<double> step(propagator_state_t& state) const {
+  Result<double>
+  step(propagator_state_t& state) const {
     // we use h for keeping the nominclature with the original atlas code
     double h = state.stepping.stepSize;
     bool Jac = state.stepping.useJacobian;

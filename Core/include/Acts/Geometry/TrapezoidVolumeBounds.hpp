@@ -69,8 +69,11 @@ class TrapezoidVolumeBounds : public VolumeBounds {
   /// @param maxhalex is the half length in x at maximal y
   /// @param haley is the half length in y
   /// @param halez is the half length in z
-  TrapezoidVolumeBounds(double minhalex, double maxhalex, double haley,
-                        double halez);
+  TrapezoidVolumeBounds(
+      double minhalex,
+      double maxhalex,
+      double haley,
+      double halez);
 
   /// Constructor - the trapezoid boundaries (arbitrary trapezoid)
   ///
@@ -79,8 +82,12 @@ class TrapezoidVolumeBounds : public VolumeBounds {
   /// @param halez is the half length in z
   /// @param alpha is the openeing angle at -x,-y
   /// @param beta is the openeing angle at +x,-y
-  TrapezoidVolumeBounds(double minhalex, double haley, double halez,
-                        double alpha, double beta);
+  TrapezoidVolumeBounds(
+      double minhalex,
+      double haley,
+      double halez,
+      double alpha,
+      double beta);
 
   /// Copy Constructor
   /// @param trabo The object to be copied
@@ -119,9 +126,10 @@ class TrapezoidVolumeBounds : public VolumeBounds {
   /// @param envelope Optional envelope to add / subtract from min/max
   /// @param entity Entity to associate this bounding box with
   /// @return Constructed bounding box
-  Volume::BoundingBox boundingBox(const Transform3D* trf = nullptr,
-                                  const Vector3D& envelope = {0, 0, 0},
-                                  const Volume* entity = nullptr) const final;
+  Volume::BoundingBox boundingBox(
+      const Transform3D* trf = nullptr,
+      const Vector3D& envelope = {0, 0, 0},
+      const Volume* entity = nullptr) const final;
 
   /// This method returns the minimal halflength in local x
   double minHalflengthX() const;
@@ -173,31 +181,39 @@ class TrapezoidVolumeBounds : public VolumeBounds {
   std::vector<TDD_real_t> m_valueStore;
 };
 
-inline TrapezoidVolumeBounds* TrapezoidVolumeBounds::clone() const {
+inline TrapezoidVolumeBounds*
+TrapezoidVolumeBounds::clone() const {
   return new TrapezoidVolumeBounds(*this);
 }
 
-inline double TrapezoidVolumeBounds::minHalflengthX() const {
+inline double
+TrapezoidVolumeBounds::minHalflengthX() const {
   return m_valueStore.at(bv_minHalfX);
 }
-inline double TrapezoidVolumeBounds::maxHalflengthX() const {
+inline double
+TrapezoidVolumeBounds::maxHalflengthX() const {
   return m_valueStore.at(bv_maxHalfX);
 }
-inline double TrapezoidVolumeBounds::halflengthY() const {
+inline double
+TrapezoidVolumeBounds::halflengthY() const {
   return m_valueStore.at(bv_halfY);
 }
-inline double TrapezoidVolumeBounds::halflengthZ() const {
+inline double
+TrapezoidVolumeBounds::halflengthZ() const {
   return m_valueStore.at(bv_halfZ);
 }
-inline double TrapezoidVolumeBounds::alpha() const {
+inline double
+TrapezoidVolumeBounds::alpha() const {
   return m_valueStore.at(bv_alpha);
 }
-inline double TrapezoidVolumeBounds::beta() const {
+inline double
+TrapezoidVolumeBounds::beta() const {
   return m_valueStore.at(bv_beta);
 }
 
 template <class T>
-T& TrapezoidVolumeBounds::dumpT(T& dt) const {
+T&
+TrapezoidVolumeBounds::dumpT(T& dt) const {
   dt << std::setiosflags(std::ios::fixed);
   dt << std::setprecision(5);
   dt << "Acts::TrapezoidVolumeBounds: (minhalfX, halfY, halfZ, alpha, beta) "

@@ -60,7 +60,8 @@ struct DenseEnvironmentExtension {
   /// @param [in] state State of the propagator
   /// @return Boolean flag if the step would be valid
   template <typename propagator_state_t, typename stepper_t>
-  int bid(const propagator_state_t& state, const stepper_t& stepper) const {
+  int
+  bid(const propagator_state_t& state, const stepper_t& stepper) const {
     // Check for valid particle properties
     if (stepper.charge(state.stepping) == 0. || state.options.mass == 0. ||
         stepper.momentum(state.stepping) < state.options.momentumCutOff) {
@@ -88,9 +89,14 @@ struct DenseEnvironmentExtension {
   /// @param [in] kprev Evaluated k_{i - 1}
   /// @return Boolean flag if the calculation is valid
   template <typename propagator_state_t, typename stepper_t>
-  bool k(const propagator_state_t& state, const stepper_t& stepper,
-         Vector3D& knew, const Vector3D& bField, const int i = 0,
-         const double h = 0., const Vector3D& kprev = Vector3D()) {
+  bool
+  k(const propagator_state_t& state,
+    const stepper_t& stepper,
+    Vector3D& knew,
+    const Vector3D& bField,
+    const int i = 0,
+    const double h = 0.,
+    const Vector3D& kprev = Vector3D()) {
     // i = 0 is used for setup and evaluation of k
     if (i == 0) {
       // Set up container for energy loss
@@ -138,8 +144,9 @@ struct DenseEnvironmentExtension {
   /// @param [in] h Step size
   /// @return Boolean flag if the calculation is valid
   template <typename propagator_state_t, typename stepper_t>
-  bool finalize(propagator_state_t& state, const stepper_t& stepper,
-                const double h) const {
+  bool
+  finalize(propagator_state_t& state, const stepper_t& stepper, const double h)
+      const {
     // Evaluate the new momentum
     double newMomentum =
         stepper.momentum(state.stepping) +
@@ -151,10 +158,11 @@ struct DenseEnvironmentExtension {
     }
 
     // Add derivative dlambda/ds = Lambda''
-    state.stepping.derivative(7) =
-        -std::sqrt(state.options.mass * state.options.mass +
-                   newMomentum * newMomentum) *
-        g / (newMomentum * newMomentum * newMomentum);
+    state.stepping.derivative(7) = -std::sqrt(
+                                       state.options.mass * state.options.mass +
+                                       newMomentum * newMomentum) *
+                                   g /
+                                   (newMomentum * newMomentum * newMomentum);
 
     // Update momentum
     state.stepping.p = newMomentum;
@@ -181,8 +189,12 @@ struct DenseEnvironmentExtension {
   /// @param [out] D Transport matrix
   /// @return Boolean flag if the calculation is valid
   template <typename propagator_state_t, typename stepper_t>
-  bool finalize(propagator_state_t& state, const stepper_t& stepper,
-                const double h, FreeMatrix& D) const {
+  bool
+  finalize(
+      propagator_state_t& state,
+      const stepper_t& stepper,
+      const double h,
+      FreeMatrix& D) const {
     return finalize(state, stepper, h) && transportMatrix(state, stepper, h, D);
   }
 
@@ -196,8 +208,12 @@ struct DenseEnvironmentExtension {
   /// @param [out] D Transport matrix
   /// @return Boolean flag if evaluation is valid
   template <typename propagator_state_t, typename stepper_t>
-  bool transportMatrix(propagator_state_t& state, const stepper_t& stepper,
-                       const double h, FreeMatrix& D) const {
+  bool
+  transportMatrix(
+      propagator_state_t& state,
+      const stepper_t& stepper,
+      const double h,
+      FreeMatrix& D) const {
     /// The calculations are based on ATL-SOFT-PUB-2009-002. The update of the
     /// Jacobian matrix is requires only the calculation of eq. 17 and 18.
     /// Since the terms of eq. 18 are currently 0, this matrix is not needed
@@ -293,25 +309,31 @@ struct DenseEnvironmentExtension {
 
     double dtpp1dl = -state.options.mass * state.options.mass * qop[0] *
                      qop[0] *
-                     (3. * g + qop[0] * dgdqop(energy[0], state.options.mass,
-                                               state.options.absPdgCode,
-                                               state.options.meanEnergyLoss));
+                     (3. * g + qop[0] * dgdqop(
+                                            energy[0],
+                                            state.options.mass,
+                                            state.options.absPdgCode,
+                                            state.options.meanEnergyLoss));
 
     double qopNew = qop[0] + half_h * Lambdappi[0];
     double dtpp2dl = -state.options.mass * state.options.mass * qopNew *
                      qopNew *
                      (3. * g * (1. + half_h * jdL[0]) +
-                      qopNew * dgdqop(energy[1], state.options.mass,
-                                      state.options.absPdgCode,
-                                      state.options.meanEnergyLoss));
+                      qopNew * dgdqop(
+                                   energy[1],
+                                   state.options.mass,
+                                   state.options.absPdgCode,
+                                   state.options.meanEnergyLoss));
 
     qopNew = qop[0] + half_h * Lambdappi[1];
     double dtpp3dl = -state.options.mass * state.options.mass * qopNew *
                      qopNew *
                      (3. * g * (1. + half_h * jdL[1]) +
-                      qopNew * dgdqop(energy[2], state.options.mass,
-                                      state.options.absPdgCode,
-                                      state.options.meanEnergyLoss));
+                      qopNew * dgdqop(
+                                   energy[2],
+                                   state.options.mass,
+                                   state.options.absPdgCode,
+                                   state.options.meanEnergyLoss));
 
     D(3, 7) = h * h / 6. * (dtpp1dl + dtpp2dl + dtpp3dl);
     return true;
@@ -328,8 +350,13 @@ struct DenseEnvironmentExtension {
   /// @param [in] meanEnergyLoss Boolean indicator if mean or mode of the energy
   /// loss will be evaluated
   /// @return Infinitesimal energy loss
-  double dEds(const double energy_, const double momentum, const double mass,
-              const int pdg, const bool meanEnergyLoss) const {
+  double
+  dEds(
+      const double energy_,
+      const double momentum,
+      const double mass,
+      const int pdg,
+      const bool meanEnergyLoss) const {
     // Easy exit if material is invalid
     if (material->X0() == 0 || material->Z() == 0) {
       return 0.;
@@ -337,11 +364,15 @@ struct DenseEnvironmentExtension {
 
     // Calculate energy loss by
     // a) ionisation
-    double ionisationEnergyLoss =
-        ionisationLoss
-            .dEds(mass, momentum / energy_, energy_ / mass, *(material), 1.,
-                  meanEnergyLoss)
-            .first;
+    double ionisationEnergyLoss = ionisationLoss
+                                      .dEds(
+                                          mass,
+                                          momentum / energy_,
+                                          energy_ / mass,
+                                          *(material),
+                                          1.,
+                                          meanEnergyLoss)
+                                      .first;
     // b) radiation
     double radiationEnergyLoss =
         radiationLoss.dEds(energy_, mass, *(material), pdg, 1.);
@@ -365,8 +396,12 @@ struct DenseEnvironmentExtension {
   /// @param [in] meanEnergyLoss Return mean or mode of the energy loss
   /// @return Derivative evaluated at the point defined by the
   /// function parameters
-  double dgdqop(const double energy_, const double mass, const int pdg,
-                const bool meanEnergyLoss) const {
+  double
+  dgdqop(
+      const double energy_,
+      const double mass,
+      const int pdg,
+      const bool meanEnergyLoss) const {
     // Fast exit if material is invalid
     if (material->X0() == 0. || material->Z() == 0. ||
         material->zOverAtimesRho() == 0.) {
@@ -395,11 +430,16 @@ struct DenseEnvironmentExtension {
   /// @tparam propagator_state_t Type of the state of the propagator
   /// @param [in] state Deliverer of configurations
   template <typename propagator_state_t>
-  void initializeEnergyLoss(const propagator_state_t& state) {
+  void
+  initializeEnergyLoss(const propagator_state_t& state) {
     energy[0] = std::hypot(initialMomentum, state.options.mass);
     // Use the same energy loss throughout the step.
-    g = dEds(energy[0], initialMomentum, state.options.mass,
-             state.options.absPdgCode, state.options.meanEnergyLoss);
+    g = dEds(
+        energy[0],
+        initialMomentum,
+        state.options.mass,
+        state.options.absPdgCode,
+        state.options.meanEnergyLoss);
     // Change of the momentum per path length
     // dPds = dPdE * dEds
     dPds[0] = g * energy[0] / initialMomentum;
@@ -407,16 +447,19 @@ struct DenseEnvironmentExtension {
       // Calculate the change of the energy loss per path length and
       // inverse momentum
       if (state.options.includeGgradient) {
-        dgdqopValue =
-            dgdqop(energy[0], state.options.mass, state.options.absPdgCode,
-                   state.options
-                       .meanEnergyLoss);  // Use this value throughout the step.
+        dgdqopValue = dgdqop(
+            energy[0],
+            state.options.mass,
+            state.options.absPdgCode,
+            state.options
+                .meanEnergyLoss);  // Use this value throughout the step.
       }
       // Calculate term for later error propagation
-      dLdl[0] = (-qop[0] * qop[0] * g * energy[0] *
-                     (3. - (initialMomentum * initialMomentum) /
-                               (energy[0] * energy[0])) -
-                 qop[0] * qop[0] * qop[0] * energy[0] * dgdqopValue);
+      dLdl[0] =
+          (-qop[0] * qop[0] * g * energy[0] *
+               (3. -
+                (initialMomentum * initialMomentum) / (energy[0] * energy[0])) -
+           qop[0] * qop[0] * qop[0] * energy[0] * dgdqopValue);
     }
   }
 
@@ -429,9 +472,13 @@ struct DenseEnvironmentExtension {
   /// @param [in] state State of the stepper
   /// @param [in] i Index of the sub-step (1-3)
   template <typename stepper_state_t, typename stepper_t>
-  void updateEnergyLoss(const double mass, const double h,
-                        const stepper_state_t& state, const stepper_t& stepper,
-                        const int i) {
+  void
+  updateEnergyLoss(
+      const double mass,
+      const double h,
+      const stepper_state_t& state,
+      const stepper_t& stepper,
+      const int i) {
     // Update parameters related to a changed momentum
     currentMomentum = initialMomentum + h * dPds[i - 1];
     energy[i] = std::sqrt(currentMomentum * currentMomentum + mass * mass);
@@ -439,16 +486,18 @@ struct DenseEnvironmentExtension {
     qop[i] = stepper.charge(state) / currentMomentum;
     // Calculate term for later error propagation
     if (state.covTransport) {
-      dLdl[i] = (-qop[i] * qop[i] * g * energy[i] *
-                     (3. - (currentMomentum * currentMomentum) /
-                               (energy[i] * energy[i])) -
-                 qop[i] * qop[i] * qop[i] * energy[i] * dgdqopValue);
+      dLdl[i] =
+          (-qop[i] * qop[i] * g * energy[i] *
+               (3. -
+                (currentMomentum * currentMomentum) / (energy[i] * energy[i])) -
+           qop[i] * qop[i] * qop[i] * energy[i] * dgdqopValue);
     }
   }
 };
 
-template <typename action_list_t = ActionList<>,
-          typename aborter_list_t = AbortList<>>
+template <
+    typename action_list_t = ActionList<>,
+    typename aborter_list_t = AbortList<>>
 struct DenseStepperPropagatorOptions
     : public PropagatorOptions<action_list_t, aborter_list_t> {
   /// Copy Constructor
@@ -480,8 +529,8 @@ struct DenseStepperPropagatorOptions
   ///
   /// @param aborters The new aborter list to be used (internally)
   template <typename extended_aborter_list_t>
-  DenseStepperPropagatorOptions<action_list_t, extended_aborter_list_t> extend(
-      extended_aborter_list_t aborters) const {
+  DenseStepperPropagatorOptions<action_list_t, extended_aborter_list_t>
+  extend(extended_aborter_list_t aborters) const {
     DenseStepperPropagatorOptions<action_list_t, extended_aborter_list_t>
         eoptions(this->geoContext, this->magFieldContext);
     // Copy the options over

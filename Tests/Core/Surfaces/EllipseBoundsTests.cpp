@@ -38,8 +38,8 @@ BOOST_AUTO_TEST_CASE(EllipseBoundsConstruction) {
       SurfaceBounds::Ellipse);
   //
   /// Copy constructor
-  EllipseBounds original(minRad1, minRad2, maxRad1, maxRad2, averagePhi,
-                         phiSector);
+  EllipseBounds original(
+      minRad1, minRad2, maxRad1, maxRad2, averagePhi, phiSector);
   EllipseBounds copied(original);
   BOOST_CHECK_EQUAL(copied.type(), SurfaceBounds::Ellipse);
 }
@@ -50,8 +50,8 @@ BOOST_AUTO_TEST_CASE(EllipseBoundsProperties) {
   double minRad1(10.), minRad2(15.), maxRad1(15.), maxRad2(20.), averagePhi(0.),
       phiSector(M_PI / 2.);
   /// Test clone
-  EllipseBounds ellipseBoundsObject(minRad1, minRad2, maxRad1, maxRad2,
-                                    averagePhi, phiSector);
+  EllipseBounds ellipseBoundsObject(
+      minRad1, minRad2, maxRad1, maxRad2, averagePhi, phiSector);
   auto pClonedEllipseBoundsObject = ellipseBoundsObject.clone();
   BOOST_CHECK_NE(pClonedEllipseBoundsObject, nullptr);
   delete pClonedEllipseBoundsObject;
@@ -65,10 +65,14 @@ BOOST_AUTO_TEST_CASE(EllipseBoundsProperties) {
   Vector2D origin(0., 0.);
   Vector2D outsideBy10(0., 30.);
   Vector2D inRectangle(17., 11.);
-  CHECK_CLOSE_REL(ellipseBoundsObject.distanceToBoundary(origin), 10.,
-                  1e-6);  // makes sense
-  CHECK_CLOSE_REL(ellipseBoundsObject.distanceToBoundary(outsideBy10), 10.,
-                  1e-6);  // fails, not clear why
+  CHECK_CLOSE_REL(
+      ellipseBoundsObject.distanceToBoundary(origin),
+      10.,
+      1e-6);  // makes sense
+  CHECK_CLOSE_REL(
+      ellipseBoundsObject.distanceToBoundary(outsideBy10),
+      10.,
+      1e-6);  // fails, not clear why
   //
   /// Test rMinX
   BOOST_CHECK_EQUAL(ellipseBoundsObject.rMinX(), minRad1);
@@ -88,13 +92,15 @@ BOOST_AUTO_TEST_CASE(EllipseBoundsProperties) {
   /// Test vertices
   std::vector<Vector2D> expectedVertices{{15, 0}, {0, 20}, {-15, 0}, {0, -20}};
   const auto& actualVertices = ellipseBoundsObject.vertices();
-  BOOST_CHECK_EQUAL_COLLECTIONS(actualVertices.cbegin(), actualVertices.cend(),
-                                expectedVertices.cbegin(),
-                                expectedVertices.cend());
+  BOOST_CHECK_EQUAL_COLLECTIONS(
+      actualVertices.cbegin(),
+      actualVertices.cend(),
+      expectedVertices.cbegin(),
+      expectedVertices.cend());
   //
   /// Test boundingBox
-  BOOST_CHECK_EQUAL(ellipseBoundsObject.boundingBox(),
-                    RectangleBounds(15., 20.));
+  BOOST_CHECK_EQUAL(
+      ellipseBoundsObject.boundingBox(), RectangleBounds(15., 20.));
   //
   /// Test halfPhiSector
   BOOST_CHECK_EQUAL(ellipseBoundsObject.halfPhiSector(), M_PI / 2.);
@@ -116,13 +122,13 @@ BOOST_AUTO_TEST_CASE(EllipseBoundsProperties) {
 BOOST_AUTO_TEST_CASE(EllipseBoundsAssignment) {
   double minRad1(10.), minRad2(15.), maxRad1(15.), maxRad2(20.), averagePhi(0.),
       phiSector(M_PI / 2.);
-  EllipseBounds ellipseBoundsObject(minRad1, minRad2, maxRad1, maxRad2,
-                                    averagePhi, phiSector);
+  EllipseBounds ellipseBoundsObject(
+      minRad1, minRad2, maxRad1, maxRad2, averagePhi, phiSector);
   EllipseBounds similarlyConstructeEllipseBoundsObject(
       minRad1, minRad2, maxRad1, maxRad2, averagePhi, phiSector);
   /// Test operator ==
-  BOOST_CHECK_EQUAL(ellipseBoundsObject,
-                    similarlyConstructeEllipseBoundsObject);
+  BOOST_CHECK_EQUAL(
+      ellipseBoundsObject, similarlyConstructeEllipseBoundsObject);
   //
   /// Test assignment
   EllipseBounds assignedEllipseBoundsObject(11., 12., 17., 18., 1.);

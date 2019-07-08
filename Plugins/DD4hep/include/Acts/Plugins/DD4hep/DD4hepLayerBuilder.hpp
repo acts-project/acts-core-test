@@ -78,8 +78,9 @@ class DD4hepLayerBuilder : public ILayerBuilder {
   /// Constructor
   /// @param config is the configuration struct
   /// @param logger is the logging instance
-  DD4hepLayerBuilder(const Acts::DD4hepLayerBuilder::Config& config,
-                     std::unique_ptr<const Logger> logger);
+  DD4hepLayerBuilder(
+      const Acts::DD4hepLayerBuilder::Config& config,
+      std::unique_ptr<const Logger> logger);
   /// Destructor
   ~DD4hepLayerBuilder() override;
 
@@ -126,7 +127,10 @@ class DD4hepLayerBuilder : public ILayerBuilder {
   std::unique_ptr<const Logger> m_logger;
 
   /// Private access to the logger
-  const Logger& logger() const { return *m_logger; }
+  const Logger&
+  logger() const {
+    return *m_logger;
+  }
 
   /// Private helper function collecting all sensitive detector elements of a
   /// layer
@@ -148,7 +152,8 @@ class DD4hepLayerBuilder : public ILayerBuilder {
   ///        as disc (e.g. for endcaps) this flag should be set to true
   /// @param axes the orientation of the modules to the Acts frame
   std::shared_ptr<const Acts::Surface> createSensitiveSurface(
-      const dd4hep::DetElement& detElement, bool isDisc = false,
+      const dd4hep::DetElement& detElement,
+      bool isDisc = false,
       const std::string& axes = "XYZ") const;
 
   // Private helper function to convert the TGeo transformation matrix into
@@ -159,11 +164,13 @@ class DD4hepLayerBuilder : public ILayerBuilder {
       const TGeoMatrix* tGeoTrans) const;
 };
 
-inline const std::string& DD4hepLayerBuilder::identification() const {
+inline const std::string&
+DD4hepLayerBuilder::identification() const {
   return m_cfg.configurationName;
 }
 
-inline DD4hepLayerBuilder::Config DD4hepLayerBuilder::getConfiguration() const {
+inline DD4hepLayerBuilder::Config
+DD4hepLayerBuilder::getConfiguration() const {
   return m_cfg;
 }
 

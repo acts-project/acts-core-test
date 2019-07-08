@@ -138,15 +138,18 @@ class TrapezoidBounds : public PlanarBounds {
   RectangleBounds m_boundingBox;
 };
 
-inline double TrapezoidBounds::minHalflengthX() const {
+inline double
+TrapezoidBounds::minHalflengthX() const {
   return m_minHalfX;
 }
 
-inline double TrapezoidBounds::maxHalflengthX() const {
+inline double
+TrapezoidBounds::maxHalflengthX() const {
   return m_maxHalfX;
 }
 
-inline double TrapezoidBounds::halflengthY() const {
+inline double
+TrapezoidBounds::halflengthY() const {
   return m_halfY;
 }
 

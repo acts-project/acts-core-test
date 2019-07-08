@@ -127,16 +127,19 @@ BOOST_AUTO_TEST_CASE(zscan_finder_test) {
       (*covMat) << resD0 * resD0, 0., 0., 0., 0., 0., 0., resZ0 * resZ0, 0., 0.,
           0., 0., 0., 0., resPh * resPh, 0., 0., 0., 0., 0., 0., resTh * resTh,
           0., 0., 0., 0., 0., 0., resQp * resQp, 0., 0., 0., 0., 0., 0., 1.;
-      tracks.push_back(BoundParameters(tgContext, std::move(covMat), paramVec,
-                                       perigeeSurface));
+      tracks.push_back(BoundParameters(
+          tgContext, std::move(covMat), paramVec, perigeeSurface));
     }
 
-    ZScanVertexFinder<ConstantBField, BoundParameters,
-                      Propagator<EigenStepper<ConstantBField>>>::Config
-        cfg(propagator);
+    ZScanVertexFinder<
+        ConstantBField,
+        BoundParameters,
+        Propagator<EigenStepper<ConstantBField>>>::Config cfg(propagator);
 
-    ZScanVertexFinder<ConstantBField, BoundParameters,
-                      Propagator<EigenStepper<ConstantBField>>>
+    ZScanVertexFinder<
+        ConstantBField,
+        BoundParameters,
+        Propagator<EigenStepper<ConstantBField>>>
         finder(std::move(cfg));
 
     VertexFinderOptions<BoundParameters> vFinderOptions(tgContext, mfContext);
@@ -157,7 +160,10 @@ BOOST_AUTO_TEST_CASE(zscan_finder_test) {
 struct InputTrack {
   InputTrack(const BoundParameters& params) : m_parameters(params) {}
 
-  const BoundParameters& parameters() const { return m_parameters; }
+  const BoundParameters&
+  parameters() const {
+    return m_parameters;
+  }
 
   // store e.g. link to original objects here
 
@@ -229,21 +235,24 @@ BOOST_AUTO_TEST_CASE(zscan_finder_usertrack_test) {
       (*covMat) << resD0 * resD0, 0., 0., 0., 0., 0., 0., resZ0 * resZ0, 0., 0.,
           0., 0., 0., 0., resPh * resPh, 0., 0., 0., 0., 0., 0., resTh * resTh,
           0., 0., 0., 0., 0., 0., resQp * resQp, 0., 0., 0., 0., 0., 0., 1.;
-      tracks.push_back(InputTrack(BoundParameters(tgContext, std::move(covMat),
-                                                  paramVec, perigeeSurface)));
+      tracks.push_back(InputTrack(BoundParameters(
+          tgContext, std::move(covMat), paramVec, perigeeSurface)));
     }
 
-    ZScanVertexFinder<ConstantBField, InputTrack,
-                      Propagator<EigenStepper<ConstantBField>>>::Config
-        cfg(propagator);
+    ZScanVertexFinder<
+        ConstantBField,
+        InputTrack,
+        Propagator<EigenStepper<ConstantBField>>>::Config cfg(propagator);
 
     // Create a custom std::function to extract BoundParameters from
     // user-defined InputTrack
     std::function<BoundParameters(InputTrack)> extractParameters =
         [](InputTrack params) { return params.parameters(); };
 
-    ZScanVertexFinder<ConstantBField, InputTrack,
-                      Propagator<EigenStepper<ConstantBField>>>
+    ZScanVertexFinder<
+        ConstantBField,
+        InputTrack,
+        Propagator<EigenStepper<ConstantBField>>>
         finder(std::move(cfg), extractParameters);
 
     VertexFinderOptions<InputTrack> vFinderOptions(tgContext, mfContext);

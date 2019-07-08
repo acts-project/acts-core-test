@@ -33,7 +33,8 @@ class IBinFinder {
   /// containing bottom resp. top space points that can be combined with the
   /// middle space points from the provided bin
   virtual std::vector<size_t> findBins(
-      size_t phiBin, size_t zBin,
+      size_t phiBin,
+      size_t zBin,
       const SpacePointGrid<SpacePoint>* binnedSP) = 0;
 };
 }  // namespace Acts

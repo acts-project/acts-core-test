@@ -65,8 +65,9 @@ BOOST_AUTO_TEST_CASE(grid_test_1d_equidistant) {
   BOOST_CHECK_EQUAL(g.globalBinFromLocalBins({{4}}), 4u);
   BOOST_CHECK_EQUAL(g.globalBinFromLocalBins({{5}}), 5u);
 
-  BOOST_CHECK(g.localBinsFromGlobalBin(
-                  g.globalBinFromPosition(Point({{2.7}}))) == indices({{3}}));
+  BOOST_CHECK(
+      g.localBinsFromGlobalBin(g.globalBinFromPosition(Point({{2.7}}))) ==
+      indices({{3}}));
 
   // inside checks
   BOOST_CHECK(not g.isInside(Point({{-2.}})));
@@ -231,8 +232,9 @@ BOOST_AUTO_TEST_CASE(grid_test_2d_equidistant) {
   BOOST_CHECK_EQUAL(g.globalBinFromLocalBins({{5, 3}}), 28u);
   BOOST_CHECK_EQUAL(g.globalBinFromLocalBins({{5, 4}}), 29u);
 
-  BOOST_CHECK(g.localBinsFromGlobalBin(g.globalBinFromPosition(
-                  Point({{1.2, 0.7}}))) == indices({{2, 1}}));
+  BOOST_CHECK(
+      g.localBinsFromGlobalBin(g.globalBinFromPosition(Point({{1.2, 0.7}}))) ==
+      indices({{2, 1}}));
 
   // inside checks
   BOOST_CHECK(not g.isInside(Point({{-2., -1}})));
@@ -385,8 +387,9 @@ BOOST_AUTO_TEST_CASE(grid_test_3d_equidistant) {
   BOOST_CHECK_EQUAL(g.globalBinFromLocalBins({{3, 4, 2}}), 78u);
   BOOST_CHECK_EQUAL(g.globalBinFromLocalBins({{3, 4, 3}}), 79u);
 
-  BOOST_CHECK(g.localBinsFromGlobalBin(g.globalBinFromPosition(
-                  Point({{1.2, 0.7, 1.4}}))) == indices({{2, 1, 2}}));
+  BOOST_CHECK(
+      g.localBinsFromGlobalBin(g.globalBinFromPosition(
+          Point({{1.2, 0.7, 1.4}}))) == indices({{2, 1, 2}}));
 
   // inside checks
   BOOST_CHECK(not g.isInside(Point({{-2., -1, -2}})));
@@ -415,14 +418,14 @@ BOOST_AUTO_TEST_CASE(grid_test_3d_equidistant) {
   CHECK_CLOSE_ABS(g.lowerLeftBinEdge({{2, 2, 1}}), Point({{1., 1., 0.}}), 1e-6);
 
   // test some upper right-bin edges
-  CHECK_CLOSE_ABS(g.upperRightBinEdge({{1, 1, 1}}), Point({{1., 1., 1.}}),
-                  1e-6);
-  CHECK_CLOSE_ABS(g.upperRightBinEdge({{2, 3, 2}}), Point({{2., 3., 2.}}),
-                  1e-6);
-  CHECK_CLOSE_ABS(g.upperRightBinEdge({{1, 1, 2}}), Point({{1., 1., 2.}}),
-                  1e-6);
-  CHECK_CLOSE_ABS(g.upperRightBinEdge({{2, 2, 1}}), Point({{2., 2., 1.}}),
-                  1e-6);
+  CHECK_CLOSE_ABS(
+      g.upperRightBinEdge({{1, 1, 1}}), Point({{1., 1., 1.}}), 1e-6);
+  CHECK_CLOSE_ABS(
+      g.upperRightBinEdge({{2, 3, 2}}), Point({{2., 3., 2.}}), 1e-6);
+  CHECK_CLOSE_ABS(
+      g.upperRightBinEdge({{1, 1, 2}}), Point({{1., 1., 2.}}), 1e-6);
+  CHECK_CLOSE_ABS(
+      g.upperRightBinEdge({{2, 2, 1}}), Point({{2., 2., 1.}}), 1e-6);
 
   // initialize grid
   for (size_t bin = 0; bin < g.size(); ++bin) {
@@ -470,8 +473,9 @@ BOOST_AUTO_TEST_CASE(grid_test_1d_variable) {
   BOOST_CHECK_EQUAL(g.globalBinFromLocalBins({{2}}), 2u);
   BOOST_CHECK_EQUAL(g.globalBinFromLocalBins({{3}}), 3u);
 
-  BOOST_CHECK(g.localBinsFromGlobalBin(
-                  g.globalBinFromPosition(Point({{0.8}}))) == indices({{1}}));
+  BOOST_CHECK(
+      g.localBinsFromGlobalBin(g.globalBinFromPosition(Point({{0.8}}))) ==
+      indices({{1}}));
 
   // inside checks
   BOOST_CHECK(not g.isInside(Point({{-2.}})));
@@ -581,8 +585,9 @@ BOOST_AUTO_TEST_CASE(grid_test_2d_variable) {
   BOOST_CHECK_EQUAL(g.globalBinFromLocalBins({{3, 2}}), 14u);
   BOOST_CHECK_EQUAL(g.globalBinFromLocalBins({{3, 3}}), 15u);
 
-  BOOST_CHECK(g.localBinsFromGlobalBin(g.globalBinFromPosition(
-                  Point({{3.2, 1.8}}))) == indices({{3, 2}}));
+  BOOST_CHECK(
+      g.localBinsFromGlobalBin(g.globalBinFromPosition(Point({{3.2, 1.8}}))) ==
+      indices({{3, 2}}));
 
   // inside checks
   BOOST_CHECK(not g.isInside(Point({{-2., -1}})));
@@ -705,8 +710,9 @@ BOOST_AUTO_TEST_CASE(grid_test_3d_variable) {
   BOOST_CHECK_EQUAL(g.globalBinFromLocalBins({{1, 3, 4}}), 39u);
   BOOST_CHECK_EQUAL(g.globalBinFromLocalBins({{2, 3, 4}}), 59u);
 
-  BOOST_CHECK(g.localBinsFromGlobalBin(g.globalBinFromPosition(
-                  Point({{1.8, 0.7, 3.2}}))) == indices({{2, 2, 3}}));
+  BOOST_CHECK(
+      g.localBinsFromGlobalBin(g.globalBinFromPosition(
+          Point({{1.8, 0.7, 3.2}}))) == indices({{2, 2, 3}}));
 
   // inside checks
   BOOST_CHECK(not g.isInside(Point({{-2., -1, -2}})));
@@ -732,29 +738,29 @@ BOOST_AUTO_TEST_CASE(grid_test_3d_variable) {
 
   // test some lower-left bin edges
   CHECK_CLOSE_ABS(g.lowerLeftBinEdge({{1, 1, 1}}), Point({{0., 0., 0.}}), 1e-6);
-  CHECK_CLOSE_ABS(g.lowerLeftBinEdge({{1, 1, 2}}), Point({{0., 0., 0.5}}),
-                  1e-6);
+  CHECK_CLOSE_ABS(
+      g.lowerLeftBinEdge({{1, 1, 2}}), Point({{0., 0., 0.5}}), 1e-6);
   CHECK_CLOSE_ABS(g.lowerLeftBinEdge({{1, 1, 3}}), Point({{0., 0., 3.}}), 1e-6);
-  CHECK_CLOSE_ABS(g.lowerLeftBinEdge({{1, 2, 1}}), Point({{0., 0.5, 0.}}),
-                  1e-6);
-  CHECK_CLOSE_ABS(g.lowerLeftBinEdge({{1, 2, 2}}), Point({{0., 0.5, 0.5}}),
-                  1e-6);
-  CHECK_CLOSE_ABS(g.lowerLeftBinEdge({{1, 2, 3}}), Point({{0., 0.5, 3.}}),
-                  1e-6);
+  CHECK_CLOSE_ABS(
+      g.lowerLeftBinEdge({{1, 2, 1}}), Point({{0., 0.5, 0.}}), 1e-6);
+  CHECK_CLOSE_ABS(
+      g.lowerLeftBinEdge({{1, 2, 2}}), Point({{0., 0.5, 0.5}}), 1e-6);
+  CHECK_CLOSE_ABS(
+      g.lowerLeftBinEdge({{1, 2, 3}}), Point({{0., 0.5, 3.}}), 1e-6);
 
   // test some upper right-bin edges
-  CHECK_CLOSE_ABS(g.upperRightBinEdge({{1, 1, 1}}), Point({{1., 0.5, 0.5}}),
-                  1e-6);
-  CHECK_CLOSE_ABS(g.upperRightBinEdge({{1, 1, 2}}), Point({{1., 0.5, 3.}}),
-                  1e-6);
-  CHECK_CLOSE_ABS(g.upperRightBinEdge({{1, 1, 3}}), Point({{1., 0.5, 3.3}}),
-                  1e-6);
-  CHECK_CLOSE_ABS(g.upperRightBinEdge({{1, 2, 1}}), Point({{1., 3., 0.5}}),
-                  1e-6);
-  CHECK_CLOSE_ABS(g.upperRightBinEdge({{1, 2, 2}}), Point({{1., 3., 3.}}),
-                  1e-6);
-  CHECK_CLOSE_ABS(g.upperRightBinEdge({{1, 2, 3}}), Point({{1., 3., 3.3}}),
-                  1e-6);
+  CHECK_CLOSE_ABS(
+      g.upperRightBinEdge({{1, 1, 1}}), Point({{1., 0.5, 0.5}}), 1e-6);
+  CHECK_CLOSE_ABS(
+      g.upperRightBinEdge({{1, 1, 2}}), Point({{1., 0.5, 3.}}), 1e-6);
+  CHECK_CLOSE_ABS(
+      g.upperRightBinEdge({{1, 1, 3}}), Point({{1., 0.5, 3.3}}), 1e-6);
+  CHECK_CLOSE_ABS(
+      g.upperRightBinEdge({{1, 2, 1}}), Point({{1., 3., 0.5}}), 1e-6);
+  CHECK_CLOSE_ABS(
+      g.upperRightBinEdge({{1, 2, 2}}), Point({{1., 3., 3.}}), 1e-6);
+  CHECK_CLOSE_ABS(
+      g.upperRightBinEdge({{1, 2, 3}}), Point({{1., 3., 3.3}}), 1e-6);
 
   // initialize grid
   for (size_t bin = 0; bin < g.size(); ++bin) {
@@ -868,8 +874,9 @@ BOOST_AUTO_TEST_CASE(grid_test_2d_mixed) {
   BOOST_CHECK_EQUAL(g.globalBinFromLocalBins({{5, 2}}), 22u);
   BOOST_CHECK_EQUAL(g.globalBinFromLocalBins({{5, 3}}), 23u);
 
-  BOOST_CHECK(g.localBinsFromGlobalBin(g.globalBinFromPosition(
-                  Point({{1.1, 1.7}}))) == indices({{5, 2}}));
+  BOOST_CHECK(
+      g.localBinsFromGlobalBin(g.globalBinFromPosition(Point({{1.1, 1.7}}))) ==
+      indices({{5, 2}}));
 
   // inside checks
   BOOST_CHECK(not g.isInside(Point({{-2., -1}})));
@@ -1081,14 +1088,18 @@ BOOST_AUTO_TEST_CASE(neighborhood) {
   EAxisClosed d(0.0, 1.0, 10u);
 
   Grid1Closed_t g1Cl(std::make_tuple(std::move(d)));
-  BOOST_CHECK(g1Cl.neighborHoodIndices({{0}}, 1).collect() ==
-              bins_t({}));  // underflow, makes no sense
-  BOOST_CHECK(g1Cl.neighborHoodIndices({{11}}, 1).collect() ==
-              bins_t({}));  // overflow, makes no sense
-  BOOST_CHECK(g1Cl.neighborHoodIndices({{1}}, 1).collect() ==
-              bins_t({10, 1, 2}));  // overflow, makes no sense
-  BOOST_CHECK(g1Cl.neighborHoodIndices({{5}}, 1).collect() ==
-              bins_t({4, 5, 6}));  // overflow, makes no sense
+  BOOST_CHECK(
+      g1Cl.neighborHoodIndices({{0}}, 1).collect() ==
+      bins_t({}));  // underflow, makes no sense
+  BOOST_CHECK(
+      g1Cl.neighborHoodIndices({{11}}, 1).collect() ==
+      bins_t({}));  // overflow, makes no sense
+  BOOST_CHECK(
+      g1Cl.neighborHoodIndices({{1}}, 1).collect() ==
+      bins_t({10, 1, 2}));  // overflow, makes no sense
+  BOOST_CHECK(
+      g1Cl.neighborHoodIndices({{5}}, 1).collect() ==
+      bins_t({4, 5, 6}));  // overflow, makes no sense
 
   using Grid2Closed_t = Grid<double, EAxisClosed, EAxisClosed>;
   // typedef Grid<double, EAxisClosed, EAxisClosed, EAxisClosed>
@@ -1097,32 +1108,42 @@ BOOST_AUTO_TEST_CASE(neighborhood) {
   EAxisClosed f(0.0, 1.0, 5u);
   EAxisClosed g(0.0, 1.0, 5u);
   Grid2Closed_t g2Cl(std::make_tuple(std::move(e), std::move(f)));
-  BOOST_CHECK(g2Cl.neighborHoodIndices({{3, 3}}, 1).collect() ==
-              bins_t({16, 17, 18, 23, 24, 25, 30, 31, 32}));
-  BOOST_CHECK(g2Cl.neighborHoodIndices({{1, 1}}, 1).collect() ==
-              bins_t({40, 36, 37, 12, 8, 9, 19, 15, 16}));
-  BOOST_CHECK(g2Cl.neighborHoodIndices({{1, 5}}, 1).collect() ==
-              bins_t({39, 40, 36, 11, 12, 8, 18, 19, 15}));
-  BOOST_CHECK(g2Cl.neighborHoodIndices({{5, 1}}, 1).collect() ==
-              bins_t({33, 29, 30, 40, 36, 37, 12, 8, 9}));
-  BOOST_CHECK(g2Cl.neighborHoodIndices({{5, 5}}, 1).collect() ==
-              bins_t({32, 33, 29, 39, 40, 36, 11, 12, 8}));
+  BOOST_CHECK(
+      g2Cl.neighborHoodIndices({{3, 3}}, 1).collect() ==
+      bins_t({16, 17, 18, 23, 24, 25, 30, 31, 32}));
+  BOOST_CHECK(
+      g2Cl.neighborHoodIndices({{1, 1}}, 1).collect() ==
+      bins_t({40, 36, 37, 12, 8, 9, 19, 15, 16}));
+  BOOST_CHECK(
+      g2Cl.neighborHoodIndices({{1, 5}}, 1).collect() ==
+      bins_t({39, 40, 36, 11, 12, 8, 18, 19, 15}));
+  BOOST_CHECK(
+      g2Cl.neighborHoodIndices({{5, 1}}, 1).collect() ==
+      bins_t({33, 29, 30, 40, 36, 37, 12, 8, 9}));
+  BOOST_CHECK(
+      g2Cl.neighborHoodIndices({{5, 5}}, 1).collect() ==
+      bins_t({32, 33, 29, 39, 40, 36, 11, 12, 8}));
 
-  BOOST_CHECK(g2Cl.neighborHoodIndices({{3, 3}}, 2).collect() ==
-              bins_t({8,  9,  10, 11, 12, 15, 16, 17, 18, 19, 22, 23, 24,
-                      25, 26, 29, 30, 31, 32, 33, 36, 37, 38, 39, 40}));
-  BOOST_CHECK(g2Cl.neighborHoodIndices({{1, 1}}, 2).collect() ==
-              bins_t({32, 33, 29, 30, 31, 39, 40, 36, 37, 38, 11, 12, 8,
-                      9,  10, 18, 19, 15, 16, 17, 25, 26, 22, 23, 24}));
-  BOOST_CHECK(g2Cl.neighborHoodIndices({{1, 5}}, 2).collect() ==
-              bins_t({31, 32, 33, 29, 30, 38, 39, 40, 36, 37, 10, 11, 12,
-                      8,  9,  17, 18, 19, 15, 16, 24, 25, 26, 22, 23}));
-  BOOST_CHECK(g2Cl.neighborHoodIndices({{5, 1}}, 2).collect() ==
-              bins_t({25, 26, 22, 23, 24, 32, 33, 29, 30, 31, 39, 40, 36,
-                      37, 38, 11, 12, 8,  9,  10, 18, 19, 15, 16, 17}));
-  BOOST_CHECK(g2Cl.neighborHoodIndices({{5, 5}}, 2).collect() ==
-              bins_t({24, 25, 26, 22, 23, 31, 32, 33, 29, 30, 38, 39, 40,
-                      36, 37, 10, 11, 12, 8,  9,  17, 18, 19, 15, 16}));
+  BOOST_CHECK(
+      g2Cl.neighborHoodIndices({{3, 3}}, 2).collect() ==
+      bins_t({8,  9,  10, 11, 12, 15, 16, 17, 18, 19, 22, 23, 24,
+              25, 26, 29, 30, 31, 32, 33, 36, 37, 38, 39, 40}));
+  BOOST_CHECK(
+      g2Cl.neighborHoodIndices({{1, 1}}, 2).collect() ==
+      bins_t({32, 33, 29, 30, 31, 39, 40, 36, 37, 38, 11, 12, 8,
+              9,  10, 18, 19, 15, 16, 17, 25, 26, 22, 23, 24}));
+  BOOST_CHECK(
+      g2Cl.neighborHoodIndices({{1, 5}}, 2).collect() ==
+      bins_t({31, 32, 33, 29, 30, 38, 39, 40, 36, 37, 10, 11, 12,
+              8,  9,  17, 18, 19, 15, 16, 24, 25, 26, 22, 23}));
+  BOOST_CHECK(
+      g2Cl.neighborHoodIndices({{5, 1}}, 2).collect() ==
+      bins_t({25, 26, 22, 23, 24, 32, 33, 29, 30, 31, 39, 40, 36,
+              37, 38, 11, 12, 8,  9,  10, 18, 19, 15, 16, 17}));
+  BOOST_CHECK(
+      g2Cl.neighborHoodIndices({{5, 5}}, 2).collect() ==
+      bins_t({24, 25, 26, 22, 23, 31, 32, 33, 29, 30, 38, 39, 40,
+              36, 37, 10, 11, 12, 8,  9,  17, 18, 19, 15, 16}));
 
   // @TODO 3D test would be nice, but should essentially not be a problem if
   // 2D works.

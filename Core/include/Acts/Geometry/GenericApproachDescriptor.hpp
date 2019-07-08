@@ -61,8 +61,11 @@ class GenericApproachDescriptor : public ApproachDescriptor {
   ///
   /// @return : a boolean indicating if an actual intersection had been tried
   ObjectIntersection<Surface> approachSurface(
-      const GeometryContext& gctx, const Vector3D& gpos, const Vector3D& gdir,
-      NavigationDirection navDir, const BoundaryCheck& bcheck,
+      const GeometryContext& gctx,
+      const Vector3D& gpos,
+      const Vector3D& gdir,
+      NavigationDirection navDir,
+      const BoundaryCheck& bcheck,
       CorrFnc corrfnc = nullptr) const override;
 
   /// return all contained surfaces of this approach descriptor

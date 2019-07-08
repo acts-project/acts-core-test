@@ -10,28 +10,37 @@
 // PlaneSurface.ipp, Acts project
 ///////////////////////////////////////////////////////////////////
 
-inline const Vector3D PlaneSurface::normal(const GeometryContext& gctx,
-                                           const Vector2D& /*lpos*/) const {
+inline const Vector3D
+PlaneSurface::normal(const GeometryContext& gctx, const Vector2D& /*lpos*/)
+    const {
   // fast access via tranform matrix (and not rotation())
   const auto& tMatrix = transform(gctx).matrix();
   return Vector3D(tMatrix(0, 2), tMatrix(1, 2), tMatrix(2, 2));
 }
 
-inline const Vector3D PlaneSurface::binningPosition(
-    const GeometryContext& gctx, BinningValue /*bValue*/) const {
+inline const Vector3D
+PlaneSurface::binningPosition(
+    const GeometryContext& gctx,
+    BinningValue /*bValue*/) const {
   return center(gctx);
 }
 
-inline double PlaneSurface::pathCorrection(const GeometryContext& gctx,
-                                           const Vector3D& pos,
-                                           const Vector3D& mom) const {
+inline double
+PlaneSurface::pathCorrection(
+    const GeometryContext& gctx,
+    const Vector3D& pos,
+    const Vector3D& mom) const {
   /// we can ignore the global position here
   return 1. / std::abs(Surface::normal(gctx, pos).dot(mom.normalized()));
 }
 
-inline Intersection PlaneSurface::intersectionEstimate(
-    const GeometryContext& gctx, const Vector3D& gpos, const Vector3D& gdir,
-    NavigationDirection navDir, const BoundaryCheck& bcheck,
+inline Intersection
+PlaneSurface::intersectionEstimate(
+    const GeometryContext& gctx,
+    const Vector3D& gpos,
+    const Vector3D& gdir,
+    NavigationDirection navDir,
+    const BoundaryCheck& bcheck,
     CorrFnc correct) const {
   // minimize the call to transform()
   const auto& tMatrix = transform(gctx).matrix();

@@ -70,8 +70,9 @@ EigenStepper estepper(bField);
 EigenPropagator epropagator(std::move(estepper), std::move(navigatorES));
 
 StraightLineStepper slstepper;
-StraightLinePropagator slpropagator(std::move(slstepper),
-                                    std::move(navigatorSL));
+StraightLinePropagator slpropagator(
+    std::move(slstepper),
+    std::move(navigatorSL));
 const int ntests = 500;
 const int skip = 0;
 bool debugModeFwd = false;
@@ -90,8 +91,15 @@ bool debugModeBwdStep = false;
 /// @param charge is the charge of the particle
 /// @param index is the run index from the test
 template <typename propagator_t>
-void runTest(const propagator_t& prop, double pT, double phi, double theta,
-             int charge, double time, int index) {
+void
+runTest(
+    const propagator_t& prop,
+    double pT,
+    double phi,
+    double theta,
+    int charge,
+    double time,
+    int index) {
   double dcharge = -1 + 2 * charge;
 
   if (index < skip) {
@@ -222,8 +230,9 @@ void runTest(const propagator_t& prop, double pT, double phi, double theta,
   }
 
   // forward-backward compatibility test
-  BOOST_CHECK_EQUAL(bwdMaterial.materialInteractions.size(),
-                    fwdMaterial.materialInteractions.size());
+  BOOST_CHECK_EQUAL(
+      bwdMaterial.materialInteractions.size(),
+      fwdMaterial.materialInteractions.size());
 
   CHECK_CLOSE_REL(bwdMaterial.materialInX0, fwdMaterial.materialInX0, 1e-3);
   CHECK_CLOSE_REL(bwdMaterial.materialInL0, bwdMaterial.materialInL0, 1e-3);
@@ -411,15 +420,18 @@ void runTest(const propagator_t& prop, double pT, double phi, double theta,
 // - this tests the collection of surfaces
 BOOST_DATA_TEST_CASE(
     test_material_collector,
-    bdata::random((bdata::seed = 20,
-                   bdata::distribution =
-                       std::uniform_real_distribution<>(0.5_GeV, 10_GeV))) ^
-        bdata::random((bdata::seed = 21,
-                       bdata::distribution =
-                           std::uniform_real_distribution<>(-M_PI, M_PI))) ^
-        bdata::random((bdata::seed = 22,
-                       bdata::distribution =
-                           std::uniform_real_distribution<>(1.0, M_PI - 1.0))) ^
+    bdata::random(
+        (bdata::seed = 20,
+         bdata::distribution =
+             std::uniform_real_distribution<>(0.5_GeV, 10_GeV))) ^
+        bdata::random(
+            (bdata::seed = 21,
+             bdata::distribution =
+                 std::uniform_real_distribution<>(-M_PI, M_PI))) ^
+        bdata::random(
+            (bdata::seed = 22,
+             bdata::distribution =
+                 std::uniform_real_distribution<>(1.0, M_PI - 1.0))) ^
         bdata::random(
             (bdata::seed = 23,
              bdata::distribution = std::uniform_int_distribution<>(0, 1))) ^
@@ -427,7 +439,12 @@ BOOST_DATA_TEST_CASE(
             (bdata::seed = 24,
              bdata::distribution = std::uniform_int_distribution<>(0, 100))) ^
         bdata::xrange(ntests),
-    pT, phi, theta, charge, time, index) {
+    pT,
+    phi,
+    theta,
+    charge,
+    time,
+    index) {
   runTest(epropagator, pT, phi, theta, charge, time, index);
   runTest(slpropagator, pT, phi, theta, charge, time, index);
 }

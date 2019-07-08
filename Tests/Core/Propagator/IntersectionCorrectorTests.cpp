@@ -56,10 +56,10 @@ BOOST_AUTO_TEST_CASE(RelativePathCorrectorTests) {
   Vector3D d0p = Vector3D(-2., 9., 0.).normalized();
   double pathp = 13.;
 
-  auto intersect = [&tgContext, &position, &direction,
-                    &plane]() -> Intersection {
-    auto pi = plane->intersectionEstimate(tgContext, position, direction,
-                                          forward, false);
+  auto intersect =
+      [&tgContext, &position, &direction, &plane]() -> Intersection {
+    auto pi = plane->intersectionEstimate(
+        tgContext, position, direction, forward, false);
     std::cout << "Interseciton it at " << toString(pi.position) << std::endl;
     return pi;
   };

@@ -39,8 +39,9 @@ struct AlignmentContext {
   AlignmentContext() {}
 
   /// Constructor with Store and context index
-  AlignmentContext(std::shared_ptr<const std::array<Transform3D, 2>> aStore,
-                   unsigned int aIndex = 0)
+  AlignmentContext(
+      std::shared_ptr<const std::array<Transform3D, 2>> aStore,
+      unsigned int aIndex = 0)
       : alignmentStore(std::move(aStore)), alignmentIndex(aIndex) {}
 };
 
@@ -59,9 +60,10 @@ class AlignableDetectorElement : public DetectorElementBase {
   /// @param transform is the transform that element the layer in 3D frame
   /// @param pBounds is the planar bounds for the planar detector element
   /// @param thickness is the module thickness
-  AlignableDetectorElement(std::shared_ptr<const Transform3D> transform,
-                           std::shared_ptr<const PlanarBounds> pBounds,
-                           double thickness)
+  AlignableDetectorElement(
+      std::shared_ptr<const Transform3D> transform,
+      std::shared_ptr<const PlanarBounds> pBounds,
+      double thickness)
       : DetectorElementBase(),
         m_elementTransform(std::move(transform)),
         m_elementThickness(thickness) {
@@ -95,8 +97,8 @@ class AlignableDetectorElement : public DetectorElementBase {
   double m_elementThickness{0.};
 };
 
-inline const Transform3D& AlignableDetectorElement::transform(
-    const GeometryContext& gctx) const {
+inline const Transform3D&
+AlignableDetectorElement::transform(const GeometryContext& gctx) const {
   auto alignContext = std::any_cast<AlignmentContext>(gctx);
   if (alignContext.alignmentStore != nullptr and
       alignContext.alignmentIndex < 2) {
@@ -105,11 +107,13 @@ inline const Transform3D& AlignableDetectorElement::transform(
   return (*m_elementTransform);
 }
 
-inline const Surface& AlignableDetectorElement::surface() const {
+inline const Surface&
+AlignableDetectorElement::surface() const {
   return *m_elementSurface;
 }
 
-inline double AlignableDetectorElement::thickness() const {
+inline double
+AlignableDetectorElement::thickness() const {
   return m_elementThickness;
 }
 
@@ -147,7 +151,8 @@ BOOST_AUTO_TEST_CASE(AlignmentContextTests) {
   // The detector element at nominal position
   AlignableDetectorElement alignedElement(
       std::make_shared<const Transform3D>(Transform3D::Identity()),
-      std::make_shared<const RectangleBounds>(100_cm, 100_cm), 1_mm);
+      std::make_shared<const RectangleBounds>(100_cm, 100_cm),
+      1_mm);
 
   const auto& alignedSurface = alignedElement.surface();
 
@@ -178,25 +183,25 @@ BOOST_AUTO_TEST_CASE(AlignmentContextTests) {
       alignedSurface.isOnSurface(positiveContext, onPositive, dummyMomentum));
 
   // Test local to Global and vice versa
-  alignedSurface.localToGlobal(defaultContext, localPosition, dummyMomentum,
-                               globalPosition);
+  alignedSurface.localToGlobal(
+      defaultContext, localPosition, dummyMomentum, globalPosition);
   BOOST_CHECK_EQUAL(globalPosition, onNominal);
-  alignedSurface.globalToLocal(defaultContext, onNominal, dummyMomentum,
-                               localPosition);
+  alignedSurface.globalToLocal(
+      defaultContext, onNominal, dummyMomentum, localPosition);
   BOOST_CHECK_EQUAL(localPosition, Vector2D(3., 3.));
 
-  alignedSurface.localToGlobal(negativeContext, localPosition, dummyMomentum,
-                               globalPosition);
+  alignedSurface.localToGlobal(
+      negativeContext, localPosition, dummyMomentum, globalPosition);
   BOOST_CHECK_EQUAL(globalPosition, onNegative);
-  alignedSurface.globalToLocal(negativeContext, onNegative, dummyMomentum,
-                               localPosition);
+  alignedSurface.globalToLocal(
+      negativeContext, onNegative, dummyMomentum, localPosition);
   BOOST_CHECK_EQUAL(localPosition, Vector2D(3., 3.));
 
-  alignedSurface.localToGlobal(positiveContext, localPosition, dummyMomentum,
-                               globalPosition);
+  alignedSurface.localToGlobal(
+      positiveContext, localPosition, dummyMomentum, globalPosition);
   BOOST_CHECK_EQUAL(globalPosition, onPositive);
-  alignedSurface.globalToLocal(positiveContext, onPositive, dummyMomentum,
-                               localPosition);
+  alignedSurface.globalToLocal(
+      positiveContext, onPositive, dummyMomentum, localPosition);
   BOOST_CHECK_EQUAL(localPosition, Vector2D(3., 3.));
 }
 

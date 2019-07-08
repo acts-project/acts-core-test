@@ -57,7 +57,8 @@ BOOST_AUTO_TEST_CASE(gain_matrix_updator) {
   BoundParameters pars(
       tgContext,
       std::make_unique<const BoundParameters::CovMatrix_t>(std::move(covTrk)),
-      parValues, cylinder);
+      parValues,
+      cylinder);
 
   // "update" track state with "prediction"
   mState.parameter.predicted = std::move(pars);
@@ -78,8 +79,8 @@ BOOST_AUTO_TEST_CASE(gain_matrix_updator) {
   BOOST_CHECK_EQUAL(
       MeasurementHelpers::getSurface(*mState.measurement.calibrated),
       cylinder.get());
-  BOOST_CHECK_EQUAL(&(*mState.parameter.filtered).referenceSurface(),
-                    cylinder.get());
+  BOOST_CHECK_EQUAL(
+      &(*mState.parameter.filtered).referenceSurface(), cylinder.get());
 
   // Check for regression. This does NOT test if the math is correct, just that
   // the result is the same as when the test was written.

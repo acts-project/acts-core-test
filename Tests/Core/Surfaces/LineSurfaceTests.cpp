@@ -65,8 +65,8 @@ BOOST_AUTO_TEST_CASE(LineSurface_Constructors_test) {
 
   /// Construct with nullptr bounds
   DetectorElementStub detElem;
-  BOOST_CHECK_THROW(LineSurfaceStub nullBounds(nullptr, detElem),
-                    AssertionFailureException);
+  BOOST_CHECK_THROW(
+      LineSurfaceStub nullBounds(nullptr, detElem), AssertionFailureException);
 
   BOOST_TEST_MESSAGE(
       "All LineSurface constructors are callable without problem");
@@ -79,8 +79,8 @@ BOOST_AUTO_TEST_CASE(LineSurface_allNamedMethods_test) {
   auto pTransform = std::make_shared<const Transform3D>(translation);
   LineSurfaceStub line(pTransform, 2.0, 20.);
   Vector3D referencePosition{0., 1., 2.};
-  CHECK_CLOSE_ABS(referencePosition, line.binningPosition(tgContext, binX),
-                  1e-6);
+  CHECK_CLOSE_ABS(
+      referencePosition, line.binningPosition(tgContext, binX), 1e-6);
   //
   // bounds()
   auto pLineBounds = std::make_shared<const LineBounds>(10.0);
@@ -105,13 +105,18 @@ BOOST_AUTO_TEST_CASE(LineSurface_allNamedMethods_test) {
       tgContext, {0., 0., 0.}, direction.normalized(), navDir, bcheck);
   BOOST_CHECK(intersection.valid);
   Vector3D expectedIntersection(0, 1., 2.);
-  CHECK_CLOSE_ABS(intersection.position, expectedIntersection,
-                  1e-6);  // need more tests..
+  CHECK_CLOSE_ABS(
+      intersection.position,
+      expectedIntersection,
+      1e-6);  // need more tests..
   //
   // isOnSurface
   const Vector3D insidePosition{0., 2.5, 0.};
-  BOOST_CHECK(line.isOnSurface(tgContext, insidePosition, mom,
-                               false));  // need better test here
+  BOOST_CHECK(line.isOnSurface(
+      tgContext,
+      insidePosition,
+      mom,
+      false));  // need better test here
   const Vector3D outsidePosition{100., 100., 200.};
   BOOST_CHECK(!line.isOnSurface(tgContext, outsidePosition, mom, true));
   //
@@ -119,8 +124,8 @@ BOOST_AUTO_TEST_CASE(LineSurface_allNamedMethods_test) {
   Vector3D returnedGlobalPosition{0., 0., 0.};
   // Vector2D localPosition{0., 0.};
   const Vector3D momentum{300., 200., 0.};  // find better values!
-  line.localToGlobal(tgContext, localPosition, momentum,
-                     returnedGlobalPosition);
+  line.localToGlobal(
+      tgContext, localPosition, momentum, returnedGlobalPosition);
   const Vector3D expectedGlobalPosition{0, 1, 0};
   CHECK_CLOSE_ABS(returnedGlobalPosition, expectedGlobalPosition, 1e-6);
   //
@@ -134,8 +139,8 @@ BOOST_AUTO_TEST_CASE(LineSurface_allNamedMethods_test) {
   expectedRotationMatrix << -v1, 0., v0, v0, 0., v1, 0., 1., -0.;
   // std::cout<<returnedRotationMatrix<<std::endl;
   // std::cout<<expectedRotationMatrix<<std::endl;
-  CHECK_CLOSE_OR_SMALL(returnedRotationMatrix, expectedRotationMatrix, 1e-6,
-                       1e-9);
+  CHECK_CLOSE_OR_SMALL(
+      returnedRotationMatrix, expectedRotationMatrix, 1e-6, 1e-9);
   //
   // name()
   boost::test_tools::output_test_stream output;
@@ -148,8 +153,8 @@ BOOST_AUTO_TEST_CASE(LineSurface_allNamedMethods_test) {
   //
   // pathCorrection
   auto any3DVector = normalVector;
-  CHECK_CLOSE_REL(line.pathCorrection(tgContext, any3DVector, any3DVector), 1.,
-                  1e-6);
+  CHECK_CLOSE_REL(
+      line.pathCorrection(tgContext, any3DVector, any3DVector), 1., 1e-6);
 }
 /// Unit test for testing LineSurface assignment
 BOOST_AUTO_TEST_CASE(LineSurface_assignment_test) {

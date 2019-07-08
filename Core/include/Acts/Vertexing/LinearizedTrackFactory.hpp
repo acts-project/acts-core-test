@@ -39,9 +39,11 @@ namespace Acts {
 /// @tparam propagator_t Propagator type
 /// @tparam action_list_t Propagator action list type
 /// @tparam aborter_list_t Propagator aborter list type
-template <typename bfield_t, typename propagator_t,
-          typename action_list_t = ActionList<>,
-          typename aborter_list_t = AbortList<>>
+template <
+    typename bfield_t,
+    typename propagator_t,
+    typename action_list_t = ActionList<>,
+    typename aborter_list_t = AbortList<>>
 class LinearizedTrackFactory {
  public:
   struct Config {
@@ -64,11 +66,12 @@ class LinearizedTrackFactory {
   /// @param propagator Propagator
   ///
   /// @return Linearized track
-  Result<LinearizedTrack> linearizeTrack(const GeometryContext& gctx,
-                                         const MagneticFieldContext& mctx,
-                                         const BoundParameters* params,
-                                         const SpacePointVector& linPoint,
-                                         const propagator_t& propagator) const;
+  Result<LinearizedTrack> linearizeTrack(
+      const GeometryContext& gctx,
+      const MagneticFieldContext& mctx,
+      const BoundParameters* params,
+      const SpacePointVector& linPoint,
+      const propagator_t& propagator) const;
 
  private:
   // Configuration object

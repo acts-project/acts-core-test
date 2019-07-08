@@ -50,8 +50,9 @@ class TrackingGeometry {
   /// @param highestVolume is the world volume
   /// @param materialDecorator is a dediated decorator that can assign
   ///        surface or volume based material to the TrackingVolume
-  TrackingGeometry(const MutableTrackingVolumePtr& highestVolume,
-                   const IMaterialDecorator* materialDecorator = nullptr);
+  TrackingGeometry(
+      const MutableTrackingVolumePtr& highestVolume,
+      const IMaterialDecorator* materialDecorator = nullptr);
 
   /// Destructor
   ~TrackingGeometry();
@@ -66,8 +67,9 @@ class TrackingGeometry {
   /// @param gp is the global position of the call
   ///
   /// @return plain pointer to the lowest TrackingVolume
-  const TrackingVolume* lowestTrackingVolume(const GeometryContext& gctx,
-                                             const Vector3D& gp) const;
+  const TrackingVolume* lowestTrackingVolume(
+      const GeometryContext& gctx,
+      const Vector3D& gp) const;
 
   /// return the lowest tracking Volume
   ///
@@ -82,8 +84,8 @@ class TrackingGeometry {
   /// @param gp is the global position of the call
   ///
   /// @return plain pointer to assocaiated layer
-  const Layer* associatedLayer(const GeometryContext& gctx,
-                               const Vector3D& gp) const;
+  const Layer* associatedLayer(const GeometryContext& gctx, const Vector3D& gp)
+      const;
 
   /// Register the beam tube
   ///

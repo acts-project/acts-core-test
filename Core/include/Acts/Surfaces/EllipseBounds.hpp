@@ -52,9 +52,13 @@ class EllipseBounds : public PlanarBounds {
   /// @param maxRadius1 is the minimum radius at coorindate 1
   /// @param averagePhi average phi (is set to 0. as default)
   /// @param halfPhi    spanning phi sector (is set to pi as default)
-  EllipseBounds(double minRadius0, double minRadius1, double maxRadius0,
-                double maxRadius1, double averagePhi = 0.,
-                double halfPhi = M_PI);
+  EllipseBounds(
+      double minRadius0,
+      double minRadius1,
+      double maxRadius0,
+      double maxRadius1,
+      double averagePhi = 0.,
+      double halfPhi = M_PI);
 
   ~EllipseBounds() override;
 
@@ -111,27 +115,33 @@ class EllipseBounds : public PlanarBounds {
   RectangleBounds m_boundingBox;
 };
 
-inline double EllipseBounds::rMinX() const {
+inline double
+EllipseBounds::rMinX() const {
   return m_rMinX;
 }
 
-inline double EllipseBounds::rMinY() const {
+inline double
+EllipseBounds::rMinY() const {
   return m_rMinY;
 }
 
-inline double EllipseBounds::rMaxX() const {
+inline double
+EllipseBounds::rMaxX() const {
   return m_rMaxX;
 }
 
-inline double EllipseBounds::rMaxY() const {
+inline double
+EllipseBounds::rMaxY() const {
   return m_rMaxY;
 }
 
-inline double EllipseBounds::averagePhi() const {
+inline double
+EllipseBounds::averagePhi() const {
   return m_avgPhi;
 }
 
-inline double EllipseBounds::halfPhiSector() const {
+inline double
+EllipseBounds::halfPhiSector() const {
   return m_halfPhi;
 }
 

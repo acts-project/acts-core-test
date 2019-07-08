@@ -30,8 +30,10 @@ struct TrackAtVertex {
   /// @param paramsAtVertex Fitted perigee parameter
   /// @param originalParams Original perigee parameter
 
-  TrackAtVertex(double chi2perTrack, const BoundParameters& paramsAtVertex,
-                const input_track_t& originalParams)
+  TrackAtVertex(
+      double chi2perTrack,
+      const BoundParameters& paramsAtVertex,
+      const input_track_t& originalParams)
       : chi2Track(chi2perTrack),
         fittedParams(paramsAtVertex),
         originalTrack(originalParams),

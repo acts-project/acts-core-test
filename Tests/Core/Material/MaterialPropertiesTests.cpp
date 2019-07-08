@@ -67,16 +67,18 @@ BOOST_AUTO_TEST_CASE(MaterialProperties_compound_test) {
   CHECK_CLOSE_REL(abc.thickness(), 1., 0.0001);
 
   // Thickness in X0 is additive
-  CHECK_CLOSE_REL(abc.thicknessInX0(),
-                  a.thicknessInX0() + b.thicknessInX0() + c.thicknessInX0(),
-                  0.0001);
+  CHECK_CLOSE_REL(
+      abc.thicknessInX0(),
+      a.thicknessInX0() + b.thicknessInX0() + c.thicknessInX0(),
+      0.0001);
 
-  CHECK_CLOSE_REL(abc.thickness() / abc.averageX0(), abc.thicknessInX0(),
-                  0.0001);
+  CHECK_CLOSE_REL(
+      abc.thickness() / abc.averageX0(), abc.thicknessInX0(), 0.0001);
 
-  CHECK_CLOSE_REL(abc.thicknessInL0(),
-                  a.thicknessInL0() + b.thicknessInL0() + c.thicknessInL0(),
-                  0.0001);
+  CHECK_CLOSE_REL(
+      abc.thicknessInL0(),
+      a.thicknessInL0() + b.thicknessInL0() + c.thicknessInL0(),
+      0.0001);
 
   // Thinkness is NOT unit scaled here
   MaterialProperties abcNS(compound, false);
@@ -100,8 +102,10 @@ BOOST_AUTO_TEST_CASE(MaterialProperties_compound_test) {
   CHECK_CLOSE_REL(abc.thicknessInL0(), abcNS.thicknessInL0(), 0.0001);
   CHECK_CLOSE_REL(abc.averageA(), abcNS.averageA(), 0.0001);
   CHECK_CLOSE_REL(abc.averageZ(), abcNS.averageZ(), 0.0001);
-  CHECK_CLOSE_REL(abc.averageRho() * abc.thickness(),
-                  abcNS.averageRho() * abcNS.thickness(), 0.0001);
+  CHECK_CLOSE_REL(
+      abc.averageRho() * abc.thickness(),
+      abcNS.averageRho() * abcNS.thickness(),
+      0.0001);
 }
 
 // Test the Scaling
@@ -120,8 +124,10 @@ BOOST_AUTO_TEST_CASE(MaterialProperties_scale_test) {
   CHECK_CLOSE_REL(mat.thicknessInL0(), 2. * halfMat.thicknessInL0(), 0.0001);
 
   // and half the energy loss, given
-  CHECK_CLOSE_REL(mat.thickness() * mat.averageRho(),
-                  2. * halfMat.thickness() * halfMat.averageRho(), 0.0001);
+  CHECK_CLOSE_REL(
+      mat.thickness() * mat.averageRho(),
+      2. * halfMat.thickness() * halfMat.averageRho(),
+      0.0001);
 }
 
 }  // namespace Test

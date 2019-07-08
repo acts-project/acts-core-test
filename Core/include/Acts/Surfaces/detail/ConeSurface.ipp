@@ -10,9 +10,13 @@
 // ConeSurface.ipp, Acts project
 ///////////////////////////////////////////////////////////////////
 
-inline Intersection ConeSurface::intersectionEstimate(
-    const GeometryContext& gctx, const Vector3D& gpos, const Vector3D& gmom,
-    NavigationDirection navDir, const BoundaryCheck& bcheck,
+inline Intersection
+ConeSurface::intersectionEstimate(
+    const GeometryContext& gctx,
+    const Vector3D& gpos,
+    const Vector3D& gmom,
+    NavigationDirection navDir,
+    const BoundaryCheck& bcheck,
     CorrFnc correct) const {
   // check if you need
   bool needsTransform = (Surface::m_transform) ? true : false;

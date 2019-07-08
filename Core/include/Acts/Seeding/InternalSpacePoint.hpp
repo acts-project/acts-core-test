@@ -23,8 +23,11 @@ class InternalSpacePoint {
 
  public:
   InternalSpacePoint() = delete;
-  InternalSpacePoint(const SpacePoint& sp, const Acts::Vector3D& globalPos,
-                     const Acts::Vector2D& offsetXY, const Acts::Vector2D& cov);
+  InternalSpacePoint(
+      const SpacePoint& sp,
+      const Acts::Vector3D& globalPos,
+      const Acts::Vector2D& offsetXY,
+      const Acts::Vector2D& cov);
 
   InternalSpacePoint(const InternalSpacePoint<SpacePoint>& sp);
   ~InternalSpacePoint() = default;
@@ -32,14 +35,38 @@ class InternalSpacePoint {
   InternalSpacePoint<SpacePoint>& operator=(
       const InternalSpacePoint<SpacePoint>&);
 
-  const float& x() const { return m_x; }
-  const float& y() const { return m_y; }
-  const float& z() const { return m_z; }
-  const float& radius() const { return m_r; }
-  float phi() const { return atan2f(m_y, m_x); }
-  const float& covr() const { return m_covr; }
-  const float& covz() const { return m_covz; }
-  const SpacePoint& sp() const { return m_sp; }
+  const float&
+  x() const {
+    return m_x;
+  }
+  const float&
+  y() const {
+    return m_y;
+  }
+  const float&
+  z() const {
+    return m_z;
+  }
+  const float&
+  radius() const {
+    return m_r;
+  }
+  float
+  phi() const {
+    return atan2f(m_y, m_x);
+  }
+  const float&
+  covr() const {
+    return m_covr;
+  }
+  const float&
+  covz() const {
+    return m_covz;
+  }
+  const SpacePoint&
+  sp() const {
+    return m_sp;
+  }
 
  protected:
   float m_x;               // x-coordinate in beam system coordinates
@@ -57,8 +84,10 @@ class InternalSpacePoint {
 
 template <typename SpacePoint>
 inline InternalSpacePoint<SpacePoint>::InternalSpacePoint(
-    const SpacePoint& sp, const Acts::Vector3D& globalPos,
-    const Acts::Vector2D& offsetXY, const Acts::Vector2D& cov)
+    const SpacePoint& sp,
+    const Acts::Vector3D& globalPos,
+    const Acts::Vector2D& offsetXY,
+    const Acts::Vector2D& cov)
     : m_sp(sp) {
   m_x = globalPos.x() - offsetXY.x();
   m_y = globalPos.y() - offsetXY.y();

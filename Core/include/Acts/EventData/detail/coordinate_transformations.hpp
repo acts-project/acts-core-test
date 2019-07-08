@@ -40,13 +40,17 @@ struct coordinate_transformation {
   /// @param s the surface for the local to global transform
   ///
   /// @return position in the global frame
-  static ActsVectorD<3> parameters2globalPosition(const GeometryContext& gctx,
-                                                  const ParVector_t& pars,
-                                                  const Surface& s) {
+  static ActsVectorD<3>
+  parameters2globalPosition(
+      const GeometryContext& gctx,
+      const ParVector_t& pars,
+      const Surface& s) {
     ActsVectorD<3> globalPosition;
-    s.localToGlobal(gctx,
-                    ActsVectorD<2>(pars(Acts::eLOC_0), pars(Acts::eLOC_1)),
-                    parameters2globalMomentum(pars), globalPosition);
+    s.localToGlobal(
+        gctx,
+        ActsVectorD<2>(pars(Acts::eLOC_0), pars(Acts::eLOC_1)),
+        parameters2globalMomentum(pars),
+        globalPosition);
     return globalPosition;
   }
 
@@ -59,7 +63,8 @@ struct coordinate_transformation {
   /// @param pars the parameter vector
   ///
   /// @return momentum in the global frame
-  static ActsVectorD<3> parameters2globalMomentum(const ParVector_t& pars) {
+  static ActsVectorD<3>
+  parameters2globalMomentum(const ParVector_t& pars) {
     ActsVectorD<3> momentum;
     double p = std::abs(1. / pars(Acts::eQOP));
     double phi = pars(Acts::ePHI);
@@ -81,9 +86,12 @@ struct coordinate_transformation {
   /// @param charge of the particle/track
   ///
   /// @return curvilinear parameter representation
-  static ParVector_t global2curvilinear(const ActsVectorD<3>& /*pos*/,
-                                        const ActsVectorD<3>& mom,
-                                        double charge, double time) {
+  static ParVector_t
+  global2curvilinear(
+      const ActsVectorD<3>& /*pos*/,
+      const ActsVectorD<3>& mom,
+      double charge,
+      double time) {
     using VectorHelpers::phi;
     using VectorHelpers::theta;
     ParVector_t parameters;
@@ -107,10 +115,14 @@ struct coordinate_transformation {
   /// @param s the surface for the global to local transform
   ///
   /// @return the track parameterisation
-  static ParVector_t global2parameters(const GeometryContext& gctx,
-                                       const ActsVectorD<3>& pos,
-                                       const ActsVectorD<3>& mom, double charge,
-                                       double time, const Surface& s) {
+  static ParVector_t
+  global2parameters(
+      const GeometryContext& gctx,
+      const ActsVectorD<3>& pos,
+      const ActsVectorD<3>& mom,
+      double charge,
+      double time,
+      const Surface& s) {
     using VectorHelpers::phi;
     using VectorHelpers::theta;
     ActsVectorD<2> localPosition;
@@ -124,14 +136,16 @@ struct coordinate_transformation {
   /// @brief static calculate the charge from the track parameterisation
   ///
   /// @return the charge as a double
-  static double parameters2charge(const ParVector_t& pars) {
+  static double
+  parameters2charge(const ParVector_t& pars) {
     return (pars(Acts::eQOP) > 0) ? 1. : -1.;
   }
 
   /// @brief static calculate the time from the track parametrisation
   ///
   /// @return the time as a double
-  static double parameters2time(const ParVector_t& pars) {
+  static double
+  parameters2time(const ParVector_t& pars) {
     return pars(Acts::eT);
   }
 };

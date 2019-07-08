@@ -40,9 +40,10 @@ class BinnedSurfaceMaterial : public ISurfaceMaterial {
   /// @param binUtility defines the binning structure on the surface (copied)
   /// @param fullProperties is the vector of properties as recorded (moved)
   /// @param splitFactor is the pre/post splitting directive
-  BinnedSurfaceMaterial(const BinUtility& binUtility,
-                        MaterialPropertiesVector fullProperties,
-                        double splitFactor = 0.);
+  BinnedSurfaceMaterial(
+      const BinUtility& binUtility,
+      MaterialPropertiesVector fullProperties,
+      double splitFactor = 0.);
 
   /// Explicit constructor with only full MaterialProperties,
   /// for two-dimensional binning.
@@ -55,9 +56,10 @@ class BinnedSurfaceMaterial : public ISurfaceMaterial {
   /// @param binUtility defines the binning structure on the surface (copied)
   /// @param fullProperties is the vector of properties as recorded (moved)
   /// @param splitFactor is the pre/post splitting directive
-  BinnedSurfaceMaterial(const BinUtility& binUtility,
-                        MaterialPropertiesMatrix fullProperties,
-                        double splitFactor = 0.);
+  BinnedSurfaceMaterial(
+      const BinUtility& binUtility,
+      MaterialPropertiesMatrix fullProperties,
+      double splitFactor = 0.);
 
   /// Copy Move Constructor
   ///
@@ -96,8 +98,8 @@ class BinnedSurfaceMaterial : public ISurfaceMaterial {
   const MaterialProperties& materialProperties(const Vector3D& gp) const final;
 
   /// @copydoc SurfaceMaterial::materialProperties(size_t, size_t)
-  const MaterialProperties& materialProperties(size_t bin0,
-                                               size_t bin1) const final;
+  const MaterialProperties& materialProperties(size_t bin0, size_t bin1)
+      const final;
 
   /// Output Method for std::ostream, to be overloaded by child classes
   std::ostream& toStream(std::ostream& sl) const final;
@@ -110,17 +112,18 @@ class BinnedSurfaceMaterial : public ISurfaceMaterial {
   MaterialPropertiesMatrix m_fullMaterial;
 };
 
-inline const BinUtility& BinnedSurfaceMaterial::binUtility() const {
+inline const BinUtility&
+BinnedSurfaceMaterial::binUtility() const {
   return (m_binUtility);
 }
 
-inline const MaterialPropertiesMatrix& BinnedSurfaceMaterial::fullMaterial()
-    const {
+inline const MaterialPropertiesMatrix&
+BinnedSurfaceMaterial::fullMaterial() const {
   return m_fullMaterial;
 }
 
-inline const MaterialProperties& BinnedSurfaceMaterial::materialProperties(
-    size_t bin0, size_t bin1) const {
+inline const MaterialProperties&
+BinnedSurfaceMaterial::materialProperties(size_t bin0, size_t bin1) const {
   return m_fullMaterial[bin1][bin0];
 }
 }  // namespace Acts

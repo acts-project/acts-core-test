@@ -31,7 +31,8 @@ class AssertionFailureException : public std::exception {
     /// @tparam T type of anything
     /// @param value const ref to anything
     template <typename T>
-    StreamFormatter& operator<<(const T& value) {
+    StreamFormatter&
+    operator<<(const T& value) {
       stream << value;
       return *this;
     }
@@ -42,9 +43,11 @@ class AssertionFailureException : public std::exception {
   /// @param file The current file
   /// @param line The current line
   /// @param msg The message to print if assertion fails
-  AssertionFailureException(const std::string& expression,
-                            const std::string& file, int line,
-                            const std::string& msg) {
+  AssertionFailureException(
+      const std::string& expression,
+      const std::string& file,
+      int line,
+      const std::string& msg) {
     std::ostringstream os;
 
     if (!msg.empty()) {
@@ -58,7 +61,10 @@ class AssertionFailureException : public std::exception {
   }
 
   /// The assertion message
-  const char* what() const throw() override { return report.c_str(); }
+  const char*
+  what() const throw() override {
+    return report.c_str();
+  }
 
  private:
   std::string report;
@@ -69,6 +75,8 @@ class AssertionFailureException : public std::exception {
 #define throw_assert(EXPRESSION, MESSAGE)                                 \
   if (!(EXPRESSION)) {                                                    \
     throw Acts::AssertionFailureException(                                \
-        #EXPRESSION, __FILE__, __LINE__,                                  \
+        #EXPRESSION,                                                      \
+        __FILE__,                                                         \
+        __LINE__,                                                         \
         (Acts::AssertionFailureException::StreamFormatter() << MESSAGE)); \
   }

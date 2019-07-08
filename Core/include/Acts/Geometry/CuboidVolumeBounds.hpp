@@ -96,9 +96,10 @@ class CuboidVolumeBounds : public VolumeBounds {
   /// @param envelope Optional envelope to add / subtract from min/max
   /// @param entity Entity to associate this bounding box with
   /// @return Constructed bounding box
-  Volume::BoundingBox boundingBox(const Transform3D* trf = nullptr,
-                                  const Vector3D& envelope = {0, 0, 0},
-                                  const Volume* entity = nullptr) const final;
+  Volume::BoundingBox boundingBox(
+      const Transform3D* trf = nullptr,
+      const Vector3D& envelope = {0, 0, 0},
+      const Volume* entity = nullptr) const final;
 
   /// This method returns the halflength in local x
   double halflengthX() const;
@@ -138,30 +139,37 @@ class CuboidVolumeBounds : public VolumeBounds {
   std::shared_ptr<const RectangleBounds> m_zxBounds;
 };
 
-inline CuboidVolumeBounds* CuboidVolumeBounds::clone() const {
+inline CuboidVolumeBounds*
+CuboidVolumeBounds::clone() const {
   return new CuboidVolumeBounds(*this);
 }
 
-inline bool CuboidVolumeBounds::inside(const Vector3D& pos, double tol) const {
-  return (std::abs(pos.x()) <= m_valueStore.at(bv_halfX) + tol &&
-          std::abs(pos.y()) <= m_valueStore.at(bv_halfY) + tol &&
-          std::abs(pos.z()) <= m_valueStore.at(bv_halfZ) + tol);
+inline bool
+CuboidVolumeBounds::inside(const Vector3D& pos, double tol) const {
+  return (
+      std::abs(pos.x()) <= m_valueStore.at(bv_halfX) + tol &&
+      std::abs(pos.y()) <= m_valueStore.at(bv_halfY) + tol &&
+      std::abs(pos.z()) <= m_valueStore.at(bv_halfZ) + tol);
 }
 
-inline double CuboidVolumeBounds::halflengthX() const {
+inline double
+CuboidVolumeBounds::halflengthX() const {
   return m_valueStore.at(bv_halfX);
 }
 
-inline double CuboidVolumeBounds::halflengthY() const {
+inline double
+CuboidVolumeBounds::halflengthY() const {
   return m_valueStore.at(bv_halfY);
 }
 
-inline double CuboidVolumeBounds::halflengthZ() const {
+inline double
+CuboidVolumeBounds::halflengthZ() const {
   return m_valueStore.at(bv_halfZ);
 }
 
 template <class T>
-T& CuboidVolumeBounds::dumpT(T& dt) const {
+T&
+CuboidVolumeBounds::dumpT(T& dt) const {
   dt << std::setiosflags(std::ios::fixed);
   dt << std::setprecision(5);
   dt << "Acts::CuboidVolumeBounds: (halfX, halfY, halfZ) = ";

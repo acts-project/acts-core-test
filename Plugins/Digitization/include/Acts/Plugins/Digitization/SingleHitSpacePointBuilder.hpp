@@ -23,15 +23,24 @@ struct SingleHitSpacePoint {
 
   /// @brief Getter of the first element in @p spacePoint
   /// @return First element in @p spacePoint
-  double x() const { return spacePoint(0); }
+  double
+  x() const {
+    return spacePoint(0);
+  }
 
   /// @brief Getter of the second element in @p spacePoint
   /// @return Second element in @p spacePoint
-  double y() const { return spacePoint(1); }
+  double
+  y() const {
+    return spacePoint(1);
+  }
 
   /// @brief Getter of the third element in @p spacePoint
   /// @return Third element in @p spacePoint
-  double z() const { return spacePoint(2); }
+  double
+  z() const {
+    return spacePoint(2);
+  }
 };
 
 /// @class OneHitSpacePointBuilder
@@ -73,8 +82,9 @@ class SpacePointBuilder<SingleHitSpacePoint> {
   /// @param cluster object related to the cluster that holds the necessary
   /// information
   /// @return vector of the global coordinates of the cluster
-  Vector3D globalCoords(const GeometryContext& gctx,
-                        const PlanarModuleCluster& cluster) const;
+  Vector3D globalCoords(
+      const GeometryContext& gctx,
+      const PlanarModuleCluster& cluster) const;
 };
 
 }  // namespace Acts

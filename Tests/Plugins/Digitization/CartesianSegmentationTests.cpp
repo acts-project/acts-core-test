@@ -49,8 +49,8 @@ BOOST_AUTO_TEST_CASE(cartesian_segmentation) {
   SurfacePtrVector segSurfacesXPZL;
   SurfacePtrVector segSurfacesYPZL;
 
-  cSegmentation.createSegmentationSurfaces(boundariesPZL, segSurfacesXPZL,
-                                           segSurfacesYPZL, hThickness, 1, 0.);
+  cSegmentation.createSegmentationSurfaces(
+      boundariesPZL, segSurfacesXPZL, segSurfacesYPZL, hThickness, 1, 0.);
 
   BOOST_CHECK_EQUAL(boundariesPZL.size(), 6);
 
@@ -72,8 +72,8 @@ BOOST_AUTO_TEST_CASE(cartesian_segmentation) {
   SurfacePtrVector segSurfacesXNZL;
   SurfacePtrVector segSurfacesYNZL;
 
-  cSegmentation.createSegmentationSurfaces(boundariesNZL, segSurfacesXNZL,
-                                           segSurfacesYNZL, hThickness, -1, 0.);
+  cSegmentation.createSegmentationSurfaces(
+      boundariesNZL, segSurfacesXNZL, segSurfacesYNZL, hThickness, -1, 0.);
 
   BOOST_CHECK_EQUAL(boundariesNZL.size(), 6);
 

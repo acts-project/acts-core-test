@@ -73,11 +73,13 @@ class LineBounds : public SurfaceBounds {
   double m_radius, m_halfZ;
 };
 
-inline double LineBounds::r() const {
+inline double
+LineBounds::r() const {
   return m_radius;
 }
 
-inline double LineBounds::halflengthZ() const {
+inline double
+LineBounds::halflengthZ() const {
   return m_halfZ;
 }
 

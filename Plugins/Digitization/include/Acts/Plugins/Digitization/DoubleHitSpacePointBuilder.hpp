@@ -25,15 +25,24 @@ struct DoubleHitSpacePoint {
 
   /// @brief Getter of the first element in @p spacePoint
   /// @return First element in @p spacePoint
-  double x() const { return spacePoint(0); }
+  double
+  x() const {
+    return spacePoint(0);
+  }
 
   /// @brief Getter of the second element in @p spacePoint
   /// @return Second element in @p spacePoint
-  double y() const { return spacePoint(1); }
+  double
+  y() const {
+    return spacePoint(1);
+  }
 
   /// @brief Getter of the third element in @p spacePoint
   /// @return Third element in @p spacePoint
-  double z() const { return spacePoint(2); }
+  double
+  z() const {
+    return spacePoint(2);
+  }
 };
 
 /// @class TwoHitsSpacePointBuilder
@@ -84,8 +93,9 @@ class SpacePointBuilder<DoubleHitSpacePoint> {
       const GeometryContext& gctx,
       const std::vector<const PlanarModuleCluster*>& clustersFront,
       const std::vector<const PlanarModuleCluster*>& clustersBack,
-      std::vector<std::pair<const PlanarModuleCluster*,
-                            const PlanarModuleCluster*>>& clusterPairs) const;
+      std::vector<
+          std::pair<const PlanarModuleCluster*, const PlanarModuleCluster*>>&
+          clusterPairs) const;
 
   /// @brief Calculates the space points out of a given collection of clusters
   /// on several strip detectors and stores the data
@@ -96,8 +106,9 @@ class SpacePointBuilder<DoubleHitSpacePoint> {
   /// @note If no configuration is set, the default values will be used
   void calculateSpacePoints(
       const GeometryContext& gctx,
-      const std::vector<std::pair<const PlanarModuleCluster*,
-                                  const PlanarModuleCluster*>>& clusterPairs,
+      const std::vector<
+          std::pair<const PlanarModuleCluster*, const PlanarModuleCluster*>>&
+          clusterPairs,
       std::vector<DoubleHitSpacePoint>& spacePoints) const;
 
  private:
@@ -146,22 +157,24 @@ class SpacePointBuilder<DoubleHitSpacePoint> {
   /// @param cluster object related to the cluster that holds the necessary
   /// information
   /// @return vector of the global coordinates of the cluster
-  Vector3D globalCoords(const GeometryContext& gctx,
-                        const PlanarModuleCluster& cluster) const;
+  Vector3D globalCoords(
+      const GeometryContext& gctx,
+      const PlanarModuleCluster& cluster) const;
 
   /// @brief Calculates (Delta theta)^2 + (Delta phi)^2 between two clusters
   /// @param pos1 position of the first cluster
   /// @param pos2 position the second cluster
   /// @return the squared sum within configuration parameters, otherwise -1
-  double differenceOfClustersChecked(const Vector3D& pos1,
-                                     const Vector3D& pos2) const;
+  double differenceOfClustersChecked(const Vector3D& pos1, const Vector3D& pos2)
+      const;
 
   /// @brief Calculates the top and bottom ends of a SDE
   /// that corresponds to a given hit
   /// @param cluster object that stores the information about the hit
   /// @return vectors to the top and bottom end of the SDE
   std::pair<Vector3D, Vector3D> endsOfStrip(
-      const GeometryContext& gctx, const PlanarModuleCluster& cluster) const;
+      const GeometryContext& gctx,
+      const PlanarModuleCluster& cluster) const;
 
   /// @brief Calculates a space point whithout using the vertex
   /// @note This is mostly to resolve space points from cosmic data
@@ -173,8 +186,11 @@ class SpacePointBuilder<DoubleHitSpacePoint> {
   /// 1. if it failed
   /// @note The meaning of the parameter is explained in more detail in the
   /// function body
-  double calcPerpProj(const Vector3D& a, const Vector3D& c, const Vector3D& q,
-                      const Vector3D& r) const;
+  double calcPerpProj(
+      const Vector3D& a,
+      const Vector3D& c,
+      const Vector3D& q,
+      const Vector3D& r) const;
 
   /// @brief This function tests if a space point can be estimated by a more
   /// tolerant treatment of construction. In fact, this function indirectly

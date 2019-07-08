@@ -48,28 +48,32 @@ class Seed {
 /////////////////////////////////////////////////////////////////////////////////
 
 template <typename SpacePoint>
-inline const std::list<const SpacePoint*>& Seed<SpacePoint>::spacePoints()
-    const {
+inline const std::list<const SpacePoint*>&
+Seed<SpacePoint>::spacePoints() const {
   return this->m_spacepoints;
 }
 
 template <typename SpacePoint>
-inline void Seed<SpacePoint>::erase() {
+inline void
+Seed<SpacePoint>::erase() {
   m_spacepoints.erase(m_spacepoints.begin(), m_spacepoints.end());
 }
 
 template <typename SpacePoint>
-inline void Seed<SpacePoint>::add(const SpacePoint*& p) {
+inline void
+Seed<SpacePoint>::add(const SpacePoint*& p) {
   m_spacepoints.push_back(p);
 }
 
 template <typename SpacePoint>
-inline void Seed<SpacePoint>::setZVertex(const double& z) {
+inline void
+Seed<SpacePoint>::setZVertex(const double& z) {
   m_zvertex = z;
 }
 
 template <typename SpacePoint>
-inline const double& Seed<SpacePoint>::zVertex() const {
+inline const double&
+Seed<SpacePoint>::zVertex() const {
   return m_zvertex;
 }
 
@@ -84,7 +88,8 @@ Seed<SpacePoint>::Seed(const Seed<SpacePoint>& s) {
 }
 
 template <typename SpacePoint>
-Seed<SpacePoint>& Seed<SpacePoint>::operator=(const Seed<SpacePoint>& s) {
+Seed<SpacePoint>&
+Seed<SpacePoint>::operator=(const Seed<SpacePoint>& s) {
   m_spacepoints = s.spacePoints();
   m_zvertex = s.zVertex();
   return *this;
@@ -94,8 +99,11 @@ template <typename SpacePoint>
 Seed<SpacePoint>::Seed() {}
 
 template <typename SpacePoint>
-Seed<SpacePoint>::Seed(const SpacePoint* b, const SpacePoint* m,
-                       const SpacePoint* u, const double vertex) {
+Seed<SpacePoint>::Seed(
+    const SpacePoint* b,
+    const SpacePoint* m,
+    const SpacePoint* u,
+    const double vertex) {
   m_zvertex = vertex;
   m_spacepoints.push_back(b);
   m_spacepoints.push_back(m);

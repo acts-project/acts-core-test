@@ -12,9 +12,12 @@
 #include <vector>
 
 template <typename cell_t>
-std::vector<std::vector<cell_t>> Acts::createClusters(
-    std::unordered_map<size_t, std::pair<cell_t, bool>>& cellMap, size_t nBins0,
-    bool commonCorner, double energyCut) {
+std::vector<std::vector<cell_t>>
+Acts::createClusters(
+    std::unordered_map<size_t, std::pair<cell_t, bool>>& cellMap,
+    size_t nBins0,
+    bool commonCorner,
+    double energyCut) {
   // the output
   std::vector<std::vector<cell_t>> mergedCells;
   // now go through cells and label
@@ -29,8 +32,8 @@ std::vector<std::vector<cell_t>> Acts::createClusters(
       // set cell to be used already
       cell.second.second = true;
       // fill all cells belonging to that cluster
-      fillCluster(mergedCells, cellMap, cell.first, nBins0, commonCorner,
-                  energyCut);
+      fillCluster(
+          mergedCells, cellMap, cell.first, nBins0, commonCorner, energyCut);
     }
   }
   // return the grouped together cells
@@ -38,10 +41,14 @@ std::vector<std::vector<cell_t>> Acts::createClusters(
 }
 
 template <typename cell_t>
-void Acts::fillCluster(
+void
+Acts::fillCluster(
     std::vector<std::vector<cell_t>>& mergedCells,
-    std::unordered_map<size_t, std::pair<cell_t, bool>>& cellMap, size_t index,
-    size_t nBins0, bool commonCorner, double energyCut) {
+    std::unordered_map<size_t, std::pair<cell_t, bool>>& cellMap,
+    size_t index,
+    size_t nBins0,
+    bool commonCorner,
+    double energyCut) {
   // go recursively through all neighbours of this cell, if present
   // calculate neighbour indices first
   constexpr int iMin = -1;
@@ -66,8 +73,14 @@ void Acts::fillCluster(
     }
   } else {
     if (commonCorner) {
-      neighbourIndices = {jMin + iMin, jMin,        jMin + iMax, iMin,
-                          iMax,        jMax + iMin, jMax,        jMax + iMax};
+      neighbourIndices = {jMin + iMin,
+                          jMin,
+                          jMin + iMax,
+                          iMin,
+                          iMax,
+                          jMax + iMin,
+                          jMax,
+                          jMax + iMax};
     } else {
       neighbourIndices = {jMin, iMin, iMax, jMax};
     }
@@ -92,8 +105,8 @@ void Acts::fillCluster(
         // set cell to be used already
         search->second.second = true;
         // add all neighbours to cluster
-        fillCluster(mergedCells, cellMap, newIndex, nBins0, commonCorner,
-                    energyCut);
+        fillCluster(
+            mergedCells, cellMap, newIndex, nBins0, commonCorner, energyCut);
       }  // check if was used already
     }    // check if neighbour is there
   }      // go through neighbour indics

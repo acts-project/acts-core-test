@@ -10,10 +10,12 @@
 // LineSurface.ipp, Acts project
 ///////////////////////////////////////////////////////////////////
 
-inline void LineSurface::localToGlobal(const GeometryContext& gctx,
-                                       const Vector2D& lpos,
-                                       const Vector3D& mom,
-                                       Vector3D& gpos) const {
+inline void
+LineSurface::localToGlobal(
+    const GeometryContext& gctx,
+    const Vector2D& lpos,
+    const Vector3D& mom,
+    Vector3D& gpos) const {
   const auto& sTransform = transform(gctx);
   const auto& tMatrix = sTransform.matrix();
   Vector3D lineDirection(tMatrix(0, 2), tMatrix(1, 2), tMatrix(2, 2));
@@ -25,10 +27,12 @@ inline void LineSurface::localToGlobal(const GeometryContext& gctx,
   gpos = Vector3D(locZinGlobal + lpos[eLOC_R] * radiusAxisGlobal.normalized());
 }
 
-inline bool LineSurface::globalToLocal(const GeometryContext& gctx,
-                                       const Vector3D& gpos,
-                                       const Vector3D& mom,
-                                       Vector2D& lpos) const {
+inline bool
+LineSurface::globalToLocal(
+    const GeometryContext& gctx,
+    const Vector3D& gpos,
+    const Vector3D& mom,
+    Vector2D& lpos) const {
   using VectorHelpers::perp;
 
   const auto& sTransform = transform(gctx);
@@ -46,12 +50,15 @@ inline bool LineSurface::globalToLocal(const GeometryContext& gctx,
   return true;
 }
 
-inline std::string LineSurface::name() const {
+inline std::string
+LineSurface::name() const {
   return "Acts::LineSurface";
 }
 
-inline const RotationMatrix3D LineSurface::referenceFrame(
-    const GeometryContext& gctx, const Vector3D& /*unused*/,
+inline const RotationMatrix3D
+LineSurface::referenceFrame(
+    const GeometryContext& gctx,
+    const Vector3D& /*unused*/,
     const Vector3D& mom) const {
   RotationMatrix3D mFrame;
   const auto& tMatrix = transform(gctx).matrix();
@@ -66,33 +73,43 @@ inline const RotationMatrix3D LineSurface::referenceFrame(
   return mFrame;
 }
 
-inline double LineSurface::pathCorrection(const GeometryContext& /*unused*/,
-                                          const Vector3D& /*pos*/,
-                                          const Vector3D& /*mom*/) const {
+inline double
+LineSurface::pathCorrection(
+    const GeometryContext& /*unused*/,
+    const Vector3D& /*pos*/,
+    const Vector3D& /*mom*/) const {
   return 1.;
 }
 
-inline const Vector3D LineSurface::binningPosition(
-    const GeometryContext& gctx, BinningValue /*bValue*/) const {
+inline const Vector3D
+LineSurface::binningPosition(
+    const GeometryContext& gctx,
+    BinningValue /*bValue*/) const {
   return center(gctx);
 }
 
-inline const Vector3D LineSurface::normal(const GeometryContext& gctx,
-                                          const Vector2D& /*lpos*/) const {
+inline const Vector3D
+LineSurface::normal(const GeometryContext& gctx, const Vector2D& /*lpos*/)
+    const {
   const auto& tMatrix = transform(gctx).matrix();
   return Vector3D(tMatrix(0, 2), tMatrix(1, 2), tMatrix(2, 2));
 }
 
-inline const SurfaceBounds& LineSurface::bounds() const {
+inline const SurfaceBounds&
+LineSurface::bounds() const {
   if (m_bounds) {
     return (*m_bounds.get());
   }
   return s_noBounds;
 }
 
-inline Intersection LineSurface::intersectionEstimate(
-    const GeometryContext& gctx, const Vector3D& gpos, const Vector3D& gdir,
-    NavigationDirection navDir, const BoundaryCheck& bcheck,
+inline Intersection
+LineSurface::intersectionEstimate(
+    const GeometryContext& gctx,
+    const Vector3D& gpos,
+    const Vector3D& gdir,
+    NavigationDirection navDir,
+    const BoundaryCheck& bcheck,
     CorrFnc correct) const {
   // following nominclature found in header file and doxygen documentation
   // line one is the straight track
@@ -138,11 +155,13 @@ inline Intersection LineSurface::intersectionEstimate(
   return Intersection(gpos, std::numeric_limits<double>::max(), false);
 }
 
-inline void LineSurface::initJacobianToGlobal(const GeometryContext& gctx,
-                                              BoundToFreeMatrix& jacobian,
-                                              const Vector3D& gpos,
-                                              const Vector3D& dir,
-                                              const BoundVector& pars) const {
+inline void
+LineSurface::initJacobianToGlobal(
+    const GeometryContext& gctx,
+    BoundToFreeMatrix& jacobian,
+    const Vector3D& gpos,
+    const Vector3D& dir,
+    const BoundVector& pars) const {
   // The trigonometry required to convert the direction to spherical
   // coordinates and then compute the sines and cosines again can be
   // surprisingly expensive from a performance point of view.
@@ -189,9 +208,13 @@ inline void LineSurface::initJacobianToGlobal(const GeometryContext& gctx,
   jacobian.block<3, 1>(0, eTHETA) = dDThetaY * pars[eLOC_0] * ipdn;
 }
 
-inline const BoundRowVector LineSurface::derivativeFactors(
-    const GeometryContext& gctx, const Vector3D& pos, const Vector3D& dir,
-    const RotationMatrix3D& rft, const BoundToFreeMatrix& jac) const {
+inline const BoundRowVector
+LineSurface::derivativeFactors(
+    const GeometryContext& gctx,
+    const Vector3D& pos,
+    const Vector3D& dir,
+    const RotationMatrix3D& rft,
+    const BoundToFreeMatrix& jac) const {
   // the vector between position and center
   ActsRowVectorD<3> pc = (pos - center(gctx)).transpose();
   // the longitudinal component vector (alogn local z)
@@ -209,6 +232,7 @@ inline const BoundRowVector LineSurface::derivativeFactors(
   ActsMatrixD<3, BoundParsDim> long_mat = ActsMatrixD<3, BoundParsDim>::Zero();
   long_mat.colwise() += locz.transpose();
   // build the combined normal & longitudinal components
-  return (norm * (s_vec - pc * (long_mat * d_vec.asDiagonal() -
-                                jac.block<3, BoundParsDim>(4, 0))));
+  return (
+      norm * (s_vec - pc * (long_mat * d_vec.asDiagonal() -
+                            jac.block<3, BoundParsDim>(4, 0))));
 }

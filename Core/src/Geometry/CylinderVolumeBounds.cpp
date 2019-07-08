@@ -35,8 +35,10 @@ Acts::CylinderVolumeBounds::CylinderVolumeBounds(double radius, double halez)
   m_valueStore.at(bv_halfZ) = std::abs(halez);
 }
 
-Acts::CylinderVolumeBounds::CylinderVolumeBounds(double rinner, double router,
-                                                 double halez)
+Acts::CylinderVolumeBounds::CylinderVolumeBounds(
+    double rinner,
+    double router,
+    double halez)
     : VolumeBounds(), m_valueStore(4, 0.) {
   m_valueStore.at(bv_innerRadius) = std::abs(rinner);
   m_valueStore.at(bv_outerRadius) = std::abs(router);
@@ -44,8 +46,11 @@ Acts::CylinderVolumeBounds::CylinderVolumeBounds(double rinner, double router,
   m_valueStore.at(bv_halfZ) = std::abs(halez);
 }
 
-Acts::CylinderVolumeBounds::CylinderVolumeBounds(double rinner, double router,
-                                                 double haphi, double halez)
+Acts::CylinderVolumeBounds::CylinderVolumeBounds(
+    double rinner,
+    double router,
+    double haphi,
+    double halez)
     : VolumeBounds(), m_valueStore(4, 0.) {
   m_valueStore.at(bv_innerRadius) = std::abs(rinner);
   m_valueStore.at(bv_outerRadius) = std::abs(router);
@@ -53,8 +58,9 @@ Acts::CylinderVolumeBounds::CylinderVolumeBounds(double rinner, double router,
   m_valueStore.at(bv_halfZ) = std::abs(halez);
 }
 
-Acts::CylinderVolumeBounds::CylinderVolumeBounds(const CylinderBounds& cBounds,
-                                                 double thickness)
+Acts::CylinderVolumeBounds::CylinderVolumeBounds(
+    const CylinderBounds& cBounds,
+    double thickness)
     : VolumeBounds(), m_valueStore(4, 0.) {
   double cR = cBounds.r();
   m_valueStore.at(bv_innerRadius) = cR - 0.5 * thickness;
@@ -63,8 +69,9 @@ Acts::CylinderVolumeBounds::CylinderVolumeBounds(const CylinderBounds& cBounds,
   m_valueStore.at(bv_halfZ) = cBounds.halflengthZ();
 }
 
-Acts::CylinderVolumeBounds::CylinderVolumeBounds(const RadialBounds& rBounds,
-                                                 double thickness)
+Acts::CylinderVolumeBounds::CylinderVolumeBounds(
+    const RadialBounds& rBounds,
+    double thickness)
     : VolumeBounds(), m_valueStore(4, 0.) {
   m_valueStore.at(bv_innerRadius) = rBounds.rMin();
   m_valueStore.at(bv_outerRadius) = rBounds.rMax();
@@ -78,8 +85,8 @@ Acts::CylinderVolumeBounds::CylinderVolumeBounds(
 
 Acts::CylinderVolumeBounds::~CylinderVolumeBounds() = default;
 
-Acts::CylinderVolumeBounds& Acts::CylinderVolumeBounds::operator=(
-    const CylinderVolumeBounds& cylbo) {
+Acts::CylinderVolumeBounds&
+Acts::CylinderVolumeBounds::operator=(const CylinderVolumeBounds& cylbo) {
   if (this != &cylbo) {
     m_valueStore = cylbo.m_valueStore;
   }
@@ -102,14 +109,14 @@ Acts::CylinderVolumeBounds::decomposeToSurfaces(
 
   std::shared_ptr<const DiscBounds> dBounds = discBounds();
   // bottom Disc (negative z)
-  tTransform =
-      new Transform3D(transform * AngleAxis3D(M_PI, Vector3D(1., 0., 0.)) *
-                      Translation3D(Vector3D(0., 0., halflengthZ())));
+  tTransform = new Transform3D(
+      transform * AngleAxis3D(M_PI, Vector3D(1., 0., 0.)) *
+      Translation3D(Vector3D(0., 0., halflengthZ())));
   rSurfaces.push_back(Surface::makeShared<DiscSurface>(
       std::shared_ptr<const Transform3D>(tTransform), dBounds));
   // top Disc (positive z)
-  tTransform = new Transform3D(transform *
-                               Translation3D(Vector3D(0., 0., halflengthZ())));
+  tTransform = new Transform3D(
+      transform * Translation3D(Vector3D(0., 0., halflengthZ())));
   rSurfaces.push_back(Surface::makeShared<DiscSurface>(
       std::shared_ptr<const Transform3D>(tTransform), dBounds));
 
@@ -147,21 +154,24 @@ Acts::CylinderVolumeBounds::decomposeToSurfaces(
 std::shared_ptr<const Acts::CylinderBounds>
 Acts::CylinderVolumeBounds::innerCylinderBounds() const {
   return std::make_shared<const CylinderBounds>(
-      m_valueStore.at(bv_innerRadius), m_valueStore.at(bv_halfPhiSector),
+      m_valueStore.at(bv_innerRadius),
+      m_valueStore.at(bv_halfPhiSector),
       m_valueStore.at(bv_halfZ));
 }
 
 std::shared_ptr<const Acts::CylinderBounds>
 Acts::CylinderVolumeBounds::outerCylinderBounds() const {
   return std::make_shared<const CylinderBounds>(
-      m_valueStore.at(bv_outerRadius), m_valueStore.at(bv_halfPhiSector),
+      m_valueStore.at(bv_outerRadius),
+      m_valueStore.at(bv_halfPhiSector),
       m_valueStore.at(bv_halfZ));
 }
 
-std::shared_ptr<const Acts::DiscBounds> Acts::CylinderVolumeBounds::discBounds()
-    const {
+std::shared_ptr<const Acts::DiscBounds>
+Acts::CylinderVolumeBounds::discBounds() const {
   return std::shared_ptr<const DiscBounds>(new RadialBounds(
-      m_valueStore.at(bv_innerRadius), m_valueStore.at(bv_outerRadius),
+      m_valueStore.at(bv_innerRadius),
+      m_valueStore.at(bv_outerRadius),
       m_valueStore.at(bv_halfPhiSector)));
 }
 
@@ -172,12 +182,15 @@ Acts::CylinderVolumeBounds::sectorPlaneBounds() const {
       m_valueStore.at(bv_halfZ)));
 }
 
-std::ostream& Acts::CylinderVolumeBounds::toStream(std::ostream& sl) const {
+std::ostream&
+Acts::CylinderVolumeBounds::toStream(std::ostream& sl) const {
   return dumpT<std::ostream>(sl);
 }
 
-Acts::Volume::BoundingBox Acts::CylinderVolumeBounds::boundingBox(
-    const Transform3D* trf, const Vector3D& envelope,
+Acts::Volume::BoundingBox
+Acts::CylinderVolumeBounds::boundingBox(
+    const Transform3D* trf,
+    const Vector3D& envelope,
     const Volume* entity) const {
   double xmax, xmin, ymax, ymin;
   xmax = outerRadius();
@@ -203,8 +216,10 @@ Acts::Volume::BoundingBox Acts::CylinderVolumeBounds::boundingBox(
   return trf == nullptr ? box : box.transformed(*trf);
 }
 
-void Acts::CylinderVolumeBounds::draw(IVisualization& helper,
-                                      const Transform3D& transform) const {
+void
+Acts::CylinderVolumeBounds::draw(
+    IVisualization& helper,
+    const Transform3D& transform) const {
   std::vector<std::shared_ptr<const Acts::Surface>> surfaces =
       decomposeToSurfaces(&transform);
   for (const auto& srf : surfaces) {

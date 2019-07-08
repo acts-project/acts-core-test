@@ -61,8 +61,13 @@ class Material {
   /// @param iZ is the average atomic number
   /// @param iRho is the average density
   /// @param imc is the material composition
-  Material(float iX0, float iL0, float iA, float iZ, float iRho,
-           MaterialComposition imc = {})
+  Material(
+      float iX0,
+      float iL0,
+      float iA,
+      float iZ,
+      float iRho,
+      MaterialComposition imc = {})
       : m_vacuum(false),
         m_store({iX0, iL0, iA, iZ, iRho, 0.}),
         m_composition(std::move(imc)) {
@@ -71,8 +76,13 @@ class Material {
   }
 
   Material(ActsVectorF<5> iMatData, MaterialComposition imc = {})
-      : Material(iMatData[0], iMatData[1], iMatData[2], iMatData[3],
-                 iMatData[4], std::move(imc)) {}
+      : Material(
+            iMatData[0],
+            iMatData[1],
+            iMatData[2],
+            iMatData[3],
+            iMatData[4],
+            std::move(imc)) {}
 
   /// @brief Copy Constructor
   ///
@@ -112,33 +122,53 @@ class Material {
 
   /// @brief Access to X0
   /// if it's vacuum, infinity
-  float X0() const { return m_store[matX0]; }
+  float
+  X0() const {
+    return m_store[matX0];
+  }
 
   /// @brief Access to L0
   /// if it's vacuum, infinity
-  float L0() const { return m_store[matL0]; }
+  float
+  L0() const {
+    return m_store[matL0];
+  }
 
   /// @brief Access to A
-  float A() const { return m_store[matA]; }
+  float
+  A() const {
+    return m_store[matA];
+  }
 
   /// @brief Access to Z
-  float Z() const { return m_store[matZ]; }
+  float
+  Z() const {
+    return m_store[matZ];
+  }
 
   /// @brief Access to rho
-  float rho() const { return m_store[matrho]; }
+  float
+  rho() const {
+    return m_store[matrho];
+  }
 
   ///  @brief Access to z/A*tho
-  float zOverAtimesRho() const { return m_store[matZ_AR]; }
+  float
+  zOverAtimesRho() const {
+    return m_store[matZ_AR];
+  }
 
   /// @brief Access to all classification numbers of the material
-  ActsVectorF<5> classificationNumbers() {
+  ActsVectorF<5>
+  classificationNumbers() {
     ActsVectorF<5> numbers;
     numbers << X0(), L0(), A(), Z(), rho();
     return numbers;
   }
 
   /// spit out as a string
-  std::string toString() const {
+  std::string
+  toString() const {
     std::ostringstream sout;
     sout << std::setiosflags(std::ios::fixed) << std::setprecision(4);
     sout << " | ";
@@ -168,11 +198,13 @@ class Material {
   MaterialComposition m_composition = MaterialComposition();
 };
 
-inline bool Material::operator==(const Material& mat) const {
+inline bool
+Material::operator==(const Material& mat) const {
   return (m_store == mat.m_store && m_composition == mat.m_composition);
 }
 
-inline bool Material::operator!=(const Material& mat) const {
+inline bool
+Material::operator!=(const Material& mat) const {
   return !operator==(mat);
 }
 }  // namespace Acts

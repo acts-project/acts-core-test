@@ -20,11 +20,18 @@
 namespace Acts {
 
 ///  helper function to create a cylinder
-TrackingVolumePtr constructCylinderVolume(
-    const GeometryContext& gctx, double surfaceHalfLengthZ,
-    double surfaceRadius, double surfaceRstagger, double surfaceZoverlap,
-    double layerEnvelope, double volumeEnvelope, double innerVolumeR,
-    double outerVolumeR, const std::string& name) {
+TrackingVolumePtr
+constructCylinderVolume(
+    const GeometryContext& gctx,
+    double surfaceHalfLengthZ,
+    double surfaceRadius,
+    double surfaceRstagger,
+    double surfaceZoverlap,
+    double layerEnvelope,
+    double volumeEnvelope,
+    double innerVolumeR,
+    double outerVolumeR,
+    const std::string& name) {
   ///  the surface transforms
   auto sfnPosition =
       Vector3D(0., 0., -3 * surfaceHalfLengthZ - surfaceZoverlap);
@@ -68,8 +75,11 @@ TrackingVolumePtr constructCylinderVolume(
   ///  now create the Layer
   auto layer0bounds =
       std::make_shared<const CylinderBounds>(surfaceRadius, bUmax);
-  auto layer0 = CylinderLayer::create(nullptr, layer0bounds, std::move(bArray),
-                                      surfaceRstagger + 2 * layerEnvelope);
+  auto layer0 = CylinderLayer::create(
+      nullptr,
+      layer0bounds,
+      std::move(bArray),
+      surfaceRstagger + 2 * layerEnvelope);
   std::unique_ptr<const LayerArray> layerArray =
       std::make_unique<const BinnedArrayXD<LayerPtr>>(layer0);
 
@@ -84,12 +94,14 @@ TrackingVolumePtr constructCylinderVolume(
 }
 
 ///  helper function to create a container
-MutableTrackingVolumePtr constructContainerVolume(const GeometryContext& gctx,
-                                                  TrackingVolumePtr iVolume,
-                                                  TrackingVolumePtr oVolume,
-                                                  double hVolumeRadius,
-                                                  double hVolumeHalflength,
-                                                  const std::string& name) {
+MutableTrackingVolumePtr
+constructContainerVolume(
+    const GeometryContext& gctx,
+    TrackingVolumePtr iVolume,
+    TrackingVolumePtr oVolume,
+    double hVolumeRadius,
+    double hVolumeHalflength,
+    const std::string& name) {
   ///  create the volume array
   using VAP = std::pair<TrackingVolumePtr, Vector3D>;
   std::vector<VAP> volumes = {{iVolume, iVolume->binningPosition(gctx, binR)},
@@ -98,8 +110,8 @@ MutableTrackingVolumePtr constructContainerVolume(const GeometryContext& gctx,
   auto hVolumeBounds = std::make_shared<const CylinderVolumeBounds>(
       0., hVolumeRadius, hVolumeHalflength);
   ///  create the BinUtility & the BinnedArray
-  auto vUtility = std::make_unique<const BinUtility>(volumes.size(), 0.,
-                                                     hVolumeRadius, open, binR);
+  auto vUtility = std::make_unique<const BinUtility>(
+      volumes.size(), 0., hVolumeRadius, open, binR);
   std::shared_ptr<const TrackingVolumeArray> vArray =
       std::make_shared<const BinnedArrayXD<TrackingVolumePtr>>(
           volumes, std::move(vUtility));

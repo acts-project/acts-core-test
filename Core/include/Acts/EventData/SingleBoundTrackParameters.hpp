@@ -41,15 +41,21 @@ class SingleBoundTrackParameters : public SingleTrackParameters<ChargePolicy> {
   ///            it is given in the measurement frame
   /// @param[in] parValues The parameter vector
   /// @param[in] surface The reference surface the parameters are bound to
-  template <typename T = ChargePolicy,
-            std::enable_if_t<std::is_same<T, ChargedPolicy>::value, int> = 0>
-  SingleBoundTrackParameters(const GeometryContext& gctx, CovPtr_t cov,
-                             const ParVector_t& parValues,
-                             std::shared_ptr<const Surface> surface)
+  template <
+      typename T = ChargePolicy,
+      std::enable_if_t<std::is_same<T, ChargedPolicy>::value, int> = 0>
+  SingleBoundTrackParameters(
+      const GeometryContext& gctx,
+      CovPtr_t cov,
+      const ParVector_t& parValues,
+      std::shared_ptr<const Surface> surface)
       : SingleTrackParameters<ChargePolicy>(
-            std::move(cov), parValues,
+            std::move(cov),
+            parValues,
             detail::coordinate_transformation::parameters2globalPosition(
-                gctx, parValues, *surface),
+                gctx,
+                parValues,
+                *surface),
             detail::coordinate_transformation::parameters2globalMomentum(
                 parValues)),
         m_pSurface(std::move(surface)) {
@@ -71,18 +77,28 @@ class SingleBoundTrackParameters : public SingleTrackParameters<ChargePolicy> {
   /// @param[in] momentum The global momentum of the track parameterisation
   /// @param[in] dCharge The charge of the particle track parameterisation
   /// @param[in] surface The reference surface the parameters are bound to
-  template <typename T = ChargePolicy,
-            std::enable_if_t<std::is_same<T, ChargedPolicy>::value, int> = 0>
-  SingleBoundTrackParameters(const GeometryContext& gctx, CovPtr_t cov,
-                             const ActsVectorD<3>& position,
-                             const ActsVectorD<3>& momentum, double dCharge,
-                             double dTime,
-                             std::shared_ptr<const Surface> surface)
+  template <
+      typename T = ChargePolicy,
+      std::enable_if_t<std::is_same<T, ChargedPolicy>::value, int> = 0>
+  SingleBoundTrackParameters(
+      const GeometryContext& gctx,
+      CovPtr_t cov,
+      const ActsVectorD<3>& position,
+      const ActsVectorD<3>& momentum,
+      double dCharge,
+      double dTime,
+      std::shared_ptr<const Surface> surface)
       : SingleTrackParameters<ChargePolicy>(
             std::move(cov),
             detail::coordinate_transformation::global2parameters(
-                gctx, position, momentum, dCharge, dTime, *surface),
-            position, momentum),
+                gctx,
+                position,
+                momentum,
+                dCharge,
+                dTime,
+                *surface),
+            position,
+            momentum),
         m_pSurface(std::move(surface)) {
     assert(m_pSurface);
   }
@@ -100,15 +116,21 @@ class SingleBoundTrackParameters : public SingleTrackParameters<ChargePolicy> {
   ///            it is given in the measurement frame
   /// @param[in] parValues The parameter vector
   /// @param[in] surface The reference surface the parameters are bound to
-  template <typename T = ChargePolicy,
-            std::enable_if_t<std::is_same<T, NeutralPolicy>::value, int> = 0>
-  SingleBoundTrackParameters(const GeometryContext& gctx, CovPtr_t cov,
-                             const ParVector_t& parValues,
-                             std::shared_ptr<const Surface> surface)
+  template <
+      typename T = ChargePolicy,
+      std::enable_if_t<std::is_same<T, NeutralPolicy>::value, int> = 0>
+  SingleBoundTrackParameters(
+      const GeometryContext& gctx,
+      CovPtr_t cov,
+      const ParVector_t& parValues,
+      std::shared_ptr<const Surface> surface)
       : SingleTrackParameters<ChargePolicy>(
-            std::move(cov), parValues,
+            std::move(cov),
+            parValues,
             detail::coordinate_transformation::parameters2globalPosition(
-                gctx, parValues, *surface),
+                gctx,
+                parValues,
+                *surface),
             detail::coordinate_transformation::parameters2globalMomentum(
                 parValues)),
         m_pSurface(std::move(surface)) {
@@ -131,17 +153,27 @@ class SingleBoundTrackParameters : public SingleTrackParameters<ChargePolicy> {
   /// @param[in] momentum The global momentum of the track parameterisation
   /// @param[in] dCharge The charge of the particle track parameterisation
   /// @param[in] surface The reference surface the parameters are bound to
-  template <typename T = ChargePolicy,
-            std::enable_if_t<std::is_same<T, NeutralPolicy>::value, int> = 0>
-  SingleBoundTrackParameters(const GeometryContext& gctx, CovPtr_t cov,
-                             const ActsVectorD<3>& position,
-                             const ActsVectorD<3>& momentum, double dTime,
-                             std::shared_ptr<const Surface> surface)
+  template <
+      typename T = ChargePolicy,
+      std::enable_if_t<std::is_same<T, NeutralPolicy>::value, int> = 0>
+  SingleBoundTrackParameters(
+      const GeometryContext& gctx,
+      CovPtr_t cov,
+      const ActsVectorD<3>& position,
+      const ActsVectorD<3>& momentum,
+      double dTime,
+      std::shared_ptr<const Surface> surface)
       : SingleTrackParameters<ChargePolicy>(
             std::move(cov),
             detail::coordinate_transformation::global2parameters(
-                gctx, position, momentum, 0, dTime, *surface),
-            position, momentum),
+                gctx,
+                position,
+                momentum,
+                0,
+                dTime,
+                *surface),
+            position,
+            momentum),
         m_pSurface(std::move(surface)) {}
 
   /// @brief copy constructor  - charged/neutral
@@ -163,8 +195,8 @@ class SingleBoundTrackParameters : public SingleTrackParameters<ChargePolicy> {
   ~SingleBoundTrackParameters() override = default;
 
   /// @brief copy assignment operator - charged/neutral
-  SingleBoundTrackParameters<ChargePolicy>& operator=(
-      const SingleBoundTrackParameters<ChargePolicy>& rhs) {
+  SingleBoundTrackParameters<ChargePolicy>&
+  operator=(const SingleBoundTrackParameters<ChargePolicy>& rhs) {
     // check for self-assignment
     if (this != &rhs) {
       SingleTrackParameters<ChargePolicy>::operator=(rhs);
@@ -175,8 +207,8 @@ class SingleBoundTrackParameters : public SingleTrackParameters<ChargePolicy> {
 
   /// @brief move assignment operator - charged/neutral
   /// checks if the surface is free and in such a case delete-clones it
-  SingleBoundTrackParameters<ChargePolicy>& operator=(
-      SingleBoundTrackParameters<ChargePolicy>&& rhs) {
+  SingleBoundTrackParameters<ChargePolicy>&
+  operator=(SingleBoundTrackParameters<ChargePolicy>&& rhs) {
     // check for self-assignment
     if (this != &rhs) {
       SingleTrackParameters<ChargePolicy>::operator=(std::move(rhs));
@@ -188,7 +220,8 @@ class SingleBoundTrackParameters : public SingleTrackParameters<ChargePolicy> {
 
   /// @brief clone - charged/netural
   /// virtual constructor for type creation without casting
-  SingleBoundTrackParameters<ChargePolicy>* clone() const override {
+  SingleBoundTrackParameters<ChargePolicy>*
+  clone() const override {
     return new SingleBoundTrackParameters<ChargePolicy>(*this);
   }
 
@@ -198,13 +231,17 @@ class SingleBoundTrackParameters : public SingleTrackParameters<ChargePolicy> {
   /// @param[in] gctx is the Context object that is forwarded to the surface
   ///            for local to global coordinate transformation
   template <ParID_t par>
-  void set(const GeometryContext& gctx, ParValue_t newValue) {
+  void
+  set(const GeometryContext& gctx, ParValue_t newValue) {
     this->getParameterSet().template setParameter<par>(newValue);
     this->updateGlobalCoordinates(gctx, typename par_type<par>::type());
   }
 
   /// @brief access method to the reference surface
-  const Surface& referenceSurface() const final { return *m_pSurface; }
+  const Surface&
+  referenceSurface() const final {
+    return *m_pSurface;
+  }
 
   /// @brief access to the measurement frame, i.e. the rotation matrix with
   /// respect to the global coordinate system, in which the local error
@@ -217,7 +254,8 @@ class SingleBoundTrackParameters : public SingleTrackParameters<ChargePolicy> {
   /// surface frame, for measurements with respect to a line this has to be
   /// constructed by the point of clostest approach to the line, for
   /// cylindrical surfaces this is (by convention) the tangential plane.
-  RotationMatrix3D referenceFrame(const GeometryContext& gctx) const final {
+  RotationMatrix3D
+  referenceFrame(const GeometryContext& gctx) const final {
     return std::move(
         m_pSurface->referenceFrame(gctx, this->position(), this->momentum()));
   }

@@ -93,8 +93,10 @@ class Surface : public virtual GeometryObject,
   /// @param gctx The current geometry context object, e.g. alignment
   /// @param other Source surface for copy
   /// @param shift Additional transform applied after copying from the source
-  Surface(const GeometryContext& gctx, const Surface& other,
-          const Transform3D& shift);
+  Surface(
+      const GeometryContext& gctx,
+      const Surface& other,
+      const Transform3D& shift);
 
  public:
   /// Destructor
@@ -104,7 +106,8 @@ class Surface : public virtual GeometryObject,
   /// Will forward all parameters and will attempt to find a suitable
   /// constructor.
   template <class T, typename... Args>
-  static std::shared_ptr<T> makeShared(Args&&... args) {
+  static std::shared_ptr<T>
+  makeShared(Args&&... args) {
     return std::shared_ptr<T>(new T(std::forward<Args>(args)...));
   }
 
@@ -156,8 +159,8 @@ class Surface : public virtual GeometryObject,
   ///
   /// @param gctx The current geometry context object, e.g. alignment
   /// @param shift applied to the surface
-  std::shared_ptr<Surface> clone(const GeometryContext& gctx,
-                                 const Transform3D& shift) const {
+  std::shared_ptr<Surface>
+  clone(const GeometryContext& gctx, const Transform3D& shift) const {
     return std::shared_ptr<Surface>(this->clone_impl(gctx, shift));
   }
 
@@ -168,8 +171,9 @@ class Surface : public virtual GeometryObject,
   ///
   /// @param gctx The current geometry context object, e.g. alignment
   /// @param shift applied to the surface
-  virtual Surface* clone_impl(const GeometryContext& gctx,
-                              const Transform3D& shift) const = 0;
+  virtual Surface* clone_impl(
+      const GeometryContext& gctx,
+      const Transform3D& shift) const = 0;
 
  public:
   /// Return method for the Surface type to avoid dynamic casts
@@ -201,8 +205,9 @@ class Surface : public virtual GeometryObject,
   /// @param lpos is the local position where the normal verctor is constructed
   ///
   /// @return normal vector by value
-  virtual const Vector3D normal(const GeometryContext& gctx,
-                                const Vector2D& lpos) const = 0;
+  virtual const Vector3D normal(
+      const GeometryContext& gctx,
+      const Vector2D& lpos) const = 0;
 
   /// Return method for the normal vector of the surface
   /// The normal vector can only be generally defined at a given local position
@@ -213,8 +218,9 @@ class Surface : public virtual GeometryObject,
 
   ///
   /// @return normal vector by value
-  virtual const Vector3D normal(const GeometryContext& gctx,
-                                const Vector3D& pos) const;
+  virtual const Vector3D normal(
+      const GeometryContext& gctx,
+      const Vector3D& pos) const;
 
   /// Return method for the normal vector of the surface
   ///
@@ -223,7 +229,8 @@ class Surface : public virtual GeometryObject,
   /// @param gctx The current geometry context object, e.g. alignment
   //
   /// @return normal vector by value
-  virtual const Vector3D normal(const GeometryContext& gctx) const {
+  virtual const Vector3D
+  normal(const GeometryContext& gctx) const {
     return normal(gctx, center(gctx));
   }
 
@@ -272,8 +279,10 @@ class Surface : public virtual GeometryObject,
   ///
   /// @return boolean indication if operation was successful
   template <typename parameters_t>
-  bool isOnSurface(const GeometryContext& gctx, const parameters_t& pars,
-                   const BoundaryCheck& bcheck = true) const;
+  bool isOnSurface(
+      const GeometryContext& gctx,
+      const parameters_t& pars,
+      const BoundaryCheck& bcheck = true) const;
 
   /// The geometric onSurface method
   ///
@@ -285,17 +294,20 @@ class Surface : public virtual GeometryObject,
   /// @param bcheck BoundaryCheck directive for this onSurface check
   ///
   /// @return boolean indication if operation was successful
-  bool isOnSurface(const GeometryContext& gctx, const Vector3D& gpos,
-                   const Vector3D& gmom,
-                   const BoundaryCheck& bcheck = true) const;
+  bool isOnSurface(
+      const GeometryContext& gctx,
+      const Vector3D& gpos,
+      const Vector3D& gmom,
+      const BoundaryCheck& bcheck = true) const;
 
   /// The insideBounds method for local positions
   ///
   /// @param locpos local position to check
   /// @param bcheck  BoundaryCheck directive for this onSurface check
   /// @return boolean indication if operation was successful
-  virtual bool insideBounds(const Vector2D& locpos,
-                            const BoundaryCheck& bcheck = true) const;
+  virtual bool insideBounds(
+      const Vector2D& locpos,
+      const BoundaryCheck& bcheck = true) const;
 
   /// Local to global transformation
   /// Generalized local to global transformation for the surface types. Since
@@ -307,8 +319,11 @@ class Surface : public virtual GeometryObject,
   /// @param gmom global 3D momentum representation (optionally ignored)
   /// @param gpos global 3D position to be filled (given by reference for method
   /// symmetry)
-  virtual void localToGlobal(const GeometryContext& gctx, const Vector2D& lpos,
-                             const Vector3D& gmom, Vector3D& gpos) const = 0;
+  virtual void localToGlobal(
+      const GeometryContext& gctx,
+      const Vector2D& lpos,
+      const Vector3D& gmom,
+      Vector3D& gpos) const = 0;
 
   /// Global to local transformation
   /// Generalized global to local transformation for the surface types. Since
@@ -324,8 +339,11 @@ class Surface : public virtual GeometryObject,
   ///
   /// @return boolean indication if operation was successful (fail means global
   /// position was not on surface)
-  virtual bool globalToLocal(const GeometryContext& gctx, const Vector3D& gpos,
-                             const Vector3D& gmom, Vector2D& lpos) const = 0;
+  virtual bool globalToLocal(
+      const GeometryContext& gctx,
+      const Vector3D& gpos,
+      const Vector3D& gmom,
+      Vector2D& lpos) const = 0;
 
   /// Return mehtod for the reference frame
   /// This is the frame in which the covariance matrix is defined (specialized
@@ -339,7 +357,8 @@ class Surface : public virtual GeometryObject,
   /// @return RotationMatrix3D which defines the three axes of the measurement
   /// frame
   virtual const Acts::RotationMatrix3D referenceFrame(
-      const GeometryContext& gctx, const Vector3D& gpos,
+      const GeometryContext& gctx,
+      const Vector3D& gpos,
       const Vector3D& gmom) const;
 
   /// Initialize the jacobian from local to global
@@ -356,10 +375,12 @@ class Surface : public virtual GeometryObject,
   /// @param gpos is the global position of the parameters
   /// @param dir is the direction at of the parameters
   /// @param pars is the parameter vector
-  virtual void initJacobianToGlobal(const GeometryContext& gctx,
-                                    BoundToFreeMatrix& jacobian,
-                                    const Vector3D& gpos, const Vector3D& dir,
-                                    const BoundVector& pars) const;
+  virtual void initJacobianToGlobal(
+      const GeometryContext& gctx,
+      BoundToFreeMatrix& jacobian,
+      const Vector3D& gpos,
+      const Vector3D& dir,
+      const BoundVector& pars) const;
 
   /// Initialize the jacobian from global to local
   /// the surface knows best, hence the calculation is done here.
@@ -377,8 +398,10 @@ class Surface : public virtual GeometryObject,
   ///
   /// @return the transposed reference frame (avoids recalculation)
   virtual const RotationMatrix3D initJacobianToLocal(
-      const GeometryContext& gctx, FreeToBoundMatrix& jacobian,
-      const Vector3D& gpos, const Vector3D& dir) const;
+      const GeometryContext& gctx,
+      FreeToBoundMatrix& jacobian,
+      const Vector3D& gpos,
+      const Vector3D& dir) const;
 
   /// Calculate the form factors for the derivatives
   /// the calculation is identical for all surfaces where the
@@ -397,8 +420,11 @@ class Surface : public virtual GeometryObject,
   ///
   /// @return a five-dim vector
   virtual const BoundRowVector derivativeFactors(
-      const GeometryContext& gctx, const Vector3D& gpos, const Vector3D& dir,
-      const RotationMatrix3D& rft, const BoundToFreeMatrix& jac) const;
+      const GeometryContext& gctx,
+      const Vector3D& gpos,
+      const Vector3D& dir,
+      const RotationMatrix3D& rft,
+      const BoundToFreeMatrix& jac) const;
 
   /// Calucation of the path correction for incident
   ///
@@ -408,9 +434,10 @@ class Surface : public virtual GeometryObject,
   /// @param gmom global 3D momentum representation
   ///
   /// @return Path correction with respect to the nominal incident.
-  virtual double pathCorrection(const GeometryContext& gctx,
-                                const Vector3D& gpos,
-                                const Vector3D& gmom) const = 0;
+  virtual double pathCorrection(
+      const GeometryContext& gctx,
+      const Vector3D& gpos,
+      const Vector3D& gmom) const = 0;
 
   /// Straight line intersection schema from position/direction
   ///
@@ -425,18 +452,26 @@ class Surface : public virtual GeometryObject,
   /// @param correct Corrector struct that can be used to refine the solution
   ///
   /// @return SurfaceIntersection object (contains intersection & surface)
-  template <typename options_t,
-            typename corrector_t = VoidIntersectionCorrector>
-  SurfaceIntersection surfaceIntersectionEstimate(
-      const GeometryContext& gctx, const Vector3D& position,
-      const Vector3D& direction, const options_t& options,
+  template <
+      typename options_t,
+      typename corrector_t = VoidIntersectionCorrector>
+  SurfaceIntersection
+  surfaceIntersectionEstimate(
+      const GeometryContext& gctx,
+      const Vector3D& position,
+      const Vector3D& direction,
+      const options_t& options,
       const corrector_t& correct = corrector_t()) const
 
   {
     // get the intersection with the surface
-    auto sIntersection =
-        intersectionEstimate(gctx, position, direction, options.navDir,
-                             options.boundaryCheck, correct);
+    auto sIntersection = intersectionEstimate(
+        gctx,
+        position,
+        direction,
+        options.navDir,
+        options.boundaryCheck,
+        correct);
     // return a surface intersection with result direction
     return SurfaceIntersection(sIntersection, this);
   }
@@ -454,10 +489,14 @@ class Surface : public virtual GeometryObject,
   /// @param correct Corrector struct that can be used to refine the solution
   ///
   /// @return SurfaceIntersection object (contains intersection & surface)
-  template <typename parameters_t, typename options_t,
-            typename corrector_t = VoidIntersectionCorrector>
-  SurfaceIntersection surfaceIntersectionEstimate(
-      const GeometryContext& gctx, const parameters_t& parameters,
+  template <
+      typename parameters_t,
+      typename options_t,
+      typename corrector_t = VoidIntersectionCorrector>
+  SurfaceIntersection
+  surfaceIntersectionEstimate(
+      const GeometryContext& gctx,
+      const parameters_t& parameters,
       const options_t& options,
       const corrector_t& correct = corrector_t()) const {
     return surfaceIntersectionEstimate(
@@ -479,8 +518,11 @@ class Surface : public virtual GeometryObject,
   ///
   /// @return Intersection object
   virtual Intersection intersectionEstimate(
-      const GeometryContext& gctx, const Vector3D& gpos, const Vector3D& gidr,
-      NavigationDirection navDir = forward, const BoundaryCheck& bcheck = false,
+      const GeometryContext& gctx,
+      const Vector3D& gpos,
+      const Vector3D& gidr,
+      NavigationDirection navDir = forward,
+      const BoundaryCheck& bcheck = false,
       CorrFnc corr = nullptr) const = 0;
   /// clang-format on
 
@@ -488,8 +530,8 @@ class Surface : public virtual GeometryObject,
   ///
   /// @param gctx The current geometry context object, e.g. alignment
   /// @param sl is the ostream to be dumped into
-  virtual std::ostream& toStream(const GeometryContext& gctx,
-                                 std::ostream& sl) const;
+  virtual std::ostream& toStream(const GeometryContext& gctx, std::ostream& sl)
+      const;
 
   /// Return properly formatted class name
   virtual std::string name() const = 0;

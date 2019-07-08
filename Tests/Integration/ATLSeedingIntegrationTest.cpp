@@ -23,17 +23,21 @@ struct SpacePoint {
   float covr = 0.03;
   float covz = 0.03;
   std::pair<int, int> m_clusterList = std::pair<int, int>(1, 1);
-  void setClusterList(int first, int second) {
+  void
+  setClusterList(int first, int second) {
     m_clusterList = std::pair<int, int>(first, second);
   }
-  const std::pair<int, int> clusterList() const { return m_clusterList; }
+  const std::pair<int, int>
+  clusterList() const {
+    return m_clusterList;
+  }
   int surface;
 };
 
 // call sequence to create seeds. Seeds are copied as the
 // call to next() overwrites the previous seed object
-std::vector<Acts::Legacy::Seed<SpacePoint>> runSeeding(
-    std::vector<SpacePoint*> spVec) {
+std::vector<Acts::Legacy::Seed<SpacePoint>>
+runSeeding(std::vector<SpacePoint*> spVec) {
   Acts::Legacy::AtlasSeedfinder<SpacePoint> seedMaker;
   seedMaker.newEvent(0, spVec.begin(), spVec.end());
   seedMaker.find3Sp();
@@ -54,8 +58,10 @@ std::vector<Acts::Legacy::Seed<SpacePoint>> runSeeding(
 // used to sort seeds, ignores z
 class seedComparator {
  public:
-  bool operator()(const Acts::Legacy::Seed<SpacePoint>& s1,
-                  const Acts::Legacy::Seed<SpacePoint>& s2) {
+  bool
+  operator()(
+      const Acts::Legacy::Seed<SpacePoint>& s1,
+      const Acts::Legacy::Seed<SpacePoint>& s2) {
     auto sp1It = s1.spacePoints().begin();
     auto sp2It = s2.spacePoints().begin();
     for (int i = 0; i < 3; i++) {
@@ -146,9 +152,13 @@ BOOST_AUTO_TEST_CASE(number_of_seeds_correct_) {
   // difference between reference and result shows if results exactly the same
   // (i.e. difference is 0)
   std::vector<Acts::Legacy::Seed<SpacePoint>> diff;
-  std::set_difference(refVec.begin(), refVec.end(), seedVec.begin(),
-                      seedVec.end(), std::inserter(diff, diff.begin()),
-                      seedComparator());
+  std::set_difference(
+      refVec.begin(),
+      refVec.end(),
+      seedVec.begin(),
+      seedVec.end(),
+      std::inserter(diff, diff.begin()),
+      seedComparator());
   BOOST_CHECK(diff.empty());
   for (auto sp : spVec) {
     delete sp;

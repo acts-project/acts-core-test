@@ -52,8 +52,11 @@ struct SurfaceCollector {
   /// @param [in] stepper The stepper in use
   /// @param [in,out] result is the mutable result object
   template <typename propagator_state_t, typename stepper_t>
-  void operator()(propagator_state_t& state, const stepper_t& stepper,
-                  result_type& result) const {
+  void
+  operator()(
+      propagator_state_t& state,
+      const stepper_t& stepper,
+      result_type& result) const {
     // a current surface has been assigned by the navigator
     //
     if (state.navigation.currentSurface &&
@@ -71,8 +74,9 @@ struct SurfaceCollector {
   /// Pure observer interface
   /// - this does not apply to the surface collector
   template <typename propagator_state_t, typename stepper_t>
-  void operator()(propagator_state_t& /*state*/,
-                  const stepper_t& /*unused*/) const {}
+  void
+  operator()(propagator_state_t& /*state*/, const stepper_t& /*unused*/) const {
+  }
 };
 
 }  // namespace Acts

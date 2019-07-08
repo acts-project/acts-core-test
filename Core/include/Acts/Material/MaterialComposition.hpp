@@ -61,19 +61,29 @@ class MaterialComposition {
   MaterialComposition& operator=(MaterialComposition&& mc) = default;
 
   /// Access to the elements themselves
-  const std::vector<ElementFraction>& elements() const { return m_elements; }
+  const std::vector<ElementFraction>&
+  elements() const {
+    return m_elements;
+  }
 
   /// Boolean operator to indicate if this is empty
   operator bool() const { return !empty(); }
 
   /// How many elements you have
-  size_t size() const { return m_elements.size(); }
+  size_t
+  size() const {
+    return m_elements.size();
+  }
 
   /// Check if empty
-  bool empty() const { return m_elements.empty(); }
+  bool
+  empty() const {
+    return m_elements.empty();
+  }
 
   /// Euality operator
-  bool operator==(const MaterialComposition& mc) const {
+  bool
+  operator==(const MaterialComposition& mc) const {
     return (mc.m_elements == m_elements);
   }
 

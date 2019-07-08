@@ -27,8 +27,8 @@ BOOST_AUTO_TEST_CASE(AuctioneerTest_VoidAuctioneer) {
   detail::VoidAuctioneer va;
   std::array<bool, 4> resultVa = va(vecArb);
   // Test that vector did not change
-  BOOST_CHECK_EQUAL_COLLECTIONS(vecRes.begin(), vecRes.end(), resultVa.begin(),
-                                resultVa.end());
+  BOOST_CHECK_EQUAL_COLLECTIONS(
+      vecRes.begin(), vecRes.end(), resultVa.begin(), resultVa.end());
 }
 
 BOOST_AUTO_TEST_CASE(AuctioneerTest_FirstValidAuctioneer) {
@@ -39,8 +39,8 @@ BOOST_AUTO_TEST_CASE(AuctioneerTest_FirstValidAuctioneer) {
   std::array<bool, 4> resultFva = fva(vecArb);
   std::array<bool, 4> expected = {false, true, false, false};
   // Test that vector did not change
-  BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(),
-                                resultFva.begin(), resultFva.end());
+  BOOST_CHECK_EQUAL_COLLECTIONS(
+      expected.begin(), expected.end(), resultFva.begin(), resultFva.end());
 }
 
 BOOST_AUTO_TEST_CASE(AuctioneerTest_HighestValidAuctioneer) {
@@ -51,8 +51,8 @@ BOOST_AUTO_TEST_CASE(AuctioneerTest_HighestValidAuctioneer) {
   std::array<bool, 4> resultFva = fva(vecArb);
   std::array<bool, 4> expected = {false, false, false, true};
   // Test that vector did not change
-  BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(),
-                                resultFva.begin(), resultFva.end());
+  BOOST_CHECK_EQUAL_COLLECTIONS(
+      expected.begin(), expected.end(), resultFva.begin(), resultFva.end());
 }
 }  // namespace Test
 }  // namespace Acts

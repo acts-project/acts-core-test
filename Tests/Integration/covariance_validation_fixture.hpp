@@ -31,10 +31,12 @@ struct covariance_validation_fixture {
   /// this is for covariance propagation validation
   /// it can either be used for curvilinear transport
   template <typename StartParameters, typename EndParameters, typename U>
-  Covariance calculateCovariance(const StartParameters& startPars,
-                                 const Covariance& startCov,
-                                 const EndParameters& endPars,
-                                 const U& options) const {
+  Covariance
+  calculateCovariance(
+      const StartParameters& startPars,
+      const Covariance& startCov,
+      const EndParameters& endPars,
+      const U& options) const {
     // steps for estimating derivatives
     const std::array<double, 4> h_steps = {{-2e-4, -1e-4, 1e-4, 2e-4}};
 
@@ -60,8 +62,8 @@ struct covariance_validation_fixture {
     x_derivatives.reserve(h_steps.size());
     for (double h : h_steps) {
       StartParameters tp = startPars;
-      tp.template set<Acts::eLOC_0>(options.geoContext,
-                                    tp.template get<Acts::eLOC_0>() + h);
+      tp.template set<Acts::eLOC_0>(
+          options.geoContext, tp.template get<Acts::eLOC_0>() + h);
       const auto& r = m_propagator.propagate(tp, dest, var_options).value();
       x_derivatives.push_back((r.endParameters->parameters() - nominal) / h);
     }
@@ -71,8 +73,8 @@ struct covariance_validation_fixture {
     y_derivatives.reserve(h_steps.size());
     for (double h : h_steps) {
       StartParameters tp = startPars;
-      tp.template set<Acts::eLOC_1>(options.geoContext,
-                                    tp.template get<Acts::eLOC_1>() + h);
+      tp.template set<Acts::eLOC_1>(
+          options.geoContext, tp.template get<Acts::eLOC_1>() + h);
       const auto& r = m_propagator.propagate(tp, dest, var_options).value();
       y_derivatives.push_back((r.endParameters->parameters() - nominal) / h);
     }
@@ -82,8 +84,8 @@ struct covariance_validation_fixture {
     phi_derivatives.reserve(h_steps.size());
     for (double h : h_steps) {
       StartParameters tp = startPars;
-      tp.template set<Acts::ePHI>(options.geoContext,
-                                  tp.template get<Acts::ePHI>() + h);
+      tp.template set<Acts::ePHI>(
+          options.geoContext, tp.template get<Acts::ePHI>() + h);
       const auto& r = m_propagator.propagate(tp, dest, var_options).value();
       phi_derivatives.push_back((r.endParameters->parameters() - nominal) / h);
     }
@@ -100,11 +102,11 @@ struct covariance_validation_fixture {
       if (current_theta + h < 0) {
         h = -current_theta;
       }
-      tp.template set<Acts::eTHETA>(options.geoContext,
-                                    tp.template get<Acts::eTHETA>() + h);
+      tp.template set<Acts::eTHETA>(
+          options.geoContext, tp.template get<Acts::eTHETA>() + h);
       const auto& r = m_propagator.propagate(tp, dest, var_options).value();
-      theta_derivatives.push_back((r.endParameters->parameters() - nominal) /
-                                  h);
+      theta_derivatives.push_back(
+          (r.endParameters->parameters() - nominal) / h);
     }
 
     // variation in q/p
@@ -112,8 +114,8 @@ struct covariance_validation_fixture {
     qop_derivatives.reserve(h_steps.size());
     for (double h : h_steps) {
       StartParameters tp = startPars;
-      tp.template set<Acts::eQOP>(options.geoContext,
-                                  tp.template get<Acts::eQOP>() + h);
+      tp.template set<Acts::eQOP>(
+          options.geoContext, tp.template get<Acts::eQOP>() + h);
       const auto& r = m_propagator.propagate(tp, dest, var_options).value();
       qop_derivatives.push_back((r.endParameters->parameters() - nominal) / h);
     }
@@ -123,8 +125,8 @@ struct covariance_validation_fixture {
     t_derivatives.reserve(h_steps.size());
     for (double h : h_steps) {
       StartParameters tp = startPars;
-      tp.template set<Acts::eT>(options.geoContext,
-                                tp.template get<Acts::eT>() + h);
+      tp.template set<Acts::eT>(
+          options.geoContext, tp.template get<Acts::eT>() + h);
       const auto& r = m_propagator.propagate(tp, dest, var_options).value();
       t_derivatives.push_back((r.endParameters->parameters() - nominal) / h);
     }
@@ -142,8 +144,10 @@ struct covariance_validation_fixture {
 
  private:
   template <unsigned long int N>
-  static BoundVector fitLinear(const std::vector<BoundVector>& values,
-                               const std::array<double, N>& h) {
+  static BoundVector
+  fitLinear(
+      const std::vector<BoundVector>& values,
+      const std::array<double, N>& h) {
     BoundVector A;
     BoundVector C;
     A.setZero();

@@ -78,21 +78,29 @@ class ElementFraction {
   ElementFraction& operator=(ElementFraction&& ef) = default;
 
   /// Access to the data itself
-  const std::array<uint8_t, 2>& data() const { return m_data; }
+  const std::array<uint8_t, 2>&
+  data() const {
+    return m_data;
+  }
 
   /// Return in a nice format
   /// @return casts back to an unsigned integer
-  unsigned int element() const { return static_cast<unsigned int>(m_data[0]); }
+  unsigned int
+  element() const {
+    return static_cast<unsigned int>(m_data[0]);
+  }
 
   /// Return in a nice format
   /// @return casts char to an unsigned int and then into double
-  double fraction() const {
+  double
+  fraction() const {
     return (static_cast<unsigned int>(m_data[1]) * s_oneOverUcharMax);
   }
 
   /// Define the equality operator
   /// @param ef is the source ElementFraction for comparison
-  bool operator==(const ElementFraction& ef) const {
+  bool
+  operator==(const ElementFraction& ef) const {
     return (m_data[0] == ef.m_data[0] && m_data[1] == ef.m_data[1]);
   }
 
@@ -101,7 +109,8 @@ class ElementFraction {
   /// most probable fraction
   ///
   /// @param ef is the source ElementFraction for comparison
-  bool operator<(const ElementFraction& ef) const {
+  bool
+  operator<(const ElementFraction& ef) const {
     return (m_data[1] < ef.m_data[1]);
   }
 

@@ -39,7 +39,8 @@ GeometryContext tgContext = GeometryContext();
 MagneticFieldContext mfContext = MagneticFieldContext();
 
 template <typename InputTrack_t, typename Propagator_t>
-Vertex<InputTrack_t> myFitWrapper(
+Vertex<InputTrack_t>
+myFitWrapper(
     IVertexFitter<InputTrack_t, Propagator_t>* fitter,
     std::vector<InputTrack_t>& tracks,
     VertexFitterOptions<InputTrack_t> vfOptions) {
@@ -59,11 +60,15 @@ BOOST_AUTO_TEST_CASE(billoir_vertex_fitter_empty_input_test) {
   Propagator<EigenStepper<ConstantBField>> propagator(stepper);
 
   // Set up Billoir Vertex Fitter
-  FullBilloirVertexFitter<ConstantBField, BoundParameters,
-                          Propagator<EigenStepper<ConstantBField>>>::Config
+  FullBilloirVertexFitter<
+      ConstantBField,
+      BoundParameters,
+      Propagator<EigenStepper<ConstantBField>>>::Config
       vertexFitterCfg(bField, propagator);
-  FullBilloirVertexFitter<ConstantBField, BoundParameters,
-                          Propagator<EigenStepper<ConstantBField>>>
+  FullBilloirVertexFitter<
+      ConstantBField,
+      BoundParameters,
+      Propagator<EigenStepper<ConstantBField>>>
       billoirFitter(vertexFitterCfg);
 
   // Constraint for vertex fit
@@ -79,8 +84,8 @@ BOOST_AUTO_TEST_CASE(billoir_vertex_fitter_empty_input_test) {
 
   std::vector<BoundParameters> emptyVector;
 
-  VertexFitterOptions<BoundParameters> vfOptions(tgContext, mfContext,
-                                                 myConstraint);
+  VertexFitterOptions<BoundParameters> vfOptions(
+      tgContext, mfContext, myConstraint);
 
   Vertex<BoundParameters> fittedVertex =
       billoirFitter.fit(emptyVector, vfOptions).value();
@@ -146,11 +151,15 @@ BOOST_AUTO_TEST_CASE(billoir_vertex_fitter_defaulttrack_test) {
     unsigned int nTracks = nTracksDist(gen);
 
     // Set up Billoir Vertex Fitter
-    FullBilloirVertexFitter<ConstantBField, BoundParameters,
-                            Propagator<EigenStepper<ConstantBField>>>::Config
+    FullBilloirVertexFitter<
+        ConstantBField,
+        BoundParameters,
+        Propagator<EigenStepper<ConstantBField>>>::Config
         vertexFitterCfg(bField, propagator);
-    FullBilloirVertexFitter<ConstantBField, BoundParameters,
-                            Propagator<EigenStepper<ConstantBField>>>
+    FullBilloirVertexFitter<
+        ConstantBField,
+        BoundParameters,
+        Propagator<EigenStepper<ConstantBField>>>
         billoirFitter(vertexFitterCfg);
     // Constraint for vertex fit
     Vertex<BoundParameters> myConstraint;
@@ -164,8 +173,8 @@ BOOST_AUTO_TEST_CASE(billoir_vertex_fitter_defaulttrack_test) {
     myConstraint.setFullPosition(SpacePointVector(0, 0, 0, 0));
     VertexFitterOptions<BoundParameters> vfOptions(tgContext, mfContext);
 
-    VertexFitterOptions<BoundParameters> vfOptionsConstr(tgContext, mfContext,
-                                                         myConstraint);
+    VertexFitterOptions<BoundParameters> vfOptionsConstr(
+        tgContext, mfContext, myConstraint);
     // Create position of vertex and perigee surface
     double x = vXYDist(gen);
     double y = vXYDist(gen);
@@ -204,8 +213,8 @@ BOOST_AUTO_TEST_CASE(billoir_vertex_fitter_defaulttrack_test) {
       (*covMat) << resD0 * resD0, 0., 0., 0., 0., 0., 0., resZ0 * resZ0, 0., 0.,
           0., 0., 0., 0., resPh * resPh, 0., 0., 0., 0., 0., 0., resTh * resTh,
           0., 0., 0., 0., 0., 0., resQp * resQp, 0., 0., 0., 0., 0., 0., 1.;
-      tracks.push_back(BoundParameters(tgContext, std::move(covMat), paramVec,
-                                       perigeeSurface));
+      tracks.push_back(BoundParameters(
+          tgContext, std::move(covMat), paramVec, perigeeSurface));
     }
     // Do the actual fit with 4 tracks without constraint
     Vertex<BoundParameters> fittedVertex =
@@ -240,7 +249,10 @@ BOOST_AUTO_TEST_CASE(billoir_vertex_fitter_defaulttrack_test) {
 struct InputTrack {
   InputTrack(const BoundParameters& params) : m_parameters(params) {}
 
-  const BoundParameters& parameters() const { return m_parameters; }
+  const BoundParameters&
+  parameters() const {
+    return m_parameters;
+  }
 
   // store e.g. link to original objects here
 
@@ -279,11 +291,15 @@ BOOST_AUTO_TEST_CASE(billoir_vertex_fitter_usertrack_test) {
         [](InputTrack params) { return params.parameters(); };
 
     // Set up Billoir Vertex Fitter
-    FullBilloirVertexFitter<ConstantBField, InputTrack,
-                            Propagator<EigenStepper<ConstantBField>>>::Config
+    FullBilloirVertexFitter<
+        ConstantBField,
+        InputTrack,
+        Propagator<EigenStepper<ConstantBField>>>::Config
         vertexFitterCfg(bField, propagator);
-    FullBilloirVertexFitter<ConstantBField, InputTrack,
-                            Propagator<EigenStepper<ConstantBField>>>
+    FullBilloirVertexFitter<
+        ConstantBField,
+        InputTrack,
+        Propagator<EigenStepper<ConstantBField>>>
         billoirFitter(vertexFitterCfg, extractParameters);
 
     // Constraint for vertex fit
@@ -299,8 +315,8 @@ BOOST_AUTO_TEST_CASE(billoir_vertex_fitter_usertrack_test) {
 
     VertexFitterOptions<InputTrack> vfOptions(tgContext, mfContext);
 
-    VertexFitterOptions<InputTrack> vfOptionsConstr(tgContext, mfContext,
-                                                    myConstraint);
+    VertexFitterOptions<InputTrack> vfOptionsConstr(
+        tgContext, mfContext, myConstraint);
 
     // Create position of vertex and perigee surface
     double x = vXYDist(gen);
@@ -342,8 +358,8 @@ BOOST_AUTO_TEST_CASE(billoir_vertex_fitter_usertrack_test) {
       (*covMat) << resD0 * resD0, 0., 0., 0., 0., 0., 0., resZ0 * resZ0, 0., 0.,
           0., 0., 0., 0., resPh * resPh, 0., 0., 0., 0., 0., 0., resTh * resTh,
           0., 0., 0., 0., 0., 0., resQp * resQp, 0., 0., 0., 0., 0., 0., 1.;
-      tracks.push_back(InputTrack(BoundParameters(tgContext, std::move(covMat),
-                                                  paramVec, perigeeSurface)));
+      tracks.push_back(InputTrack(BoundParameters(
+          tgContext, std::move(covMat), paramVec, perigeeSurface)));
     }
 
     // Do the actual fit with 4 tracks without constraint

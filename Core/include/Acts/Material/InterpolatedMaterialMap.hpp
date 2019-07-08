@@ -63,10 +63,14 @@ struct MaterialMapper {
     /// @return Material at the given position
     ///
     /// @pre The given @c position must lie within the current cell.
-    Material getMaterial(const Vector3D& position) const {
+    Material
+    getMaterial(const Vector3D& position) const {
       // defined in Interpolation.hpp
-      return Material(interpolate(m_transformPos(position), m_lowerLeft,
-                                  m_upperRight, m_materialValues));
+      return Material(interpolate(
+          m_transformPos(position),
+          m_lowerLeft,
+          m_upperRight,
+          m_materialValues));
     }
 
     /// @brief Check whether given 3D position is inside this cell
@@ -74,7 +78,8 @@ struct MaterialMapper {
     /// @param [in] position Global 3D position
     /// @return @c true if position is inside the current cell,
     ///         otherwise @c false
-    bool isInside(const Vector3D& position) const {
+    bool
+    isInside(const Vector3D& position) const {
       const auto& gridCoordinates = m_transformPos(position);
       for (unsigned int i = 0; i < DIM_POS; ++i) {
         if (gridCoordinates[i] < m_lowerLeft.at(i) ||
@@ -119,7 +124,8 @@ struct MaterialMapper {
   ///
   /// @pre The given @c position must lie within the range of the underlying
   /// map.
-  Material getMaterial(const Vector3D& position) const {
+  Material
+  getMaterial(const Vector3D& position) const {
     return Material(m_grid.interpolate(m_transformPos(position)));
   }
 
@@ -130,7 +136,8 @@ struct MaterialMapper {
   ///
   /// @pre The given @c position must lie within the range of the underlying
   /// map.
-  MaterialCell getMaterialCell(const Vector3D& position) const {
+  MaterialCell
+  getMaterialCell(const Vector3D& position) const {
     const auto& gridPosition = m_transformPos(position);
     size_t bin = m_grid.globalBinFromPosition(gridPosition);
     const auto& indices = m_grid.localBinsFromPosition(bin);
@@ -147,14 +154,15 @@ struct MaterialMapper {
       neighbors.at(i++) = m_grid.at(index);
     }
 
-    return MaterialCell(m_transformPos, lowerLeft, upperRight,
-                        std::move(neighbors));
+    return MaterialCell(
+        m_transformPos, lowerLeft, upperRight, std::move(neighbors));
   }
 
   /// @brief Get the number of bins for all axes of the map
   ///
   /// @return Vector returning number of bins for all map axes
-  std::vector<size_t> getNBins() const {
+  std::vector<size_t>
+  getNBins() const {
     auto nBinsArray = m_grid.numLocalBins();
     return std::vector<size_t>(nBinsArray.begin(), nBinsArray.end());
   }
@@ -162,7 +170,8 @@ struct MaterialMapper {
   /// @brief Get the minimum value of all axes of the map
   ///
   /// @return Vector returning the minima of all map axes
-  std::vector<double> getMin() const {
+  std::vector<double>
+  getMin() const {
     auto minArray = m_grid.minPosition();
     return std::vector<double>(minArray.begin(), minArray.end());
   }
@@ -170,7 +179,8 @@ struct MaterialMapper {
   /// @brief Get the maximum value of all axes of the map
   ///
   /// @return Vector returning the maxima of all map axes
-  std::vector<double> getMax() const {
+  std::vector<double>
+  getMax() const {
     auto maxArray = m_grid.maxPosition();
     return std::vector<double>(maxArray.begin(), maxArray.end());
   }
@@ -180,14 +190,18 @@ struct MaterialMapper {
   /// @param [in] position Global 3D position
   /// @return @c true if position is inside the defined look-up grid,
   ///         otherwise @c false
-  bool isInside(const Vector3D& position) const {
+  bool
+  isInside(const Vector3D& position) const {
     return m_grid.isInside(m_transformPos(position));
   }
 
   /// @brief Get a const reference on the underlying grid structure
   ///
   /// @return Grid reference
-  const Grid_t& getGrid() const { return m_grid; }
+  const Grid_t&
+  getGrid() const {
+    return m_grid;
+  }
 
  private:
   /// Geometric transformation applied to global 3D positions
@@ -239,7 +253,8 @@ class InterpolatedMaterialMap final {
   /// @param [in] position Global 3D position
   ///
   /// @return Material at given position
-  Material getMaterial(const Vector3D& position) const {
+  Material
+  getMaterial(const Vector3D& position) const {
     return m_mapper.getMaterial(position);
   }
 
@@ -250,7 +265,8 @@ class InterpolatedMaterialMap final {
   /// interpolation
   ///
   /// @return material at given position
-  Material getMaterial(const Vector3D& position, Cache& cache) const {
+  Material
+  getMaterial(const Vector3D& position, Cache& cache) const {
     if (!cache.initialized || !(*cache.matCell).isInside(position)) {
       cache.matCell = getMaterialCell(position);
       cache.initialized = true;
@@ -266,8 +282,10 @@ class InterpolatedMaterialMap final {
   ///
   /// @note Currently the derivative is not calculated
   /// @todo return derivative
-  Material getMaterialGradient(const Vector3D& position,
-                               ActsMatrixD<5, 5>& /*derivative*/) const {
+  Material
+  getMaterialGradient(
+      const Vector3D& position,
+      ActsMatrixD<5, 5>& /*derivative*/) const {
     return m_mapper.getMaterial(position);
   }
 
@@ -281,22 +299,28 @@ class InterpolatedMaterialMap final {
   /// @note Currently the derivative is not calculated
   /// @note Cache is not used currently
   /// @todo return derivative
-  Material getMaterialGradient(const Vector3D& position,
-                               ActsMatrixD<5, 5>& /*derivative*/,
-                               Cache& /*cache*/) const {
+  Material
+  getMaterialGradient(
+      const Vector3D& position,
+      ActsMatrixD<5, 5>& /*derivative*/,
+      Cache& /*cache*/) const {
     return m_mapper.getMaterial(position);
   }
 
   /// @brief Convenience method to access underlying material mapper
   ///
   /// @return The material mapper
-  Mapper_t getMapper() const { return m_mapper; }
+  Mapper_t
+  getMapper() const {
+    return m_mapper;
+  }
 
   /// @brief Check whether given 3D position is inside look-up domain
   ///
   /// @param [in] position Global 3D position
   /// @return @c true if position is inside the defined map, otherwise @c false
-  bool isInside(const Vector3D& position) const {
+  bool
+  isInside(const Vector3D& position) const {
     return m_mapper.isInside(position);
   }
 
@@ -308,8 +332,8 @@ class InterpolatedMaterialMap final {
   ///
   /// @pre The given @c position must lie within the range of the underlying
   /// map.
-  typename Mapper_t::MaterialCell getMaterialCell(
-      const Vector3D& position) const {
+  typename Mapper_t::MaterialCell
+  getMaterialCell(const Vector3D& position) const {
     return m_mapper.getMaterialCell(position);
   }
 

@@ -26,9 +26,13 @@
 #include "TGeoTube.h"
 
 Acts::TGeoDetectorElement::TGeoDetectorElement(
-    const Identifier& identifier, TGeoNode* tGeoDetElement,
-    const TGeoMatrix* mGlobal, const std::string& axes, double scalor,
-    bool isDisc, std::shared_ptr<const Acts::ISurfaceMaterial> material,
+    const Identifier& identifier,
+    TGeoNode* tGeoDetElement,
+    const TGeoMatrix* mGlobal,
+    const std::string& axes,
+    double scalor,
+    bool isDisc,
+    std::shared_ptr<const Acts::ISurfaceMaterial> material,
     std::shared_ptr<const Acts::DigitizationModule> digitizationModule)
     : Acts::IdentifiedDetectorElement(),
       m_detElement(tGeoDetElement),
@@ -59,8 +63,10 @@ Acts::TGeoDetectorElement::TGeoDetectorElement(
     rotation = (nodeTransform->GetRotationMatrix());
   }
   // create the translation
-  Vector3D colT(scalor * translation[0], scalor * translation[1],
-                scalor * translation[2]);
+  Vector3D colT(
+      scalor * translation[0],
+      scalor * translation[1],
+      scalor * translation[2]);
   Vector3D colX(rotation[0], rotation[3], rotation[6]);
   Vector3D colY(rotation[1], rotation[4], rotation[7]);
   Vector3D colZ(rotation[2], rotation[5], rotation[8]);
@@ -121,7 +127,8 @@ Acts::TGeoDetectorElement::TGeoDetectorElement(
       if (trapezoid != nullptr) {
         // bounds with x/y
         auto trapezoidBounds = std::make_shared<const TrapezoidBounds>(
-            scalor * trapezoid->GetDx1(), scalor * trapezoid->GetDx2(),
+            scalor * trapezoid->GetDx1(),
+            scalor * trapezoid->GetDx2(),
             scalor * 0.5 * (trapezoid->GetDy1() + trapezoid->GetDy2()));
         // thickness
         m_thickness = scalor * trapezoid->GetDz();
@@ -164,7 +171,8 @@ Acts::TGeoDetectorElement::TGeoDetectorElement(
       if (trapezoid != nullptr) {
         // bounds with x/z
         auto trapezoidBounds = std::make_shared<const TrapezoidBounds>(
-            scalor * trapezoid->GetDx1(), scalor * trapezoid->GetDx2(),
+            scalor * trapezoid->GetDx1(),
+            scalor * trapezoid->GetDx2(),
             scalor * trapezoid->GetDz());
         // thickness
         m_thickness =
@@ -209,7 +217,8 @@ Acts::TGeoDetectorElement::TGeoDetectorElement(
       if (trapezoid != nullptr) {
         // bounds with y/z
         auto trapezoidBounds = std::make_shared<const TrapezoidBounds>(
-            scalor * trapezoid->GetDy1(), scalor * trapezoid->GetDy2(),
+            scalor * trapezoid->GetDy1(),
+            scalor * trapezoid->GetDy2(),
             scalor * trapezoid->GetDz());
         // thickness
         m_thickness =
@@ -253,7 +262,8 @@ Acts::TGeoDetectorElement::TGeoDetectorElement(
       if (trapezoid != nullptr) {
         // bounds with y/x
         auto trapezoidBounds = std::make_shared<const TrapezoidBounds>(
-            scalor * trapezoid->GetDy1(), scalor * trapezoid->GetDy2(),
+            scalor * trapezoid->GetDy1(),
+            scalor * trapezoid->GetDy2(),
             scalor * 0.5 * (trapezoid->GetDx1() + trapezoid->GetDx2()));
         // thickness
         m_thickness = scalor * trapezoid->GetDz();
@@ -296,7 +306,8 @@ Acts::TGeoDetectorElement::TGeoDetectorElement(
       if (trapezoid != nullptr) {
         // bounds with z/y
         auto trapezoidBounds = std::make_shared<const TrapezoidBounds>(
-            scalor * trapezoid->GetDz(), scalor * trapezoid->GetDz(),
+            scalor * trapezoid->GetDz(),
+            scalor * trapezoid->GetDz(),
             scalor * 0.5 * (trapezoid->GetDy1() + trapezoid->GetDy2()));
         // thickness
         m_thickness =
@@ -341,7 +352,8 @@ Acts::TGeoDetectorElement::TGeoDetectorElement(
       if (trapezoid != nullptr) {
         // bounds with z/x
         auto trapezoidBounds = std::make_shared<const TrapezoidBounds>(
-            scalor * trapezoid->GetDz(), scalor * trapezoid->GetDz(),
+            scalor * trapezoid->GetDz(),
+            scalor * trapezoid->GetDz(),
             scalor * 0.5 * (trapezoid->GetDx1() + trapezoid->GetDx2()));
         // thickness
         m_thickness =
@@ -372,9 +384,13 @@ Acts::TGeoDetectorElement::TGeoDetectorElement(
 }
 
 Acts::TGeoDetectorElement::TGeoDetectorElement(
-    const Identifier& identifier, const TGeoMatrix& transform,
-    TGeoNode* tGeoDetElement, const std::string& axes, double scalor,
-    bool isDisc, std::shared_ptr<const Acts::ISurfaceMaterial> material,
+    const Identifier& identifier,
+    const TGeoMatrix& transform,
+    TGeoNode* tGeoDetElement,
+    const std::string& axes,
+    double scalor,
+    bool isDisc,
+    std::shared_ptr<const Acts::ISurfaceMaterial> material,
     std::shared_ptr<const Acts::DigitizationModule> digitizationModule)
     : Acts::IdentifiedDetectorElement(),
       m_detElement(tGeoDetElement),
@@ -393,8 +409,10 @@ Acts::TGeoDetectorElement::TGeoDetectorElement(
   rotation = transform.GetRotationMatrix();
 
   // create the translation
-  Vector3D colT(scalor * translation[0], scalor * translation[1],
-                scalor * translation[2]);
+  Vector3D colT(
+      scalor * translation[0],
+      scalor * translation[1],
+      scalor * translation[2]);
   Vector3D colX(rotation[0], rotation[3], rotation[6]);
   Vector3D colY(rotation[1], rotation[4], rotation[7]);
   Vector3D colZ(rotation[2], rotation[5], rotation[8]);
@@ -454,7 +472,8 @@ Acts::TGeoDetectorElement::TGeoDetectorElement(
       if (trapezoid != nullptr) {
         // bounds with x/y
         auto trapezoidBounds = std::make_shared<const TrapezoidBounds>(
-            scalor * trapezoid->GetDx1(), scalor * trapezoid->GetDx2(),
+            scalor * trapezoid->GetDx1(),
+            scalor * trapezoid->GetDx2(),
             scalor * 0.5 * (trapezoid->GetDy1() + trapezoid->GetDy2()));
         // thickness
         m_thickness = scalor * trapezoid->GetDz();
@@ -497,7 +516,8 @@ Acts::TGeoDetectorElement::TGeoDetectorElement(
       if (trapezoid != nullptr) {
         // bounds with x/z
         auto trapezoidBounds = std::make_shared<const TrapezoidBounds>(
-            scalor * trapezoid->GetDx1(), scalor * trapezoid->GetDx2(),
+            scalor * trapezoid->GetDx1(),
+            scalor * trapezoid->GetDx2(),
             scalor * trapezoid->GetDz());
         // thickness
         m_thickness =
@@ -542,7 +562,8 @@ Acts::TGeoDetectorElement::TGeoDetectorElement(
       if (trapezoid != nullptr) {
         // bounds with y/z
         auto trapezoidBounds = std::make_shared<const TrapezoidBounds>(
-            scalor * trapezoid->GetDy1(), scalor * trapezoid->GetDy2(),
+            scalor * trapezoid->GetDy1(),
+            scalor * trapezoid->GetDy2(),
             scalor * trapezoid->GetDz());
         // thickness
         m_thickness =
@@ -586,7 +607,8 @@ Acts::TGeoDetectorElement::TGeoDetectorElement(
       if (trapezoid != nullptr) {
         // bounds with y/x
         auto trapezoidBounds = std::make_shared<const TrapezoidBounds>(
-            scalor * trapezoid->GetDy1(), scalor * trapezoid->GetDy2(),
+            scalor * trapezoid->GetDy1(),
+            scalor * trapezoid->GetDy2(),
             scalor * 0.5 * (trapezoid->GetDx1() + trapezoid->GetDx2()));
         // thickness
         m_thickness = scalor * trapezoid->GetDz();
@@ -629,7 +651,8 @@ Acts::TGeoDetectorElement::TGeoDetectorElement(
       if (trapezoid != nullptr) {
         // bounds with z/y
         auto trapezoidBounds = std::make_shared<const TrapezoidBounds>(
-            scalor * trapezoid->GetDz(), scalor * trapezoid->GetDz(),
+            scalor * trapezoid->GetDz(),
+            scalor * trapezoid->GetDz(),
             scalor * 0.5 * (trapezoid->GetDy1() + trapezoid->GetDy2()));
         // thickness
         m_thickness =
@@ -674,7 +697,8 @@ Acts::TGeoDetectorElement::TGeoDetectorElement(
       if (trapezoid != nullptr) {
         // bounds with z/x
         auto trapezoidBounds = std::make_shared<const TrapezoidBounds>(
-            scalor * trapezoid->GetDz(), scalor * trapezoid->GetDz(),
+            scalor * trapezoid->GetDz(),
+            scalor * trapezoid->GetDz(),
             scalor * 0.5 * (trapezoid->GetDx1() + trapezoid->GetDx2()));
         // thickness
         m_thickness =

@@ -21,9 +21,11 @@ class LayerStub : virtual public SurfaceStub, public Layer {
   /// copy constructor (deleted in Surface baseclass)
   LayerStub(const LayerStub& otherLayer) = delete;
   /// constructor with pointer to SurfaceArray (protected in Layer baseclass)
-  LayerStub(std::unique_ptr<SurfaceArray> surfaceArray, double thickness = 0,
-            std::unique_ptr<ApproachDescriptor> ad = nullptr,
-            LayerType ltype = passive)
+  LayerStub(
+      std::unique_ptr<SurfaceArray> surfaceArray,
+      double thickness = 0,
+      std::unique_ptr<ApproachDescriptor> ad = nullptr,
+      LayerType ltype = passive)
       : SurfaceStub(),
         Layer(std::move(surfaceArray), thickness, std::move(ad), ltype) {}
 
@@ -34,13 +36,22 @@ class LayerStub : virtual public SurfaceStub, public Layer {
   LayerStub& operator=(const LayerStub& lay) = delete;
 
   /// surfaceRepresentation is pure virtual in baseclass
-  const Surface& surfaceRepresentation() const override { return (*this); }
+  const Surface&
+  surfaceRepresentation() const override {
+    return (*this);
+  }
 
-  Surface& surfaceRepresentation() override { return (*this); }
+  Surface&
+  surfaceRepresentation() override {
+    return (*this);
+  }
 
   /// simply return true to show a method can be called on the constructed
   /// object
-  bool constructedOk() const { return true; }
+  bool
+  constructedOk() const {
+    return true;
+  }
 
   /// Other methods have implementation in baseclass
   /// templated 'onLayer()' from baseclass ?

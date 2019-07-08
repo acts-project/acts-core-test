@@ -10,15 +10,19 @@
 // CylinderSurface.ipp, Acts project
 ///////////////////////////////////////////////////////////////////
 
-inline const Vector3D CylinderSurface::rotSymmetryAxis(
-    const GeometryContext& gctx) const {
+inline const Vector3D
+CylinderSurface::rotSymmetryAxis(const GeometryContext& gctx) const {
   // fast access via tranform matrix (and not rotation())
   return transform(gctx).matrix().block<3, 1>(0, 2);
 }
 
-inline Intersection CylinderSurface::intersectionEstimate(
-    const GeometryContext& gctx, const Vector3D& gpos, const Vector3D& gdir,
-    NavigationDirection navDir, const BoundaryCheck& bcheck,
+inline Intersection
+CylinderSurface::intersectionEstimate(
+    const GeometryContext& gctx,
+    const Vector3D& gpos,
+    const Vector3D& gdir,
+    NavigationDirection navDir,
+    const BoundaryCheck& bcheck,
     CorrFnc correct) const {
   // create line parameters
   Vector3D lpos = gpos;
@@ -32,8 +36,8 @@ inline Intersection CylinderSurface::intersectionEstimate(
   double path = 0.;
 
   // lemma : the solver -> should catch current values
-  auto solve = [&solution, &path, &lpos, &ldir, &ccenter, &caxis,
-                &navDir](double R) -> bool {
+  auto solve = [&solution, &path, &lpos, &ldir, &ccenter, &caxis, &navDir](
+                   double R) -> bool {
     // check documentation for explanation
     Vector3D pc = lpos - ccenter;
     Vector3D pcXcd = pc.cross(caxis);

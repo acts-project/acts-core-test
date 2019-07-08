@@ -20,8 +20,9 @@ using Acts::VectorHelpers::phi;
 
 namespace Acts {
 
-ProtoLayer::ProtoLayer(const GeometryContext& gctx,
-                       const std::vector<const Surface*>& surfaces) {
+ProtoLayer::ProtoLayer(
+    const GeometryContext& gctx,
+    const std::vector<const Surface*>& surfaces) {
   measure(gctx, surfaces);
 }
 
@@ -31,8 +32,8 @@ ProtoLayer::ProtoLayer(
   measure(gctx, unpack_shared_vector(surfaces));
 }
 
-double ProtoLayer::radialDistance(const Vector3D& pos1,
-                                  const Vector3D& pos2) const {
+double
+ProtoLayer::radialDistance(const Vector3D& pos1, const Vector3D& pos2) const {
   Vector2D p1(pos1.x(), pos1.y());
   Vector2D p2(pos2.x(), pos2.y());
 
@@ -56,7 +57,8 @@ double ProtoLayer::radialDistance(const Vector3D& pos1,
   return dist;
 }
 
-std::ostream& ProtoLayer::toStream(std::ostream& sl) const {
+std::ostream&
+ProtoLayer::toStream(std::ostream& sl) const {
   sl << "ProtoLayer with dimensions (min/max)" << std::endl;
   sl << " - r : " << minR << " - " << envR.first << " / " << maxR << " + "
      << envR.second << std::endl;
@@ -68,8 +70,10 @@ std::ostream& ProtoLayer::toStream(std::ostream& sl) const {
   return sl;
 }
 
-void ProtoLayer::measure(const GeometryContext& gctx,
-                         const std::vector<const Surface*>& surfaces) {
+void
+ProtoLayer::measure(
+    const GeometryContext& gctx,
+    const std::vector<const Surface*>& surfaces) {
   minR = std::numeric_limits<double>::max();
   maxR = std::numeric_limits<double>::lowest();
   minX = std::numeric_limits<double>::max();
@@ -111,10 +115,12 @@ void ProtoLayer::measure(const GeometryContext& gctx,
           // thickness
           double locz = side != 0 ? 0.5 * thickness : -0.5 * thickness;
           // p1 & p2 vectors
-          Vector3D p2(sTransform *
-                      Vector3D(vertices.at(iv).x(), vertices.at(iv).y(), locz));
-          Vector3D p1(sTransform * Vector3D(vertices.at(ivp).x(),
-                                            vertices.at(ivp).y(), locz));
+          Vector3D p2(
+              sTransform *
+              Vector3D(vertices.at(iv).x(), vertices.at(iv).y(), locz));
+          Vector3D p1(
+              sTransform *
+              Vector3D(vertices.at(ivp).x(), vertices.at(ivp).y(), locz));
 
           maxX = std::max(maxX, p2.x());
           minX = std::min(minX, p2.x());

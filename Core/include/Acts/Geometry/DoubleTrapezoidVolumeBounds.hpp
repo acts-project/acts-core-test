@@ -82,8 +82,13 @@ class DoubleTrapezoidVolumeBounds : public VolumeBounds {
   /// @param haley1 first half length in y (to negative)
   /// @param haley2 second half length in y (to positive)
   /// @param halez half length in z
-  DoubleTrapezoidVolumeBounds(double minhalex, double medhalex, double maxhalex,
-                              double haley1, double haley2, double halez);
+  DoubleTrapezoidVolumeBounds(
+      double minhalex,
+      double medhalex,
+      double maxhalex,
+      double haley1,
+      double haley2,
+      double halez);
 
   /// Copy Constructor
   ///
@@ -122,9 +127,10 @@ class DoubleTrapezoidVolumeBounds : public VolumeBounds {
   /// @param envelope Optional envelope to add / subtract from min/max
   /// @param entity Entity to associate this bounding box with
   /// @return Constructed bounding box
-  Volume::BoundingBox boundingBox(const Transform3D* trf = nullptr,
-                                  const Vector3D& envelope = {0, 0, 0},
-                                  const Volume* entity = nullptr) const final;
+  Volume::BoundingBox boundingBox(
+      const Transform3D* trf = nullptr,
+      const Vector3D& envelope = {0, 0, 0},
+      const Volume* entity = nullptr) const final;
 
   /// This method returns the X halflength at minimal Y
   double minHalflengthX() const;
@@ -191,44 +197,54 @@ class DoubleTrapezoidVolumeBounds : public VolumeBounds {
   std::vector<TDD_real_t> m_valueStore;  ///< the internal store
 };
 
-inline DoubleTrapezoidVolumeBounds* DoubleTrapezoidVolumeBounds::clone() const {
+inline DoubleTrapezoidVolumeBounds*
+DoubleTrapezoidVolumeBounds::clone() const {
   return new DoubleTrapezoidVolumeBounds(*this);
 }
 
-inline double DoubleTrapezoidVolumeBounds::minHalflengthX() const {
+inline double
+DoubleTrapezoidVolumeBounds::minHalflengthX() const {
   return m_valueStore.at(bv_minHalfX);
 }
 
-inline double DoubleTrapezoidVolumeBounds::medHalflengthX() const {
+inline double
+DoubleTrapezoidVolumeBounds::medHalflengthX() const {
   return m_valueStore.at(bv_medHalfX);
 }
 
-inline double DoubleTrapezoidVolumeBounds::maxHalflengthX() const {
+inline double
+DoubleTrapezoidVolumeBounds::maxHalflengthX() const {
   return m_valueStore.at(bv_maxHalfX);
 }
 
-inline double DoubleTrapezoidVolumeBounds::halflengthY1() const {
+inline double
+DoubleTrapezoidVolumeBounds::halflengthY1() const {
   return m_valueStore.at(bv_halfY1);
 }
 
-inline double DoubleTrapezoidVolumeBounds::halflengthY2() const {
+inline double
+DoubleTrapezoidVolumeBounds::halflengthY2() const {
   return m_valueStore.at(bv_halfY2);
 }
 
-inline double DoubleTrapezoidVolumeBounds::halflengthZ() const {
+inline double
+DoubleTrapezoidVolumeBounds::halflengthZ() const {
   return m_valueStore.at(bv_halfZ);
 }
 
-inline double DoubleTrapezoidVolumeBounds::alpha1() const {
+inline double
+DoubleTrapezoidVolumeBounds::alpha1() const {
   return m_valueStore.at(bv_alpha1);
 }
 
-inline double DoubleTrapezoidVolumeBounds::alpha2() const {
+inline double
+DoubleTrapezoidVolumeBounds::alpha2() const {
   return m_valueStore.at(bv_alpha2);
 }
 
 template <class T>
-T& DoubleTrapezoidVolumeBounds::dumpT(T& dT) const {
+T&
+DoubleTrapezoidVolumeBounds::dumpT(T& dT) const {
   dT << std::setiosflags(std::ios::fixed);
   dT << std::setprecision(5);
   dT << "Acts::DoubleTrapezoidVolumeBounds: (minhalfX, medhalfX, maxhalfX, "

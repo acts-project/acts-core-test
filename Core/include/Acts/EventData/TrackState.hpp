@@ -31,8 +31,9 @@ class Surface;
 /// assumed the surface lives longer than the TrackState
 template <typename source_link_t, typename parameters_t>
 class TrackState {
-  static_assert(SourceLinkConcept<source_link_t>,
-                "Source link does not fulfill SourceLinkConcept");
+  static_assert(
+      SourceLinkConcept<source_link_t>,
+      "Source link does not fulfill SourceLinkConcept");
 
  public:
   using SourceLink = source_link_t;
@@ -77,7 +78,8 @@ class TrackState {
   /// Assignment operator
   ///
   /// @param rhs is the source TrackState
-  TrackState& operator=(const TrackState& rhs) {
+  TrackState&
+  operator=(const TrackState& rhs) {
     parameter = rhs.parameter;
     measurement = rhs.measurement;
     m_surface = rhs.m_surface;
@@ -87,7 +89,8 @@ class TrackState {
   /// Assignment move operator
   ///
   /// @param rhs is the source TrackState
-  TrackState& operator=(TrackState&& rhs) {
+  TrackState&
+  operator=(TrackState&& rhs) {
     parameter = std::move(rhs.parameter);
     measurement = std::move(rhs.measurement);
     m_surface = std::move(rhs.m_surface);
@@ -95,14 +98,18 @@ class TrackState {
   }
 
   /// @brief return method for the surface
-  const Surface& referenceSurface() const { return (*m_surface); }
+  const Surface&
+  referenceSurface() const {
+    return (*m_surface);
+  }
 
   /// @brief number of Measured parameters, forwarded
   /// @note This only returns a value if there is a calibrated measurement
   ///       set. If not, this returns boost::none
   ///
   /// @return number of measured parameters, or boost::none
-  boost::optional<size_t> size() {
+  boost::optional<size_t>
+  size() {
     if (this->measurement.calibrated) {
       return MeasurementHelpers::getSize(*this->measurement.calibrated);
     }

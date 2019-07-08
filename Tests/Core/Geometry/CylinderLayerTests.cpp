@@ -62,8 +62,8 @@ BOOST_AUTO_TEST_CASE(CylinderLayerConstruction) {
   const double thickness(1.0);
   auto pCylinderLayerFromSurfaces =
       CylinderLayer::create(pTransform, pCylinder, nullptr);
-  BOOST_CHECK_EQUAL(pCylinderLayerFromSurfaces->layerType(),
-                    LayerType::passive);
+  BOOST_CHECK_EQUAL(
+      pCylinderLayerFromSurfaces->layerType(), LayerType::passive);
   // construct with thickness:
   auto pCylinderLayerWithThickness =
       CylinderLayer::create(pTransform, pCylinder, nullptr, thickness);
@@ -74,14 +74,18 @@ BOOST_AUTO_TEST_CASE(CylinderLayerConstruction) {
   auto adPtr = ad.get();
   auto pCylinderLayerWithApproachDescriptor = CylinderLayer::create(
       pTransform, pCylinder, nullptr, thickness, std::move(ad));
-  BOOST_CHECK_EQUAL(pCylinderLayerWithApproachDescriptor->approachDescriptor(),
-                    adPtr);
+  BOOST_CHECK_EQUAL(
+      pCylinderLayerWithApproachDescriptor->approachDescriptor(), adPtr);
   // with the layerType specified...
-  auto pCylinderLayerWithLayerType =
-      CylinderLayer::create(pTransform, pCylinder, nullptr, thickness,
-                            std::move(ad), LayerType::passive);
-  BOOST_CHECK_EQUAL(pCylinderLayerWithLayerType->layerType(),
-                    LayerType::passive);
+  auto pCylinderLayerWithLayerType = CylinderLayer::create(
+      pTransform,
+      pCylinder,
+      nullptr,
+      thickness,
+      std::move(ad),
+      LayerType::passive);
+  BOOST_CHECK_EQUAL(
+      pCylinderLayerWithLayerType->layerType(), LayerType::passive);
 }
 
 /// Unit test for testing Layer properties
@@ -92,8 +96,9 @@ BOOST_AUTO_TEST_CASE(CylinderLayerProperties /*, *utf::expected_failures(1)*/) {
   auto pCylinder = std::make_shared<const CylinderBounds>(radius, halfz);
   auto pCylinderLayer = CylinderLayer::create(pTransform, pCylinder);
   // auto planeSurface = pCylinderLayer->surfaceRepresentation();
-  BOOST_CHECK_EQUAL(pCylinderLayer->surfaceRepresentation().name(),
-                    std::string("Acts::CylinderSurface"));
+  BOOST_CHECK_EQUAL(
+      pCylinderLayer->surfaceRepresentation().name(),
+      std::string("Acts::CylinderSurface"));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

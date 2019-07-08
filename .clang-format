@@ -6,6 +6,11 @@ AllowShortCaseLabelsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: Inline
 AllowShortIfStatementsOnASingleLine: false
 AllowShortLoopsOnASingleLine: false
+AllowAllParametersOfDeclarationOnNextLine: false
+BinPackArguments: false
+BinPackParameters: false
+AlignAfterOpenBracket: AlwaysBreak
+AlwaysBreakAfterDefinitionReturnType: All
 PointerAlignment: Left
 ColumnLimit:     80
 IncludeCategories: 

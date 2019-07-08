@@ -15,8 +15,20 @@ struct SpacePoint {
   int surface;
   float covr;
   float covz;
-  float x() const { return m_x; }
-  float y() const { return m_y; }
-  float z() const { return m_z; }
-  float r() const { return m_r; }
+  float
+  x() const {
+    return m_x;
+  }
+  float
+  y() const {
+    return m_y;
+  }
+  float
+  z() const {
+    return m_z;
+  }
+  float
+  r() const {
+    return m_r;
+  }
 };

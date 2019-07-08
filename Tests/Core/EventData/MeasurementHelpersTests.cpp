@@ -32,8 +32,8 @@ BOOST_AUTO_TEST_CASE(getSurface_test) {
 
   ActsSymMatrixD<2> cov;
   cov << 0.04, 0, 0, 0.1;
-  MeasurementType<ParDef::eLOC_0, ParDef::eLOC_1> m(cylinder, {},
-                                                    std::move(cov), -0.1, 0.45);
+  MeasurementType<ParDef::eLOC_0, ParDef::eLOC_1> m(
+      cylinder, {}, std::move(cov), -0.1, 0.45);
 
   FittableMeasurement fm = m;
 
@@ -50,8 +50,8 @@ BOOST_AUTO_TEST_CASE(getSize_test) {
 
   ActsSymMatrixD<2> cov;
   cov << 0.04, 0, 0, 0.1;
-  MeasurementType<ParDef::eLOC_0, ParDef::eLOC_1> m(cylinder, {},
-                                                    std::move(cov), -0.1, 0.45);
+  MeasurementType<ParDef::eLOC_0, ParDef::eLOC_1> m(
+      cylinder, {}, std::move(cov), -0.1, 0.45);
 
   FittableMeasurement fm = m;
   BOOST_CHECK_EQUAL(MeasurementHelpers::getSize(fm), 2);
@@ -70,8 +70,8 @@ BOOST_AUTO_TEST_CASE(MinimalSourceLinkTest) {
 
   ActsSymMatrixD<2> cov;
   cov << 0.04, 0, 0, 0.1;
-  MeasurementType<ParDef::eLOC_0, ParDef::eLOC_1> m(cylinder, {},
-                                                    std::move(cov), -0.1, 0.45);
+  MeasurementType<ParDef::eLOC_0, ParDef::eLOC_1> m(
+      cylinder, {}, std::move(cov), -0.1, 0.45);
 
   FittableMeasurement fm = m;
   MinimalSourceLink msl{&fm};
@@ -113,11 +113,11 @@ BOOST_AUTO_TEST_CASE(visit_measurement_test) {
           BOOST_CHECK_EQUAL(cov, covFullConst.topLeftCorner(i, i));
         });
 
-    visit_measurement(parFull, covFull, i,
-                      [&](const auto param, const auto cov) {
-                        BOOST_CHECK_EQUAL(param, parFull.head(i));
-                        BOOST_CHECK_EQUAL(cov, covFull.topLeftCorner(i, i));
-                      });
+    visit_measurement(
+        parFull, covFull, i, [&](const auto param, const auto cov) {
+          BOOST_CHECK_EQUAL(param, parFull.head(i));
+          BOOST_CHECK_EQUAL(cov, covFull.topLeftCorner(i, i));
+        });
   }
 }
 

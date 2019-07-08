@@ -19,12 +19,14 @@
 #include "Acts/Utilities/Helpers.hpp"
 #include "Acts/Utilities/IVisualization.hpp"
 
-Acts::VolumeBounds* Acts::CutoutCylinderVolumeBounds::clone() const {
+Acts::VolumeBounds*
+Acts::CutoutCylinderVolumeBounds::clone() const {
   return new CutoutCylinderVolumeBounds(*this);
 }
 
-bool Acts::CutoutCylinderVolumeBounds::inside(const Acts::Vector3D& gpos,
-                                              double tol) const {
+bool
+Acts::CutoutCylinderVolumeBounds::inside(const Acts::Vector3D& gpos, double tol)
+    const {
   // first check whether we are in the outer envelope at all (ignore r_med)
   using VectorHelpers::perp;
   using VectorHelpers::phi;
@@ -121,8 +123,10 @@ Acts::CutoutCylinderVolumeBounds::decomposeToSurfaces(
   return surfaces;
 }
 
-Acts::Volume::BoundingBox Acts::CutoutCylinderVolumeBounds::boundingBox(
-    const Acts::Transform3D* trf, const Acts::Vector3D& envelope,
+Acts::Volume::BoundingBox
+Acts::CutoutCylinderVolumeBounds::boundingBox(
+    const Acts::Transform3D* trf,
+    const Acts::Vector3D& envelope,
     const Acts::Volume* entity) const {
   Vector3D vmin, vmax;
 
@@ -137,8 +141,8 @@ Acts::Volume::BoundingBox Acts::CutoutCylinderVolumeBounds::boundingBox(
   return trf == nullptr ? box : box.transformed(*trf);
 }
 
-std::ostream& Acts::CutoutCylinderVolumeBounds::toStream(
-    std::ostream& sl) const {
+std::ostream&
+Acts::CutoutCylinderVolumeBounds::toStream(std::ostream& sl) const {
   sl << "Acts::CutoutCylinderVolumeBounds(\n";
   sl << "rmin = " << m_rmin << " rmed = " << m_rmed << " rmax = " << m_rmax
      << "\n";
@@ -146,8 +150,10 @@ std::ostream& Acts::CutoutCylinderVolumeBounds::toStream(
   return sl;
 }
 
-void Acts::CutoutCylinderVolumeBounds::draw(
-    IVisualization& helper, const Transform3D& transform) const {
+void
+Acts::CutoutCylinderVolumeBounds::draw(
+    IVisualization& helper,
+    const Transform3D& transform) const {
   std::vector<std::shared_ptr<const Acts::Surface>> surfaces =
       decomposeToSurfaces(&transform);
   for (const auto& srf : surfaces) {

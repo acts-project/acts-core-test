@@ -24,14 +24,17 @@
 #include "Acts/Utilities/BinUtility.hpp"
 
 Acts::SurfaceMaterialMapper::SurfaceMaterialMapper(
-    const Config& cfg, StraightLinePropagator propagator,
+    const Config& cfg,
+    StraightLinePropagator propagator,
     std::unique_ptr<const Logger> slogger)
     : m_cfg(cfg),
       m_propagator(std::move(propagator)),
       m_logger(std::move(slogger)) {}
 
-Acts::SurfaceMaterialMapper::State Acts::SurfaceMaterialMapper::createState(
-    const GeometryContext& gctx, const MagneticFieldContext& mctx,
+Acts::SurfaceMaterialMapper::State
+Acts::SurfaceMaterialMapper::createState(
+    const GeometryContext& gctx,
+    const MagneticFieldContext& mctx,
     const TrackingGeometry& tGeometry) const {
   // Parse the geometry and find all surfaces with material proxies
   auto world = tGeometry.highestTrackingVolume();
@@ -40,18 +43,21 @@ Acts::SurfaceMaterialMapper::State Acts::SurfaceMaterialMapper::createState(
   State mState(gctx, mctx);
   resolveMaterialSurfaces(mState, *world);
 
-  ACTS_DEBUG(mState.accumulatedMaterial.size()
-             << " Surfaces with PROXIES collected ... ");
+  ACTS_DEBUG(
+      mState.accumulatedMaterial.size()
+      << " Surfaces with PROXIES collected ... ");
   for (auto& smg : mState.accumulatedMaterial) {
     ACTS_VERBOSE(" -> Surface in with id " << smg.first.toString());
   }
   return mState;
 }
 
-void Acts::SurfaceMaterialMapper::resolveMaterialSurfaces(
-    State& mState, const TrackingVolume& tVolume) const {
-  ACTS_VERBOSE("Checking volume '" << tVolume.volumeName()
-                                   << "' for material surfaces.")
+void
+Acts::SurfaceMaterialMapper::resolveMaterialSurfaces(
+    State& mState,
+    const TrackingVolume& tVolume) const {
+  ACTS_VERBOSE(
+      "Checking volume '" << tVolume.volumeName() << "' for material surfaces.")
   // check the boundary surfaces
   for (auto& bSurface : tVolume.boundarySurfaces()) {
     checkAndInsert(mState, bSurface->surfaceRepresentation());
@@ -93,8 +99,10 @@ void Acts::SurfaceMaterialMapper::resolveMaterialSurfaces(
   }
 }
 
-void Acts::SurfaceMaterialMapper::checkAndInsert(State& mState,
-                                                 const Surface& surface) const {
+void
+Acts::SurfaceMaterialMapper::checkAndInsert(
+    State& mState,
+    const Surface& surface) const {
   auto surfaceMaterial = surface.surfaceMaterial();
   // check if the surface has a proxy
   if (surfaceMaterial != nullptr) {
@@ -137,7 +145,8 @@ void Acts::SurfaceMaterialMapper::checkAndInsert(State& mState,
   }
 }
 
-void Acts::SurfaceMaterialMapper::finalizeMaps(State& mState) const {
+void
+Acts::SurfaceMaterialMapper::finalizeMaps(State& mState) const {
   // iterate over the map to call the total average
   for (auto& accMaterial : mState.accumulatedMaterial) {
     mState.surfaceMaterial[accMaterial.first] =
@@ -145,11 +154,13 @@ void Acts::SurfaceMaterialMapper::finalizeMaps(State& mState) const {
   }
 }
 
-void Acts::SurfaceMaterialMapper::mapMaterialTrack(
-    State& mState, const RecordedMaterialTrack& mTrack) const {
+void
+Acts::SurfaceMaterialMapper::mapMaterialTrack(
+    State& mState,
+    const RecordedMaterialTrack& mTrack) const {
   // Neutral curvilinear parameters
-  NeutralCurvilinearParameters start(nullptr, mTrack.first.first,
-                                     mTrack.first.second, 0.);
+  NeutralCurvilinearParameters start(
+      nullptr, mTrack.first.first, mTrack.first.second, 0.);
 
   // Prepare Action list and abort list
   using DebugOutput = detail::DebugOutputActor;
@@ -157,8 +168,8 @@ void Acts::SurfaceMaterialMapper::mapMaterialTrack(
   using ActionList = ActionList<MaterialSurfaceCollector, DebugOutput>;
   using AbortList = AbortList<detail::EndOfWorldReached>;
 
-  PropagatorOptions<ActionList, AbortList> options(mState.geoContext,
-                                                   mState.magFieldContext);
+  PropagatorOptions<ActionList, AbortList> options(
+      mState.geoContext, mState.magFieldContext);
   options.debug = m_cfg.mapperDebugOutput;
 
   // Now collect the material layers by using the straight line propagator
@@ -168,12 +179,14 @@ void Acts::SurfaceMaterialMapper::mapMaterialTrack(
 
   // Retrieve the recorded material from the recorded material track
   const auto& rMaterial = mTrack.second.materialInteractions;
-  ACTS_VERBOSE("Retrieved " << rMaterial.size()
-                            << " recorded material properties to map.")
+  ACTS_VERBOSE(
+      "Retrieved " << rMaterial.size()
+                   << " recorded material properties to map.")
 
   // These should be mapped onto the mapping surfaces found
-  ACTS_VERBOSE("Found     " << mappingSurfaces.size()
-                            << " mapping surfaces for this track.");
+  ACTS_VERBOSE(
+      "Found     " << mappingSurfaces.size()
+                   << " mapping surfaces for this track.");
 
   // Run the mapping process, i.e. take the recorded material and map it
   // onto the mapping surfaces

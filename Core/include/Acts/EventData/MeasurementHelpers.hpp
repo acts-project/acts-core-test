@@ -22,26 +22,31 @@ namespace MeasurementHelpers {
 /// @tparam T The FittableMeasurement type
 /// @return const pointer to the extracted surface
 template <typename T>
-const Surface* getSurface(const T& fittable_measurement) {
-  return std::visit([](const auto& meas) { return &meas.referenceSurface(); },
-                    fittable_measurement);
+const Surface*
+getSurface(const T& fittable_measurement) {
+  return std::visit(
+      [](const auto& meas) { return &meas.referenceSurface(); },
+      fittable_measurement);
 }
 
 template <typename T>
-size_t getSize(const T& fittable_measurement) {
-  return std::visit([](const auto& meas) { return meas.size(); },
-                    fittable_measurement);
+size_t
+getSize(const T& fittable_measurement) {
+  return std::visit(
+      [](const auto& meas) { return meas.size(); }, fittable_measurement);
 }
 }  // namespace MeasurementHelpers
 
 struct MinimalSourceLink {
   const FittableMeasurement<MinimalSourceLink>* meas{nullptr};
 
-  bool operator==(const MinimalSourceLink& rhs) const {
+  bool
+  operator==(const MinimalSourceLink& rhs) const {
     return meas == rhs.meas;
   }
 
-  const Surface& referenceSurface() const {
+  const Surface&
+  referenceSurface() const {
     return *MeasurementHelpers::getSurface(*meas);
   }
 
@@ -50,13 +55,15 @@ struct MinimalSourceLink {
   }
 };
 
-inline std::ostream& operator<<(std::ostream& os, const MinimalSourceLink& sl) {
+inline std::ostream&
+operator<<(std::ostream& os, const MinimalSourceLink& sl) {
   os << "SourceLink(" << sl.meas << ")";
   return os;
 }
 
-static_assert(SourceLinkConcept<MinimalSourceLink>,
-              "MinimalSourceLink does not fulfill SourceLinkConcept");
+static_assert(
+    SourceLinkConcept<MinimalSourceLink>,
+    "MinimalSourceLink does not fulfill SourceLinkConcept");
 
 namespace detail {
 
@@ -96,7 +103,8 @@ struct visit_measurement_callable {
 /// @param dim The actual dimension as a runtime value
 /// @param lambda The lambda to call with the statically sized subsets
 template <typename L, typename A, typename B>
-auto visit_measurement(A&& param, B&& cov, size_t dim, L&& lambda) {
+auto
+visit_measurement(A&& param, B&& cov, size_t dim, L&& lambda) {
   return template_switch<detail::visit_measurement_callable, 1, BoundParsDim>(
       dim, param, cov, lambda);
 }

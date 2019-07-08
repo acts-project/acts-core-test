@@ -29,12 +29,19 @@ namespace Test {
 BOOST_AUTO_TEST_SUITE(Volumes)
 
 /// Unit test for testing the decomposeToSurfaces() function
-BOOST_DATA_TEST_CASE(CylinderVolumeBounds_decomposeToSurfaces,
-                     bdata::random(-M_PI, M_PI) ^ bdata::random(-M_PI, M_PI) ^
-                         bdata::random(-M_PI, M_PI) ^ bdata::random(-10., 10.) ^
-                         bdata::random(-10., 10.) ^ bdata::random(-10., 10.) ^
-                         bdata::xrange(100),
-                     alpha, beta, gamma, posX, posY, posZ, index) {
+BOOST_DATA_TEST_CASE(
+    CylinderVolumeBounds_decomposeToSurfaces,
+    bdata::random(-M_PI, M_PI) ^ bdata::random(-M_PI, M_PI) ^
+        bdata::random(-M_PI, M_PI) ^ bdata::random(-10., 10.) ^
+        bdata::random(-10., 10.) ^ bdata::random(-10., 10.) ^
+        bdata::xrange(100),
+    alpha,
+    beta,
+    gamma,
+    posX,
+    posY,
+    posZ,
+    index) {
   (void)index;
 
   // Create a test context
@@ -64,10 +71,14 @@ BOOST_DATA_TEST_CASE(CylinderVolumeBounds_decomposeToSurfaces,
   // Test
 
   // check if difference is halfZ - sign and direction independent
-  CHECK_CLOSE_REL((pos - boundarySurfaces.at(0)->center(tgContext)).norm(),
-                  cylBounds.halflengthZ(), 1e-12);
-  CHECK_CLOSE_REL((pos - boundarySurfaces.at(1)->center(tgContext)).norm(),
-                  cylBounds.halflengthZ(), 1e-12);
+  CHECK_CLOSE_REL(
+      (pos - boundarySurfaces.at(0)->center(tgContext)).norm(),
+      cylBounds.halflengthZ(),
+      1e-12);
+  CHECK_CLOSE_REL(
+      (pos - boundarySurfaces.at(1)->center(tgContext)).norm(),
+      cylBounds.halflengthZ(),
+      1e-12);
   // transform to local
   double posDiscPosZ =
       (transformPtr->inverse() * boundarySurfaces.at(1)->center(tgContext)).z();
@@ -87,13 +98,15 @@ BOOST_DATA_TEST_CASE(CylinderVolumeBounds_decomposeToSurfaces,
   CHECK_CLOSE_REL(
       transformPtr->rotation().col(2).dot(
           boundarySurfaces.at(1)->normal(tgContext, Acts::Vector2D(0., 0.))),
-      1., 1e-12);
+      1.,
+      1e-12);
   // negative disc durface should point in negative direction in the frame of
   // the volume
   CHECK_CLOSE_REL(
       transformPtr->rotation().col(2).dot(
           boundarySurfaces.at(0)->normal(tgContext, Acts::Vector2D(0., 0.))),
-      -1., 1e-12);
+      -1.,
+      1e-12);
   // test in r
   CHECK_CLOSE_REL(boundarySurfaces.at(3)->center(tgContext), pos, 1e-12);
   CHECK_CLOSE_REL(boundarySurfaces.at(2)->center(tgContext), pos, 1e-12);

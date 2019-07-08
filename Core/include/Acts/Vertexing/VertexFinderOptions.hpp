@@ -22,10 +22,11 @@ struct VertexFinderOptions {
   /// @param gctx The goemetry context for this fit
   /// @param mctx The magnetic context for this fit
   /// @param vconstr The pointing contraint to a vertex
-  VertexFinderOptions(std::reference_wrapper<const GeometryContext> gctx,
-                      std::reference_wrapper<const MagneticFieldContext> mctx,
-                      const Vertex<input_track_t>& vconstr =
-                          Vertex<input_track_t>(Vector3D(0., 0., 0.)))
+  VertexFinderOptions(
+      std::reference_wrapper<const GeometryContext> gctx,
+      std::reference_wrapper<const MagneticFieldContext> mctx,
+      const Vertex<input_track_t>& vconstr =
+          Vertex<input_track_t>(Vector3D(0., 0., 0.)))
       : geoContext(gctx), magFieldContext(mctx), vertexConstraint(vconstr) {}
 
   /// Context object for the geometry

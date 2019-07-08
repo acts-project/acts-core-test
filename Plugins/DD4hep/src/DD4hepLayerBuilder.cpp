@@ -40,13 +40,14 @@ Acts::DD4hepLayerBuilder::DD4hepLayerBuilder(
 
 Acts::DD4hepLayerBuilder::~DD4hepLayerBuilder() = default;
 
-void Acts::DD4hepLayerBuilder::setConfiguration(
+void
+Acts::DD4hepLayerBuilder::setConfiguration(
     const Acts::DD4hepLayerBuilder::Config& config) {
   m_cfg = config;
 }
 
-const Acts::LayerVector Acts::DD4hepLayerBuilder::negativeLayers(
-    const GeometryContext& gctx) const {
+const Acts::LayerVector
+Acts::DD4hepLayerBuilder::negativeLayers(const GeometryContext& gctx) const {
   LayerVector layers;
   if (m_cfg.negativeLayers.empty()) {
     ACTS_VERBOSE("[L] No layers handed over for negative volume.");
@@ -140,10 +141,10 @@ const Acts::LayerVector Acts::DD4hepLayerBuilder::negativeLayers(
         std::pair<size_t, size_t> materialBins = detExtension->materialBins();
         size_t bins1 = materialBins.first;
         size_t bins2 = materialBins.second;
-        Acts::BinUtility materialBinUtil(bins1, -M_PI, M_PI, Acts::closed,
-                                         Acts::binPhi);
-        materialBinUtil += Acts::BinUtility(bins2, pl.minR, pl.maxR, Acts::open,
-                                            Acts::binR, transform);
+        Acts::BinUtility materialBinUtil(
+            bins1, -M_PI, M_PI, Acts::closed, Acts::binPhi);
+        materialBinUtil += Acts::BinUtility(
+            bins2, pl.minR, pl.maxR, Acts::open, Acts::binR, transform);
         // and create material proxy to mark layer for material mapping
         materialProxy =
             std::make_shared<const ProtoSurfaceMaterial>(materialBinUtil);
@@ -173,15 +174,17 @@ const Acts::LayerVector Acts::DD4hepLayerBuilder::negativeLayers(
 
         std::shared_ptr<Acts::DiscSurface> innerBoundary =
             Surface::makeShared<Acts::DiscSurface>(
-                std::make_shared<const Transform3D>(Translation3D(innerPos) *
-                                                    transform->rotation()),
-                pl.minR, pl.maxR);
+                std::make_shared<const Transform3D>(
+                    Translation3D(innerPos) * transform->rotation()),
+                pl.minR,
+                pl.maxR);
 
         std::shared_ptr<Acts::DiscSurface> outerBoundary =
             Surface::makeShared<Acts::DiscSurface>(
-                std::make_shared<const Transform3D>(Translation3D(outerPos) *
-                                                    transform->rotation()),
-                pl.minR, pl.maxR);
+                std::make_shared<const Transform3D>(
+                    Translation3D(outerPos) * transform->rotation()),
+                pl.minR,
+                pl.maxR);
 
         std::shared_ptr<Acts::DiscSurface> centralSurface =
             Surface::makeShared<Acts::DiscSurface>(transform, pl.minR, pl.maxR);
@@ -222,13 +225,22 @@ const Acts::LayerVector Acts::DD4hepLayerBuilder::negativeLayers(
         auto dBounds = std::make_shared<const RadialBounds>(pl.minR, pl.maxR);
         double thickness = std::fabs(pl.maxZ - pl.minZ);
         // Create the layer containing the sensitive surface
-        negativeLayer =
-            DiscLayer::create(transform, dBounds, std::move(sArray), thickness,
-                              std::move(approachDescriptor), Acts::active);
+        negativeLayer = DiscLayer::create(
+            transform,
+            dBounds,
+            std::move(sArray),
+            thickness,
+            std::move(approachDescriptor),
+            Acts::active);
 
       } else {
         negativeLayer = m_cfg.layerCreator->discLayer(
-            gctx, layerSurfaces, m_cfg.bTypeR, m_cfg.bTypePhi, pl, transform,
+            gctx,
+            layerSurfaces,
+            m_cfg.bTypeR,
+            m_cfg.bTypePhi,
+            pl,
+            transform,
             std::move(approachDescriptor));
       }
 
@@ -239,12 +251,13 @@ const Acts::LayerVector Acts::DD4hepLayerBuilder::negativeLayers(
       if (!boost::iequals(ddmaterial.name(), "vacuum")) {
         Material layerMaterial(
             ddmaterial.radLength() * Acts::UnitConstants::cm,
-            ddmaterial.intLength() * Acts::UnitConstants::cm, ddmaterial.A(),
+            ddmaterial.intLength() * Acts::UnitConstants::cm,
+            ddmaterial.A(),
             ddmaterial.Z(),
             ddmaterial.density() / pow(Acts::UnitConstants::cm, 3));
 
-        MaterialProperties materialProperties(layerMaterial,
-                                              fabs(pl.maxR - pl.minR));
+        MaterialProperties materialProperties(
+            layerMaterial, fabs(pl.maxR - pl.minR));
 
         surfMaterial = std::make_shared<const HomogeneousSurfaceMaterial>(
             materialProperties);
@@ -260,8 +273,8 @@ const Acts::LayerVector Acts::DD4hepLayerBuilder::negativeLayers(
   return layers;
 }
 
-const Acts::LayerVector Acts::DD4hepLayerBuilder::centralLayers(
-    const GeometryContext& gctx) const {
+const Acts::LayerVector
+Acts::DD4hepLayerBuilder::centralLayers(const GeometryContext& gctx) const {
   LayerVector layers;
   if (m_cfg.centralLayers.empty()) {
     ACTS_VERBOSE("[L] No layers handed over for central volume!");
@@ -362,10 +375,10 @@ const Acts::LayerVector Acts::DD4hepLayerBuilder::centralLayers(
 
         size_t bins1 = materialBins.first;
         size_t bins2 = materialBins.second;
-        Acts::BinUtility materialBinUtil(bins1, -M_PI, M_PI, Acts::closed,
-                                         Acts::binPhi);
-        materialBinUtil += Acts::BinUtility(bins2, -halfZ, halfZ, Acts::open,
-                                            Acts::binZ, transform);
+        Acts::BinUtility materialBinUtil(
+            bins1, -M_PI, M_PI, Acts::closed, Acts::binPhi);
+        materialBinUtil += Acts::BinUtility(
+            bins2, -halfZ, halfZ, Acts::open, Acts::binZ, transform);
         // and create material proxy to mark layer for material mapping
         materialProxy =
             std::make_shared<const ProtoSurfaceMaterial>(materialBinUtil);
@@ -418,12 +431,21 @@ const Acts::LayerVector Acts::DD4hepLayerBuilder::centralLayers(
             new CylinderBounds(layerR, halfZ));
         // Create the layer containing the sensitive surface
         centralLayer = CylinderLayer::create(
-            transform, cBounds, std::move(sArray), thickness,
-            std::move(approachDescriptor), Acts::active);
+            transform,
+            cBounds,
+            std::move(sArray),
+            thickness,
+            std::move(approachDescriptor),
+            Acts::active);
 
       } else {
         centralLayer = m_cfg.layerCreator->cylinderLayer(
-            gctx, layerSurfaces, m_cfg.bTypePhi, m_cfg.bTypeZ, pl, transform,
+            gctx,
+            layerSurfaces,
+            m_cfg.bTypePhi,
+            m_cfg.bTypeZ,
+            pl,
+            transform,
             std::move(approachDescriptor));
       }
 
@@ -434,12 +456,13 @@ const Acts::LayerVector Acts::DD4hepLayerBuilder::centralLayers(
       if (!boost::iequals(ddmaterial.name(), "vacuum")) {
         Material layerMaterial(
             ddmaterial.radLength() * Acts::UnitConstants::cm,
-            ddmaterial.intLength() * Acts::UnitConstants::cm, ddmaterial.A(),
+            ddmaterial.intLength() * Acts::UnitConstants::cm,
+            ddmaterial.A(),
             ddmaterial.Z(),
             ddmaterial.density() / pow(Acts::UnitConstants::cm, 3));
 
-        MaterialProperties materialProperties(layerMaterial,
-                                              fabs(pl.maxR - pl.minR));
+        MaterialProperties materialProperties(
+            layerMaterial, fabs(pl.maxR - pl.minR));
 
         surfMaterial = std::make_shared<const HomogeneousSurfaceMaterial>(
             materialProperties);
@@ -456,8 +479,8 @@ const Acts::LayerVector Acts::DD4hepLayerBuilder::centralLayers(
   return layers;
 }
 
-const Acts::LayerVector Acts::DD4hepLayerBuilder::positiveLayers(
-    const GeometryContext& gctx) const {
+const Acts::LayerVector
+Acts::DD4hepLayerBuilder::positiveLayers(const GeometryContext& gctx) const {
   LayerVector layers;
   if (m_cfg.positiveLayers.empty()) {
     ACTS_VERBOSE("[L] No layers handed over for positive volume!");
@@ -551,10 +574,10 @@ const Acts::LayerVector Acts::DD4hepLayerBuilder::positiveLayers(
         std::pair<size_t, size_t> materialBins = detExtension->materialBins();
         size_t bins1 = materialBins.first;
         size_t bins2 = materialBins.second;
-        Acts::BinUtility materialBinUtil(bins1, -M_PI, M_PI, Acts::closed,
-                                         Acts::binPhi);
-        materialBinUtil += Acts::BinUtility(bins2, pl.minR, pl.maxR, Acts::open,
-                                            Acts::binR, transform);
+        Acts::BinUtility materialBinUtil(
+            bins1, -M_PI, M_PI, Acts::closed, Acts::binPhi);
+        materialBinUtil += Acts::BinUtility(
+            bins2, pl.minR, pl.maxR, Acts::open, Acts::binR, transform);
         // and create material proxy to mark layer for material mapping
         materialProxy =
             std::make_shared<const ProtoSurfaceMaterial>(materialBinUtil);
@@ -583,14 +606,16 @@ const Acts::LayerVector Acts::DD4hepLayerBuilder::positiveLayers(
         }
 
         auto innerBoundary = Surface::makeShared<Acts::DiscSurface>(
-            std::make_shared<const Transform3D>(Translation3D(innerPos) *
-                                                transform->rotation()),
-            pl.minR, pl.maxR);
+            std::make_shared<const Transform3D>(
+                Translation3D(innerPos) * transform->rotation()),
+            pl.minR,
+            pl.maxR);
 
         auto outerBoundary = Surface::makeShared<Acts::DiscSurface>(
-            std::make_shared<const Transform3D>(Translation3D(outerPos) *
-                                                transform->rotation()),
-            pl.minR, pl.maxR);
+            std::make_shared<const Transform3D>(
+                Translation3D(outerPos) * transform->rotation()),
+            pl.minR,
+            pl.maxR);
 
         auto centralSurface =
             Surface::makeShared<Acts::DiscSurface>(transform, pl.minR, pl.maxR);
@@ -630,13 +655,22 @@ const Acts::LayerVector Acts::DD4hepLayerBuilder::positiveLayers(
         auto dBounds = std::make_shared<const RadialBounds>(pl.minR, pl.maxR);
         double thickness = std::fabs(pl.maxZ - pl.minZ);
         // Create the layer containing the sensitive surface
-        positiveLayer =
-            DiscLayer::create(transform, dBounds, std::move(sArray), thickness,
-                              std::move(approachDescriptor), Acts::active);
+        positiveLayer = DiscLayer::create(
+            transform,
+            dBounds,
+            std::move(sArray),
+            thickness,
+            std::move(approachDescriptor),
+            Acts::active);
 
       } else {
         positiveLayer = m_cfg.layerCreator->discLayer(
-            gctx, layerSurfaces, m_cfg.bTypeR, m_cfg.bTypePhi, pl, transform,
+            gctx,
+            layerSurfaces,
+            m_cfg.bTypeR,
+            m_cfg.bTypePhi,
+            pl,
+            transform,
             std::move(approachDescriptor));
       }
 
@@ -647,12 +681,13 @@ const Acts::LayerVector Acts::DD4hepLayerBuilder::positiveLayers(
       if (!boost::iequals(ddmaterial.name(), "vacuum")) {
         Material layerMaterial(
             ddmaterial.radLength() * Acts::UnitConstants::cm,
-            ddmaterial.intLength() * Acts::UnitConstants::cm, ddmaterial.A(),
+            ddmaterial.intLength() * Acts::UnitConstants::cm,
+            ddmaterial.A(),
             ddmaterial.Z(),
             ddmaterial.density() / pow(Acts::UnitConstants::cm, 3));
 
-        MaterialProperties materialProperties(layerMaterial,
-                                              fabs(pl.maxR - pl.minR));
+        MaterialProperties materialProperties(
+            layerMaterial, fabs(pl.maxR - pl.minR));
 
         surfMaterial = std::make_shared<const HomogeneousSurfaceMaterial>(
             materialProperties);
@@ -667,7 +702,8 @@ const Acts::LayerVector Acts::DD4hepLayerBuilder::positiveLayers(
   return layers;
 }
 
-void Acts::DD4hepLayerBuilder::resolveSensitive(
+void
+Acts::DD4hepLayerBuilder::resolveSensitive(
     const dd4hep::DetElement& detElement,
     std::vector<std::shared_ptr<const Acts::Surface>>& surfaces,
     const std::string& axes) const {
@@ -687,7 +723,8 @@ void Acts::DD4hepLayerBuilder::resolveSensitive(
 
 std::shared_ptr<const Acts::Surface>
 Acts::DD4hepLayerBuilder::createSensitiveSurface(
-    const dd4hep::DetElement& detElement, bool isDisc,
+    const dd4hep::DetElement& detElement,
+    bool isDisc,
     const std::string& axes) const {
   // access the possible material
   std::shared_ptr<const Acts::ISurfaceMaterial> material = nullptr;
@@ -704,8 +741,8 @@ Acts::DD4hepLayerBuilder::createSensitiveSurface(
   auto digiModule = detExtension->digitizationModule();
   // create the corresponding detector element
   Acts::DD4hepDetectorElement* dd4hepDetElement =
-      new Acts::DD4hepDetectorElement(detElement, axes, UnitConstants::cm,
-                                      isDisc, material, digiModule);
+      new Acts::DD4hepDetectorElement(
+          detElement, axes, UnitConstants::cm, isDisc, material, digiModule);
 
   // return the surface
   return dd4hepDetElement->surface().getSharedPtr();
@@ -721,8 +758,9 @@ Acts::DD4hepLayerBuilder::convertTransform(const TGeoMatrix* tGeoTrans) const {
           Acts::Vector3D(rotation[0], rotation[3], rotation[6]),
           Acts::Vector3D(rotation[1], rotation[4], rotation[7]),
           Acts::Vector3D(rotation[2], rotation[5], rotation[8]),
-          Acts::Vector3D(translation[0] * UnitConstants::cm,
-                         translation[1] * UnitConstants::cm,
-                         translation[2] * UnitConstants::cm)));
+          Acts::Vector3D(
+              translation[0] * UnitConstants::cm,
+              translation[1] * UnitConstants::cm,
+              translation[2] * UnitConstants::cm)));
   return (transform);
 }

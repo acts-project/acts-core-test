@@ -53,22 +53,40 @@ double iov_volumeRadius =
 
 ///  inner inner volume
 auto iiVolume = constructCylinderVolume(
-    tgContext, surfaceHalfLengthZ, iiv_surfaceRadius, surfaceRstagger,
-    surfaceZoverlap, layerEnvelope, volumeEnvelope, 0., iiv_volumeRadius,
+    tgContext,
+    surfaceHalfLengthZ,
+    iiv_surfaceRadius,
+    surfaceRstagger,
+    surfaceZoverlap,
+    layerEnvelope,
+    volumeEnvelope,
+    0.,
+    iiv_volumeRadius,
     "InnerInnerVolume");
 ///  inner outer volume
 auto ioVolume = constructCylinderVolume(
-    tgContext, surfaceHalfLengthZ, iov_surfaceRadius, surfaceRstagger,
-    surfaceZoverlap, layerEnvelope, volumeEnvelope, iiv_volumeRadius,
-    iov_volumeRadius, "InnerOuterVolume");
+    tgContext,
+    surfaceHalfLengthZ,
+    iov_surfaceRadius,
+    surfaceRstagger,
+    surfaceZoverlap,
+    layerEnvelope,
+    volumeEnvelope,
+    iiv_volumeRadius,
+    iov_volumeRadius,
+    "InnerOuterVolume");
 
 // now create the Inner Container volume
 double volumeHalfZ =
     (4 * surfaceHalfLengthZ - surfaceZoverlap) + volumeEnvelope;
 /// the inner volume
-auto iVolume =
-    constructContainerVolume(tgContext, iiVolume, ioVolume, iov_volumeRadius,
-                             volumeHalfZ, "InnerVolume");
+auto iVolume = constructContainerVolume(
+    tgContext,
+    iiVolume,
+    ioVolume,
+    iov_volumeRadius,
+    volumeHalfZ,
+    "InnerVolume");
 
 // outer volume definitions
 double ov_surfaceRadius = 150_mm;
@@ -77,12 +95,24 @@ double ov_volumeRadius =
 
 ///  inner outer volume
 auto oVolume = constructCylinderVolume(
-    tgContext, surfaceHalfLengthZ, ov_surfaceRadius, surfaceRstagger,
-    surfaceZoverlap, layerEnvelope, volumeEnvelope, iov_volumeRadius,
-    ov_volumeRadius, "OuterVolume");
+    tgContext,
+    surfaceHalfLengthZ,
+    ov_surfaceRadius,
+    surfaceRstagger,
+    surfaceZoverlap,
+    layerEnvelope,
+    volumeEnvelope,
+    iov_volumeRadius,
+    ov_volumeRadius,
+    "OuterVolume");
 /// the inner volume
 auto volume = constructContainerVolume(
-    tgContext, iVolume, oVolume, ov_volumeRadius, volumeHalfZ, "WorldVolume");
+    tgContext,
+    iVolume,
+    oVolume,
+    ov_volumeRadius,
+    volumeHalfZ,
+    "WorldVolume");
 
 // creating a TrackingGeometry
 // -> closs the geometry, this should set the GeometryID

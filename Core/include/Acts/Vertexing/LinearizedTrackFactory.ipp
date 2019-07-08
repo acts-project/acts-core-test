@@ -8,16 +8,24 @@
 
 #include "Acts/Surfaces/PerigeeSurface.hpp"
 
-template <typename bfield_t, typename propagator_t, typename action_list_t,
-          typename aborter_list_t>
+template <
+    typename bfield_t,
+    typename propagator_t,
+    typename action_list_t,
+    typename aborter_list_t>
 
-Acts::Result<Acts::LinearizedTrack> Acts::LinearizedTrackFactory<
-    bfield_t, propagator_t, action_list_t,
-    aborter_list_t>::linearizeTrack(const GeometryContext& gctx,
-                                    const MagneticFieldContext& mctx,
-                                    const BoundParameters* params,
-                                    const SpacePointVector& linPoint,
-                                    const propagator_t& propagator) const {
+Acts::Result<Acts::LinearizedTrack>
+Acts::LinearizedTrackFactory<
+    bfield_t,
+    propagator_t,
+    action_list_t,
+    aborter_list_t>::
+    linearizeTrack(
+        const GeometryContext& gctx,
+        const MagneticFieldContext& mctx,
+        const BoundParameters* params,
+        const SpacePointVector& linPoint,
+        const propagator_t& propagator) const {
   if (params == nullptr) {
     return LinearizedTrack();
   }
@@ -161,7 +169,13 @@ Acts::Result<Acts::LinearizedTrack> Acts::LinearizedTrackFactory<
   BoundVector constTerm = predParamsAtPCA - positionJacobian * positionAtPCA -
                           momentumJacobian * momentumAtPCA;
 
-  return LinearizedTrack(paramsAtPCA, parCovarianceAtPCA, linPoint,
-                         positionJacobian, momentumJacobian, positionAtPCA,
-                         momentumAtPCA, constTerm);
+  return LinearizedTrack(
+      paramsAtPCA,
+      parCovarianceAtPCA,
+      linPoint,
+      positionJacobian,
+      momentumJacobian,
+      positionAtPCA,
+      momentumAtPCA,
+      constTerm);
 }

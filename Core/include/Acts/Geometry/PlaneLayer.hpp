@@ -37,15 +37,21 @@ class PlaneLayer : virtual public PlaneSurface, public Layer {
   /// @param laytyp is the layer type
   ///
   /// @return shared pointer to a PlaneLayer
-  static MutableLayerPtr create(
+  static MutableLayerPtr
+  create(
       std::shared_ptr<const Transform3D> transform,
       std::shared_ptr<const PlanarBounds> pbounds,
       std::unique_ptr<SurfaceArray> surfaceArray = nullptr,
-      double thickness = 0., std::unique_ptr<ApproachDescriptor> ad = nullptr,
+      double thickness = 0.,
+      std::unique_ptr<ApproachDescriptor> ad = nullptr,
       LayerType laytyp = Acts::active) {
-    return MutableLayerPtr(new PlaneLayer(std::move(transform), pbounds,
-                                          std::move(surfaceArray), thickness,
-                                          std::move(ad), laytyp));
+    return MutableLayerPtr(new PlaneLayer(
+        std::move(transform),
+        pbounds,
+        std::move(surfaceArray),
+        thickness,
+        std::move(ad),
+        laytyp));
   }
 
   /// Default Constructor - deleted
@@ -82,12 +88,13 @@ class PlaneLayer : virtual public PlaneSurface, public Layer {
   /// @param laytyp is the layer type
   ///
   /// @return shared pointer to a PlaneLayer
-  PlaneLayer(std::shared_ptr<const Transform3D> transform,
-             std::shared_ptr<const PlanarBounds>& pbounds,
-             std::unique_ptr<SurfaceArray> surfaceArray = nullptr,
-             double thickness = 0.,
-             std::unique_ptr<ApproachDescriptor> ades = nullptr,
-             LayerType laytyp = Acts::active);
+  PlaneLayer(
+      std::shared_ptr<const Transform3D> transform,
+      std::shared_ptr<const PlanarBounds>& pbounds,
+      std::unique_ptr<SurfaceArray> surfaceArray = nullptr,
+      double thickness = 0.,
+      std::unique_ptr<ApproachDescriptor> ades = nullptr,
+      LayerType laytyp = Acts::active);
 
   /// Private constructor for a PlaneLayer, is called by create(arge*
   ///

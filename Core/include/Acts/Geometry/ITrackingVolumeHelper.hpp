@@ -62,7 +62,8 @@ class ITrackingVolumeHelper {
   ///
   /// @return shared pointer to a new TrackingVolume
   virtual MutableTrackingVolumePtr createTrackingVolume(
-      const GeometryContext& gctx, const LayerVector& layers,
+      const GeometryContext& gctx,
+      const LayerVector& layers,
       std::shared_ptr<const IVolumeMaterial> volumeMaterial,
       VolumeBoundsPtr volumeBounds,
       std::shared_ptr<const Transform3D> transform = nullptr,
@@ -83,9 +84,13 @@ class ITrackingVolumeHelper {
   ///
   /// @return shared pointer to a new TrackingVolume
   virtual MutableTrackingVolumePtr createTrackingVolume(
-      const GeometryContext& gctx, const LayerVector& layers,
-      std::shared_ptr<const IVolumeMaterial> volumeMaterial, double loc0Min,
-      double loc0Max, double loc1Min, double loc1Max,
+      const GeometryContext& gctx,
+      const LayerVector& layers,
+      std::shared_ptr<const IVolumeMaterial> volumeMaterial,
+      double loc0Min,
+      double loc0Max,
+      double loc1Min,
+      double loc1Max,
       const std::string& volumeName = "UndefinedVolume",
       BinningType btype = arbitrary) const = 0;
 
@@ -102,9 +107,13 @@ class ITrackingVolumeHelper {
   /// @return shared pointer to a new TrackingVolume
   virtual MutableTrackingVolumePtr createGapTrackingVolume(
       const GeometryContext& gctx,
-      std::shared_ptr<const IVolumeMaterial> volumeMaterial, double loc0Min,
-      double loc0Max, double loc1Min, double loc1Max,
-      unsigned int materialLayers, bool cylinder = true,
+      std::shared_ptr<const IVolumeMaterial> volumeMaterial,
+      double loc0Min,
+      double loc0Max,
+      double loc1Min,
+      double loc1Max,
+      unsigned int materialLayers,
+      bool cylinder = true,
       const std::string& volumeName = "UndefinedVolume") const = 0;
 
   /// Create a gap volume from dimensions and
@@ -120,9 +129,13 @@ class ITrackingVolumeHelper {
   /// @return shared pointer to a new TrackingVolume
   virtual MutableTrackingVolumePtr createGapTrackingVolume(
       const GeometryContext& gctx,
-      std::shared_ptr<const IVolumeMaterial> volumeMaterial, double loc0Min,
-      double loc0Max, double loc1Min, double loc1Max,
-      const std::vector<double>& layerPositions, bool cylinder = true,
+      std::shared_ptr<const IVolumeMaterial> volumeMaterial,
+      double loc0Min,
+      double loc0Max,
+      double loc1Min,
+      double loc1Max,
+      const std::vector<double>& layerPositions,
+      bool cylinder = true,
       const std::string& volumeName = "UndefinedVolume",
       BinningType btype = arbitrary) const = 0;
 

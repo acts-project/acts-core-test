@@ -99,8 +99,8 @@ BOOST_AUTO_TEST_CASE(StrawSurfaceProperties) {
   BOOST_CHECK_EQUAL(strawSurfaceObject->type(), Surface::Straw);
   //
   /// Test name
-  BOOST_CHECK_EQUAL(strawSurfaceObject->name(),
-                    std::string("Acts::StrawSurface"));
+  BOOST_CHECK_EQUAL(
+      strawSurfaceObject->name(), std::string("Acts::StrawSurface"));
   //
   /// Test dump
   boost::test_tools::output_test_stream dumpOuput;

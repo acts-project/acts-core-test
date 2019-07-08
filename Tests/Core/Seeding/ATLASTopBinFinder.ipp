@@ -8,8 +8,10 @@
 
 // DEBUG: THIS REQUIRES THE BINS TO BE SET TO phi:41 z:11
 template <typename SpacePoint>
-std::set<size_t> Acts::ATLASTopBinFinder<SpacePoint>::findBins(
-    size_t phiBin, size_t zBin,
+std::set<size_t>
+Acts::ATLASTopBinFinder<SpacePoint>::findBins(
+    size_t phiBin,
+    size_t zBin,
     const Acts::SpacePointGrid<SpacePoint>* binnedSP) {
   std::set<size_t> neighbourBins =
       binnedSP->neighborHoodIndices({phiBin, zBin}, 1);

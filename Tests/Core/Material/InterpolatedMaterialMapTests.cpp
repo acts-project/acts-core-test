@@ -25,10 +25,11 @@ namespace Acts {
 namespace Test {
 
 constexpr unsigned int dim = 2;
-using grid_t = detail::Grid<ActsVectorF<5>, detail::EquidistantAxis,
-                            detail::EquidistantAxis>;
+using grid_t = detail::
+    Grid<ActsVectorF<5>, detail::EquidistantAxis, detail::EquidistantAxis>;
 
-ActsVectorD<dim> trafoGlobalToLocal(const Vector3D& global) {
+ActsVectorD<dim>
+trafoGlobalToLocal(const Vector3D& global) {
   return {global.x(), global.y()};
 }
 
@@ -53,8 +54,8 @@ BOOST_AUTO_TEST_CASE(InterpolatedMaterialMap_MaterialCell_test) {
   BOOST_CHECK_EQUAL(materialCell.isInside(Vector3D(0., 0., 2.)), true);
 
   // Test the getter
-  CHECK_CLOSE_REL(materialCell.getMaterial({0.5, 0.5, 0.5}), Material(mat),
-                  1e-4);
+  CHECK_CLOSE_REL(
+      materialCell.getMaterial({0.5, 0.5, 0.5}), Material(mat), 1e-4);
 }
 
 BOOST_AUTO_TEST_CASE(InterpolatedMaterialMap_MaterialMapper_test) {
@@ -146,13 +147,15 @@ BOOST_AUTO_TEST_CASE(InterpolatedMaterialMap_test) {
   InterpolatedMaterialMap<MaterialMapper<grid_t>>::Cache cache;
   cache.matCell = materialCell;
   cache.initialized = true;
-  CHECK_CLOSE_REL(ipolMatMap.getMaterial(Vector3D(0.5, 0.5, 0.5), cache),
-                  Material(mat), 1e-4);
+  CHECK_CLOSE_REL(
+      ipolMatMap.getMaterial(Vector3D(0.5, 0.5, 0.5), cache),
+      Material(mat),
+      1e-4);
 
   // Test the material map getter
   auto mapper = ipolMatMap.getMapper();
-  BOOST_CHECK_EQUAL(mapper.getMaterial({0.5, 0.5, 0.5}),
-                    matMap.getMaterial({0.5, 0.5, 0.5}));
+  BOOST_CHECK_EQUAL(
+      mapper.getMaterial({0.5, 0.5, 0.5}), matMap.getMaterial({0.5, 0.5, 0.5}));
   for (unsigned int i = 0; i < dim; i++) {
     BOOST_CHECK_EQUAL(mapper.getNBins()[i], matMap.getNBins()[i]);
     BOOST_CHECK_EQUAL(mapper.getMin()[i], matMap.getMin()[i]);

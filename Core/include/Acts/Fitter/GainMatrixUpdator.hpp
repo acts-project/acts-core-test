@@ -25,8 +25,9 @@ namespace Acts {
 ///
 /// This is implemented as a boost vistor pattern for use of the
 /// boost variant container
-template <typename parameters_t,
-          typename calibrator_t = VoidMeasurementCalibrator>
+template <
+    typename parameters_t,
+    typename calibrator_t = VoidMeasurementCalibrator>
 class GainMatrixUpdator {
   using jacobian_t = typename parameters_t::CovMatrix_t;
 
@@ -49,8 +50,8 @@ class GainMatrixUpdator {
   /// @note Non-'successful' updates could be holes or outliers,
   ///       which need to be treated differently in calling code.
   template <typename track_state_t>
-  bool operator()(const GeometryContext& gctx,
-                  track_state_t& trackState) const {
+  bool
+  operator()(const GeometryContext& gctx, track_state_t& trackState) const {
     using CovMatrix_t = typename parameters_t::CovMatrix_t;
     using ParVector_t = typename parameters_t::ParVector_t;
 
@@ -90,8 +91,9 @@ class GainMatrixUpdator {
           // type of projection
           using projection_t = typename meas_t::Projection_t;
           // type of gain matrix (transposed projection)
-          using gain_matrix_t = ActsMatrixD<projection_t::ColsAtCompileTime,
-                                            projection_t::RowsAtCompileTime>;
+          using gain_matrix_t = ActsMatrixD<
+              projection_t::ColsAtCompileTime,
+              projection_t::RowsAtCompileTime>;
 
           // Take the projector (measurement mapping function)
           const projection_t& H = calibrated.projector();
@@ -111,11 +113,12 @@ class GainMatrixUpdator {
               (CovMatrix_t::Identity() - K * H) * predicted_covariance;
 
           // Create new filtered parameters and covariance
-          parameters_t filtered(gctx,
-                                std::make_unique<const CovMatrix_t>(
-                                    std::move(filtered_covariance)),
-                                filtered_parameters,
-                                predicted.referenceSurface().getSharedPtr());
+          parameters_t filtered(
+              gctx,
+              std::make_unique<const CovMatrix_t>(
+                  std::move(filtered_covariance)),
+              filtered_parameters,
+              predicted.referenceSurface().getSharedPtr());
 
           // calculate the chi2
           // chi2 = r^T * R^-1 * r

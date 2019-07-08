@@ -49,8 +49,8 @@ BOOST_AUTO_TEST_CASE(Material_construction_and_units) {
   CHECK_CLOSE_REL(silicon.L0(), 465.2_mm, 0.001);
   CHECK_CLOSE_REL(silicon.Z(), 14., 0.001);
   CHECK_CLOSE_REL(silicon.A(), 28.0855, 0.001);
-  CHECK_CLOSE_REL(silicon.rho(), 0.002329_g / std::pow(UnitConstants::cm, 3.0),
-                  0.001);
+  CHECK_CLOSE_REL(
+      silicon.rho(), 0.002329_g / std::pow(UnitConstants::cm, 3.0), 0.001);
   CHECK_CLOSE_REL(silicon.zOverAtimesRho(), 14. / 28.0855 * 0.002329, 0.0001);
 
   ActsVectorF<5> siliconValues;

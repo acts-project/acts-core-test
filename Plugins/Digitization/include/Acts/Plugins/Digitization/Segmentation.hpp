@@ -53,8 +53,10 @@ class Segmentation {
   virtual void createSegmentationSurfaces(
       SurfacePtrVector& boundarySurfaces,
       SurfacePtrVector& segmentationSurfacesX,
-      SurfacePtrVector& segmentationSurfacesY, double halfThickness,
-      int readoutDirection, double lorentzAngle) const = 0;
+      SurfacePtrVector& segmentationSurfacesY,
+      double halfThickness,
+      int readoutDirection,
+      double lorentzAngle) const = 0;
 
   /// Get the digitization cell fropm a 3D position
   /// - ignores the shift, i.e. assumenes in to be in cell frame
@@ -89,11 +91,12 @@ class Segmentation {
   /// @param lorentzAngle is the lorentz angle measured from local z towards x
   ///
   /// @return is a fully calculated digitzation step
-  virtual DigitizationStep digitizationStep(const Vector3D& start,
-                                            const Vector3D& end,
-                                            double halfThickness,
-                                            int readoutDirection,
-                                            double lorentzAngle) const = 0;
+  virtual DigitizationStep digitizationStep(
+      const Vector3D& start,
+      const Vector3D& end,
+      double halfThickness,
+      int readoutDirection,
+      double lorentzAngle) const = 0;
 
   /// return the surface bounds by reference
   virtual const SurfaceBounds& moduleBounds() const = 0;

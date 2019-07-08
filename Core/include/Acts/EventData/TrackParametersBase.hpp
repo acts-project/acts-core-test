@@ -53,7 +53,8 @@ class TrackParametersBase {
   /// @brief inequality operator
   ///
   /// @return `not (*this == rhs)`
-  bool operator!=(const TrackParametersBase& rhs) const {
+  bool
+  operator!=(const TrackParametersBase& rhs) const {
     return !(*this == rhs);
   }
 
@@ -72,7 +73,10 @@ class TrackParametersBase {
   /// @return Eigen vector of dimension Acts::BoundParsDim with values of the
   /// track parameters
   ///         (in the order as defined by the ParID_t enumeration)
-  ParVector_t parameters() const { return getParameterSet().getParameters(); }
+  ParVector_t
+  parameters() const {
+    return getParameterSet().getParameters();
+  }
 
   /// @brief access track parameter
   ///
@@ -82,7 +86,8 @@ class TrackParametersBase {
   ///
   /// @sa ParameterSet::get
   template <ParID_t par>
-  ParValue_t get() const {
+  ParValue_t
+  get() const {
     return getParameterSet().template getParameter<par>();
   }
 
@@ -92,7 +97,8 @@ class TrackParametersBase {
   ///
   /// @return value of the requested track parameter uncertainty
   template <ParID_t par>
-  ParValue_t uncertainty() const {
+  ParValue_t
+  uncertainty() const {
     return getParameterSet().template getUncertainty<par>();
   }
 
@@ -104,15 +110,22 @@ class TrackParametersBase {
   /// @return raw pointer to covariance matrix (can be a nullptr)
   ///
   /// @sa ParameterSet::getCovariance
-  const CovMatrix_t* covariance() const {
+  const CovMatrix_t*
+  covariance() const {
     return getParameterSet().getCovariance();
   }
 
   /// @brief convenience method to retrieve transverse momentum
-  double pT() const { return VectorHelpers::perp(momentum()); }
+  double
+  pT() const {
+    return VectorHelpers::perp(momentum());
+  }
 
   /// @brief convenience method to retrieve pseudorapidity
-  double eta() const { return VectorHelpers::eta(momentum()); }
+  double
+  eta() const {
+    return VectorHelpers::eta(momentum());
+  }
 
   /// @brief retrieve electric charge
   ///
@@ -152,8 +165,8 @@ class TrackParametersBase {
   /// TrackParameters::print method.
   ///
   /// @return modified output stream object
-  friend std::ostream& operator<<(std::ostream& out,
-                                  const TrackParametersBase& tp) {
+  friend std::ostream&
+  operator<<(std::ostream& out, const TrackParametersBase& tp) {
     tp.print(out);
     return out;
   }

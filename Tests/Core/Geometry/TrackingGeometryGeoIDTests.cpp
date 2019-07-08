@@ -46,8 +46,15 @@ double oVvolumeRadius = oVsurfaceRadius + 0.5 * oVsurfaceRstagger +
 
 ///  inner volume
 auto iVolume = constructCylinderVolume(
-    tgContext, iVsurfaceHalfLengthZ, iVsurfaceRadius, iVsurfaceRstagger,
-    iVsurfaceZoverlap, iVlayerEnvelope, iVvolumeEnvelope, 0., iVvolumeRadius,
+    tgContext,
+    iVsurfaceHalfLengthZ,
+    iVsurfaceRadius,
+    iVsurfaceRstagger,
+    iVsurfaceZoverlap,
+    iVlayerEnvelope,
+    iVvolumeEnvelope,
+    0.,
+    iVvolumeRadius,
     "InnerVolume");
 
 BOOST_AUTO_TEST_CASE(GeometryID_innervolume_test) {
@@ -71,9 +78,16 @@ BOOST_AUTO_TEST_CASE(GeometryID_innervolume_test) {
 
 ///  outer volume
 auto oVolume = constructCylinderVolume(
-    tgContext, oVsurfaceHalfLengthZ, oVsurfaceRadius, oVsurfaceRstagger,
-    oVsurfaceZoverlap, oVlayerEnvelope, oVvolumeEnvelope, iVvolumeRadius,
-    oVvolumeRadius, "OuterVolume");
+    tgContext,
+    oVsurfaceHalfLengthZ,
+    oVsurfaceRadius,
+    oVsurfaceRstagger,
+    oVsurfaceZoverlap,
+    oVlayerEnvelope,
+    oVvolumeEnvelope,
+    iVvolumeRadius,
+    oVvolumeRadius,
+    "OuterVolume");
 
 BOOST_AUTO_TEST_CASE(GeometryID_outervolume_test) {
   BOOST_CHECK_EQUAL(0ul, oVolume->geoID().value());
@@ -98,7 +112,12 @@ double oVvolumeHalfZ =
     (4 * oVsurfaceHalfLengthZ - oVsurfaceZoverlap) + oVvolumeEnvelope;
 // now create the container volume
 auto hVolume = constructContainerVolume(
-    tgContext, iVolume, oVolume, oVvolumeRadius, oVvolumeHalfZ, "Container");
+    tgContext,
+    iVolume,
+    oVolume,
+    oVvolumeRadius,
+    oVvolumeHalfZ,
+    "Container");
 
 ///  pre-check on GeometryID
 BOOST_AUTO_TEST_CASE(GeometryID_containervolume_test) {

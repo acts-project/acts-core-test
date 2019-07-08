@@ -17,8 +17,12 @@
 #include <iomanip>
 #include <iostream>
 
-Acts::DiamondBounds::DiamondBounds(double x1, double x2, double x3, double y1,
-                                   double y2)
+Acts::DiamondBounds::DiamondBounds(
+    double x1,
+    double x2,
+    double x3,
+    double y1,
+    double y2)
     : m_x1(std::abs(x1)),
       m_x2(std::abs(x2)),
       m_x3(std::abs(x3)),
@@ -31,15 +35,18 @@ Acts::DiamondBounds::DiamondBounds(double x1, double x2, double x3, double y1,
 
 Acts::DiamondBounds::~DiamondBounds() = default;
 
-Acts::DiamondBounds* Acts::DiamondBounds::clone() const {
+Acts::DiamondBounds*
+Acts::DiamondBounds::clone() const {
   return new DiamondBounds(*this);
 }
 
-Acts::SurfaceBounds::BoundsType Acts::DiamondBounds::type() const {
+Acts::SurfaceBounds::BoundsType
+Acts::DiamondBounds::type() const {
   return SurfaceBounds::Diamond;
 }
 
-std::vector<TDD_real_t> Acts::DiamondBounds::valueStore() const {
+std::vector<TDD_real_t>
+Acts::DiamondBounds::valueStore() const {
   std::vector<TDD_real_t> values(DiamondBounds::bv_length);
   values[DiamondBounds::bv_x1] = x1();
   values[DiamondBounds::bv_x2] = x2();
@@ -49,28 +56,37 @@ std::vector<TDD_real_t> Acts::DiamondBounds::valueStore() const {
   return values;
 }
 
-bool Acts::DiamondBounds::inside(const Acts::Vector2D& lpos,
-                                 const Acts::BoundaryCheck& bcheck) const {
+bool
+Acts::DiamondBounds::inside(
+    const Acts::Vector2D& lpos,
+    const Acts::BoundaryCheck& bcheck) const {
   return bcheck.isInside(lpos, vertices());
 }
 
-double Acts::DiamondBounds::distanceToBoundary(
-    const Acts::Vector2D& lpos) const {
+double
+Acts::DiamondBounds::distanceToBoundary(const Acts::Vector2D& lpos) const {
   return BoundaryCheck(true).distance(lpos, vertices());
 }
 
-std::vector<Acts::Vector2D> Acts::DiamondBounds::vertices() const {
+std::vector<Acts::Vector2D>
+Acts::DiamondBounds::vertices() const {
   // vertices starting from lower right in clock-wise order
-  return {{x1(), -y1()}, {x2(), 0},  {x3(), y2()},
-          {-x3(), y2()}, {-x2(), 0}, {-x1(), -y1()}};
+  return {{x1(), -y1()},
+          {x2(), 0},
+          {x3(), y2()},
+          {-x3(), y2()},
+          {-x2(), 0},
+          {-x1(), -y1()}};
 }
 
-const Acts::RectangleBounds& Acts::DiamondBounds::boundingBox() const {
+const Acts::RectangleBounds&
+Acts::DiamondBounds::boundingBox() const {
   return m_boundingBox;
 }
 
 // ostream operator overload
-std::ostream& Acts::DiamondBounds::toStream(std::ostream& sl) const {
+std::ostream&
+Acts::DiamondBounds::toStream(std::ostream& sl) const {
   sl << std::setiosflags(std::ios::fixed);
   sl << std::setprecision(7);
   sl << "Acts::DiamondBounds:  (x1, x2, x3, "

@@ -23,7 +23,8 @@ namespace Acts {
 template <typename SpacePoint>
 class SeedfinderStateIterator {
  public:
-  SeedfinderStateIterator& operator++() {
+  SeedfinderStateIterator&
+  operator++() {
     if (zIndex < phiZbins[1]) {
       zIndex++;
 
@@ -44,13 +45,15 @@ class SeedfinderStateIterator {
     return *this;
   }
 
-  bool operator==(const SeedfinderStateIterator& otherState) {
+  bool
+  operator==(const SeedfinderStateIterator& otherState) {
     return (zIndex == otherState.zIndex && phiIndex == otherState.phiIndex);
   }
 
-  SeedfinderStateIterator(const SpacePointGrid<SpacePoint>* spgrid,
-                          IBinFinder<SpacePoint>* botBinFinder,
-                          IBinFinder<SpacePoint>* tBinFinder)
+  SeedfinderStateIterator(
+      const SpacePointGrid<SpacePoint>* spgrid,
+      IBinFinder<SpacePoint>* botBinFinder,
+      IBinFinder<SpacePoint>* tBinFinder)
       : currentBin(&(spgrid->atLocalBins({1, 1}))) {
     grid = spgrid;
     bottomBinFinder = botBinFinder;
@@ -63,10 +66,12 @@ class SeedfinderStateIterator {
     topBinIndices = topBinFinder->findBins(phiIndex, zIndex, grid);
   }
 
-  SeedfinderStateIterator(const SpacePointGrid<SpacePoint>* spgrid,
-                          IBinFinder<SpacePoint>* botBinFinder,
-                          IBinFinder<SpacePoint>* tBinFinder, size_t phiInd,
-                          size_t zInd)
+  SeedfinderStateIterator(
+      const SpacePointGrid<SpacePoint>* spgrid,
+      IBinFinder<SpacePoint>* botBinFinder,
+      IBinFinder<SpacePoint>* tBinFinder,
+      size_t phiInd,
+      size_t zInd)
       : currentBin(&(spgrid->atLocalBins({phiInd, zInd}))) {
     bottomBinFinder = botBinFinder;
     topBinFinder = tBinFinder;
@@ -108,15 +113,20 @@ struct SeedfinderState {
   // container with seeds created so far
   std::vector<std::vector<std::unique_ptr<Seed<SpacePoint>>>> outputVec;
 
-  SeedfinderStateIterator<SpacePoint> begin() {
+  SeedfinderStateIterator<SpacePoint>
+  begin() {
     return SeedfinderStateIterator<SpacePoint>(
         binnedSP.get(), bottomBinFinder.get(), topBinFinder.get());
   }
 
-  SeedfinderStateIterator<SpacePoint> end() {
+  SeedfinderStateIterator<SpacePoint>
+  end() {
     auto phiZbins = binnedSP->numLocalBins();
     return SeedfinderStateIterator<SpacePoint>(
-        binnedSP.get(), bottomBinFinder.get(), topBinFinder.get(), phiZbins[0],
+        binnedSP.get(),
+        bottomBinFinder.get(),
+        topBinFinder.get(),
+        phiZbins[0],
         phiZbins[1] + 1);
   }
 };

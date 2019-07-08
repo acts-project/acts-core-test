@@ -54,14 +54,17 @@ namespace Acts {
 /// @note The function localToGlobalBin determines how the material was
 /// stored in the vector in respect to the grid values
 /// @param [in] lengthUnit The unit of the grid points
-MaterialMapper<detail::Grid<ActsVectorF<5>, detail::EquidistantAxis,
-                            detail::EquidistantAxis>>
-materialMapperRZ(const std::function<size_t(std::array<size_t, 2> binsRZ,
-                                            std::array<size_t, 2> nBinsRZ)>&
-                     materialVectorToGridMapper,
-                 std::vector<double> rPos, std::vector<double> zPos,
-                 std::vector<Material> material,
-                 double lengthUnit = UnitConstants::mm);
+MaterialMapper<
+    detail::
+        Grid<ActsVectorF<5>, detail::EquidistantAxis, detail::EquidistantAxis>>
+materialMapperRZ(
+    const std::function<
+        size_t(std::array<size_t, 2> binsRZ, std::array<size_t, 2> nBinsRZ)>&
+        materialVectorToGridMapper,
+    std::vector<double> rPos,
+    std::vector<double> zPos,
+    std::vector<Material> material,
+    double lengthUnit = UnitConstants::mm);
 
 /// Method to setup the MaterialMapper
 /// @param [in] materialVectorToGridMapper Function mapping the vector of
@@ -104,13 +107,19 @@ materialMapperRZ(const std::function<size_t(std::array<size_t, 2> binsRZ,
 /// @note The function localToGlobalBin determines how the material was
 /// stored in the vector in respect to the grid values
 /// @param [in] lengthUnit The unit of the grid points
-MaterialMapper<detail::Grid<ActsVectorF<5>, detail::EquidistantAxis,
-                            detail::EquidistantAxis, detail::EquidistantAxis>>
-materialMapperXYZ(const std::function<size_t(std::array<size_t, 3> binsXYZ,
-                                             std::array<size_t, 3> nBinsXYZ)>&
-                      materialVectorToGridMapper,
-                  std::vector<double> xPos, std::vector<double> yPos,
-                  std::vector<double> zPos, std::vector<Material> material,
-                  double lengthUnit = UnitConstants::mm);
+MaterialMapper<detail::Grid<
+    ActsVectorF<5>,
+    detail::EquidistantAxis,
+    detail::EquidistantAxis,
+    detail::EquidistantAxis>>
+materialMapperXYZ(
+    const std::function<
+        size_t(std::array<size_t, 3> binsXYZ, std::array<size_t, 3> nBinsXYZ)>&
+        materialVectorToGridMapper,
+    std::vector<double> xPos,
+    std::vector<double> yPos,
+    std::vector<double> zPos,
+    std::vector<Material> material,
+    double lengthUnit = UnitConstants::mm);
 
 }  // namespace Acts

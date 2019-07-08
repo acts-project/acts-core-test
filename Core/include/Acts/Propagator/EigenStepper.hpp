@@ -36,9 +36,11 @@ namespace Acts {
 /// with s being the arc length of the track, q the charge of the particle,
 /// p its momentum and B the magnetic field
 ///
-template <typename BField, typename corrector_t = VoidIntersectionCorrector,
-          typename extensionlist_t = StepperExtensionList<DefaultExtension>,
-          typename auctioneer_t = detail::VoidAuctioneer>
+template <
+    typename BField,
+    typename corrector_t = VoidIntersectionCorrector,
+    typename extensionlist_t = StepperExtensionList<DefaultExtension>,
+    typename auctioneer_t = detail::VoidAuctioneer>
 class EigenStepper {
  private:
   // This struct is a meta-function which normally maps to BoundParameters...
@@ -81,10 +83,12 @@ class EigenStepper {
     ///
     /// @note the covariance matrix is copied when needed
     template <typename parameters_t>
-    explicit State(std::reference_wrapper<const GeometryContext> gctx,
-                   std::reference_wrapper<const MagneticFieldContext> mctx,
-                   const parameters_t& par, NavigationDirection ndir = forward,
-                   double ssize = std::numeric_limits<double>::max())
+    explicit State(
+        std::reference_wrapper<const GeometryContext> gctx,
+        std::reference_wrapper<const MagneticFieldContext> mctx,
+        const parameters_t& par,
+        NavigationDirection ndir = forward,
+        double ssize = std::numeric_limits<double>::max())
         : pos(par.position()),
           dir(par.momentum().normalized()),
           p(par.momentum().norm()),
@@ -104,8 +108,8 @@ class EigenStepper {
         // set the covariance transport flag to true and copy
         covTransport = true;
         cov = BoundSymMatrix(*par.covariance());
-        surface.initJacobianToGlobal(gctx, jacToGlobal, pos, dir,
-                                     par.parameters());
+        surface.initJacobianToGlobal(
+            gctx, jacToGlobal, pos, dir, par.parameters());
       }
     }
 
@@ -197,25 +201,41 @@ class EigenStepper {
   /// @param [in,out] state is the propagation state associated with the track
   ///                 the magnetic field cell is used (and potentially updated)
   /// @param [in] pos is the field position
-  Vector3D getField(State& state, const Vector3D& pos) const {
+  Vector3D
+  getField(State& state, const Vector3D& pos) const {
     // get the field from the cell
     return m_bField.getField(pos, state.fieldCache);
   }
 
   /// Global particle position accessor
-  Vector3D position(const State& state) const { return state.pos; }
+  Vector3D
+  position(const State& state) const {
+    return state.pos;
+  }
 
   /// Momentum direction accessor
-  Vector3D direction(const State& state) const { return state.dir; }
+  Vector3D
+  direction(const State& state) const {
+    return state.dir;
+  }
 
   /// Actual momentum accessor
-  double momentum(const State& state) const { return state.p; }
+  double
+  momentum(const State& state) const {
+    return state.p;
+  }
 
   /// Charge access
-  double charge(const State& state) const { return state.q; }
+  double
+  charge(const State& state) const {
+    return state.q;
+  }
 
   /// Time access
-  double time(const State& state) const { return state.t0 + state.dt; }
+  double
+  time(const State& state) const {
+    return state.t0 + state.dt;
+  }
 
   /// Tests if the state reached a surface
   ///
@@ -223,9 +243,10 @@ class EigenStepper {
   /// @param [in] surface Surface that is tested
   ///
   /// @return Boolean statement if surface is reached by state
-  bool surfaceReached(const State& state, const Surface* surface) const {
-    return surface->isOnSurface(state.geoContext, position(state),
-                                direction(state), true);
+  bool
+  surfaceReached(const State& state, const Surface* surface) const {
+    return surface->isOnSurface(
+        state.geoContext, position(state), direction(state), true);
   }
 
   /// Create and return the bound state at the current position
@@ -244,8 +265,10 @@ class EigenStepper {
   ///   - the parameters at the surface
   ///   - the stepwise jacobian towards it (from last bound)
   ///   - and the path length (from start - for ordering)
-  BoundState boundState(State& state, const Surface& surface,
-                        bool reinitialize = true) const;
+  BoundState boundState(
+      State& state,
+      const Surface& surface,
+      bool reinitialize = true) const;
 
   /// Create and return a curvilinear state at the current position
   ///
@@ -260,8 +283,8 @@ class EigenStepper {
   ///   - the curvilinear parameters at given position
   ///   - the stepweise jacobian towards it (from last bound)
   ///   - and the path length (from start - for ordering)
-  CurvilinearState curvilinearState(State& state,
-                                    bool reinitialize = true) const;
+  CurvilinearState curvilinearState(State& state, bool reinitialize = true)
+      const;
 
   /// Method to update a stepper state to the some parameters
   ///
@@ -275,11 +298,16 @@ class EigenStepper {
   /// @param [in] uposition the updated position
   /// @param [in] udirection the updated direction
   /// @param [in] up the updated momentum value
-  void update(State& state, const Vector3D& uposition,
-              const Vector3D& udirection, double up, double time) const;
+  void update(
+      State& state,
+      const Vector3D& uposition,
+      const Vector3D& udirection,
+      double up,
+      double time) const;
 
   /// Return a corrector
-  corrector_t corrector(State& state) const {
+  corrector_t
+  corrector(State& state) const {
     return corrector_t(state.startPos, state.startDir, state.pathAccumulated);
   }
 
@@ -305,8 +333,10 @@ class EigenStepper {
   /// @param [in] reinitialize is a flag to steer whether the state should be
   /// reinitialized at the new position
   /// @note no check is done if the position is actually on the surface
-  void covarianceTransport(State& state, const Surface& surface,
-                           bool reinitialize = true) const;
+  void covarianceTransport(
+      State& state,
+      const Surface& surface,
+      bool reinitialize = true) const;
 
   /// Perform a Runge-Kutta track parameter propagation step
   ///

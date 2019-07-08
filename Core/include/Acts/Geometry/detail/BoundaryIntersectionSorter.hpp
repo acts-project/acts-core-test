@@ -51,24 +51,29 @@ struct DefaultBoundaryIntersectionSorter {
   /// @return Vector of intersections with the boundaries ordered by the
   /// intersection probability
   template <typename options_t, typename corrector_t>
-  std::vector<BoundaryIntersection> operator()(
+  std::vector<BoundaryIntersection>
+  operator()(
       const GeometryContext& gctx,
       std::vector<const BoundarySurfaceT<TrackingVolume>*>& boundaries,
-      const Vector3D& position, const Vector3D& direction,
-      const options_t& options, const corrector_t& corrfnc) const {
+      const Vector3D& position,
+      const Vector3D& direction,
+      const options_t& options,
+      const corrector_t& corrfnc) const {
     std::vector<BoundaryIntersection> bIntersections;
     for (auto& bSurface : boundaries) {
       const auto& bSurfaceRep = bSurface->surfaceRepresentation();
       // intersect the surface
       SurfaceIntersection bsIntersection =
-          bSurfaceRep.surfaceIntersectionEstimate(gctx, position, direction,
-                                                  options, corrfnc);
+          bSurfaceRep.surfaceIntersectionEstimate(
+              gctx, position, direction, options, corrfnc);
       // check if the intersection is valid, but exlude the on-surface case
       // when requested -- move to intersectionestimate
       if (bsIntersection) {
-        bIntersections.push_back(
-            BoundaryIntersection(bsIntersection.intersection, bSurface,
-                                 &bSurfaceRep, options.navDir));
+        bIntersections.push_back(BoundaryIntersection(
+            bsIntersection.intersection,
+            bSurface,
+            &bSurfaceRep,
+            options.navDir));
       }
     }
     // and now sort to get the closest - need custom sort here to respect sign
@@ -118,11 +123,14 @@ struct BoundaryIntersectionSorter {
   /// @return Vector of intersections with the boundaries ordered by the
   /// intersection probability
   template <typename options_t, typename corrector_t>
-  std::vector<BoundaryIntersection> operator()(
+  std::vector<BoundaryIntersection>
+  operator()(
       const GeometryContext& gctx,
       std::vector<const BoundarySurfaceT<TrackingVolume>*>& boundaries,
-      const Vector3D& position, const Vector3D& direction,
-      const options_t& options, const corrector_t& corrfnc) const {
+      const Vector3D& position,
+      const Vector3D& direction,
+      const options_t& options,
+      const corrector_t& corrfnc) const {
     // Resulting vector
     std::vector<BoundaryIntersection> bIntersections, bIntersectionsOtherNavDir;
     bIntersections.reserve(boundaries.size());
@@ -168,21 +176,24 @@ struct BoundaryIntersectionSorter {
     // Sort both lists
     if (options.navDir == forward) {
       std::sort(bIntersections.begin(), bIntersections.end());
-      std::sort(bIntersectionsOtherNavDir.begin(),
-                bIntersectionsOtherNavDir.end(), std::greater<>());
+      std::sort(
+          bIntersectionsOtherNavDir.begin(),
+          bIntersectionsOtherNavDir.end(),
+          std::greater<>());
     } else {
       std::sort(bIntersections.begin(), bIntersections.end(), std::greater<>());
-      std::sort(bIntersectionsOtherNavDir.begin(),
-                bIntersectionsOtherNavDir.end());
+      std::sort(
+          bIntersectionsOtherNavDir.begin(), bIntersectionsOtherNavDir.end());
     }
 
     // @p bIntersectionsOtherNavDir is sorted such that the backwards elements
     // are in front and then the non-interacting elements. So, they get inserted
     // in inverted order to preserve the probability ordering in the original
     // direction.
-    bIntersections.insert(bIntersections.end(),
-                          bIntersectionsOtherNavDir.rbegin(),
-                          bIntersectionsOtherNavDir.rend());
+    bIntersections.insert(
+        bIntersections.end(),
+        bIntersectionsOtherNavDir.rbegin(),
+        bIntersectionsOtherNavDir.rend());
 
     return bIntersections;
   }
@@ -203,17 +214,20 @@ struct BoundaryIntersectionSorter {
   ///
   /// @return Intersection object of the boundary surface
   template <typename options_t, typename corrector_t>
-  BoundaryIntersection intersect(
+  BoundaryIntersection
+  intersect(
       const GeometryContext& gctx,
       const BoundarySurfaceT<TrackingVolume>* boundary,
-      const Vector3D& position, const Vector3D& direction,
-      const options_t& options, const corrector_t& corrfnc) const {
+      const Vector3D& position,
+      const Vector3D& direction,
+      const options_t& options,
+      const corrector_t& corrfnc) const {
     const Surface* surface = &(boundary->surfaceRepresentation());
     // intersect the surface
     SurfaceIntersection bsIntersection = surface->surfaceIntersectionEstimate(
         gctx, position, direction, options, corrfnc);
-    return BoundaryIntersection(bsIntersection.intersection, boundary, surface,
-                                options.navDir);
+    return BoundaryIntersection(
+        bsIntersection.intersection, boundary, surface, options.navDir);
   }
 };
 }  // namespace Acts

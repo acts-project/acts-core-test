@@ -230,7 +230,8 @@ class OutStream final {
   ///
   /// @param [in] input content added to the stream
   template <typename T>
-  OutStream& operator<<(T&& input) {
+  OutStream&
+  operator<<(T&& input) {
     m_stream << std::forward<T>(input);
     return *this;
   }
@@ -241,7 +242,8 @@ class OutStream final {
   ///
   /// @param [in] f stream modifier
   template <typename T>
-  OutStream& operator<<(T& (*f)(T&)) {
+  OutStream&
+  operator<<(T& (*f)(T&)) {
     f(m_stream);
     return *this;
   }
@@ -273,7 +275,10 @@ class DefaultFilterPolicy final : public OutputFilterPolicy {
   /// @param [in] lvl debug level of debug message
   ///
   /// @return @c true if @p lvl >= #m_level, otherwise @c false
-  bool doPrint(const Level& lvl) const override { return m_level <= lvl; }
+  bool
+  doPrint(const Level& lvl) const override {
+    return m_level <= lvl;
+  }
 
  private:
   /// threshold debug level for messages to be processed
@@ -301,7 +306,8 @@ class OutputDecorator : public OutputPrintPolicy {
   ///
   /// This function delegates the flushing of the debug message to its wrapped
   /// object.
-  void flush(const Level& lvl, const std::ostringstream& input) override {
+  void
+  flush(const Level& lvl, const std::ostringstream& input) override {
     m_wrappee->flush(lvl, input);
   }
 
@@ -320,8 +326,10 @@ class NamedOutputDecorator final : public OutputDecorator {
   /// @param [in] wrappee  output print policy object to be wrapped
   /// @param [in] name     name to be added to debug message
   /// @param [in] maxWidth maximum width of field used for name
-  NamedOutputDecorator(std::unique_ptr<OutputPrintPolicy> wrappee,
-                       const std::string& name, unsigned int maxWidth = 15)
+  NamedOutputDecorator(
+      std::unique_ptr<OutputPrintPolicy> wrappee,
+      const std::string& name,
+      unsigned int maxWidth = 15)
       : OutputDecorator(std::move(wrappee)),
         m_name(name),
         m_maxWidth(maxWidth) {}
@@ -333,7 +341,8 @@ class NamedOutputDecorator final : public OutputDecorator {
   ///
   /// This function prepends the given name to the debug message and then
   /// delegates the flushing of the whole message to its wrapped object.
-  void flush(const Level& lvl, const std::ostringstream& input) override {
+  void
+  flush(const Level& lvl, const std::ostringstream& input) override {
     std::ostringstream os;
     os << std::left << std::setw(m_maxWidth) << m_name.substr(0, m_maxWidth - 3)
        << input.str();
@@ -357,8 +366,9 @@ class TimedOutputDecorator final : public OutputDecorator {
   ///
   /// @param [in] wrappee output print policy object to be wrapped
   /// @param [in] format  format of time stamp (see std::strftime)
-  TimedOutputDecorator(std::unique_ptr<OutputPrintPolicy> wrappee,
-                       const std::string& format = "%X")
+  TimedOutputDecorator(
+      std::unique_ptr<OutputPrintPolicy> wrappee,
+      const std::string& format = "%X")
       : OutputDecorator(std::move(wrappee)), m_format(format) {}
 
   /// @brief flush the debug message to the destination stream
@@ -368,7 +378,8 @@ class TimedOutputDecorator final : public OutputDecorator {
   ///
   /// This function prepends a time stamp to the debug message and then
   /// delegates the flushing of the whole message to its wrapped object.
-  void flush(const Level& lvl, const std::ostringstream& input) override {
+  void
+  flush(const Level& lvl, const std::ostringstream& input) override {
     std::ostringstream os;
     os << std::left << std::setw(12) << now() << input.str();
     OutputDecorator::flush(lvl, os);
@@ -378,7 +389,8 @@ class TimedOutputDecorator final : public OutputDecorator {
   /// @brief get current time stamp
   ///
   /// @return current time stamp as string
-  std::string now() const {
+  std::string
+  now() const {
     char buffer[20];
     time_t t;
     std::time(&t);
@@ -408,7 +420,8 @@ class ThreadOutputDecorator final : public OutputDecorator {
   ///
   /// This function prepends the thread ID to the debug message and then
   /// delegates the flushing of the whole message to its wrapped object.
-  void flush(const Level& lvl, const std::ostringstream& input) override {
+  void
+  flush(const Level& lvl, const std::ostringstream& input) override {
     std::ostringstream os;
     os << std::left << std::setw(20) << std::this_thread::get_id()
        << input.str();
@@ -434,7 +447,8 @@ class LevelOutputDecorator final : public OutputDecorator {
   ///
   /// This function prepends the debug level to the debug message and then
   /// delegates the flushing of the whole message to its wrapped object.
-  void flush(const Level& lvl, const std::ostringstream& input) override {
+  void
+  flush(const Level& lvl, const std::ostringstream& input) override {
     std::ostringstream os;
     os << std::left << std::setw(10) << toString(lvl) << input.str();
     OutputDecorator::flush(lvl, os);
@@ -446,9 +460,10 @@ class LevelOutputDecorator final : public OutputDecorator {
   /// @param [in] lvl debug level
   ///
   /// @return string representation of debug level
-  std::string toString(const Level& lvl) const {
-    static const char* const buffer[] = {"VERBOSE", "DEBUG", "INFO",
-                                         "WARNING", "ERROR", "FATAL"};
+  std::string
+  toString(const Level& lvl) const {
+    static const char* const buffer[] = {
+        "VERBOSE", "DEBUG", "INFO", "WARNING", "ERROR", "FATAL"};
     return buffer[lvl];
   }
 };
@@ -470,7 +485,8 @@ class DefaultPrintPolicy final : public OutputPrintPolicy {
   ///
   /// @param [in] lvl   debug level of debug message
   /// @param [in] input text of debug message
-  void flush(const Level& /*lvl*/, const std::ostringstream& input) final {
+  void
+  flush(const Level& /*lvl*/, const std::ostringstream& input) final {
     (*m_out) << input.str() << std::endl;
   }
 
@@ -492,8 +508,9 @@ class Logger {
   ///
   /// @param [in] pPrint  policy for printing debug messages
   /// @param [in] pFilter policy for filtering debug messages
-  Logger(std::unique_ptr<Logging::OutputPrintPolicy> pPrint,
-         std::unique_ptr<Logging::OutputFilterPolicy> pFilter)
+  Logger(
+      std::unique_ptr<Logging::OutputPrintPolicy> pPrint,
+      std::unique_ptr<Logging::OutputFilterPolicy> pFilter)
       : m_printPolicy(std::move(pPrint)), m_filterPolicy(std::move(pFilter)) {}
 
   /// @brief decide whether a message with a given debug level has to be printed
@@ -501,7 +518,8 @@ class Logger {
   /// @param [in] lvl debug level of debug message
   ///
   /// @return @c true if debug message should be printed, otherwise @c false
-  bool doPrint(const Logging::Level& lvl) const {
+  bool
+  doPrint(const Logging::Level& lvl) const {
     return m_filterPolicy->doPrint(lvl);
   }
 
@@ -515,10 +533,13 @@ class Logger {
   /// of scope.
   ///
   /// @return output stream object with internal cache for debug message
-  Logging::OutStream log(const Logging::Level& lvl) const {
-    return Logging::OutStream(std::bind(&Logging::OutputPrintPolicy::flush,
-                                        m_printPolicy.get(), lvl,
-                                        std::placeholders::_1));
+  Logging::OutStream
+  log(const Logging::Level& lvl) const {
+    return Logging::OutStream(std::bind(
+        &Logging::OutputPrintPolicy::flush,
+        m_printPolicy.get(),
+        lvl,
+        std::placeholders::_1));
   }
 
  private:
@@ -543,7 +564,8 @@ class Logger {
 ///
 /// @return pointer to logging instance
 std::unique_ptr<const Logger> getDefaultLogger(
-    const std::string& name, const Logging::Level& lvl,
+    const std::string& name,
+    const Logging::Level& lvl,
     std::ostream* log_stream = &std::cout);
 
 }  // namespace Acts

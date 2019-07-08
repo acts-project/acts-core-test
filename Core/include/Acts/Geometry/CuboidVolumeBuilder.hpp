@@ -47,9 +47,10 @@ class CuboidVolumeBuilder : public ITrackingVolumeBuilder {
     double thickness = 0.;
     // Constructor function for optional detector elements
     // Arguments are transform, rectangle bounds and thickness.
-    std::function<DetectorElementBase*(std::shared_ptr<const Transform3D>,
-                                       std::shared_ptr<const RectangleBounds>,
-                                       double)>
+    std::function<DetectorElementBase*(
+        std::shared_ptr<const Transform3D>,
+        std::shared_ptr<const RectangleBounds>,
+        double)>
         detElementConstructor;
   };
 
@@ -106,7 +107,10 @@ class CuboidVolumeBuilder : public ITrackingVolumeBuilder {
   /// @brief Setter of the config
   ///
   /// @param [in] cfg Configuration that is set
-  void setConfig(Config& cfg) { m_cfg = cfg; }
+  void
+  setConfig(Config& cfg) {
+    m_cfg = cfg;
+  }
 
   /// @brief This function creates a surface with a given configuration. A
   /// detector element is attached if the template parameter is non-void.
@@ -116,7 +120,8 @@ class CuboidVolumeBuilder : public ITrackingVolumeBuilder {
   ///
   /// @return Pointer to the created surface
   std::shared_ptr<const PlaneSurface> buildSurface(
-      const GeometryContext& gctx, const SurfaceConfig& cfg) const;
+      const GeometryContext& gctx,
+      const SurfaceConfig& cfg) const;
 
   /// @brief This function creates a layer with a surface encaspulated with a
   /// given configuration. The surface gets a detector element attached if the
@@ -126,8 +131,9 @@ class CuboidVolumeBuilder : public ITrackingVolumeBuilder {
   /// @param [in, out] cfg Configuration of the layer and the surface
   ///
   /// @return Pointer to the created layer
-  std::shared_ptr<const Layer> buildLayer(const GeometryContext& gctx,
-                                          LayerConfig& cfg) const;
+  std::shared_ptr<const Layer> buildLayer(
+      const GeometryContext& gctx,
+      LayerConfig& cfg) const;
 
   /// @brief This function creates a TrackingVolume with a configurable number
   /// of layers and surfaces. Each surface gets a detector element attached if
@@ -137,8 +143,9 @@ class CuboidVolumeBuilder : public ITrackingVolumeBuilder {
   /// @param [in, out] cfg Configuration of the TrackingVolume
   ///
   /// @return Pointer to the created TrackingVolume
-  std::shared_ptr<TrackingVolume> buildVolume(const GeometryContext& gctx,
-                                              VolumeConfig& cfg) const;
+  std::shared_ptr<TrackingVolume> buildVolume(
+      const GeometryContext& gctx,
+      VolumeConfig& cfg) const;
 
   /// @brief This function evaluates the minimum and maximum of the binning as
   /// given by the configurations of the surfaces and layers. The ordering
@@ -149,8 +156,9 @@ class CuboidVolumeBuilder : public ITrackingVolumeBuilder {
   ///
   /// @return Pair containing the minimum and maximum along the binning
   /// direction
-  std::pair<double, double> binningRange(const GeometryContext& gctx,
-                                         const VolumeConfig& cfg) const;
+  std::pair<double, double> binningRange(
+      const GeometryContext& gctx,
+      const VolumeConfig& cfg) const;
 
   /// @brief This function builds a world TrackingVolume based on a given
   /// configuration

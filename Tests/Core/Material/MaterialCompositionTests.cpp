@@ -61,8 +61,8 @@ BOOST_AUTO_TEST_CASE(ElementFraction_movable_test) {
 
   ElementFraction carbonMovedAssigned = std::move(carbonMoved);
   BOOST_CHECK_EQUAL(12ul, carbonMovedAssigned.element());
-  CHECK_CLOSE_REL(carbonFraction, carbonMovedAssigned.fraction(),
-                  elMaxTolerance);
+  CHECK_CLOSE_REL(
+      carbonFraction, carbonMovedAssigned.fraction(), elMaxTolerance);
 }
 
 BOOST_AUTO_TEST_CASE(MaterialComposition_construction_test) {
@@ -94,22 +94,22 @@ BOOST_AUTO_TEST_CASE(MaterialComposition_construction_test) {
   MaterialComposition shuffledC(shuffled);
   // check if the sorting worked
   BOOST_CHECK_EQUAL(elementsC.size(), shuffledC.size());
-  BOOST_CHECK_EQUAL(elementsC.elements()[0].data()[0],
-                    shuffledC.elements()[0].data()[0]);
-  BOOST_CHECK_EQUAL(elementsC.elements()[1].data()[0],
-                    shuffledC.elements()[1].data()[0]);
-  BOOST_CHECK_EQUAL(elementsC.elements()[2].data()[0],
-                    shuffledC.elements()[2].data()[0]);
-  BOOST_CHECK_EQUAL(elementsC.elements()[3].data()[0],
-                    shuffledC.elements()[3].data()[0]);
-  BOOST_CHECK_EQUAL(elementsC.elements()[0].data()[1],
-                    shuffledC.elements()[0].data()[1]);
-  BOOST_CHECK_EQUAL(elementsC.elements()[1].data()[1],
-                    shuffledC.elements()[1].data()[1]);
-  BOOST_CHECK_EQUAL(elementsC.elements()[2].data()[1],
-                    shuffledC.elements()[2].data()[1]);
-  BOOST_CHECK_EQUAL(elementsC.elements()[3].data()[1],
-                    shuffledC.elements()[3].data()[1]);
+  BOOST_CHECK_EQUAL(
+      elementsC.elements()[0].data()[0], shuffledC.elements()[0].data()[0]);
+  BOOST_CHECK_EQUAL(
+      elementsC.elements()[1].data()[0], shuffledC.elements()[1].data()[0]);
+  BOOST_CHECK_EQUAL(
+      elementsC.elements()[2].data()[0], shuffledC.elements()[2].data()[0]);
+  BOOST_CHECK_EQUAL(
+      elementsC.elements()[3].data()[0], shuffledC.elements()[3].data()[0]);
+  BOOST_CHECK_EQUAL(
+      elementsC.elements()[0].data()[1], shuffledC.elements()[0].data()[1]);
+  BOOST_CHECK_EQUAL(
+      elementsC.elements()[1].data()[1], shuffledC.elements()[1].data()[1]);
+  BOOST_CHECK_EQUAL(
+      elementsC.elements()[2].data()[1], shuffledC.elements()[2].data()[1]);
+  BOOST_CHECK_EQUAL(
+      elementsC.elements()[3].data()[1], shuffledC.elements()[3].data()[1]);
   /// or shortly
   BOOST_CHECK_EQUAL(elementsC, shuffledC);
 
@@ -118,8 +118,9 @@ BOOST_AUTO_TEST_CASE(MaterialComposition_construction_test) {
     totalFraction += eFraction.fraction();
   }
   // to better fit we need to implement some proper weight scaling
-  BOOST_CHECK_LT(std::abs(1. - totalFraction),
-                 elementsC.elements().size() * elMaxTolerance);
+  BOOST_CHECK_LT(
+      std::abs(1. - totalFraction),
+      elementsC.elements().size() * elMaxTolerance);
 }
 
 BOOST_AUTO_TEST_CASE(MaterialComposition_movable_test) {

@@ -50,8 +50,9 @@ class Surface;
 template <typename source_link_t, ParID_t... params>
 class Measurement {
   // check type conditions
-  static_assert(SourceLinkConcept<source_link_t>,
-                "Source link does not fulfill SourceLinkConcept");
+  static_assert(
+      SourceLinkConcept<source_link_t>,
+      "Source link does not fulfill SourceLinkConcept");
 
  private:
   // private typedefs
@@ -90,13 +91,18 @@ class Measurement {
   /// @param head,values consistent number of parameter values of the
   /// measurement
   template <typename... Tail>
-  Measurement(std::shared_ptr<const Surface> surface,
-              const source_link_t& source, CovMatrix_t cov,
-              typename std::enable_if<sizeof...(Tail) + 1 == sizeof...(params),
-                                      ParValue_t>::type head,
-              Tail... values)
-      : m_oParameters(std::make_unique<const CovMatrix_t>(std::move(cov)), head,
-                      values...),
+  Measurement(
+      std::shared_ptr<const Surface> surface,
+      const source_link_t& source,
+      CovMatrix_t cov,
+      typename std::enable_if<
+          sizeof...(Tail) + 1 == sizeof...(params),
+          ParValue_t>::type head,
+      Tail... values)
+      : m_oParameters(
+            std::make_unique<const CovMatrix_t>(std::move(cov)),
+            head,
+            values...),
         m_pSurface(std::move(surface)),
         m_sourceLink(source) {
     assert(m_pSurface);
@@ -133,8 +139,8 @@ class Measurement {
   /// @tparam params...The local parameter pack
   ///
   /// @param rhs is the source for the assignment
-  Measurement<source_link_t, params...>& operator=(
-      const Measurement<source_link_t, params...>& rhs) {
+  Measurement<source_link_t, params...>&
+  operator=(const Measurement<source_link_t, params...>& rhs) {
     // check for self-assignment
     if (&rhs != this) {
       m_oParameters = rhs.m_oParameters;
@@ -150,8 +156,8 @@ class Measurement {
   /// @tparam params...The local parameter pack
   ///
   /// @param rhs is the source for the move assignment
-  Measurement<source_link_t, params...>& operator=(
-      Measurement<source_link_t, params...>&& rhs) {
+  Measurement<source_link_t, params...>&
+  operator=(Measurement<source_link_t, params...>&& rhs) {
     m_oParameters = std::move(rhs.m_oParameters);
     m_pSurface = std::move(rhs.m_pSurface);
     m_sourceLink = std::move(rhs.m_sourceLink);
@@ -168,7 +174,8 @@ class Measurement {
   ///
   /// @return value of the stored parameter
   template <ParID_t parameter>
-  ParValue_t get() const {
+  ParValue_t
+  get() const {
     return m_oParameters.template getParameter<parameter>();
   }
 
@@ -179,12 +186,18 @@ class Measurement {
   ///         given for the measured parameters in the order defined by the
   ///         class
   /// template argument @c params.
-  ParVector_t parameters() const { return m_oParameters.getParameters(); }
+  ParVector_t
+  parameters() const {
+    return m_oParameters.getParameters();
+  }
 
   /// @brief access covariance matrix of the measured parameter values
   ///
   /// @return covariance matrix of the measurement
-  CovMatrix_t covariance() const { return *m_oParameters.getCovariance(); }
+  CovMatrix_t
+  covariance() const {
+    return *m_oParameters.getCovariance();
+  }
 
   /// @brief retrieve stored uncertainty for given parameter
   ///
@@ -196,14 +209,18 @@ class Measurement {
   ///
   /// @return uncertainty \f$\sigma \ge 0\f$ for given parameter
   template <ParID_t parameter>
-  ParValue_t uncertainty() const {
+  ParValue_t
+  uncertainty() const {
     return m_oParameters.template getUncertainty<parameter>();
   }
 
   /// @brief number of measured parameters
   ///
   /// @return number of measured parameters
-  static constexpr unsigned int size() { return ParSet_t::size(); }
+  static constexpr unsigned int
+  size() {
+    return ParSet_t::size();
+  }
 
   /// @brief access associated surface
   ///
@@ -211,7 +228,10 @@ class Measurement {
   /// must still be valid at the same memory location.
   ///
   /// @return reference to surface at which the measurement took place
-  const Acts::Surface& referenceSurface() const { return *m_pSurface; }
+  const Acts::Surface&
+  referenceSurface() const {
+    return *m_pSurface;
+  }
 
   /// @brief link access to the source of the measurement.
   ///
@@ -219,7 +239,10 @@ class Measurement {
   /// object, see description above.
   ///
   /// @return source_link_t object
-  const source_link_t& sourceLink() const { return m_sourceLink; }
+  const source_link_t&
+  sourceLink() const {
+    return m_sourceLink;
+  }
 
   /// @brief calculate residual with respect to given track parameters
   ///
@@ -237,7 +260,8 @@ class Measurement {
   /// @return vector with the residual parameter values (in valid range)
   ///
   /// @sa ParameterSet::residual
-  ParVector_t residual(const TrackParameters& trackPars) const {
+  ParVector_t
+  residual(const TrackParameters& trackPars) const {
     return m_oParameters.residual(trackPars.getParameterSet());
   }
 
@@ -245,11 +269,11 @@ class Measurement {
   ///
   /// @return @c true if parameter sets and associated surfaces compare equal,
   /// otherwise @c false
-  virtual bool operator==(
-      const Measurement<source_link_t, params...>& rhs) const {
-    return ((m_oParameters == rhs.m_oParameters) &&
-            (*m_pSurface == *rhs.m_pSurface) &&
-            (m_sourceLink == rhs.m_sourceLink));
+  virtual bool
+  operator==(const Measurement<source_link_t, params...>& rhs) const {
+    return (
+        (m_oParameters == rhs.m_oParameters) &&
+        (*m_pSurface == *rhs.m_pSurface) && (m_sourceLink == rhs.m_sourceLink));
   }
 
   /// @brief inequality operator
@@ -257,21 +281,28 @@ class Measurement {
   /// @return @c true if both objects are not equal, otherwise @c false
   ///
   /// @sa Measurement::operator==
-  bool operator!=(const Measurement<source_link_t, params...>& rhs) const {
+  bool
+  operator!=(const Measurement<source_link_t, params...>& rhs) const {
     return !(*this == rhs);
   }
 
   /// @projection operator
-  static Projection_t projector() { return ParSet_t::projector(); }
+  static Projection_t
+  projector() {
+    return ParSet_t::projector();
+  }
 
-  friend std::ostream& operator<<(
-      std::ostream& out, const Measurement<source_link_t, params...>& m) {
+  friend std::ostream&
+  operator<<(
+      std::ostream& out,
+      const Measurement<source_link_t, params...>& m) {
     m.print(out);
     return out;
   }
 
  protected:
-  virtual std::ostream& print(std::ostream& out) const {
+  virtual std::ostream&
+  print(std::ostream& out) const {
     out << sizeof...(params) << "D measurement: ";
     int dummy[sizeof...(params)] = {(out << params << ", ", 0)...};
     dummy[0] = dummy[0];

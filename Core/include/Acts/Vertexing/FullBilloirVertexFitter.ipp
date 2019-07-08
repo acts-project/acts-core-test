@@ -114,8 +114,11 @@ Acts::FullBilloirVertexFitter<bfield_t, input_track_t, propagator_t>::fit(
       }
 
       auto result = m_cfg.linFactory.linearizeTrack(
-          vFitterOptions.geoContext, vFitterOptions.magFieldContext,
-          &trackParams, linPoint, m_cfg.propagator);
+          vFitterOptions.geoContext,
+          vFitterOptions.magFieldContext,
+          &trackParams,
+          linPoint,
+          m_cfg.propagator);
       if (result.ok()) {
         const auto linTrack = *result;
         double d0 = linTrack.parametersAtPCA[ParID_t::eLOC_D0];
@@ -128,8 +131,8 @@ Acts::FullBilloirVertexFitter<bfield_t, input_track_t, propagator_t>::fit(
         double fPhi = trackMomenta[iTrack][0];
         double fTheta = trackMomenta[iTrack][1];
         double fQOvP = trackMomenta[iTrack][2];
-        BilloirTrack<input_track_t> currentBilloirTrack(trackContainer,
-                                                        linTrack);
+        BilloirTrack<input_track_t> currentBilloirTrack(
+            trackContainer, linTrack);
 
         // calculate dqi = deltaQ[i]
         currentBilloirTrack.deltaQ[0] = d0;
@@ -280,9 +283,10 @@ Acts::FullBilloirVertexFitter<bfield_t, input_track_t, propagator_t>::fit(
       bTrack.chi2 =
           ((bTrack.deltaQ - bTrack.DiMat * deltaV - bTrack.EiMat * deltaP)
                .transpose())
-              .dot(bTrack.linTrack.covarianceAtPCA.inverse() *
-                   (bTrack.deltaQ - bTrack.DiMat * deltaV -
-                    bTrack.EiMat * deltaP));
+              .dot(
+                  bTrack.linTrack.covarianceAtPCA.inverse() *
+                  (bTrack.deltaQ - bTrack.DiMat * deltaV -
+                   bTrack.EiMat * deltaP));
       newChi2 += bTrack.chi2;
 
       ++iTrack;
@@ -301,8 +305,9 @@ Acts::FullBilloirVertexFitter<bfield_t, input_track_t, propagator_t>::fit(
                                  linPoint[2]);
       newChi2 +=
           (deltaTrk.transpose())
-              .dot(vFitterOptions.vertexConstraint.covariance().inverse() *
-                   deltaTrk);
+              .dot(
+                  vFitterOptions.vertexConstraint.covariance().inverse() *
+                  deltaTrk);
     }
 
     if (!std::isnormal(newChi2)) {
@@ -333,12 +338,14 @@ Acts::FullBilloirVertexFitter<bfield_t, input_track_t, propagator_t>::fit(
         paramVec << 0., 0., trackMomenta[iTrack](0), trackMomenta[iTrack](1),
             trackMomenta[iTrack](2), 0.;
 
-        BoundParameters refittedParams(vFitterOptions.geoContext,
-                                       std::move(covDeltaPmat[iTrack]),
-                                       paramVec, perigee);
+        BoundParameters refittedParams(
+            vFitterOptions.geoContext,
+            std::move(covDeltaPmat[iTrack]),
+            paramVec,
+            perigee);
 
-        TrackAtVertex<input_track_t> trackVx(bTrack.chi2, refittedParams,
-                                             bTrack.originalTrack);
+        TrackAtVertex<input_track_t> trackVx(
+            bTrack.chi2, refittedParams, bTrack.originalTrack);
         tracksAtVertex.push_back(std::move(trackVx));
         ++iTrack;
       }
@@ -349,10 +356,9 @@ Acts::FullBilloirVertexFitter<bfield_t, input_track_t, propagator_t>::fit(
 }
 
 template <typename bfield_t, typename input_track_t, typename propagator_t>
-std::pair<double, double> Acts::FullBilloirVertexFitter<
-    bfield_t, input_track_t,
-    propagator_t>::correctPhiThetaPeriodicity(double phiIn,
-                                              double thetaIn) const {
+std::pair<double, double>
+Acts::FullBilloirVertexFitter<bfield_t, input_track_t, propagator_t>::
+    correctPhiThetaPeriodicity(double phiIn, double thetaIn) const {
   double tmpPhi = std::fmod(phiIn, 2 * M_PI);  // temp phi
   if (tmpPhi > M_PI) {
     tmpPhi -= 2 * M_PI;

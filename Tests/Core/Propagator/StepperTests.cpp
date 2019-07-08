@@ -61,7 +61,8 @@ struct EndOfWorld {
   /// @param [in] stepper Stepper of the propagation
   /// @return Boolean statement if the particle is still in the detector
   template <typename propagator_state_t, typename stepper_t>
-  bool operator()(propagator_state_t& state, const stepper_t& stepper) const {
+  bool
+  operator()(propagator_state_t& state, const stepper_t& stepper) const {
     const double tolerance = state.options.targetTolerance;
     if (maxX - std::abs(stepper.position(state.stepping).x()) <= tolerance ||
         std::abs(stepper.position(state.stepping).y()) >= 0.5_m ||
@@ -96,11 +97,14 @@ struct StepCollector {
   /// @param [in] stepper Stepper of the propagation
   /// @param [out] result Struct which is filled with the data
   template <typename propagator_state_t, typename stepper_t>
-  void operator()(propagator_state_t& state, const stepper_t& stepper,
-                  result_type& result) const {
+  void
+  operator()(
+      propagator_state_t& state,
+      const stepper_t& stepper,
+      result_type& result) const {
     result.position.push_back(stepper.position(state.stepping));
-    result.momentum.push_back(stepper.momentum(state.stepping) *
-                              stepper.direction(state.stepping));
+    result.momentum.push_back(
+        stepper.momentum(state.stepping) * stepper.direction(state.stepping));
   }
 };
 
@@ -154,8 +158,9 @@ BOOST_AUTO_TEST_CASE(step_extension_vacuum_test) {
   AbortList<EndOfWorld> abortList;
 
   // Set options for propagator
-  DenseStepperPropagatorOptions<ActionList<StepCollector>,
-                                AbortList<EndOfWorld>>
+  DenseStepperPropagatorOptions<
+      ActionList<StepCollector>,
+      AbortList<EndOfWorld>>
       propOpts(tgContext, mfContext);
   propOpts.actionList = aList;
   propOpts.abortList = abortList;
@@ -165,15 +170,18 @@ BOOST_AUTO_TEST_CASE(step_extension_vacuum_test) {
   // Build stepper and propagator
   ConstantBField bField(Vector3D(0., 0., 0.));
   EigenStepper<
-      ConstantBField, VoidIntersectionCorrector,
+      ConstantBField,
+      VoidIntersectionCorrector,
       StepperExtensionList<DefaultExtension, DenseEnvironmentExtension>,
       detail::HighestValidAuctioneer>
       es(bField);
-  Propagator<EigenStepper<ConstantBField, VoidIntersectionCorrector,
-                          StepperExtensionList<DefaultExtension,
-                                               DenseEnvironmentExtension>,
-                          detail::HighestValidAuctioneer>,
-             Navigator>
+  Propagator<
+      EigenStepper<
+          ConstantBField,
+          VoidIntersectionCorrector,
+          StepperExtensionList<DefaultExtension, DenseEnvironmentExtension>,
+          detail::HighestValidAuctioneer>,
+      Navigator>
       prop(es, naviVac);
 
   // Launch and collect results
@@ -203,12 +211,17 @@ BOOST_AUTO_TEST_CASE(step_extension_vacuum_test) {
   propOptsDef.maxSteps = 100;
   propOptsDef.maxStepSize = 0.5_m;
 
-  EigenStepper<ConstantBField, VoidIntersectionCorrector,
-               StepperExtensionList<DefaultExtension>>
+  EigenStepper<
+      ConstantBField,
+      VoidIntersectionCorrector,
+      StepperExtensionList<DefaultExtension>>
       esDef(bField);
-  Propagator<EigenStepper<ConstantBField, VoidIntersectionCorrector,
-                          StepperExtensionList<DefaultExtension>>,
-             Navigator>
+  Propagator<
+      EigenStepper<
+          ConstantBField,
+          VoidIntersectionCorrector,
+          StepperExtensionList<DefaultExtension>>,
+      Navigator>
       propDef(esDef, naviVac);
 
   // Launch and collect results
@@ -269,8 +282,9 @@ BOOST_AUTO_TEST_CASE(step_extension_material_test) {
   AbortList<EndOfWorld> abortList;
 
   // Set options for propagator
-  DenseStepperPropagatorOptions<ActionList<StepCollector>,
-                                AbortList<EndOfWorld>>
+  DenseStepperPropagatorOptions<
+      ActionList<StepCollector>,
+      AbortList<EndOfWorld>>
       propOpts(tgContext, mfContext);
   propOpts.actionList = aList;
   propOpts.abortList = abortList;
@@ -281,15 +295,18 @@ BOOST_AUTO_TEST_CASE(step_extension_material_test) {
   // Build stepper and propagator
   ConstantBField bField(Vector3D(0., 0., 0.));
   EigenStepper<
-      ConstantBField, VoidIntersectionCorrector,
+      ConstantBField,
+      VoidIntersectionCorrector,
       StepperExtensionList<DefaultExtension, DenseEnvironmentExtension>,
       detail::HighestValidAuctioneer>
       es(bField);
-  Propagator<EigenStepper<ConstantBField, VoidIntersectionCorrector,
-                          StepperExtensionList<DefaultExtension,
-                                               DenseEnvironmentExtension>,
-                          detail::HighestValidAuctioneer>,
-             Navigator>
+  Propagator<
+      EigenStepper<
+          ConstantBField,
+          VoidIntersectionCorrector,
+          StepperExtensionList<DefaultExtension, DenseEnvironmentExtension>,
+          detail::HighestValidAuctioneer>,
+      Navigator>
       prop(es, naviMat);
 
   // Launch and collect results
@@ -319,8 +336,9 @@ BOOST_AUTO_TEST_CASE(step_extension_material_test) {
 
   // Rebuild and check the choice of extension
   // Set options for propagator
-  DenseStepperPropagatorOptions<ActionList<StepCollector>,
-                                AbortList<EndOfWorld>>
+  DenseStepperPropagatorOptions<
+      ActionList<StepCollector>,
+      AbortList<EndOfWorld>>
       propOptsDense(tgContext, mfContext);
   propOptsDense.actionList = aList;
   propOptsDense.abortList = abortList;
@@ -329,12 +347,17 @@ BOOST_AUTO_TEST_CASE(step_extension_material_test) {
   propOptsDense.debug = true;
 
   // Build stepper and propagator
-  EigenStepper<ConstantBField, VoidIntersectionCorrector,
-               StepperExtensionList<DenseEnvironmentExtension>>
+  EigenStepper<
+      ConstantBField,
+      VoidIntersectionCorrector,
+      StepperExtensionList<DenseEnvironmentExtension>>
       esDense(bField);
-  Propagator<EigenStepper<ConstantBField, VoidIntersectionCorrector,
-                          StepperExtensionList<DenseEnvironmentExtension>>,
-             Navigator>
+  Propagator<
+      EigenStepper<
+          ConstantBField,
+          VoidIntersectionCorrector,
+          StepperExtensionList<DenseEnvironmentExtension>>,
+      Navigator>
       propDense(esDense, naviMat);
 
   // Launch and collect results
@@ -358,15 +381,18 @@ BOOST_AUTO_TEST_CASE(step_extension_material_test) {
   // Re-launch the configuration with magnetic field
   bField.setField(0., 1_T, 0.);
   EigenStepper<
-      ConstantBField, VoidIntersectionCorrector,
+      ConstantBField,
+      VoidIntersectionCorrector,
       StepperExtensionList<DefaultExtension, DenseEnvironmentExtension>,
       detail::HighestValidAuctioneer>
       esB(bField);
-  Propagator<EigenStepper<ConstantBField, VoidIntersectionCorrector,
-                          StepperExtensionList<DefaultExtension,
-                                               DenseEnvironmentExtension>,
-                          detail::HighestValidAuctioneer>,
-             Navigator>
+  Propagator<
+      EigenStepper<
+          ConstantBField,
+          VoidIntersectionCorrector,
+          StepperExtensionList<DefaultExtension, DenseEnvironmentExtension>,
+          detail::HighestValidAuctioneer>,
+      Navigator>
       propB(esB, naviMat);
 
   const auto& resultB = propB.propagate(sbtp, propOptsDense).value();
@@ -444,8 +470,9 @@ BOOST_AUTO_TEST_CASE(step_extension_vacmatvac_test) {
   abortList.get<EndOfWorld>().maxX = 3_m;
 
   // Set options for propagator
-  DenseStepperPropagatorOptions<ActionList<StepCollector>,
-                                AbortList<EndOfWorld>>
+  DenseStepperPropagatorOptions<
+      ActionList<StepCollector>,
+      AbortList<EndOfWorld>>
       propOpts(tgContext, mfContext);
   propOpts.actionList = aList;
   propOpts.abortList = abortList;
@@ -455,15 +482,18 @@ BOOST_AUTO_TEST_CASE(step_extension_vacmatvac_test) {
   // Build stepper and propagator
   ConstantBField bField(Vector3D(0., 1_T, 0.));
   EigenStepper<
-      ConstantBField, VoidIntersectionCorrector,
+      ConstantBField,
+      VoidIntersectionCorrector,
       StepperExtensionList<DefaultExtension, DenseEnvironmentExtension>,
       detail::HighestValidAuctioneer>
       es(bField);
-  Propagator<EigenStepper<ConstantBField, VoidIntersectionCorrector,
-                          StepperExtensionList<DefaultExtension,
-                                               DenseEnvironmentExtension>,
-                          detail::HighestValidAuctioneer>,
-             Navigator>
+  Propagator<
+      EigenStepper<
+          ConstantBField,
+          VoidIntersectionCorrector,
+          StepperExtensionList<DefaultExtension, DenseEnvironmentExtension>,
+          detail::HighestValidAuctioneer>,
+      Navigator>
       prop(es, naviDet);
 
   // Launch and collect results
@@ -514,12 +544,17 @@ BOOST_AUTO_TEST_CASE(step_extension_vacmatvac_test) {
   propOptsDef.maxStepSize = 0.5_m;
 
   // Build stepper and propagator
-  EigenStepper<ConstantBField, VoidIntersectionCorrector,
-               StepperExtensionList<DefaultExtension>>
+  EigenStepper<
+      ConstantBField,
+      VoidIntersectionCorrector,
+      StepperExtensionList<DefaultExtension>>
       esDef(bField);
-  Propagator<EigenStepper<ConstantBField, VoidIntersectionCorrector,
-                          StepperExtensionList<DefaultExtension>>,
-             Navigator>
+  Propagator<
+      EigenStepper<
+          ConstantBField,
+          VoidIntersectionCorrector,
+          StepperExtensionList<DefaultExtension>>,
+      Navigator>
       propDef(esDef, naviDet);
 
   // Launch and collect results
@@ -558,8 +593,9 @@ BOOST_AUTO_TEST_CASE(step_extension_vacmatvac_test) {
       std::move(covPtr), startParams, startMom, 1., 0.);
 
   // Set options for propagator
-  DenseStepperPropagatorOptions<ActionList<StepCollector>,
-                                AbortList<EndOfWorld>>
+  DenseStepperPropagatorOptions<
+      ActionList<StepCollector>,
+      AbortList<EndOfWorld>>
       propOptsDense(tgContext, mfContext);
   abortList.get<EndOfWorld>().maxX = 2_m;
   propOptsDense.actionList = aList;
@@ -569,12 +605,17 @@ BOOST_AUTO_TEST_CASE(step_extension_vacmatvac_test) {
   propOptsDense.tolerance = 1e-8;
 
   // Build stepper and propagator
-  EigenStepper<ConstantBField, VoidIntersectionCorrector,
-               StepperExtensionList<DenseEnvironmentExtension>>
+  EigenStepper<
+      ConstantBField,
+      VoidIntersectionCorrector,
+      StepperExtensionList<DenseEnvironmentExtension>>
       esDense(bField);
-  Propagator<EigenStepper<ConstantBField, VoidIntersectionCorrector,
-                          StepperExtensionList<DenseEnvironmentExtension>>,
-             Navigator>
+  Propagator<
+      EigenStepper<
+          ConstantBField,
+          VoidIntersectionCorrector,
+          StepperExtensionList<DenseEnvironmentExtension>>,
+      Navigator>
       propDense(esDense, naviDet);
 
   // Launch and collect results
@@ -586,8 +627,8 @@ BOOST_AUTO_TEST_CASE(step_extension_vacmatvac_test) {
   // Check the exit situation of the second volume
   for (unsigned int i = 0; i < stepResultDense.position.size(); i++) {
     if (2_m - stepResultDense.position[i].x() < 1e-4) {
-      endParams = std::make_pair(stepResultDense.position[i],
-                                 stepResultDense.momentum[i]);
+      endParams = std::make_pair(
+          stepResultDense.position[i], stepResultDense.momentum[i]);
       break;
     }
   }

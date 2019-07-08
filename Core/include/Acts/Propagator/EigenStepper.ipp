@@ -11,10 +11,11 @@ Acts::EigenStepper<B, C, E, A>::EigenStepper(B bField)
     : m_bField(std::move(bField)) {}
 
 template <typename B, typename C, typename E, typename A>
-auto Acts::EigenStepper<B, C, E, A>::boundState(State& state,
-                                                const Surface& surface,
-                                                bool reinitialize) const
-    -> BoundState {
+auto
+Acts::EigenStepper<B, C, E, A>::boundState(
+    State& state,
+    const Surface& surface,
+    bool reinitialize) const -> BoundState {
   // Transport the covariance to here
   std::unique_ptr<const Covariance> covPtr = nullptr;
   if (state.covTransport) {
@@ -22,12 +23,17 @@ auto Acts::EigenStepper<B, C, E, A>::boundState(State& state,
     covPtr = std::make_unique<const Covariance>(state.cov);
   }
   // Create the bound parameters
-  BoundParameters parameters(state.geoContext, std::move(covPtr), state.pos,
-                             state.p * state.dir, state.q, state.t0 + state.dt,
-                             surface.getSharedPtr());
+  BoundParameters parameters(
+      state.geoContext,
+      std::move(covPtr),
+      state.pos,
+      state.p * state.dir,
+      state.q,
+      state.t0 + state.dt,
+      surface.getSharedPtr());
   // Create the bound state
-  BoundState bState{std::move(parameters), state.jacobian,
-                    state.pathAccumulated};
+  BoundState bState{
+      std::move(parameters), state.jacobian, state.pathAccumulated};
   // Reset the jacobian to identity
   if (reinitialize) {
     state.jacobian = Jacobian::Identity();
@@ -37,9 +43,10 @@ auto Acts::EigenStepper<B, C, E, A>::boundState(State& state,
 }
 
 template <typename B, typename C, typename E, typename A>
-auto Acts::EigenStepper<B, C, E, A>::curvilinearState(State& state,
-                                                      bool reinitialize) const
-    -> CurvilinearState {
+auto
+Acts::EigenStepper<B, C, E, A>::curvilinearState(
+    State& state,
+    bool reinitialize) const -> CurvilinearState {
   // Transport the covariance to here
   std::unique_ptr<const Covariance> covPtr = nullptr;
   if (state.covTransport) {
@@ -47,12 +54,15 @@ auto Acts::EigenStepper<B, C, E, A>::curvilinearState(State& state,
     covPtr = std::make_unique<const Covariance>(state.cov);
   }
   // Create the curvilinear parameters
-  CurvilinearParameters parameters(std::move(covPtr), state.pos,
-                                   state.p * state.dir, state.q,
-                                   state.t0 + state.dt);
+  CurvilinearParameters parameters(
+      std::move(covPtr),
+      state.pos,
+      state.p * state.dir,
+      state.q,
+      state.t0 + state.dt);
   // Create the bound state
-  CurvilinearState curvState{std::move(parameters), state.jacobian,
-                             state.pathAccumulated};
+  CurvilinearState curvState{
+      std::move(parameters), state.jacobian, state.pathAccumulated};
   // Reset the jacobian to identity
   if (reinitialize) {
     state.jacobian = Jacobian::Identity();
@@ -62,8 +72,10 @@ auto Acts::EigenStepper<B, C, E, A>::curvilinearState(State& state,
 }
 
 template <typename B, typename C, typename E, typename A>
-void Acts::EigenStepper<B, C, E, A>::update(State& state,
-                                            const BoundParameters& pars) const {
+void
+Acts::EigenStepper<B, C, E, A>::update(
+    State& state,
+    const BoundParameters& pars) const {
   const auto& mom = pars.momentum();
   state.pos = pars.position();
   state.dir = mom.normalized();
@@ -75,10 +87,13 @@ void Acts::EigenStepper<B, C, E, A>::update(State& state,
 }
 
 template <typename B, typename C, typename E, typename A>
-void Acts::EigenStepper<B, C, E, A>::update(State& state,
-                                            const Vector3D& uposition,
-                                            const Vector3D& udirection,
-                                            double up, double time) const {
+void
+Acts::EigenStepper<B, C, E, A>::update(
+    State& state,
+    const Vector3D& uposition,
+    const Vector3D& udirection,
+    double up,
+    double time) const {
   state.pos = uposition;
   state.dir = udirection;
   state.p = up;
@@ -86,8 +101,10 @@ void Acts::EigenStepper<B, C, E, A>::update(State& state,
 }
 
 template <typename B, typename C, typename E, typename A>
-void Acts::EigenStepper<B, C, E, A>::covarianceTransport(
-    State& state, bool reinitialize) const {
+void
+Acts::EigenStepper<B, C, E, A>::covarianceTransport(
+    State& state,
+    bool reinitialize) const {
   // Optimized trigonometry on the propagation direction
   const double x = state.dir(0);  // == cos(phi) * sin(theta)
   const double y = state.dir(1);  // == sin(phi) * sin(theta)
@@ -161,15 +178,18 @@ void Acts::EigenStepper<B, C, E, A>::covarianceTransport(
 }
 
 template <typename B, typename C, typename E, typename A>
-void Acts::EigenStepper<B, C, E, A>::covarianceTransport(
-    State& state, const Surface& surface, bool reinitialize) const {
+void
+Acts::EigenStepper<B, C, E, A>::covarianceTransport(
+    State& state,
+    const Surface& surface,
+    bool reinitialize) const {
   using VectorHelpers::phi;
   using VectorHelpers::theta;
   // Initialize the transport final frame jacobian
   FreeToBoundMatrix jacToLocal = FreeToBoundMatrix::Zero();
   // initalize the jacobian to local, returns the transposed ref frame
-  auto rframeT = surface.initJacobianToLocal(state.geoContext, jacToLocal,
-                                             state.pos, state.dir);
+  auto rframeT = surface.initJacobianToLocal(
+      state.geoContext, jacToLocal, state.pos, state.dir);
   // Update the jacobian with the transport from the steps
   state.jacToGlobal = state.jacTransport * state.jacToGlobal;
   // calculate the form factors for the derivatives
@@ -194,8 +214,8 @@ void Acts::EigenStepper<B, C, E, A>::covarianceTransport(
     BoundVector pars;
     pars << loc[eLOC_0], loc[eLOC_1], phi(state.dir), theta(state.dir),
         state.q / state.p, state.t0 + state.dt;
-    surface.initJacobianToGlobal(state.geoContext, state.jacToGlobal, state.pos,
-                                 state.dir, pars);
+    surface.initJacobianToGlobal(
+        state.geoContext, state.jacToGlobal, state.pos, state.dir, pars);
   }
   // Store The global and bound jacobian (duplication for the moment)
   state.jacobian = jacFull * state.jacobian;
@@ -203,8 +223,8 @@ void Acts::EigenStepper<B, C, E, A>::covarianceTransport(
 
 template <typename B, typename C, typename E, typename A>
 template <typename propagator_state_t>
-Acts::Result<double> Acts::EigenStepper<B, C, E, A>::step(
-    propagator_state_t& state) const {
+Acts::Result<double>
+Acts::EigenStepper<B, C, E, A>::step(propagator_state_t& state) const {
   using namespace Acts::UnitLiterals;
 
   // Runge-Kutta integrator state
@@ -232,14 +252,14 @@ Acts::Result<double> Acts::EigenStepper<B, C, E, A>::step(
     const Vector3D pos1 =
         state.stepping.pos + half_h * state.stepping.dir + h2 * 0.125 * sd.k1;
     sd.B_middle = getField(state.stepping, pos1);
-    if (!state.stepping.extension.k2(state, *this, sd.k2, sd.B_middle, half_h,
-                                     sd.k1)) {
+    if (!state.stepping.extension.k2(
+            state, *this, sd.k2, sd.B_middle, half_h, sd.k1)) {
       return false;
     }
 
     // Third Runge-Kutta point
-    if (!state.stepping.extension.k3(state, *this, sd.k3, sd.B_middle, half_h,
-                                     sd.k2)) {
+    if (!state.stepping.extension.k3(
+            state, *this, sd.k3, sd.B_middle, half_h, sd.k2)) {
       return false;
     }
 
@@ -247,8 +267,8 @@ Acts::Result<double> Acts::EigenStepper<B, C, E, A>::step(
     const Vector3D pos2 =
         state.stepping.pos + h * state.stepping.dir + h2 * 0.5 * sd.k3;
     sd.B_last = getField(state.stepping, pos2);
-    if (!state.stepping.extension.k4(state, *this, sd.k4, sd.B_last, h,
-                                     sd.k3)) {
+    if (!state.stepping.extension.k4(
+            state, *this, sd.k4, sd.B_last, h, sd.k3)) {
       return false;
     }
 
@@ -264,11 +284,13 @@ Acts::Result<double> Acts::EigenStepper<B, C, E, A>::step(
   // Select and adjust the appropriate Runge-Kutta step size as given
   // ATL-SOFT-PUB-2009-001
   while (!tryRungeKuttaStep(state.stepping.stepSize)) {
-    stepSizeScaling =
-        std::min(std::max(0.25, std::pow((state.options.tolerance /
-                                          std::abs(2. * error_estimate)),
-                                         0.25)),
-                 4.);
+    stepSizeScaling = std::min(
+        std::max(
+            0.25,
+            std::pow(
+                (state.options.tolerance / std::abs(2. * error_estimate)),
+                0.25)),
+        4.);
     if (stepSizeScaling == 1.) {
       break;
     }

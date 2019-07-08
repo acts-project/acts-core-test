@@ -44,8 +44,14 @@ class AxisAlignedBoundingBox {
    public:
     explicit NamedType(const T& value) : m_value(value) {}
     explicit NamedType(T&& value) : m_value(std::move(value)) {}
-    T& get() { return m_value; }
-    const T& get() const { return m_value; }
+    T&
+    get() {
+      return m_value;
+    }
+    const T&
+    get() const {
+      return m_value;
+    }
 
    private:
     T m_value;
@@ -105,8 +111,10 @@ class AxisAlignedBoundingBox {
    * @param vmin The minimum vertex.
    * @param vmax The maximum vertex.
    */
-  AxisAlignedBoundingBox(const entity_t* entity, const vertex_type& vmin,
-                         const vertex_type& vmax);
+  AxisAlignedBoundingBox(
+      const entity_t* entity,
+      const vertex_type& vmin,
+      const vertex_type& vmax);
 
   /**
    * Constructor from a center position, and a width and height.
@@ -116,8 +124,10 @@ class AxisAlignedBoundingBox {
    * @note The special type @c size is required to disambiguate this constructor
    * from the other one above. It is a wrapper around a simple @c Vector3D.
    */
-  AxisAlignedBoundingBox(const entity_t* entity, const vertex_type& center,
-                         const Size& size);
+  AxisAlignedBoundingBox(
+      const entity_t* entity,
+      const vertex_type& center,
+      const Size& size);
 
   /**
    * Constructor from a list of child boxes. This box will wrap around all boxes
@@ -288,8 +298,10 @@ class AxisAlignedBoundingBox {
    * @param trf An optional transform to apply first.
    */
   template <size_t D = DIM, std::enable_if_t<D == 3, int> = 0>
-  void draw(IVisualization& helper, std::array<int, 3> color = {120, 120, 120},
-            const transform_type& trf = transform_type::Identity()) const;
+  void draw(
+      IVisualization& helper,
+      std::array<int, 3> color = {120, 120, 120},
+      const transform_type& trf = transform_type::Identity()) const;
 
   /**
    * Draw this bounding box as SVG. This method is only available for the 2D
@@ -304,9 +316,13 @@ class AxisAlignedBoundingBox {
    * @return The outstream given in @p os.
    */
   template <size_t D = DIM, std::enable_if_t<D == 2, int> = 0>
-  std::ostream& svg(std::ostream& os, value_type w, value_type h,
-                    value_type unit = 10, std::string label = "",
-                    std::string fillcolor = "grey") const;
+  std::ostream& svg(
+      std::ostream& os,
+      value_type w,
+      value_type h,
+      value_type unit = 10,
+      std::string label = "",
+      std::string fillcolor = "grey") const;
 
  private:
   template <size_t D = DIM, std::enable_if_t<D == 2, int> = 0>
@@ -342,9 +358,11 @@ class AxisAlignedBoundingBox {
  * @return Pointer to the top most bounding box, containing the entire octree
  */
 template <typename box_t>
-box_t* make_octree(std::vector<std::unique_ptr<box_t>>& store,
-                   const std::vector<box_t*>& prims, size_t max_depth = 1,
-                   typename box_t::value_type envelope1 = 0);
+box_t* make_octree(
+    std::vector<std::unique_ptr<box_t>>& store,
+    const std::vector<box_t*>& prims,
+    size_t max_depth = 1,
+    typename box_t::value_type envelope1 = 0);
 
 /**
  * Overload of the << operator for bounding boxes.
@@ -356,8 +374,9 @@ box_t* make_octree(std::vector<std::unique_ptr<box_t>>& store,
  * @return The given output stream.
  */
 template <typename T, typename U, size_t V>
-std::ostream& operator<<(std::ostream& os,
-                         const AxisAlignedBoundingBox<T, U, V>& box);
+std::ostream& operator<<(
+    std::ostream& os,
+    const AxisAlignedBoundingBox<T, U, V>& box);
 
 }  // namespace Acts
 

@@ -41,8 +41,12 @@ class CutoutCylinderVolumeBounds : public VolumeBounds {
    * @param dz1 The longer halflength of the shape
    * @param dz2 The shorter halflength of the shape
    */
-  CutoutCylinderVolumeBounds(double rmin, double rmed, double rmax, double dz1,
-                             double dz2)
+  CutoutCylinderVolumeBounds(
+      double rmin,
+      double rmed,
+      double rmax,
+      double dz1,
+      double dz2)
       : m_rmin(rmin), m_rmed(rmed), m_rmax(rmax), m_dz1(dz1), m_dz2(dz2) {}
 
   /**
@@ -82,9 +86,10 @@ class CutoutCylinderVolumeBounds : public VolumeBounds {
    * @param entity Entity to associate this bounding box with
    * @return Constructed bounding box
    */
-  Volume::BoundingBox boundingBox(const Transform3D* trf = nullptr,
-                                  const Vector3D& envelope = {0, 0, 0},
-                                  const Volume* entity = nullptr) const final;
+  Volume::BoundingBox boundingBox(
+      const Transform3D* trf = nullptr,
+      const Vector3D& envelope = {0, 0, 0},
+      const Volume* entity = nullptr) const final;
 
   /**
    * Write information about this instance to an outstream
@@ -98,38 +103,54 @@ class CutoutCylinderVolumeBounds : public VolumeBounds {
    * @param helper The visualizatin helper
    * @param transform Optional transformation matrix
    */
-  void draw(IVisualization& helper,
-            const Transform3D& transform = Transform3D::Identity()) const;
+  void draw(
+      IVisualization& helper,
+      const Transform3D& transform = Transform3D::Identity()) const;
 
   /**
    * Return the minimum radius
    * @return The minimum radius
    */
-  double rMin() const { return m_rmin; }
+  double
+  rMin() const {
+    return m_rmin;
+  }
 
   /**
    * Return the medium radius
    * @return The medium radius
    */
-  double rMed() const { return m_rmed; }
+  double
+  rMed() const {
+    return m_rmed;
+  }
 
   /**
    * Return the maximum radius
    * @return The maximum radius
    */
-  double rMax() const { return m_rmax; }
+  double
+  rMax() const {
+    return m_rmax;
+  }
 
   /**
    * Return the longer halflength in z.
    * @return The halflength
    */
-  double dZ1() const { return m_dz1; }
+  double
+  dZ1() const {
+    return m_dz1;
+  }
 
   /**
    * Return the shorter halflength in z.
    * @return The halflength
    */
-  double dZ2() const { return m_dz2; }
+  double
+  dZ2() const {
+    return m_dz2;
+  }
 
  private:
   double m_rmin;

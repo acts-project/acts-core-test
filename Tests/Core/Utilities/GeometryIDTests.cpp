@@ -51,14 +51,14 @@ BOOST_AUTO_TEST_CASE(GeometryID_test) {
     auto mask = msr.first;
     auto range = msr.second;
     /// test range by [0, 1, 2^range-1]
-    std::vector<geo_id_value> range_values = {0, 1,
-                                              (geo_id_value(1) << range) - 1};
+    std::vector<geo_id_value> range_values = {
+        0, 1, (geo_id_value(1) << range) - 1};
     for (auto& idv : range_values) {
       // create the geometry ID
       GeometryID geoID(idv, mask);
       // encode - decode test
-      BOOST_CHECK_EQUAL(idv,
-                        (ACTS_BIT_DECODE(ACTS_BIT_ENCODE(idv, mask), mask)));
+      BOOST_CHECK_EQUAL(
+          idv, (ACTS_BIT_DECODE(ACTS_BIT_ENCODE(idv, mask), mask)));
       // geo id decoding
       BOOST_CHECK_EQUAL(idv, geoID.value(mask));
     }
@@ -87,8 +87,8 @@ BOOST_AUTO_TEST_CASE(FullGeometryID_test) {
   GeometryID compoundID_cconst(volumeID);
   GeometryID compoundID_assign = volumeID;
 
-  std::vector<GeometryID> compoundIDs = {compoundID_dconst, compoundID_cconst,
-                                         compoundID_assign};
+  std::vector<GeometryID> compoundIDs = {
+      compoundID_dconst, compoundID_cconst, compoundID_assign};
 
   /// check the validity after assigning/copying/constructing
   BOOST_CHECK_EQUAL(1lu, compoundID_dconst.value(GeometryID::volume_mask));

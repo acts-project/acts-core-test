@@ -19,12 +19,15 @@
 
 #include "Acts/Surfaces/InfiniteBounds.hpp"
 
-Acts::StrawSurface::StrawSurface(std::shared_ptr<const Transform3D> htrans,
-                                 double radius, double halez)
+Acts::StrawSurface::StrawSurface(
+    std::shared_ptr<const Transform3D> htrans,
+    double radius,
+    double halez)
     : GeometryObject(), LineSurface(std::move(htrans), radius, halez) {}
 
-Acts::StrawSurface::StrawSurface(std::shared_ptr<const Transform3D> htrans,
-                                 std::shared_ptr<const LineBounds> lbounds)
+Acts::StrawSurface::StrawSurface(
+    std::shared_ptr<const Transform3D> htrans,
+    std::shared_ptr<const LineBounds> lbounds)
     : GeometryObject(), LineSurface(std::move(htrans), std::move(lbounds)) {}
 
 Acts::StrawSurface::StrawSurface(
@@ -35,12 +38,14 @@ Acts::StrawSurface::StrawSurface(
 Acts::StrawSurface::StrawSurface(const Acts::StrawSurface& other)
     : GeometryObject(), LineSurface(other) {}
 
-Acts::StrawSurface::StrawSurface(const GeometryContext& gctx,
-                                 const StrawSurface& other,
-                                 const Transform3D& transf)
+Acts::StrawSurface::StrawSurface(
+    const GeometryContext& gctx,
+    const StrawSurface& other,
+    const Transform3D& transf)
     : GeometryObject(), LineSurface(gctx, other, transf) {}
 
-Acts::StrawSurface& Acts::StrawSurface::operator=(const StrawSurface& other) {
+Acts::StrawSurface&
+Acts::StrawSurface::operator=(const StrawSurface& other) {
   if (this != &other) {
     LineSurface::operator=(other);
     m_bounds = other.m_bounds;
@@ -48,18 +53,24 @@ Acts::StrawSurface& Acts::StrawSurface::operator=(const StrawSurface& other) {
   return *this;
 }
 
-std::shared_ptr<Acts::StrawSurface> Acts::StrawSurface::clone(
-    const GeometryContext& gctx, const Transform3D& shift) const {
+std::shared_ptr<Acts::StrawSurface>
+Acts::StrawSurface::clone(const GeometryContext& gctx, const Transform3D& shift)
+    const {
   return std::shared_ptr<StrawSurface>(this->clone_impl(gctx, shift));
 }
 
-Acts::StrawSurface* Acts::StrawSurface::clone_impl(
-    const GeometryContext& gctx, const Transform3D& shift) const {
+Acts::StrawSurface*
+Acts::StrawSurface::clone_impl(
+    const GeometryContext& gctx,
+    const Transform3D& shift) const {
   return new StrawSurface(gctx, *this, shift);
 }
 
-Acts::PolyhedronRepresentation Acts::StrawSurface::polyhedronRepresentation(
-    const GeometryContext& gctx, size_t l0div, size_t /*l1div*/) const {
+Acts::PolyhedronRepresentation
+Acts::StrawSurface::polyhedronRepresentation(
+    const GeometryContext& gctx,
+    size_t l0div,
+    size_t /*l1div*/) const {
   std::vector<Vector3D> vertices;
   std::vector<std::vector<size_t>> faces;
 

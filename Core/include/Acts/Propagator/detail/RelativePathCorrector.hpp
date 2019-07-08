@@ -42,9 +42,10 @@ struct RelativePathCorrector {
   double stepModification = 0.5;
 
   /// Constructor from arguments
-  RelativePathCorrector(const Vector3D& spos = Vector3D(0., 0., 0.),
-                        const Vector3D& sdir = Vector3D(0., 0., 0.),
-                        double spath = 0.)
+  RelativePathCorrector(
+      const Vector3D& spos = Vector3D(0., 0., 0.),
+      const Vector3D& sdir = Vector3D(0., 0., 0.),
+      double spath = 0.)
       : startPos(spos), startDir(sdir), pathLength(spath) {}
 
   /// Boolean() operator - returns false for void modifier
@@ -55,7 +56,8 @@ struct RelativePathCorrector {
   /// @param pos[in,out] the position for the path intersection
   /// @param dir[in,out] the direction for the path intersection
   /// @param path[in,out] path that as a first estimate
-  bool operator()(Vector3D& pos, Vector3D& dir, double& path) const {
+  bool
+  operator()(Vector3D& pos, Vector3D& dir, double& path) const {
     // Approximation with straight line
     if (path * path < straightLineStep * straightLineStep) {
       return false;
@@ -73,7 +75,8 @@ struct RelativePathCorrector {
   }
 
   /// Step size manipulation call
-  bool operator()(ConstrainedStep& step) const {
+  bool
+  operator()(ConstrainedStep& step) const {
     // Don't do anything if you are under accuracy or user control
     auto stepType = step.currentType();
     if (stepType == Cstep::accuracy or stepType == Cstep::user) {

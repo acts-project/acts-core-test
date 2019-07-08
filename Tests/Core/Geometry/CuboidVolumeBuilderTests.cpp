@@ -71,7 +71,8 @@ BOOST_AUTO_TEST_CASE(CuboidVolumeBuilderTest) {
 
     cfg.detElementConstructor =
         [](std::shared_ptr<const Transform3D> trans,
-           std::shared_ptr<const RectangleBounds> bounds, double thickness) {
+           std::shared_ptr<const RectangleBounds> bounds,
+           double thickness) {
           return new DetectorElementStub(trans, bounds, thickness);
         };
     surfaceConfig.push_back(cfg);
@@ -128,9 +129,10 @@ BOOST_AUTO_TEST_CASE(CuboidVolumeBuilderTest) {
   std::shared_ptr<TrackingVolume> trVol =
       cvb.buildVolume(tgContext, volumeConfig);
   BOOST_CHECK_EQUAL(volumeConfig.layers.size(), 4);
-  BOOST_CHECK_EQUAL(trVol->confinedLayers()->arrayObjects().size(),
-                    volumeConfig.layers.size() * 2 +
-                        1);  // #layers = navigation + material layers
+  BOOST_CHECK_EQUAL(
+      trVol->confinedLayers()->arrayObjects().size(),
+      volumeConfig.layers.size() * 2 +
+          1);  // #layers = navigation + material layers
   BOOST_CHECK_EQUAL(trVol->volumeName(), volumeConfig.name);
   BOOST_CHECK_NE(trVol->volumeMaterial(), nullptr);
 
@@ -138,9 +140,10 @@ BOOST_AUTO_TEST_CASE(CuboidVolumeBuilderTest) {
   volumeConfig.layers.clear();
   trVol = cvb.buildVolume(tgContext, volumeConfig);
   BOOST_CHECK_EQUAL(volumeConfig.layers.size(), 4);
-  BOOST_CHECK_EQUAL(trVol->confinedLayers()->arrayObjects().size(),
-                    volumeConfig.layers.size() * 2 +
-                        1);  // #layers = navigation + material layers
+  BOOST_CHECK_EQUAL(
+      trVol->confinedLayers()->arrayObjects().size(),
+      volumeConfig.layers.size() * 2 +
+          1);  // #layers = navigation + material layers
   BOOST_CHECK_EQUAL(trVol->volumeName(), volumeConfig.name);
 
   volumeConfig.layers.clear();

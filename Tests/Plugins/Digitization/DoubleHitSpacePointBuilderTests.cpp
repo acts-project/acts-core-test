@@ -32,8 +32,10 @@ GeometryContext tgContext = GeometryContext();
 /// Unit test for testing the main functions of DoubleHitSpacePointBuilder
 /// 1) A pair of hits gets added and resolved.
 /// 2) A pair of hits gets added and rejected.
-BOOST_DATA_TEST_CASE(DoubleHitsSpacePointBuilder_basic, bdata::xrange(1),
-                     index) {
+BOOST_DATA_TEST_CASE(
+    DoubleHitsSpacePointBuilder_basic,
+    bdata::xrange(1),
+    index) {
   (void)index;
 
   std::cout << "Create first hit" << std::endl;
@@ -108,8 +110,9 @@ BOOST_DATA_TEST_CASE(DoubleHitsSpacePointBuilder_basic, bdata::xrange(1),
   std::cout << "Store both hits" << std::endl;
 
   std::vector<DoubleHitSpacePoint> resultSP;
-  std::vector<std::pair<Acts::PlanarModuleCluster const*,
-                        Acts::PlanarModuleCluster const*>>
+  std::vector<std::pair<
+      Acts::PlanarModuleCluster const*,
+      Acts::PlanarModuleCluster const*>>
       clusterPairs;
   SpacePointBuilder<DoubleHitSpacePoint>::DoubleHitSpacePointConfig dhsp_cfg;
 

@@ -93,8 +93,11 @@ struct MaterialInteractor {
   /// @param stepper The stepper in use
   /// @param result is the mutable result state object
   template <typename propagator_state_t, typename stepper_t>
-  void operator()(propagator_state_t& state, const stepper_t& stepper,
-                  result_type& result) const {
+  void
+  operator()(
+      propagator_state_t& state,
+      const stepper_t& stepper,
+      result_type& result) const {
     using namespace Acts::UnitLiterals;
 
     // If we are on target, everything should have been done
@@ -120,8 +123,8 @@ struct MaterialInteractor {
         });
         mStage = postUpdate;
         // Or is it the target surface ?
-      } else if (state.navigation.targetSurface ==
-                 state.navigation.currentSurface) {
+      } else if (
+          state.navigation.targetSurface == state.navigation.currentSurface) {
         debugLog(state, [&] {
           return std::string("Update on target surface: pre-update mode");
         });
@@ -158,7 +161,8 @@ struct MaterialInteractor {
 
         // Calculate the path correction
         double pCorrection = state.navigation.currentSurface->pathCorrection(
-            state.geoContext, stepper.position(state.stepping),
+            state.geoContext,
+            stepper.position(state.stepping),
             stepper.direction(state.stepping));
 
         // Scale the material properties
@@ -231,7 +235,8 @@ struct MaterialInteractor {
             mInteraction.deltaP = p - newP;
             // Update the state/momentum
             stepper.update(
-                state.stepping, stepper.position(state.stepping),
+                state.stepping,
+                stepper.position(state.stepping),
                 stepper.direction(state.stepping),
                 std::copysign(newP, stepper.momentum(state.stepping)),
                 stepper.time(state.stepping));
@@ -281,7 +286,8 @@ struct MaterialInteractor {
   /// Pure observer interface
   /// This does not apply to the surface collector
   template <typename propagator_state_t>
-  void operator()(propagator_state_t& /*state*/) const {}
+  void
+  operator()(propagator_state_t& /*state*/) const {}
 
  private:
   /// The private propagation debug logging
@@ -296,8 +302,10 @@ struct MaterialInteractor {
   /// length
   /// @param logAction is a callable function that returns a stremable object
   template <typename propagator_state_t>
-  void debugLog(propagator_state_t& state,
-                const std::function<std::string()>& logAction) const {
+  void
+  debugLog(
+      propagator_state_t& state,
+      const std::function<std::string()>& logAction) const {
     if (state.options.debug) {
       std::stringstream dstream;
       dstream << "   " << std::setw(state.options.debugPfxWidth);

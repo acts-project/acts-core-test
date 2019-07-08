@@ -76,7 +76,8 @@ class VolumeBounds {
   /// @param entity Entity to associate this bounding box with
   /// @return Constructed bounding box
   virtual Volume::BoundingBox boundingBox(
-      const Transform3D* trf = nullptr, const Vector3D& envelope = {0, 0, 0},
+      const Transform3D* trf = nullptr,
+      const Vector3D& envelope = {0, 0, 0},
       const Volume* entity = nullptr) const = 0;
 
   /// Binning offset - overloaded for some R-binning types
@@ -105,7 +106,8 @@ inline Vector3D VolumeBounds::binningOffset(
   return Vector3D(0., 0., 0.);
 }
 
-inline double VolumeBounds::binningBorder(BinningValue /*bValue*/) const {
+inline double
+VolumeBounds::binningBorder(BinningValue /*bValue*/) const {
   return 0.;
 }
 

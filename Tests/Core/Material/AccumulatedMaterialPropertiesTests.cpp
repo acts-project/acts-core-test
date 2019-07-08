@@ -81,16 +81,18 @@ BOOST_AUTO_TEST_CASE(AccumulatedMaterialProperties_trackaverage_test) {
   // A/Z should be 0.5 roughly for both
   CHECK_CLOSE_REL(mpAbc.averageZ() / mpAbc.averageA(), 0.5, 0.0001);
   // Thickness in X0 is additive
-  CHECK_CLOSE_REL(mpAbc.thicknessInX0(),
-                  a.thicknessInX0() + b.thicknessInX0() + c.thicknessInX0(),
-                  0.0001);
+  CHECK_CLOSE_REL(
+      mpAbc.thicknessInX0(),
+      a.thicknessInX0() + b.thicknessInX0() + c.thicknessInX0(),
+      0.0001);
   // Consistency check : X0
-  CHECK_CLOSE_REL(mpAbc.thickness() / mpAbc.averageX0(), mpAbc.thicknessInX0(),
-                  0.0001);
+  CHECK_CLOSE_REL(
+      mpAbc.thickness() / mpAbc.averageX0(), mpAbc.thicknessInX0(), 0.0001);
   // Consistency check : L0
-  CHECK_CLOSE_REL(mpAbc.thicknessInL0(),
-                  a.thicknessInL0() + b.thicknessInL0() + c.thicknessInL0(),
-                  0.0001);
+  CHECK_CLOSE_REL(
+      mpAbc.thicknessInL0(),
+      a.thicknessInL0() + b.thicknessInL0() + c.thicknessInL0(),
+      0.0001);
   // The density scales with the thickness then
   double rhoTmapped = mpAbc.averageRho() * mpAbc.thickness();
   double rhoTadded =
@@ -134,8 +136,10 @@ BOOST_AUTO_TEST_CASE(AccumulatedMaterialProperties_totalaverage_test) {
 
   BOOST_CHECK_EQUAL(halfA.thicknessInX0(), matAV.thicknessInX0());
   BOOST_CHECK_EQUAL(halfA.thicknessInL0(), matAV.thicknessInL0());
-  CHECK_CLOSE_REL(halfA.averageRho() * halfA.thickness(),
-                  matAV.averageRho() * matAV.thickness(), 0.0001);
+  CHECK_CLOSE_REL(
+      halfA.averageRho() * halfA.thickness(),
+      matAV.averageRho() * matAV.thickness(),
+      0.0001);
   BOOST_CHECK_EQUAL(2, averageAV.second);
 
   // Test:
@@ -153,8 +157,10 @@ BOOST_AUTO_TEST_CASE(AccumulatedMaterialProperties_totalaverage_test) {
 
   BOOST_CHECK_EQUAL(doubleA.thicknessInX0(), matAA3.thicknessInX0());
   BOOST_CHECK_EQUAL(doubleA.thicknessInL0(), matAA3.thicknessInL0());
-  CHECK_CLOSE_REL(doubleA.averageRho() * doubleA.thickness(),
-                  matAA3.averageRho() * matAA3.thickness(), 0.0001);
+  CHECK_CLOSE_REL(
+      doubleA.averageRho() * doubleA.thickness(),
+      matAA3.averageRho() * matAA3.thickness(),
+      0.0001);
   BOOST_CHECK_EQUAL(2, averageAA3.second);
 
   /// Test:

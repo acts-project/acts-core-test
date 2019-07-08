@@ -44,9 +44,14 @@ struct IonisationLoss {
   /// ionization along a given path length or its mode. The second entry is
   /// the sigma of the distribution.
   template <typename material_t>
-  std::pair<double, double> dEds(double m, double lbeta, double lgamma,
-                                 const material_t& mat, double path = 1.,
-                                 bool mean = true) const {
+  std::pair<double, double>
+  dEds(
+      double m,
+      double lbeta,
+      double lgamma,
+      const material_t& mat,
+      double path = 1.,
+      bool mean = true) const {
     // the return value
     double dE = 0.;
 
@@ -119,8 +124,13 @@ struct IonisationLoss {
   /// @param [in] mean     Toggle between mean (true) and mode (false)
   /// @return The evaluated derivative
   template <typename material_t>
-  double dqop(const double energy, const double qOverP, const double mass,
-              const material_t& material, const bool mean = true) const {
+  double
+  dqop(
+      const double energy,
+      const double qOverP,
+      const double mass,
+      const material_t& material,
+      const bool mean = true) const {
     // Fast exit if material is invalid
     if (material.Z() == 0 || material.zOverAtimesRho() == 0) {
       return 0.;
@@ -150,8 +160,8 @@ struct IonisationLoss {
                             (1. + 2. * gamma * me / mass + me2 / m2);
       const double lnCoreDerivative =
           -4. * me2 / (m4 * I2) *
-          std::pow(qop4 + 2. * gamma * qop4 * me / mass + qop4 * me2 / m2,
-                   -2.) *
+          std::pow(
+              qop4 + 2. * gamma * qop4 * me / mass + qop4 * me2 / m2, -2.) *
           (4. * qop3 + 8. * me * qop3 * gamma / mass -
            2. * me * qOverP / (m2 * mass * gamma) + 4. * qop3 * me2 / m2);
 
@@ -176,8 +186,9 @@ struct IonisationLoss {
     // pre-factor
     if (gamma > 10.) {
       const double delta =
-          2. * std::log(constants::eplasma *
-                        std::sqrt(1000. * material.zOverAtimesRho()) / I) +
+          2. * std::log(
+                   constants::eplasma *
+                   std::sqrt(1000. * material.zOverAtimesRho()) / I) +
           2. * std::log(beta * gamma) - 1.;
       if (mean) {
         const double deltaDerivative =
@@ -205,8 +216,9 @@ struct HighlandScattering {
   /// @param p is the momentum
   /// @param lbeta is the Lorentz beta parameter
   /// @param dInX0 is the passed thickness expressed in units of X0
-  double operator()(double p, double lbeta, double dInX0,
-                    bool electron = false) const {
+  double
+  operator()(double p, double lbeta, double dInX0, bool electron = false)
+      const {
     if (dInX0 == 0. || p == 0. || lbeta == 0.) {
       return 0.;
     }
@@ -250,8 +262,9 @@ struct RadiationLoss {
   /// @param [in] path   Path length of the particle through the material
   /// @return Radiation energy loss
   template <typename material_t>
-  double dEds(double E, double m, const material_t& mat, int pdg,
-              double path = 1.) const {
+  double
+  dEds(double E, double m, const material_t& mat, int pdg, double path = 1.)
+      const {
     using namespace Acts::UnitLiterals;
 
     // Easy exit
@@ -288,8 +301,13 @@ struct RadiationLoss {
   /// @param [in] pdg      PDG code of the particle
   /// @return The evaluated derivative
   template <typename material_t>
-  double dqop(const double mass, const material_t& material, const double qop,
-              const double energy, const int pdg) const {
+  double
+  dqop(
+      const double mass,
+      const material_t& material,
+      const double qop,
+      const double energy,
+      const int pdg) const {
     using namespace Acts::UnitLiterals;
 
     // Fast exit if material is invalid

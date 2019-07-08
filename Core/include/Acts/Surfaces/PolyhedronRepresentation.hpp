@@ -28,8 +28,9 @@ struct PolyhedronRepresentation {
   /// @param verticesIn The 3D global vertices that make up the object
   /// @param facesIn List of lists of indices for faces.
   /// @note This creates copies of the input vectors
-  PolyhedronRepresentation(const std::vector<Vector3D>& verticesIn,
-                           const std::vector<std::vector<size_t>>& facesIn)
+  PolyhedronRepresentation(
+      const std::vector<Vector3D>& verticesIn,
+      const std::vector<std::vector<size_t>>& facesIn)
       : vertices(verticesIn), faces(facesIn) {}
 
   /// list of 3D vertices as vectors
@@ -47,7 +48,8 @@ struct PolyhedronRepresentation {
   std::string objString(size_t vtxOffset = 0) const;
 
   template <typename helper_t>
-  void draw(helper_t& helper) const {
+  void
+  draw(helper_t& helper) const {
     for (const auto& face : faces) {
       std::vector<Vector3D> face_vtx;
       for (size_t i : face) {

@@ -46,15 +46,21 @@ class CylinderLayer : public CylinderSurface, public Layer {
   /// @todo ApproachDescriptor to unique_ptr
   ///
   /// @return The return object is a shared poiter to the layer.
-  static MutableLayerPtr create(
+  static MutableLayerPtr
+  create(
       const std::shared_ptr<const Transform3D>& transform,
       const std::shared_ptr<const CylinderBounds>& cbounds,
       std::unique_ptr<SurfaceArray> surfaceArray = nullptr,
-      double thickness = 0., std::unique_ptr<ApproachDescriptor> ad = nullptr,
+      double thickness = 0.,
+      std::unique_ptr<ApproachDescriptor> ad = nullptr,
       LayerType laytyp = passive) {
-    return MutableLayerPtr(new CylinderLayer(transform, cbounds,
-                                             std::move(surfaceArray), thickness,
-                                             std::move(ad), laytyp));
+    return MutableLayerPtr(new CylinderLayer(
+        transform,
+        cbounds,
+        std::move(surfaceArray),
+        thickness,
+        std::move(ad),
+        laytyp));
   }
 
   /// Copy constructor - deleted
@@ -92,12 +98,13 @@ class CylinderLayer : public CylinderSurface, public Layer {
   /// @todo change ApproachDescriptor to unique_ptr
   ///
   /// @return The return object is a shared poiter to the layer.
-  CylinderLayer(const std::shared_ptr<const Transform3D>& transform,
-                const std::shared_ptr<const CylinderBounds>& cBounds,
-                std::unique_ptr<SurfaceArray> surfaceArray = nullptr,
-                double thickness = 0.,
-                std::unique_ptr<ApproachDescriptor> ades = nullptr,
-                LayerType laytyp = passive);
+  CylinderLayer(
+      const std::shared_ptr<const Transform3D>& transform,
+      const std::shared_ptr<const CylinderBounds>& cBounds,
+      std::unique_ptr<SurfaceArray> surfaceArray = nullptr,
+      double thickness = 0.,
+      std::unique_ptr<ApproachDescriptor> ades = nullptr,
+      LayerType laytyp = passive);
 
   /// Private copy constructor with shift, called by create(args*)
   ///

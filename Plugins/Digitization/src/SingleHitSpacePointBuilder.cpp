@@ -8,7 +8,8 @@
 
 #include "Acts/Plugins/Digitization/SingleHitSpacePointBuilder.hpp"
 
-Acts::Vector2D Acts::SpacePointBuilder<Acts::SingleHitSpacePoint>::localCoords(
+Acts::Vector2D
+Acts::SpacePointBuilder<Acts::SingleHitSpacePoint>::localCoords(
     const PlanarModuleCluster& cluster) const {
   // Local position information
   auto par = cluster.parameters();
@@ -16,8 +17,10 @@ Acts::Vector2D Acts::SpacePointBuilder<Acts::SingleHitSpacePoint>::localCoords(
   return local;
 }
 
-Acts::Vector3D Acts::SpacePointBuilder<Acts::SingleHitSpacePoint>::globalCoords(
-    const GeometryContext& gctx, const PlanarModuleCluster& cluster) const {
+Acts::Vector3D
+Acts::SpacePointBuilder<Acts::SingleHitSpacePoint>::globalCoords(
+    const GeometryContext& gctx,
+    const PlanarModuleCluster& cluster) const {
   // Receive corresponding surface
   auto& clusterSurface = cluster.referenceSurface();
 
@@ -28,7 +31,8 @@ Acts::Vector3D Acts::SpacePointBuilder<Acts::SingleHitSpacePoint>::globalCoords(
   return pos;
 }
 
-void Acts::SpacePointBuilder<Acts::SingleHitSpacePoint>::calculateSpacePoints(
+void
+Acts::SpacePointBuilder<Acts::SingleHitSpacePoint>::calculateSpacePoints(
     const GeometryContext& gctx,
     const std::vector<const Acts::PlanarModuleCluster*>& clusters,
     std::vector<Acts::SingleHitSpacePoint>& spacePointStorage) const {

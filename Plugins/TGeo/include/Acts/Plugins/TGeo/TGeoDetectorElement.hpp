@@ -70,9 +70,12 @@ class TGeoDetectorElement : public IdentifiedDetectorElement {
   /// @param digitizationModule Shared pointer to the geometric digitization
   /// description
   TGeoDetectorElement(
-      const Identifier& identifier, TGeoNode* tGeoDetElement,
-      const TGeoMatrix* mGlobal = nullptr, const std::string& axes = "XYZ",
-      double scalor = 1., bool isDisc = false,
+      const Identifier& identifier,
+      TGeoNode* tGeoDetElement,
+      const TGeoMatrix* mGlobal = nullptr,
+      const std::string& axes = "XYZ",
+      double scalor = 1.,
+      bool isDisc = false,
       std::shared_ptr<const Acts::ISurfaceMaterial> material = nullptr,
       std::shared_ptr<const Acts::DigitizationModule> digitizationModule =
           nullptr);
@@ -114,9 +117,12 @@ class TGeoDetectorElement : public IdentifiedDetectorElement {
   /// @param digitizationModule Shared pointer to the geometric digitization
   /// description
   TGeoDetectorElement(
-      const Identifier& identifier, const TGeoMatrix& transform,
-      TGeoNode* tGeoDetElement, const std::string& axes = "XYZ",
-      double scalor = 1., bool isDisc = false,
+      const Identifier& identifier,
+      const TGeoMatrix& transform,
+      TGeoNode* tGeoDetElement,
+      const std::string& axes = "XYZ",
+      double scalor = 1.,
+      bool isDisc = false,
       std::shared_ptr<const Acts::ISurfaceMaterial> material = nullptr,
       std::shared_ptr<const Acts::DigitizationModule> digitizationModule =
           nullptr);
@@ -163,20 +169,23 @@ class TGeoDetectorElement : public IdentifiedDetectorElement {
   std::shared_ptr<const Acts::DigitizationModule> m_digitizationModule{nullptr};
 };
 
-inline Identifier TGeoDetectorElement::identifier() const {
+inline Identifier
+TGeoDetectorElement::identifier() const {
   return m_identifier;
 }
 
-inline const Transform3D& TGeoDetectorElement::transform(
-    const GeometryContext& /*gctx*/) const {
+inline const Transform3D&
+TGeoDetectorElement::transform(const GeometryContext& /*gctx*/) const {
   return (*m_transform);
 }
 
-inline const Surface& TGeoDetectorElement::surface() const {
+inline const Surface&
+TGeoDetectorElement::surface() const {
   return (*m_surface);
 }
 
-inline double TGeoDetectorElement::thickness() const {
+inline double
+TGeoDetectorElement::thickness() const {
   return m_thickness;
 }
 

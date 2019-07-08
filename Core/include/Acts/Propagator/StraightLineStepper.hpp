@@ -65,10 +65,12 @@ class StraightLineStepper {
     /// @param [in] ndir is the navigation direction
     /// @param [in] ssize is the (absolute) maximum step size
     template <typename parameters_t>
-    explicit State(std::reference_wrapper<const GeometryContext> gctx,
-                   std::reference_wrapper<const MagneticFieldContext> /*mctx*/,
-                   const parameters_t& par, NavigationDirection ndir = forward,
-                   double ssize = std::numeric_limits<double>::max())
+    explicit State(
+        std::reference_wrapper<const GeometryContext> gctx,
+        std::reference_wrapper<const MagneticFieldContext> /*mctx*/,
+        const parameters_t& par,
+        NavigationDirection ndir = forward,
+        double ssize = std::numeric_limits<double>::max())
         : pos(par.position()),
           dir(par.momentum().normalized()),
           p(par.momentum().norm()),
@@ -83,8 +85,8 @@ class StraightLineStepper {
         // set the covariance transport flag to true and copy
         covTransport = true;
         cov = BoundSymMatrix(*par.covariance());
-        surface.initJacobianToGlobal(gctx, jacToGlobal, pos, dir,
-                                     par.parameters());
+        surface.initJacobianToGlobal(
+            gctx, jacToGlobal, pos, dir, par.parameters());
       }
     }
 
@@ -158,25 +160,41 @@ class StraightLineStepper {
   /// @param [in,out] state is the propagation state associated with the track
   ///                 the magnetic field cell is used (and potentially updated)
   /// @param [in] pos is the field position
-  Vector3D getField(State& /*state*/, const Vector3D& /*pos*/) const {
+  Vector3D
+  getField(State& /*state*/, const Vector3D& /*pos*/) const {
     // get the field from the cell
     return Vector3D(0., 0., 0.);
   }
 
   /// Global particle position accessor
-  Vector3D position(const State& state) const { return state.pos; }
+  Vector3D
+  position(const State& state) const {
+    return state.pos;
+  }
 
   /// Momentum direction accessor
-  Vector3D direction(const State& state) const { return state.dir; }
+  Vector3D
+  direction(const State& state) const {
+    return state.dir;
+  }
 
   /// Momentum accessor
-  double momentum(const State& state) const { return state.p; }
+  double
+  momentum(const State& state) const {
+    return state.p;
+  }
 
   /// Charge access
-  double charge(const State& state) const { return state.q; }
+  double
+  charge(const State& state) const {
+    return state.q;
+  }
 
   /// Time access
-  double time(const State& state) const { return state.t0 + state.dt; }
+  double
+  time(const State& state) const {
+    return state.t0 + state.dt;
+  }
 
   /// Tests if the state reached a surface
   ///
@@ -184,9 +202,10 @@ class StraightLineStepper {
   /// @param [in] surface Surface that is tested
   ///
   /// @return Boolean statement if surface is reached by state
-  bool surfaceReached(const State& state, const Surface* surface) const {
-    return surface->isOnSurface(state.geoContext, position(state),
-                                direction(state), true);
+  bool
+  surfaceReached(const State& state, const Surface* surface) const {
+    return surface->isOnSurface(
+        state.geoContext, position(state), direction(state), true);
   }
 
   /// Create and return the bound state at the current position
@@ -203,8 +222,8 @@ class StraightLineStepper {
   ///   - the parameters at the surface
   ///   - the stepwise jacobian towards it (from last bound)
   ///   - and the path length (from start - for ordering)
-  BoundState boundState(State& state, const Surface& surface,
-                        bool reinitialize) const {
+  BoundState
+  boundState(State& state, const Surface& surface, bool reinitialize) const {
     // Transport the covariance to here
     std::unique_ptr<const Covariance> covPtr = nullptr;
     if (state.covTransport) {
@@ -212,12 +231,17 @@ class StraightLineStepper {
       covPtr = std::make_unique<const Covariance>(state.cov);
     }
     // Create the bound parameters
-    BoundParameters parameters(state.geoContext, std::move(covPtr), state.pos,
-                               state.p * state.dir, state.q,
-                               state.t0 + state.dt, surface.getSharedPtr());
+    BoundParameters parameters(
+        state.geoContext,
+        std::move(covPtr),
+        state.pos,
+        state.p * state.dir,
+        state.q,
+        state.t0 + state.dt,
+        surface.getSharedPtr());
     // Create the bound state
-    BoundState bState{std::move(parameters), state.jacobian,
-                      state.pathAccumulated};
+    BoundState bState{
+        std::move(parameters), state.jacobian, state.pathAccumulated};
     // Reset the jacobian to identity
     if (reinitialize) {
       state.jacobian = Jacobian::Identity();
@@ -238,7 +262,8 @@ class StraightLineStepper {
   ///   - the curvilinear parameters at given position
   ///   - the stepweise jacobian towards it (from last bound)
   ///   - and the path length (from start - for ordering)
-  CurvilinearState curvilinearState(State& state, bool reinitialize) const {
+  CurvilinearState
+  curvilinearState(State& state, bool reinitialize) const {
     // Transport the covariance to here
     std::unique_ptr<const Covariance> covPtr = nullptr;
     if (state.covTransport) {
@@ -246,12 +271,15 @@ class StraightLineStepper {
       covPtr = std::make_unique<const Covariance>(state.cov);
     }
     // Create the curvilinear parameters
-    CurvilinearParameters parameters(std::move(covPtr), state.pos,
-                                     state.p * state.dir, state.q,
-                                     state.t0 + state.dt);
+    CurvilinearParameters parameters(
+        std::move(covPtr),
+        state.pos,
+        state.p * state.dir,
+        state.q,
+        state.t0 + state.dt);
     // Create the bound state
-    CurvilinearState curvState{std::move(parameters), state.jacobian,
-                               state.pathAccumulated};
+    CurvilinearState curvState{
+        std::move(parameters), state.jacobian, state.pathAccumulated};
     // Reset the jacobian to identity
     if (reinitialize) {
       state.jacobian = Jacobian::Identity();
@@ -264,7 +292,8 @@ class StraightLineStepper {
   ///
   /// @param [in,out] state State object that will be updated
   /// @param [in] pars Parameters that will be written into @p state
-  void update(State& state, const BoundParameters& pars) const {
+  void
+  update(State& state, const BoundParameters& pars) const {
     const auto& mom = pars.momentum();
     state.pos = pars.position();
     state.dir = mom.normalized();
@@ -283,8 +312,13 @@ class StraightLineStepper {
   /// @param [in] udirection the updated direction
   /// @param [in] up the updated momentum value
   /// @param [in] time the updated time value
-  void update(State& state, const Vector3D& uposition,
-              const Vector3D& udirection, double up, double time) const {
+  void
+  update(
+      State& state,
+      const Vector3D& uposition,
+      const Vector3D& udirection,
+      double up,
+      double time) const {
     state.pos = uposition;
     state.dir = udirection;
     state.p = up;
@@ -292,7 +326,8 @@ class StraightLineStepper {
   }
 
   /// Return a corrector
-  VoidIntersectionCorrector corrector(State& /*state*/) const {
+  VoidIntersectionCorrector
+  corrector(State& /*state*/) const {
     return VoidIntersectionCorrector();
   }
 
@@ -304,7 +339,8 @@ class StraightLineStepper {
   /// @param [in] reinitialize is a flag to steer whether the
   ///        state should be reinitialized at the new
   ///        position
-  void covarianceTransport(State& state, bool reinitialize = false) const {
+  void
+  covarianceTransport(State& state, bool reinitialize = false) const {
     // Optimized trigonometry on the propagation direction
     const double x = state.dir(0);  // == cos(phi) * sin(theta)
     const double y = state.dir(1);  // == sin(phi) * sin(theta)
@@ -391,15 +427,18 @@ class StraightLineStepper {
   ///        position
   /// @note no check is done if the position is actually on the surface
   ///
-  void covarianceTransport(State& state, const Surface& surface,
-                           bool reinitialize = false) const {
+  void
+  covarianceTransport(
+      State& state,
+      const Surface& surface,
+      bool reinitialize = false) const {
     using VectorHelpers::phi;
     using VectorHelpers::theta;
     // Initialize the transport final frame jacobian
     FreeToBoundMatrix jacToLocal = FreeToBoundMatrix::Zero();
     // initalize the jacobian to local, returns the transposed ref frame
-    auto rframeT = surface.initJacobianToLocal(state.geoContext, jacToLocal,
-                                               state.pos, state.dir);
+    auto rframeT = surface.initJacobianToLocal(
+        state.geoContext, jacToLocal, state.pos, state.dir);
     // Update the jacobian with the transport from the steps
     state.jacToGlobal = state.jacTransport * state.jacToGlobal;
     // calculate the form factors for the derivatives
@@ -424,8 +463,8 @@ class StraightLineStepper {
       BoundVector pars;
       pars << loc[eLOC_0], loc[eLOC_1], phi(state.dir), theta(state.dir),
           state.q / state.p, state.t0 + state.dt;
-      surface.initJacobianToGlobal(state.geoContext, state.jacToGlobal,
-                                   state.pos, state.dir, pars);
+      surface.initJacobianToGlobal(
+          state.geoContext, state.jacToGlobal, state.pos, state.dir, pars);
     }
     // Store The global and bound jacobian (duplication for the moment)
     state.jacobian = jacFull * state.jacobian;
@@ -442,7 +481,8 @@ class StraightLineStepper {
   ///
   /// @return the step size taken
   template <typename propagator_state_t>
-  Result<double> step(propagator_state_t& state) const {
+  Result<double>
+  step(propagator_state_t& state) const {
     // use the adjusted step size
     const auto h = state.stepping.stepSize;
     // time propagates along distance as 1/b = sqrt(1 + m²/p²)

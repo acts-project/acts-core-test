@@ -19,12 +19,13 @@
 #include "Acts/Utilities/Definitions.hpp"
 #include "Acts/Utilities/Helpers.hpp"
 
-Acts::PlaneLayer::PlaneLayer(std::shared_ptr<const Transform3D> transform,
-                             std::shared_ptr<const PlanarBounds>& pbounds,
-                             std::unique_ptr<SurfaceArray> surfaceArray,
-                             double thickness,
-                             std::unique_ptr<ApproachDescriptor> ades,
-                             LayerType laytyp)
+Acts::PlaneLayer::PlaneLayer(
+    std::shared_ptr<const Transform3D> transform,
+    std::shared_ptr<const PlanarBounds>& pbounds,
+    std::unique_ptr<SurfaceArray> surfaceArray,
+    double thickness,
+    std::unique_ptr<ApproachDescriptor> ades,
+    LayerType laytyp)
     : PlaneSurface(std::move(transform), pbounds),
       Layer(std::move(surfaceArray), thickness, std::move(ades), laytyp) {
   // @todo create representing volume
@@ -40,15 +41,18 @@ Acts::PlaneLayer::PlaneLayer(std::shared_ptr<const Transform3D> transform,
   }
 }
 
-const Acts::PlaneSurface& Acts::PlaneLayer::surfaceRepresentation() const {
+const Acts::PlaneSurface&
+Acts::PlaneLayer::surfaceRepresentation() const {
   return (*this);
 }
 
-Acts::PlaneSurface& Acts::PlaneLayer::surfaceRepresentation() {
+Acts::PlaneSurface&
+Acts::PlaneLayer::surfaceRepresentation() {
   return (*this);
 }
 
-void Acts::PlaneLayer::buildApproachDescriptor() {
+void
+Acts::PlaneLayer::buildApproachDescriptor() {
   // delete it
   m_approachDescriptor.reset(nullptr);
   // delete the surfaces

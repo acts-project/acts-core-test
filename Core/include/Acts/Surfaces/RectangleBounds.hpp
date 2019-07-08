@@ -98,23 +98,28 @@ class RectangleBounds : public PlanarBounds {
   Vector2D m_max;
 };
 
-inline double RectangleBounds::halflengthX() const {
+inline double
+RectangleBounds::halflengthX() const {
   return std::abs(m_max.x() - m_min.x()) * 0.5;
 }
 
-inline double RectangleBounds::halflengthY() const {
+inline double
+RectangleBounds::halflengthY() const {
   return std::abs(m_max.y() - m_min.y()) * 0.5;
 }
 
-inline SurfaceBounds::BoundsType RectangleBounds::type() const {
+inline SurfaceBounds::BoundsType
+RectangleBounds::type() const {
   return SurfaceBounds::Rectangle;
 }
 
-inline const Vector2D& RectangleBounds::min() const {
+inline const Vector2D&
+RectangleBounds::min() const {
   return m_min;
 }
 
-inline const Vector2D& RectangleBounds::max() const {
+inline const Vector2D&
+RectangleBounds::max() const {
   return m_max;
 }
 

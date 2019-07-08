@@ -34,8 +34,9 @@ BOOST_AUTO_TEST_CASE(TrapezoidBoundsConstruction) {
   // TrapezoidBounds defaultConstructedTrapezoidBounds;
   //
   /// Test construction with defining half lengths
-  BOOST_CHECK_EQUAL(TrapezoidBounds(minHalfX, maxHalfX, halfY).type(),
-                    SurfaceBounds::Trapezoid);
+  BOOST_CHECK_EQUAL(
+      TrapezoidBounds(minHalfX, maxHalfX, halfY).type(),
+      SurfaceBounds::Trapezoid);
   /// Copy constructor
   TrapezoidBounds original(minHalfX, maxHalfX, halfY);
   TrapezoidBounds copied(original);
@@ -68,27 +69,32 @@ BOOST_AUTO_TEST_CASE(TrapezoidBoundsProperties, *utf::expected_failures(3)) {
   Vector2D origin(0., 0.);
   Vector2D outside(30., 0.);
   Vector2D inRectangle(2., 0.5);
-  CHECK_CLOSE_REL(trapezoidBoundsObject.distanceToBoundary(origin), -2.,
-                  1e-6);  // makes sense
-  CHECK_CLOSE_REL(trapezoidBoundsObject.distanceToBoundary(outside),
-                  std::hypot(2., 24.),
-                  1e-6);  // ok
+  CHECK_CLOSE_REL(
+      trapezoidBoundsObject.distanceToBoundary(origin),
+      -2.,
+      1e-6);  // makes sense
+  CHECK_CLOSE_REL(
+      trapezoidBoundsObject.distanceToBoundary(outside),
+      std::hypot(2., 24.),
+      1e-6);  // ok
   //
   /// Test vertices
   std::vector<Vector2D> expectedVertices{
       {1., -2.}, {6., 2.}, {-6., 2.}, {-1., -2.}};
   const auto& actualVertices = trapezoidBoundsObject.vertices();
-  BOOST_CHECK_EQUAL_COLLECTIONS(actualVertices.cbegin(), actualVertices.cend(),
-                                expectedVertices.cbegin(),
-                                expectedVertices.cend());
+  BOOST_CHECK_EQUAL_COLLECTIONS(
+      actualVertices.cbegin(),
+      actualVertices.cend(),
+      expectedVertices.cbegin(),
+      expectedVertices.cend());
   /**
   for (auto i: trapezoidBoundsObject.vertices()){
     std::cout<<i[0]<<", "<<i[1]<<std::endl;
   }**/
   //
   /// Test boundingBox
-  BOOST_CHECK_EQUAL(trapezoidBoundsObject.boundingBox(),
-                    RectangleBounds(6., 2.));
+  BOOST_CHECK_EQUAL(
+      trapezoidBoundsObject.boundingBox(), RectangleBounds(6., 2.));
   //
 
   //

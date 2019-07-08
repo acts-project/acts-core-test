@@ -106,23 +106,28 @@ class DiamondBounds : public PlanarBounds {
   RectangleBounds m_boundingBox;  ///< internal bounding box cache
 };
 
-inline double DiamondBounds::x1() const {
+inline double
+DiamondBounds::x1() const {
   return m_x1;
 }
 
-inline double DiamondBounds::x2() const {
+inline double
+DiamondBounds::x2() const {
   return m_x2;
 }
 
-inline double DiamondBounds::x3() const {
+inline double
+DiamondBounds::x3() const {
   return m_x3;
 }
 
-inline double DiamondBounds::y1() const {
+inline double
+DiamondBounds::y1() const {
   return m_y1;
 }
 
-inline double DiamondBounds::y2() const {
+inline double
+DiamondBounds::y2() const {
   return m_y2;
 }
 

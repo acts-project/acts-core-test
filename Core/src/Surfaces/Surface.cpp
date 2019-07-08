@@ -30,8 +30,10 @@ Acts::Surface::Surface(const Surface& other)
       m_transform(other.m_transform),
       m_surfaceMaterial(other.m_surfaceMaterial) {}
 
-Acts::Surface::Surface(const GeometryContext& gctx, const Surface& other,
-                       const Transform3D& shift)
+Acts::Surface::Surface(
+    const GeometryContext& gctx,
+    const Surface& other,
+    const Transform3D& shift)
     : GeometryObject(),
       m_transform(std::make_shared<const Transform3D>(
           Transform3D(shift * other.transform(gctx)))),
@@ -40,9 +42,12 @@ Acts::Surface::Surface(const GeometryContext& gctx, const Surface& other,
 
 Acts::Surface::~Surface() = default;
 
-bool Acts::Surface::isOnSurface(const GeometryContext& gctx,
-                                const Vector3D& gpos, const Vector3D& gmom,
-                                const BoundaryCheck& bcheck) const {
+bool
+Acts::Surface::isOnSurface(
+    const GeometryContext& gctx,
+    const Vector3D& gpos,
+    const Vector3D& gmom,
+    const BoundaryCheck& bcheck) const {
   // create the local position
   Vector2D lpos;
   // global to local transformation
@@ -54,15 +59,18 @@ bool Acts::Surface::isOnSurface(const GeometryContext& gctx,
   return false;
 }
 
-std::shared_ptr<Acts::Surface> Acts::Surface::getSharedPtr() {
+std::shared_ptr<Acts::Surface>
+Acts::Surface::getSharedPtr() {
   return shared_from_this();
 }
 
-std::shared_ptr<const Acts::Surface> Acts::Surface::getSharedPtr() const {
+std::shared_ptr<const Acts::Surface>
+Acts::Surface::getSharedPtr() const {
   return shared_from_this();
 }
 
-Acts::Surface& Acts::Surface::operator=(const Surface& other) {
+Acts::Surface&
+Acts::Surface::operator=(const Surface& other) {
   if (&other != this) {
     GeometryObject::operator=(other);
     // detector element, identifier & layer association are unique
@@ -74,7 +82,8 @@ Acts::Surface& Acts::Surface::operator=(const Surface& other) {
   return *this;
 }
 
-bool Acts::Surface::operator==(const Surface& other) const {
+bool
+Acts::Surface::operator==(const Surface& other) const {
   // (a) fast exit for pointer comparison
   if (&other == this) {
     return true;
@@ -107,8 +116,8 @@ bool Acts::Surface::operator==(const Surface& other) const {
 }
 
 // overload dump for stream operator
-std::ostream& Acts::Surface::toStream(const GeometryContext& gctx,
-                                      std::ostream& sl) const {
+std::ostream&
+Acts::Surface::toStream(const GeometryContext& gctx, std::ostream& sl) const {
   sl << std::setiosflags(std::ios::fixed);
   sl << std::setprecision(4);
   sl << name() << std::endl;
@@ -131,6 +140,7 @@ std::ostream& Acts::Surface::toStream(const GeometryContext& gctx,
   return sl;
 }
 
-bool Acts::Surface::operator!=(const Acts::Surface& sf) const {
+bool
+Acts::Surface::operator!=(const Acts::Surface& sf) const {
   return !(operator==(sf));
 }

@@ -40,7 +40,8 @@ struct full_parset {
   template <typename T, unsigned int N>
   struct tparam_generator {
     using type = typename add_to_value_container<
-        static_cast<T>(N), typename tparam_generator<T, N - 1>::type>::type;
+        static_cast<T>(N),
+        typename tparam_generator<T, N - 1>::type>::type;
   };
 
   template <typename T>

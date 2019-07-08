@@ -71,7 +71,8 @@ bool debugMode = false;
 struct PlaneSelector {
   /// Call operator
   /// @param sf The input surface to be checked
-  bool operator()(const Surface& sf) const {
+  bool
+  operator()(const Surface& sf) const {
     return (sf.type() == Surface::Plane);
   }
 };
@@ -80,15 +81,18 @@ struct PlaneSelector {
 // - simple extrapolation test
 BOOST_DATA_TEST_CASE(
     test_extrapolation_,
-    bdata::random((bdata::seed = 0,
-                   bdata::distribution =
-                       std::uniform_real_distribution<>(0.4_GeV, 10_GeV))) ^
-        bdata::random((bdata::seed = 1,
-                       bdata::distribution =
-                           std::uniform_real_distribution<>(-M_PI, M_PI))) ^
-        bdata::random((bdata::seed = 2,
-                       bdata::distribution =
-                           std::uniform_real_distribution<>(1.0, M_PI - 1.0))) ^
+    bdata::random(
+        (bdata::seed = 0,
+         bdata::distribution =
+             std::uniform_real_distribution<>(0.4_GeV, 10_GeV))) ^
+        bdata::random(
+            (bdata::seed = 1,
+             bdata::distribution =
+                 std::uniform_real_distribution<>(-M_PI, M_PI))) ^
+        bdata::random(
+            (bdata::seed = 2,
+             bdata::distribution =
+                 std::uniform_real_distribution<>(1.0, M_PI - 1.0))) ^
         bdata::random(
             (bdata::seed = 3,
              bdata::distribution = std::uniform_int_distribution<>(0, 1))) ^
@@ -96,7 +100,12 @@ BOOST_DATA_TEST_CASE(
             (bdata::seed = 4,
              bdata::distribution = std::uniform_int_distribution<>(0, 100))) ^
         bdata::xrange(ntests),
-    pT, phi, theta, charge, time, index) {
+    pT,
+    phi,
+    theta,
+    charge,
+    time,
+    index) {
   double dcharge = -1 + 2 * charge;
   (void)index;
 
@@ -123,23 +132,26 @@ BOOST_DATA_TEST_CASE(
   options.maxStepSize = 10_cm;
   options.pathLimit = 25_cm;
 
-  BOOST_CHECK(epropagator.propagate(start, options).value().endParameters !=
-              nullptr);
+  BOOST_CHECK(
+      epropagator.propagate(start, options).value().endParameters != nullptr);
 }
 
 // This test case checks that no segmentation fault appears
 // - this tests the collection of surfaces
 BOOST_DATA_TEST_CASE(
     test_surface_collection_,
-    bdata::random((bdata::seed = 10,
-                   bdata::distribution =
-                       std::uniform_real_distribution<>(0.4_GeV, 10_GeV))) ^
-        bdata::random((bdata::seed = 11,
-                       bdata::distribution =
-                           std::uniform_real_distribution<>(-M_PI, M_PI))) ^
-        bdata::random((bdata::seed = 12,
-                       bdata::distribution =
-                           std::uniform_real_distribution<>(1.0, M_PI - 1.0))) ^
+    bdata::random(
+        (bdata::seed = 10,
+         bdata::distribution =
+             std::uniform_real_distribution<>(0.4_GeV, 10_GeV))) ^
+        bdata::random(
+            (bdata::seed = 11,
+             bdata::distribution =
+                 std::uniform_real_distribution<>(-M_PI, M_PI))) ^
+        bdata::random(
+            (bdata::seed = 12,
+             bdata::distribution =
+                 std::uniform_real_distribution<>(1.0, M_PI - 1.0))) ^
         bdata::random(
             (bdata::seed = 13,
              bdata::distribution = std::uniform_int_distribution<>(0, 1))) ^
@@ -147,7 +159,12 @@ BOOST_DATA_TEST_CASE(
             (bdata::seed = 14,
              bdata::distribution = std::uniform_int_distribution<>(0, 100))) ^
         bdata::xrange(ntests),
-    pT, phi, theta, charge, time, index) {
+    pT,
+    phi,
+    theta,
+    charge,
+    time,
+    index) {
   double dcharge = -1 + 2 * charge;
   (void)index;
 
@@ -207,15 +224,18 @@ BOOST_DATA_TEST_CASE(
 // - this tests the collection of surfaces
 BOOST_DATA_TEST_CASE(
     test_material_interactor_,
-    bdata::random((bdata::seed = 20,
-                   bdata::distribution =
-                       std::uniform_real_distribution<>(0.4_GeV, 10_GeV))) ^
-        bdata::random((bdata::seed = 21,
-                       bdata::distribution =
-                           std::uniform_real_distribution<>(-M_PI, M_PI))) ^
-        bdata::random((bdata::seed = 22,
-                       bdata::distribution =
-                           std::uniform_real_distribution<>(1.0, M_PI - 1.0))) ^
+    bdata::random(
+        (bdata::seed = 20,
+         bdata::distribution =
+             std::uniform_real_distribution<>(0.4_GeV, 10_GeV))) ^
+        bdata::random(
+            (bdata::seed = 21,
+             bdata::distribution =
+                 std::uniform_real_distribution<>(-M_PI, M_PI))) ^
+        bdata::random(
+            (bdata::seed = 22,
+             bdata::distribution =
+                 std::uniform_real_distribution<>(1.0, M_PI - 1.0))) ^
         bdata::random(
             (bdata::seed = 23,
              bdata::distribution = std::uniform_int_distribution<>(0, 1))) ^
@@ -223,7 +243,12 @@ BOOST_DATA_TEST_CASE(
             (bdata::seed = 24,
              bdata::distribution = std::uniform_int_distribution<>(0, 100))) ^
         bdata::xrange(ntests),
-    pT, phi, theta, charge, time, index) {
+    pT,
+    phi,
+    theta,
+    charge,
+    time,
+    index) {
   double dcharge = -1 + 2 * charge;
   (void)index;
 
@@ -257,8 +282,8 @@ BOOST_DATA_TEST_CASE(
   const auto& result = epropagator.propagate(start, options).value();
   if (result.endParameters) {
     // test that you actually lost some energy
-    BOOST_CHECK_LT(result.endParameters->momentum().norm(),
-                   start.momentum().norm());
+    BOOST_CHECK_LT(
+        result.endParameters->momentum().norm(), start.momentum().norm());
   }
 
   if (debugMode) {
@@ -272,15 +297,18 @@ BOOST_DATA_TEST_CASE(
 // - this tests the loop protection
 BOOST_DATA_TEST_CASE(
     loop_protection_test,
-    bdata::random((bdata::seed = 20,
-                   bdata::distribution =
-                       std::uniform_real_distribution<>(0.1_GeV, 0.5_GeV))) ^
-        bdata::random((bdata::seed = 21,
-                       bdata::distribution =
-                           std::uniform_real_distribution<>(-M_PI, M_PI))) ^
-        bdata::random((bdata::seed = 22,
-                       bdata::distribution =
-                           std::uniform_real_distribution<>(1.0, M_PI - 1.0))) ^
+    bdata::random(
+        (bdata::seed = 20,
+         bdata::distribution =
+             std::uniform_real_distribution<>(0.1_GeV, 0.5_GeV))) ^
+        bdata::random(
+            (bdata::seed = 21,
+             bdata::distribution =
+                 std::uniform_real_distribution<>(-M_PI, M_PI))) ^
+        bdata::random(
+            (bdata::seed = 22,
+             bdata::distribution =
+                 std::uniform_real_distribution<>(1.0, M_PI - 1.0))) ^
         bdata::random(
             (bdata::seed = 23,
              bdata::distribution = std::uniform_int_distribution<>(0, 1))) ^
@@ -288,7 +316,12 @@ BOOST_DATA_TEST_CASE(
             (bdata::seed = 24,
              bdata::distribution = std::uniform_int_distribution<>(0, 100))) ^
         bdata::xrange(ntests),
-    pT, phi, theta, charge, time, index) {
+    pT,
+    phi,
+    theta,
+    charge,
+    time,
+    index) {
   double dcharge = -1 + 2 * charge;
   (void)index;
 

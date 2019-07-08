@@ -40,8 +40,8 @@ BOOST_AUTO_TEST_CASE(track_state_initialization) {
   std::default_random_engine generator(42);
 
   // The plane surface
-  auto plane = Surface::makeShared<PlaneSurface>(Vector3D{0., 0., 0.},
-                                                 Vector3D{1., 0., 0.});
+  auto plane = Surface::makeShared<PlaneSurface>(
+      Vector3D{0., 0., 0.}, Vector3D{1., 0., 0.});
 
   // Construct the 1D measurement
   ActsSymMatrixD<1> cov1D;
@@ -116,8 +116,8 @@ BOOST_AUTO_TEST_CASE(track_state_initialization) {
   // Test the move assignment for a parameter state
   BoundTrackState ptsMoveAssigned = std::move(ptsCopyAssigned);
 
-  std::vector<BoundTrackState> trackStates = {std::move(mts1DMoveAssigned),
-                                              std::move(mts2D), std::move(pts)};
+  std::vector<BoundTrackState> trackStates = {
+      std::move(mts1DMoveAssigned), std::move(mts2D), std::move(pts)};
 
   BOOST_CHECK_EQUAL(trackStates.size(), 3);
 

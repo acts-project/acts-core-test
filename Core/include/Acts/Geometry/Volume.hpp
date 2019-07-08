@@ -44,8 +44,9 @@ class Volume : public virtual GeometryObject {
   /// @param volbounds is the volume boundary definitions
   /// @note This will automatically build an oriented bounding box with an
   /// envelope value of (0.05, 0.05, 0.05)mm
-  Volume(const std::shared_ptr<const Transform3D>& htrans,
-         VolumeBoundsPtr volbounds);
+  Volume(
+      const std::shared_ptr<const Transform3D>& htrans,
+      VolumeBoundsPtr volbounds);
 
   /// Copy Constructor - with optional shift
   ///
@@ -102,8 +103,9 @@ class Volume : public virtual GeometryObject {
   /// @param bValue is the binning value schema
   ///
   /// @return vector 3D that can be used for the binning
-  const Vector3D binningPosition(const GeometryContext& gctx,
-                                 BinningValue bValue) const override;
+  const Vector3D binningPosition(
+      const GeometryContext& gctx,
+      BinningValue bValue) const override;
 
  protected:
   std::shared_ptr<const Transform3D> m_transform;
@@ -113,22 +115,26 @@ class Volume : public virtual GeometryObject {
   BoundingBox m_orientedBoundingBox;
 };
 
-inline const Transform3D& Volume::transform() const {
+inline const Transform3D&
+Volume::transform() const {
   if (m_transform) {
     return (*(m_transform.get()));
   }
   return Acts::s_idTransform;
 }
 
-inline const Transform3D& Volume::itransform() const {
+inline const Transform3D&
+Volume::itransform() const {
   return m_itransform;
 }
 
-inline const Vector3D& Volume::center() const {
+inline const Vector3D&
+Volume::center() const {
   return m_center;
 }
 
-inline const VolumeBounds& Volume::volumeBounds() const {
+inline const VolumeBounds&
+Volume::volumeBounds() const {
   return (*(m_volumeBounds.get()));
 }
 

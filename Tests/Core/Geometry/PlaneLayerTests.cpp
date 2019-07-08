@@ -77,15 +77,22 @@ BOOST_AUTO_TEST_CASE(PlaneLayerConstruction) {
   std::unique_ptr<ApproachDescriptor> ad(
       new GenericApproachDescriptor(aSurfaces));
   auto adPtr = ad.get();
-  auto pPlaneLayerWithApproachDescriptor =
-      PlaneLayer::create(pTransform, pRectangle, std::move(pSurfaceArray),
-                         thickness, std::move(ad));
-  BOOST_CHECK_EQUAL(pPlaneLayerWithApproachDescriptor->approachDescriptor(),
-                    adPtr);
+  auto pPlaneLayerWithApproachDescriptor = PlaneLayer::create(
+      pTransform,
+      pRectangle,
+      std::move(pSurfaceArray),
+      thickness,
+      std::move(ad));
+  BOOST_CHECK_EQUAL(
+      pPlaneLayerWithApproachDescriptor->approachDescriptor(), adPtr);
   // with the layerType specified...
-  auto pPlaneLayerWithLayerType =
-      PlaneLayer::create(pTransform, pRectangle, std::move(pSurfaceArray),
-                         thickness, std::move(ad), LayerType::passive);
+  auto pPlaneLayerWithLayerType = PlaneLayer::create(
+      pTransform,
+      pRectangle,
+      std::move(pSurfaceArray),
+      thickness,
+      std::move(ad),
+      LayerType::passive);
   BOOST_CHECK_EQUAL(pPlaneLayerWithLayerType->layerType(), LayerType::passive);
 }
 
@@ -97,8 +104,9 @@ BOOST_AUTO_TEST_CASE(PlaneLayerProperties /*, *utf::expected_failures(1)*/) {
   auto pRectangle = std::make_shared<const RectangleBounds>(halfX, halfY);
   auto pPlaneLayer = PlaneLayer::create(pTransform, pRectangle);
   // auto planeSurface = pPlaneLayer->surfaceRepresentation();
-  BOOST_CHECK_EQUAL(pPlaneLayer->surfaceRepresentation().name(),
-                    std::string("Acts::PlaneSurface"));
+  BOOST_CHECK_EQUAL(
+      pPlaneLayer->surfaceRepresentation().name(),
+      std::string("Acts::PlaneSurface"));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

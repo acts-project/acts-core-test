@@ -31,12 +31,13 @@ BOOST_AUTO_TEST_CASE(RadialBoundsConstruction) {
   // RadialBounds defaultConstructedRadialBounds;  should be deleted
   //
   /// Test construction with radii and default sector
-  BOOST_CHECK_EQUAL(RadialBounds(minRadius, maxRadius).type(),
-                    SurfaceBounds::Disc);
+  BOOST_CHECK_EQUAL(
+      RadialBounds(minRadius, maxRadius).type(), SurfaceBounds::Disc);
   //
   /// Test construction with radii and sector half angle
-  BOOST_CHECK_EQUAL(RadialBounds(minRadius, maxRadius, halfPhiSector).type(),
-                    SurfaceBounds::Disc);
+  BOOST_CHECK_EQUAL(
+      RadialBounds(minRadius, maxRadius, halfPhiSector).type(),
+      SurfaceBounds::Disc);
   //
   /// Copy constructor
   RadialBounds original(minRadius, maxRadius);
@@ -60,10 +61,14 @@ BOOST_AUTO_TEST_CASE(RadialBoundsProperties) {
   Vector2D origin(0., 0.);
   Vector2D outside(30., 0.);
   Vector2D inSurface(2., 0.0);
-  CHECK_CLOSE_REL(radialBoundsObject.distanceToBoundary(origin), 1.,
-                  1e-6);  // makes sense
-  CHECK_CLOSE_REL(radialBoundsObject.distanceToBoundary(outside), 25.,
-                  1e-6);  // ok
+  CHECK_CLOSE_REL(
+      radialBoundsObject.distanceToBoundary(origin),
+      1.,
+      1e-6);  // makes sense
+  CHECK_CLOSE_REL(
+      radialBoundsObject.distanceToBoundary(outside),
+      25.,
+      1e-6);  // ok
   //
   /// Test dump
   boost::test_tools::output_test_stream dumpOuput;

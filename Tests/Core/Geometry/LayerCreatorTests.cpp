@@ -49,7 +49,8 @@ GeometryContext tgContext = GeometryContext();
 
 using SrfVec = std::vector<std::shared_ptr<const Surface>>;
 
-void draw_surfaces(const SrfVec& surfaces, const std::string& fname) {
+void
+draw_surfaces(const SrfVec& surfaces, const std::string& fname) {
   std::ofstream os;
   os.open(fname);
 
@@ -97,11 +98,13 @@ struct LayerCreatorFixture {
   }
 
   template <typename... Args>
-  bool checkBinning(Args&&... args) {
+  bool
+  checkBinning(Args&&... args) {
     return p_LC->checkBinning(std::forward<Args>(args)...);
   }
 
-  bool checkBinContentSize(const SurfaceArray* sArray, size_t n) {
+  bool
+  checkBinContentSize(const SurfaceArray* sArray, size_t n) {
     size_t nBins = sArray->size();
     bool result = true;
     for (size_t i = 0; i < nBins; ++i) {
@@ -117,8 +120,12 @@ struct LayerCreatorFixture {
     return result;
   }
 
-  SrfVec fullPhiTestSurfacesEC(size_t n = 10, double shift = 0,
-                               double zbase = 0, double r = 10) {
+  SrfVec
+  fullPhiTestSurfacesEC(
+      size_t n = 10,
+      double shift = 0,
+      double zbase = 0,
+      double r = 10) {
     SrfVec res;
 
     double phiStep = 2 * M_PI / n;
@@ -144,9 +151,14 @@ struct LayerCreatorFixture {
     return res;
   }
 
-  SrfVec fullPhiTestSurfacesBRL(int n = 10, double shift = 0, double zbase = 0,
-                                double incl = M_PI / 9., double w = 2,
-                                double h = 1.5) {
+  SrfVec
+  fullPhiTestSurfacesBRL(
+      int n = 10,
+      double shift = 0,
+      double zbase = 0,
+      double incl = M_PI / 9.,
+      double w = 2,
+      double h = 1.5) {
     SrfVec res;
 
     double phiStep = 2 * M_PI / n;
@@ -174,7 +186,8 @@ struct LayerCreatorFixture {
     return res;
   }
 
-  SrfVec makeBarrel(int nPhi, int nZ, double w, double h) {
+  SrfVec
+  makeBarrel(int nPhi, int nZ, double w, double h) {
     double z0 = -(nZ - 1) * w;
     SrfVec res;
 
@@ -189,8 +202,13 @@ struct LayerCreatorFixture {
   }
 
   std::pair<SrfVec, std::vector<std::pair<const Surface*, const Surface*>>>
-  makeBarrelStagger(int nPhi, int nZ, double shift = 0, double incl = M_PI / 9.,
-                    double w = 2, double h = 1.5) {
+  makeBarrelStagger(
+      int nPhi,
+      int nZ,
+      double shift = 0,
+      double incl = M_PI / 9.,
+      double w = 2,
+      double h = 1.5) {
     double z0 = -(nZ - 1) * w;
     SrfVec res;
 

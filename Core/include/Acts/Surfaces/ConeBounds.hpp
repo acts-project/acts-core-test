@@ -62,8 +62,12 @@ class ConeBounds : public SurfaceBounds {
   /// @param halfphi is the half opening angle (default is pi)
   /// @param avphi is the phi value around which the bounds are opened
   /// (default=0)
-  ConeBounds(double alpha, double zmin, double zmax, double halfphi = M_PI,
-             double avphi = 0.);
+  ConeBounds(
+      double alpha,
+      double zmin,
+      double zmax,
+      double halfphi = M_PI,
+      double avphi = 0.);
 
   ~ConeBounds() override;
 
@@ -78,8 +82,8 @@ class ConeBounds : public SurfaceBounds {
   /// @param lpos is the local position to be checked
   /// @param bcheck is the boundary check directive
   /// @return is a boolean indicating if the position is inside
-  bool inside(const Vector2D& lpos,
-              const BoundaryCheck& bcheck = true) const final;
+  bool inside(const Vector2D& lpos, const BoundaryCheck& bcheck = true)
+      const final;
 
   /// Minimal distance to boundary ( > 0 if outside and <=0 if inside)
   ///
@@ -135,39 +139,48 @@ class ConeBounds : public SurfaceBounds {
   Vector2D shifted(const Vector2D& lpos) const;
 };
 
-inline double ConeBounds::r(double z) const {
+inline double
+ConeBounds::r(double z) const {
   return std::abs(z * m_tanAlpha);
 }
 
-inline double ConeBounds::tanAlpha() const {
+inline double
+ConeBounds::tanAlpha() const {
   return m_tanAlpha;
 }
 
-inline double ConeBounds::sinAlpha() const {
+inline double
+ConeBounds::sinAlpha() const {
   return std::sin(m_alpha);
 }
 
-inline double ConeBounds::cosAlpha() const {
+inline double
+ConeBounds::cosAlpha() const {
   return std::cos(m_alpha);
 }
 
-inline double ConeBounds::alpha() const {
+inline double
+ConeBounds::alpha() const {
   return m_alpha;
 }
 
-inline double ConeBounds::minZ() const {
+inline double
+ConeBounds::minZ() const {
   return m_zMin;
 }
 
-inline double ConeBounds::maxZ() const {
+inline double
+ConeBounds::maxZ() const {
   return m_zMax;
 }
 
-inline double ConeBounds::averagePhi() const {
+inline double
+ConeBounds::averagePhi() const {
   return m_avgPhi;
 }
 
-inline double ConeBounds::halfPhiSector() const {
+inline double
+ConeBounds::halfPhiSector() const {
   return m_halfPhi;
 }
 }  // namespace Acts

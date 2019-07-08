@@ -45,8 +45,10 @@ class CartesianSegmentation : public Segmentation {
   /// @param mBounds are the rectangle bounds of the sensitive volume
   /// @param numCellsX is the number of cells in X
   /// @param numCellsY is the number of cells in Y
-  CartesianSegmentation(const std::shared_ptr<const PlanarBounds>& mBounds,
-                        size_t numCellsX, size_t numCellsY = 1);
+  CartesianSegmentation(
+      const std::shared_ptr<const PlanarBounds>& mBounds,
+      size_t numCellsX,
+      size_t numCellsY = 1);
 
   /// @todo contructor from BinUtilities for more complex readouts
   ///
@@ -57,8 +59,9 @@ class CartesianSegmentation : public Segmentation {
   ///
   /// @note if both RectangleBounds and BinUtility are provided, no check is
   /// done for consitency
-  CartesianSegmentation(std::shared_ptr<const BinUtility> bUtility,
-                        std::shared_ptr<const PlanarBounds> mBounds = nullptr);
+  CartesianSegmentation(
+      std::shared_ptr<const BinUtility> bUtility,
+      std::shared_ptr<const PlanarBounds> mBounds = nullptr);
 
   /// Virtual Destructor
   ~CartesianSegmentation() override;
@@ -67,12 +70,13 @@ class CartesianSegmentation : public Segmentation {
   ///
   /// Create the segmentation surfaces in X and Y for rectangular shapes
   /// These are needed for a full three dimensional module
-  void createSegmentationSurfaces(SurfacePtrVector& boundarySurfaces,
-                                  SurfacePtrVector& segmentationSurfacesX,
-                                  SurfacePtrVector& segmentationSurfacesY,
-                                  double halfThickness,
-                                  int readoutDirection = 1.,
-                                  double lorentzAngle = 0.) const final;
+  void createSegmentationSurfaces(
+      SurfacePtrVector& boundarySurfaces,
+      SurfacePtrVector& segmentationSurfacesX,
+      SurfacePtrVector& segmentationSurfacesY,
+      double halfThickness,
+      int readoutDirection = 1.,
+      double lorentzAngle = 0.) const final;
 
   /// @copydoc Segmentation::cell
   DigitizationCell cell(const Vector3D& position) const final;
@@ -87,11 +91,12 @@ class CartesianSegmentation : public Segmentation {
   /// correct for lorentz effect if needed
   ///
   /// @copydoc Segmentation::digitizationStep
-  DigitizationStep digitizationStep(const Vector3D& startStep,
-                                    const Vector3D& endStep,
-                                    double halfThickness,
-                                    int readoutDirection = 1,
-                                    double lorentzAngle = 0.) const final;
+  DigitizationStep digitizationStep(
+      const Vector3D& startStep,
+      const Vector3D& endStep,
+      double halfThickness,
+      int readoutDirection = 1,
+      double lorentzAngle = 0.) const final;
 
   /// return the surface bounds by reference
   /// specialization for Rectangle Bounds
@@ -112,31 +117,35 @@ class CartesianSegmentation : public Segmentation {
   std::shared_ptr<const BinUtility> m_binUtility;      /// bin Utility
 };
 
-inline const PlanarBounds& CartesianSegmentation::moduleBounds() const {
+inline const PlanarBounds&
+CartesianSegmentation::moduleBounds() const {
   return (*(m_activeBounds.get()));
 }
 
-inline const BinUtility& CartesianSegmentation::binUtility() const {
+inline const BinUtility&
+CartesianSegmentation::binUtility() const {
   return (*(m_binUtility.get()));
 }
 
 template <class T>
-DigitizationCell CartesianSegmentation::cellT(const T& position) const {
-  return DigitizationCell(m_binUtility->bin(position, 0),
-                          m_binUtility->bin(position, 1));
+DigitizationCell
+CartesianSegmentation::cellT(const T& position) const {
+  return DigitizationCell(
+      m_binUtility->bin(position, 0), m_binUtility->bin(position, 1));
 }
 
-inline DigitizationCell CartesianSegmentation::cell(
-    const Vector3D& position) const {
+inline DigitizationCell
+CartesianSegmentation::cell(const Vector3D& position) const {
   return cellT<Vector3D>(position);
 }
 
-inline DigitizationCell CartesianSegmentation::cell(
-    const Vector2D& position) const {
+inline DigitizationCell
+CartesianSegmentation::cell(const Vector2D& position) const {
   return cellT<Vector2D>(position);
 }
 
-inline std::pair<double, double> CartesianSegmentation::pitch() const {
+inline std::pair<double, double>
+CartesianSegmentation::pitch() const {
   auto boundingBox = m_activeBounds->boundingBox();
   auto values = boundingBox.valueStore();
   double pitchX = 2. * values[0] / m_binUtility->bins(0);

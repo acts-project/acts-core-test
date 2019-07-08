@@ -51,8 +51,10 @@ class PerigeeSurface : public LineSurface {
   /// @param gctx The current geometry context object, e.g. alignment
   /// @param other is the source cone surface
   /// @param transf is the additional transfrom applied after copying
-  PerigeeSurface(const GeometryContext& gctx, const PerigeeSurface& other,
-                 const Transform3D& transf);
+  PerigeeSurface(
+      const GeometryContext& gctx,
+      const PerigeeSurface& other,
+      const Transform3D& transf);
 
  public:
   /// Destructor - defaulted
@@ -62,8 +64,9 @@ class PerigeeSurface : public LineSurface {
   ///
   /// @param gctx The current geometry context object, e.g. alignment
   /// @param shift applied to the surface
-  std::shared_ptr<PerigeeSurface> clone(const GeometryContext& gctx,
-                                        const Transform3D& shift) const;
+  std::shared_ptr<PerigeeSurface> clone(
+      const GeometryContext& gctx,
+      const Transform3D& shift) const;
 
   /// Assignment operator
   ///
@@ -82,16 +85,17 @@ class PerigeeSurface : public LineSurface {
   /// @param sl is the ostream to be dumped into
   ///
   /// @return ostreamn obect which was streamed into
-  std::ostream& toStream(const GeometryContext& gctx,
-                         std::ostream& sl) const final;
+  std::ostream& toStream(const GeometryContext& gctx, std::ostream& sl)
+      const final;
 
  private:
   /// Clone method implementation
   ///
   /// @param gctx The current geometry context object, e.g. alignment
   /// @param shift applied to the surface
-  PerigeeSurface* clone_impl(const GeometryContext& gctx,
-                             const Transform3D& shift) const override;
+  PerigeeSurface* clone_impl(
+      const GeometryContext& gctx,
+      const Transform3D& shift) const override;
 };
 
 }  // namespace Acts

@@ -18,7 +18,8 @@
 
 using namespace Acts::UnitLiterals;
 
-int main(int argc, char* argv[]) {
+int
+main(int argc, char* argv[]) {
   size_t n = 1e6;
   if (argc == 2) {
     n = std::stoi(argv[1]);
@@ -40,8 +41,8 @@ int main(int argc, char* argv[]) {
 
   Acts::SolenoidBField bSolenoidField({R, L, nCoils, bMagCenter});
   std::cout << "building map" << std::endl;
-  auto mapper = Acts::solenoidFieldMapper({rMin, rMax}, {zMin, zMax},
-                                          {nBinsR, nBinsZ}, bSolenoidField);
+  auto mapper = Acts::solenoidFieldMapper(
+      {rMin, rMax}, {zMin, zMax}, {nBinsR, nBinsZ}, bSolenoidField);
   using BField_t = Acts::InterpolatedBFieldMap<decltype(mapper)>;
 
   BField_t::Config cfg(std::move(mapper));

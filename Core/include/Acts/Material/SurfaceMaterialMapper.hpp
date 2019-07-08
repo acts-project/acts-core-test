@@ -31,7 +31,8 @@ class TrackingGeometry;
 
 /// @brief selector for finding
 struct MaterialSurface {
-  bool operator()(const Surface& sf) const {
+  bool
+  operator()(const Surface& sf) const {
     return (sf.surfaceMaterial() != nullptr);
   }
 };
@@ -80,8 +81,9 @@ class SurfaceMaterialMapper {
   /// Nested State struct which is used for the mapping prococess
   struct State {
     /// Constructor of the Sate with contexts
-    State(std::reference_wrapper<const GeometryContext> gctx,
-          std::reference_wrapper<const MagneticFieldContext> mctx)
+    State(
+        std::reference_wrapper<const GeometryContext> gctx,
+        std::reference_wrapper<const MagneticFieldContext> mctx)
         : geoContext(gctx), magFieldContext(mctx) {}
 
     /// The accumulated material per geometry ID
@@ -106,10 +108,11 @@ class SurfaceMaterialMapper {
   /// @param cfg Configuration struct
   /// @param propagator The straight line propagator
   /// @param log The logger
-  SurfaceMaterialMapper(const Config& cfg, StraightLinePropagator propagator,
-                        std::unique_ptr<const Logger> slogger =
-                            getDefaultLogger("SurfaceMaterialMapper",
-                                             Logging::INFO));
+  SurfaceMaterialMapper(
+      const Config& cfg,
+      StraightLinePropagator propagator,
+      std::unique_ptr<const Logger> slogger =
+          getDefaultLogger("SurfaceMaterialMapper", Logging::INFO));
 
   /// @brief helper method that creates the cache for the mapping
   ///
@@ -118,9 +121,10 @@ class SurfaceMaterialMapper {
   /// This method takes a TrackingGeometry,
   /// finds all surfaces with material proxis
   /// and returns you a Cache object tO be used
-  State createState(const GeometryContext& gctx,
-                    const MagneticFieldContext& mctx,
-                    const TrackingGeometry& tGeometry) const;
+  State createState(
+      const GeometryContext& gctx,
+      const MagneticFieldContext& mctx,
+      const TrackingGeometry& tGeometry) const;
 
   /// @brief Method to finalize the maps
   ///
@@ -138,16 +142,16 @@ class SurfaceMaterialMapper {
   ///
   /// @note the RecordedMaterialProperties of the track are assumed
   /// to be ordered from the starting position along the starting direction
-  void mapMaterialTrack(State& mState,
-                        const RecordedMaterialTrack& mTrack) const;
+  void mapMaterialTrack(State& mState, const RecordedMaterialTrack& mTrack)
+      const;
 
  private:
   /// @brief finds all surfaces with ProtoSurfaceMaterial of a volume
   ///
   /// @param mState The state to be filled
   /// @param tVolume is current TrackingVolume
-  void resolveMaterialSurfaces(State& mState,
-                               const TrackingVolume& tVolume) const;
+  void resolveMaterialSurfaces(State& mState, const TrackingVolume& tVolume)
+      const;
 
   /// @brief check and insert
   ///
@@ -156,7 +160,10 @@ class SurfaceMaterialMapper {
   void checkAndInsert(State& /*mState*/, const Surface& surface) const;
 
   /// Standard logger method
-  const Logger& logger() const { return *m_logger; }
+  const Logger&
+  logger() const {
+    return *m_logger;
+  }
 
   /// The configuration object
   Config m_cfg;

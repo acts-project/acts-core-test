@@ -110,8 +110,10 @@ class AccumulatedMaterialProperties {
   unsigned int m_totalEvents{0};  //!< the number of events
 };
 
-inline void AccumulatedMaterialProperties::accumulate(
-    const MaterialProperties& amp, double pathCorrection) {
+inline void
+AccumulatedMaterialProperties::accumulate(
+    const MaterialProperties& amp,
+    double pathCorrection) {
   m_eventPathInX0 += amp.thicknessInX0();
   m_eventPathInL0 += amp.thicknessInL0();
   double t = amp.thickness();
@@ -125,7 +127,8 @@ inline void AccumulatedMaterialProperties::accumulate(
   m_eventPathCorrection += pathCorrection * t;
 }
 
-inline void AccumulatedMaterialProperties::trackAverage() {
+inline void
+AccumulatedMaterialProperties::trackAverage() {
   // Always count a hit if a path length is registered
   if (m_eventPath > 0.) {
     ++m_totalEvents;
@@ -163,8 +166,8 @@ AccumulatedMaterialProperties::totalAverage() {
     double L0 = 1. / m_totalPathInL0;
     // Create the material properties - fixed to unit path length
     MaterialProperties averageMat(X0, L0, m_totalA, m_totalZ, m_totalRho, 1.);
-    return std::pair<MaterialProperties, unsigned int>(std::move(averageMat),
-                                                       m_totalEvents);
+    return std::pair<MaterialProperties, unsigned int>(
+        std::move(averageMat), m_totalEvents);
   }
   return std::pair<MaterialProperties, unsigned int>(
       MaterialProperties{Material(), 0.}, 0);

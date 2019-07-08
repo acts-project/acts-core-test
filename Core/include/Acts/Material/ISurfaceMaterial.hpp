@@ -66,8 +66,8 @@ class ISurfaceMaterial {
   ///
   /// @param ib0 is the material bin in dimension 0
   /// @param ib1 is the material bin in dimension 1
-  virtual const MaterialProperties& materialProperties(size_t ib0,
-                                                       size_t ib1) const = 0;
+  virtual const MaterialProperties& materialProperties(size_t ib0, size_t ib1)
+      const = 0;
 
   /// Update pre factor
   ///
@@ -83,9 +83,10 @@ class ISurfaceMaterial {
   /// @param mStage is the material update directive (onapproach, full, onleave)
   ///
   /// @return MaterialProperties
-  MaterialProperties materialProperties(const Vector2D& lp,
-                                        NavigationDirection pDir,
-                                        MaterialUpdateStage mStage) const;
+  MaterialProperties materialProperties(
+      const Vector2D& lp,
+      NavigationDirection pDir,
+      MaterialUpdateStage mStage) const;
 
   /// Return method for full material description of the Surface
   /// - from the global coordinates
@@ -95,9 +96,10 @@ class ISurfaceMaterial {
   /// @param mStage is the material update directive (onapproach, full, onleave)
   ///
   /// @return MaterialProperties
-  MaterialProperties materialProperties(const Vector3D& gp,
-                                        NavigationDirection pDir,
-                                        MaterialUpdateStage mStage) const;
+  MaterialProperties materialProperties(
+      const Vector3D& gp,
+      NavigationDirection pDir,
+      MaterialUpdateStage mStage) const;
 
   /// @brief output stream operator
   ///
@@ -105,8 +107,8 @@ class ISurfaceMaterial {
   /// virtual ISurfaceMaterial::toStream method
   ///
   /// @return modified output stream object
-  friend std::ostream& operator<<(std::ostream& out,
-                                  const ISurfaceMaterial& sm) {
+  friend std::ostream&
+  operator<<(std::ostream& out, const ISurfaceMaterial& sm) {
     sm.toStream(out);
     return out;
   }
@@ -118,16 +120,19 @@ class ISurfaceMaterial {
   double m_splitFactor{1.};  //!< the split factor in favour of oppositePre
 };
 
-inline double ISurfaceMaterial::factor(NavigationDirection pDir,
-                                       MaterialUpdateStage mStage) const {
+inline double
+ISurfaceMaterial::factor(NavigationDirection pDir, MaterialUpdateStage mStage)
+    const {
   if (mStage == Acts::fullUpdate) {
     return 1.;
   }
   return (pDir * mStage > 0 ? m_splitFactor : 1. - m_splitFactor);
 }
 
-inline MaterialProperties ISurfaceMaterial::materialProperties(
-    const Vector2D& lp, NavigationDirection pDir,
+inline MaterialProperties
+ISurfaceMaterial::materialProperties(
+    const Vector2D& lp,
+    NavigationDirection pDir,
     MaterialUpdateStage mStage) const {
   // The plain material properties associated to this bin
   MaterialProperties plainMatProp = materialProperties(lp);
@@ -142,8 +147,10 @@ inline MaterialProperties ISurfaceMaterial::materialProperties(
   return plainMatProp;
 }
 
-inline MaterialProperties ISurfaceMaterial::materialProperties(
-    const Vector3D& gp, NavigationDirection pDir,
+inline MaterialProperties
+ISurfaceMaterial::materialProperties(
+    const Vector3D& gp,
+    NavigationDirection pDir,
     MaterialUpdateStage mStage) const {
   // The plain material properties associated to this bin
   MaterialProperties plainMatProp = materialProperties(gp);

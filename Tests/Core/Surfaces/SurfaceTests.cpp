@@ -38,9 +38,15 @@ class MockTrack {
     // nop
   }
 
-  Vector3D momentum() const { return m_mom; }
+  Vector3D
+  momentum() const {
+    return m_mom;
+  }
 
-  Vector3D position() const { return m_pos; }
+  Vector3D
+  position() const {
+    return m_pos;
+  }
 
  private:
   Vector3D m_mom;
@@ -64,8 +70,8 @@ BOOST_AUTO_TEST_CASE(SurfaceConstruction) {
   BOOST_CHECK_EQUAL(Surface::Other, SurfaceStub(original).type());
   Translation3D translation{0., 1., 2.};
   Transform3D transform(translation);
-  BOOST_CHECK_EQUAL(Surface::Other,
-                    SurfaceStub(tgContext, original, transform).type());
+  BOOST_CHECK_EQUAL(
+      Surface::Other, SurfaceStub(tgContext, original, transform).type());
   // need some cruft to make the next one work
   auto pTransform = std::make_shared<const Transform3D>(translation);
   std::shared_ptr<const Acts::PlanarBounds> p =
@@ -113,8 +119,11 @@ BOOST_AUTO_TEST_CASE(SurfaceProperties, *utf::expected_failures(1)) {
   BOOST_CHECK_EQUAL(ref.position, intersectionEstimate.position);
   // isOnSurface
   BOOST_CHECK(surface.isOnSurface(tgContext, reference, mom, false));
-  BOOST_CHECK(surface.isOnSurface(tgContext, reference, mom,
-                                  true));  // need to improve bounds()
+  BOOST_CHECK(surface.isOnSurface(
+      tgContext,
+      reference,
+      mom,
+      true));  // need to improve bounds()
   // referenceFrame()
   RotationMatrix3D unitary;
   unitary << 1, 0, 0, 0, 1, 0, 0, 0, 1;
@@ -122,9 +131,10 @@ BOOST_AUTO_TEST_CASE(SurfaceProperties, *utf::expected_failures(1)) {
       tgContext, reference, mom);  // need more complex case to test
   BOOST_CHECK_EQUAL(referenceFrame, unitary);
   // normal()
-  auto normal = surface.Surface::normal(tgContext,
-                                        reference);  // needs more complex
-                                                     // test
+  auto normal = surface.Surface::normal(
+      tgContext,
+      reference);  // needs more complex
+                   // test
   Vector3D zero{0., 0., 0.};
   BOOST_CHECK_EQUAL(zero, normal);
   // pathCorrection is pure virtual
@@ -133,8 +143,9 @@ BOOST_AUTO_TEST_CASE(SurfaceProperties, *utf::expected_failures(1)) {
   auto pNewMaterial =
       std::make_shared<const HomogeneousSurfaceMaterial>(newProperties);
   surface.assignSurfaceMaterial(pNewMaterial);
-  BOOST_CHECK_EQUAL(surface.surfaceMaterial(),
-                    pNewMaterial.get());  // passes ??
+  BOOST_CHECK_EQUAL(
+      surface.surfaceMaterial(),
+      pNewMaterial.get());  // passes ??
   //
   CHECK_CLOSE_OR_SMALL(surface.transform(tgContext), *pTransform, 1e-6, 1e-9);
   // type() is pure virtual

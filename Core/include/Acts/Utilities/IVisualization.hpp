@@ -32,8 +32,9 @@ class IVisualization {
    * @param vtx The vertex position
    * @param color The color
    */
-  virtual void vertex(const Vector3D& vtx,
-                      color_type color = {120, 120, 120}) = 0;
+  virtual void vertex(
+      const Vector3D& vtx,
+      color_type color = {120, 120, 120}) = 0;
 
   /**
    * Draw a face that connects a list of vertices.
@@ -42,8 +43,9 @@ class IVisualization {
    * @param vtxs The vertices that make up the face
    * @param color The color of the face
    */
-  virtual void face(const std::vector<Vector3D>& vtxs,
-                    color_type color = {120, 120, 120}) = 0;
+  virtual void face(
+      const std::vector<Vector3D>& vtxs,
+      color_type color = {120, 120, 120}) = 0;
 
   /**
    * Draw a line from a vertex to another
@@ -51,8 +53,10 @@ class IVisualization {
    * @param b The end vertex
    * @param color The color of the line
    */
-  virtual void line(const Vector3D& a, const Vector3D& b,
-                    color_type color = {120, 120, 120}) = 0;
+  virtual void line(
+      const Vector3D& a,
+      const Vector3D& b,
+      color_type color = {120, 120, 120}) = 0;
 
   /**
    * Write the content of the helper to an outstream.
@@ -74,7 +78,8 @@ class IVisualization {
   /**
    * @copydoc Acts::IVisualization::vertex(const Vector3D&, color_type)
    */
-  void vertex(const Vector3F& vtx, color_type color = {120, 120, 120}) {
+  void
+  vertex(const Vector3F& vtx, color_type color = {120, 120, 120}) {
     Vector3D vtxd = vtx.template cast<double>();
     vertex(vtxd, color);
   }
@@ -82,11 +87,13 @@ class IVisualization {
   /**
    * @copydoc Acts::IVisualization::face(std::vector<Vector3F>&, color_type)
    */
-  void face(const std::vector<Vector3F>& vtxs,
-            color_type color = {120, 120, 120}) {
+  void
+  face(const std::vector<Vector3F>& vtxs, color_type color = {120, 120, 120}) {
     std::vector<Vector3D> vtxsd;
-    std::transform(vtxs.begin(), vtxs.end(), std::back_inserter(vtxsd),
-                   [](auto& v) { return v.template cast<double>(); });
+    std::transform(
+        vtxs.begin(), vtxs.end(), std::back_inserter(vtxsd), [](auto& v) {
+          return v.template cast<double>();
+        });
     face(vtxsd, color);
   }
 
@@ -94,8 +101,11 @@ class IVisualization {
    * @copydoc Acts::IVisualization::line(const Vector3F&, const Vector3F&,
    * color_type)
    */
-  void line(const Vector3F& a, const Vector3F& b,
-            color_type color = {120, 120, 120}) {
+  void
+  line(
+      const Vector3F& a,
+      const Vector3F& b,
+      color_type color = {120, 120, 120}) {
     Vector3D ad = a.template cast<double>();
     Vector3D bd = b.template cast<double>();
     line(ad, bd, color);
@@ -107,7 +117,8 @@ class IVisualization {
  * @param os The output stream
  * @param hlp The helper instance
  */
-inline std::ostream& operator<<(std::ostream& os, const IVisualization& hlp) {
+inline std::ostream&
+operator<<(std::ostream& os, const IVisualization& hlp) {
   hlp.write(os);
   return os;
 }

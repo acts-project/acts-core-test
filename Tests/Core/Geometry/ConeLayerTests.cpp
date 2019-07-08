@@ -73,8 +73,8 @@ BOOST_AUTO_TEST_CASE(ConeLayerConstruction) {
   auto adPtr = ad.get();
   auto pConeLayerWithApproachDescriptor =
       ConeLayer::create(pTransform, pCone, nullptr, thickness, std::move(ad));
-  BOOST_CHECK_EQUAL(pConeLayerWithApproachDescriptor->approachDescriptor(),
-                    adPtr);
+  BOOST_CHECK_EQUAL(
+      pConeLayerWithApproachDescriptor->approachDescriptor(), adPtr);
   // with the layerType specified...
   auto pConeLayerWithLayerType = ConeLayer::create(
       pTransform, pCone, nullptr, thickness, std::move(ad), LayerType::passive);
@@ -98,8 +98,9 @@ BOOST_AUTO_TEST_CASE(ConeLayerProperties /*, *utf::expected_failures(1)*/) {
   // const double        thickness(1.0);
   auto pConeLayerFromSurfaces = ConeLayer::create(pTransform, pCone, nullptr);
   // auto planeSurface = pConeLayer->surfaceRepresentation();
-  BOOST_CHECK_EQUAL(pConeLayerFromSurfaces->surfaceRepresentation().name(),
-                    std::string("Acts::ConeSurface"));
+  BOOST_CHECK_EQUAL(
+      pConeLayerFromSurfaces->surfaceRepresentation().name(),
+      std::string("Acts::ConeSurface"));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -22,29 +22,37 @@
 using Acts::VectorHelpers::perp;
 using Acts::VectorHelpers::phi;
 
-Acts::EllipseBounds::EllipseBounds(double minRadius0, double minRadius1,
-                                   double maxRadius0, double maxRadius1,
-                                   double averagePhi, double halfPhi)
+Acts::EllipseBounds::EllipseBounds(
+    double minRadius0,
+    double minRadius1,
+    double maxRadius0,
+    double maxRadius1,
+    double averagePhi,
+    double halfPhi)
     : m_rMinX(std::abs(minRadius0)),
       m_rMinY(std::abs(minRadius1)),
       m_rMaxX(std::abs(maxRadius0)),
       m_rMaxY(std::abs(maxRadius1)),
       m_avgPhi(detail::radian_sym(averagePhi)),
       m_halfPhi(std::abs(halfPhi)),
-      m_boundingBox(std::max(minRadius0, maxRadius0),
-                    std::max(minRadius1, maxRadius1)) {}
+      m_boundingBox(
+          std::max(minRadius0, maxRadius0),
+          std::max(minRadius1, maxRadius1)) {}
 
 Acts::EllipseBounds::~EllipseBounds() = default;
 
-Acts::EllipseBounds* Acts::EllipseBounds::clone() const {
+Acts::EllipseBounds*
+Acts::EllipseBounds::clone() const {
   return new EllipseBounds(*this);
 }
 
-Acts::SurfaceBounds::BoundsType Acts::EllipseBounds::type() const {
+Acts::SurfaceBounds::BoundsType
+Acts::EllipseBounds::type() const {
   return SurfaceBounds::Ellipse;
 }
 
-std::vector<TDD_real_t> Acts::EllipseBounds::valueStore() const {
+std::vector<TDD_real_t>
+Acts::EllipseBounds::valueStore() const {
   std::vector<TDD_real_t> values(EllipseBounds::bv_length);
   values[EllipseBounds::bv_rMinX] = m_rMinX;
   values[EllipseBounds::bv_rMinY] = m_rMinY;
@@ -55,13 +63,16 @@ std::vector<TDD_real_t> Acts::EllipseBounds::valueStore() const {
   return values;
 }
 
-static inline double square(double x) {
+static inline double
+square(double x) {
   return x * x;
 }
 
 /// @warning This **only** works for tolerance-based checks
-bool Acts::EllipseBounds::inside(const Acts::Vector2D& lpos,
-                                 const Acts::BoundaryCheck& bcheck) const {
+bool
+Acts::EllipseBounds::inside(
+    const Acts::Vector2D& lpos,
+    const Acts::BoundaryCheck& bcheck) const {
   double tol0 = bcheck.m_tolerance[0];
   double tol1 = bcheck.m_tolerance[1];
   double phi = detail::radian_sym(VectorHelpers::phi(lpos) - averagePhi());
@@ -71,8 +82,9 @@ bool Acts::EllipseBounds::inside(const Acts::Vector2D& lpos,
   bool insideInner = (rMinX() <= tol0) || (rMinY() <= tol0) ||
                      (1 < (square(lpos[Acts::eLOC_X] / (rMinX() - tol0)) +
                            square(lpos[Acts::eLOC_Y] / (rMinY() - tol0))));
-  bool insideOuter = ((square(lpos[Acts::eLOC_X] / (rMaxX() + tol0)) +
-                       square(lpos[Acts::eLOC_Y] / (rMaxY() + tol0))) < 1);
+  bool insideOuter =
+      ((square(lpos[Acts::eLOC_X] / (rMaxX() + tol0)) +
+        square(lpos[Acts::eLOC_Y] / (rMaxY() + tol0))) < 1);
   return (insidePhi && insideInner && insideOuter);
 }
 
@@ -82,7 +94,8 @@ bool Acts::EllipseBounds::inside(const Acts::Vector2D& lpos,
 // and m_valueStore.at(EllipseBounds::bv_rMaxX) ~=
 // m_valueStore.at(EllipseBounds::bv_rMaxY)
 //
-double Acts::EllipseBounds::distanceToBoundary(const Vector2D& lpos) const {
+double
+Acts::EllipseBounds::distanceToBoundary(const Vector2D& lpos) const {
   double r = perp(lpos);
   if (r == 0) {
     return std::min(rMinX(), rMinY());
@@ -144,17 +157,20 @@ double Acts::EllipseBounds::distanceToBoundary(const Vector2D& lpos) const {
   return sf;
 }
 
-std::vector<Acts::Vector2D> Acts::EllipseBounds::vertices() const {
+std::vector<Acts::Vector2D>
+Acts::EllipseBounds::vertices() const {
   // 2017-04-08 msmk: this is definitely too coarse
   return {{rMaxX(), 0}, {0, rMaxY()}, {-rMaxX(), 0}, {0, -rMaxY()}};
 }
 
-const Acts::RectangleBounds& Acts::EllipseBounds::boundingBox() const {
+const Acts::RectangleBounds&
+Acts::EllipseBounds::boundingBox() const {
   return m_boundingBox;
 }
 
 // ostream operator overload
-std::ostream& Acts::EllipseBounds::toStream(std::ostream& sl) const {
+std::ostream&
+Acts::EllipseBounds::toStream(std::ostream& sl) const {
   sl << std::setiosflags(std::ios::fixed);
   sl << std::setprecision(7);
   sl << "Acts::EllipseBounds:  (innerRadiusX, innerRadiusY, outerRadiusX, "

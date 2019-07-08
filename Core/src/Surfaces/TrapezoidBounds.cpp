@@ -16,8 +16,10 @@
 #include <iomanip>
 #include <iostream>
 
-Acts::TrapezoidBounds::TrapezoidBounds(double minhalex, double maxhalex,
-                                       double haley)
+Acts::TrapezoidBounds::TrapezoidBounds(
+    double minhalex,
+    double maxhalex,
+    double haley)
     : m_minHalfX(std::abs(minhalex)),
       m_maxHalfX(std::abs(maxhalex)),
       m_halfY(std::abs(haley)),
@@ -25,15 +27,18 @@ Acts::TrapezoidBounds::TrapezoidBounds(double minhalex, double maxhalex,
 
 Acts::TrapezoidBounds::~TrapezoidBounds() = default;
 
-Acts::TrapezoidBounds* Acts::TrapezoidBounds::clone() const {
+Acts::TrapezoidBounds*
+Acts::TrapezoidBounds::clone() const {
   return new TrapezoidBounds(*this);
 }
 
-Acts::SurfaceBounds::BoundsType Acts::TrapezoidBounds::type() const {
+Acts::SurfaceBounds::BoundsType
+Acts::TrapezoidBounds::type() const {
   return SurfaceBounds::Trapezoid;
 }
 
-std::vector<TDD_real_t> Acts::TrapezoidBounds::valueStore() const {
+std::vector<TDD_real_t>
+Acts::TrapezoidBounds::valueStore() const {
   std::vector<TDD_real_t> values(TrapezoidBounds::bv_length);
   values[TrapezoidBounds::bv_minHalfX] = minHalflengthX();
   values[TrapezoidBounds::bv_maxHalfX] = maxHalflengthX();
@@ -41,17 +46,20 @@ std::vector<TDD_real_t> Acts::TrapezoidBounds::valueStore() const {
   return values;
 }
 
-bool Acts::TrapezoidBounds::inside(const Acts::Vector2D& lpos,
-                                   const Acts::BoundaryCheck& bcheck) const {
+bool
+Acts::TrapezoidBounds::inside(
+    const Acts::Vector2D& lpos,
+    const Acts::BoundaryCheck& bcheck) const {
   return bcheck.isInside(lpos, vertices());
 }
 
-double Acts::TrapezoidBounds::distanceToBoundary(
-    const Acts::Vector2D& lpos) const {
+double
+Acts::TrapezoidBounds::distanceToBoundary(const Acts::Vector2D& lpos) const {
   return BoundaryCheck(true).distance(lpos, vertices());
 }
 
-std::vector<Acts::Vector2D> Acts::TrapezoidBounds::vertices() const {
+std::vector<Acts::Vector2D>
+Acts::TrapezoidBounds::vertices() const {
   // counter-clockwise from bottom-right corner
   return {{minHalflengthX(), -halflengthY()},
           {maxHalflengthX(), halflengthY()},
@@ -59,11 +67,13 @@ std::vector<Acts::Vector2D> Acts::TrapezoidBounds::vertices() const {
           {-minHalflengthX(), -halflengthY()}};
 }
 
-const Acts::RectangleBounds& Acts::TrapezoidBounds::boundingBox() const {
+const Acts::RectangleBounds&
+Acts::TrapezoidBounds::boundingBox() const {
   return m_boundingBox;
 }
 
-std::ostream& Acts::TrapezoidBounds::toStream(std::ostream& sl) const {
+std::ostream&
+Acts::TrapezoidBounds::toStream(std::ostream& sl) const {
   sl << std::setiosflags(std::ios::fixed);
   sl << std::setprecision(7);
   sl << "Acts::TrapezoidBounds:  (minHlengthX, maxHlengthX, hlengthY) = "

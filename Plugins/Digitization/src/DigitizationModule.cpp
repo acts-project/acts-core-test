@@ -16,8 +16,11 @@
 
 Acts::DigitizationModule::DigitizationModule(
     std::shared_ptr<const Segmentation> moduleSegmentation,
-    double halfThickness, int readoutDirection, double lorentzAngle,
-    double energyThreshold, bool analogue)
+    double halfThickness,
+    int readoutDirection,
+    double lorentzAngle,
+    double energyThreshold,
+    bool analogue)
     :
 
       m_halfThickness(halfThickness),
@@ -31,11 +34,16 @@ Acts::DigitizationModule::DigitizationModule(
       m_segmentationSurfacesX(),
       m_segmentationSurfacesY() {
   m_segmentation->createSegmentationSurfaces(
-      m_boundarySurfaces, m_segmentationSurfacesX, m_segmentationSurfacesY,
-      halfThickness, readoutDirection, lorentzAngle);
+      m_boundarySurfaces,
+      m_segmentationSurfacesX,
+      m_segmentationSurfacesY,
+      halfThickness,
+      readoutDirection,
+      lorentzAngle);
 }
 
-const Acts::SurfacePtrVector Acts::DigitizationModule::segmentationSurfaces(
+const Acts::SurfacePtrVector
+Acts::DigitizationModule::segmentationSurfaces(
     const Acts::DigitizationCell& entryCids,
     const Acts::DigitizationCell& exitCids) const {
   SurfacePtrVector sSurfaces;
@@ -67,8 +75,10 @@ const Acts::SurfacePtrVector Acts::DigitizationModule::segmentationSurfaces(
   return sSurfaces;
 }
 
-const Acts::SurfacePtrVector Acts::DigitizationModule::stepSurfaces(
-    const Vector3D& start, const Vector3D& end) const {
+const Acts::SurfacePtrVector
+Acts::DigitizationModule::stepSurfaces(
+    const Vector3D& start,
+    const Vector3D& end) const {
   // prepare the return vector
   SurfacePtrVector stepSurfaces;
 

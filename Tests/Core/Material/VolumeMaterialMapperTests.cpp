@@ -61,7 +61,8 @@ using MaterialGrid3D =
 ///
 /// @return Local grid point with the closest distance to @p matPos along the
 /// first axis
-Grid2D::index_t mapToBin2D(const Vector3D& matPos, const Grid2D& grid) {
+Grid2D::index_t
+mapToBin2D(const Vector3D& matPos, const Grid2D& grid) {
   double dist = std::numeric_limits<double>::max();
   size_t index = 0;
   // Loop through all elements in the first axis
@@ -86,7 +87,8 @@ Grid2D::index_t mapToBin2D(const Vector3D& matPos, const Grid2D& grid) {
 ///
 /// @return Local grid point with the closest distance to @p matPos along the
 /// first axis
-Grid3D::index_t mapToBin3D(const Vector3D& matPos, const Grid3D& grid) {
+Grid3D::index_t
+mapToBin3D(const Vector3D& matPos, const Grid3D& grid) {
   double dist = std::numeric_limits<double>::max();
   size_t index = 0;
   // Loop through all elements in the first axis
@@ -109,7 +111,8 @@ Grid3D::index_t mapToBin3D(const Vector3D& matPos, const Grid3D& grid) {
 /// @param [in] grid Grid that is used for the look-up
 ///
 /// @return Local grid point with the closest distance to @p matPos
-Grid3D::index_t mapMaterial3D(const Vector3D& matPos, const Grid3D& grid) {
+Grid3D::index_t
+mapMaterial3D(const Vector3D& matPos, const Grid3D& grid) {
   double dist = std::numeric_limits<double>::max();
   size_t indexX = 0, indexY = 0, indexZ = 0;
   // Loop through all elements
@@ -145,8 +148,11 @@ struct MaterialCollector {
   using result_type = this_result;
 
   template <typename propagator_state_t, typename stepper_t>
-  void operator()(propagator_state_t& state, const stepper_t& stepper,
-                  result_type& result) const {
+  void
+  operator()(
+      propagator_state_t& state,
+      const stepper_t& stepper,
+      result_type& result) const {
     if (state.navigation.currentVolume != nullptr) {
       auto position = stepper.position(state.stepping);
       result.matTrue.push_back(
@@ -209,8 +215,8 @@ BOOST_AUTO_TEST_CASE(VolumeMaterialMapper_tests) {
       createMaterialGrid(axis1, axis2, axis3, matRecord, mapToBin3D);
 
   // Test sizes
-  BOOST_CHECK_EQUAL(mgrid3d.size(),
-                    (axis1[2] + 2) * (axis2[2] + 2) * (axis3[2] + 2));
+  BOOST_CHECK_EQUAL(
+      mgrid3d.size(), (axis1[2] + 2) * (axis2[2] + 2) * (axis3[2] + 2));
   for (size_t index = 0; index < mgrid3d.size(); index++) {
     // Check the contained data
     if (index == 0) {
@@ -307,14 +313,15 @@ BOOST_AUTO_TEST_CASE(VolumeMaterialMapper_comparison_tests) {
   // Set some start parameters
   Vector3D pos(0., 0., 0.);
   Vector3D mom(1_GeV, 0., 0.);
-  SingleCurvilinearTrackParameters<NeutralPolicy> sctp(nullptr, pos, mom,
-                                                       42_ns);
+  SingleCurvilinearTrackParameters<NeutralPolicy> sctp(
+      nullptr, pos, mom, 42_ns);
 
   MagneticFieldContext mc;
 
   // Launch propagation and gather result
-  PropagatorOptions<ActionList<MaterialCollector>,
-                    AbortList<detail::EndOfWorldReached>>
+  PropagatorOptions<
+      ActionList<MaterialCollector>,
+      AbortList<detail::EndOfWorldReached>>
       po(gc, mc);
   po.maxStepSize = 1._mm;
   po.maxSteps = 1e6;

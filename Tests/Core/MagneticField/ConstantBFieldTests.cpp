@@ -37,12 +37,19 @@ MagneticFieldContext mfContext = MagneticFieldContext();
 /// -# ConstantBField::ConstantBField(Vector3D B)
 /// -# ConstantBField::getField(const double* xyz, double* B) const
 /// -# ConstantBField::getField(const Vector3D& pos) const
-BOOST_DATA_TEST_CASE(ConstantBField_components,
-                     bdata::random(-2_T, 2_T) ^ bdata::random(-1_T, 4_T) ^
-                         bdata::random(0_T, 10_T) ^ bdata::random(-10_m, 10_m) ^
-                         bdata::random(-10_m, 10_m) ^
-                         bdata::random(-10_m, 10_m) ^ bdata::xrange(10),
-                     x, y, z, bx, by, bz, index) {
+BOOST_DATA_TEST_CASE(
+    ConstantBField_components,
+    bdata::random(-2_T, 2_T) ^ bdata::random(-1_T, 4_T) ^
+        bdata::random(0_T, 10_T) ^ bdata::random(-10_m, 10_m) ^
+        bdata::random(-10_m, 10_m) ^ bdata::random(-10_m, 10_m) ^
+        bdata::xrange(10),
+    x,
+    y,
+    z,
+    bx,
+    by,
+    bz,
+    index) {
   (void)index;
   BOOST_TEST_CONTEXT("Eigen interface") {
     const Vector3D Btrue(bx, by, bz);
@@ -84,12 +91,19 @@ BOOST_DATA_TEST_CASE(ConstantBField_components,
 /// -# ConstantBField::setField(const Vector3D& B)
 /// -# ConstantBField::getField(const double* xyz, double* B) const
 /// -# ConstantBField::getField(const Vector3D& pos) const
-BOOST_DATA_TEST_CASE(ConstantBField_update,
-                     bdata::random(-2_T, 2_T) ^ bdata::random(-1_T, 4_T) ^
-                         bdata::random(0_T, 10_T) ^ bdata::random(-10_m, 10_m) ^
-                         bdata::random(-10_m, 10_m) ^
-                         bdata::random(-10_m, 10_m) ^ bdata::xrange(10),
-                     x, y, z, bx, by, bz, index) {
+BOOST_DATA_TEST_CASE(
+    ConstantBField_update,
+    bdata::random(-2_T, 2_T) ^ bdata::random(-1_T, 4_T) ^
+        bdata::random(0_T, 10_T) ^ bdata::random(-10_m, 10_m) ^
+        bdata::random(-10_m, 10_m) ^ bdata::random(-10_m, 10_m) ^
+        bdata::xrange(10),
+    x,
+    y,
+    z,
+    bx,
+    by,
+    bz,
+    index) {
   (void)index;
   ConstantBField BField(0, 0, 0);
 

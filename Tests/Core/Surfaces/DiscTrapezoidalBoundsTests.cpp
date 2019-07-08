@@ -54,24 +54,24 @@ BOOST_AUTO_TEST_CASE(DiscTrapezoidalBoundsProperties) {
   double minHalfX(1.0), maxHalfX(5.0), rMin(2.0), rMax(6.0),
       averagePhi(0.0) /*, stereo(0.1)*/;
   /// Test clone
-  DiscTrapezoidalBounds discTrapezoidalBoundsObject(minHalfX, maxHalfX, rMin,
-                                                    rMax, averagePhi);
+  DiscTrapezoidalBounds discTrapezoidalBoundsObject(
+      minHalfX, maxHalfX, rMin, rMax, averagePhi);
   auto pClonedDiscTrapezoidalBounds = discTrapezoidalBoundsObject.clone();
   BOOST_CHECK_NE(pClonedDiscTrapezoidalBounds, nullptr);
   delete pClonedDiscTrapezoidalBounds;
   //
   /// Test type() (redundant; already used in constructor confirmation)
-  BOOST_CHECK_EQUAL(discTrapezoidalBoundsObject.type(),
-                    SurfaceBounds::DiscTrapezoidal);
+  BOOST_CHECK_EQUAL(
+      discTrapezoidalBoundsObject.type(), SurfaceBounds::DiscTrapezoidal);
   //
   /// Test distanceToBoundary
   Vector2D origin(0., 0.);
   Vector2D outside(30., 0.);
   Vector2D inSurface(2., 0.0);
-  CHECK_CLOSE_REL(discTrapezoidalBoundsObject.distanceToBoundary(origin), 2.0,
-                  1e-6);
-  CHECK_CLOSE_REL(discTrapezoidalBoundsObject.distanceToBoundary(outside), 24.0,
-                  1e-6);
+  CHECK_CLOSE_REL(
+      discTrapezoidalBoundsObject.distanceToBoundary(origin), 2.0, 1e-6);
+  CHECK_CLOSE_REL(
+      discTrapezoidalBoundsObject.distanceToBoundary(outside), 24.0, 1e-6);
   //
   /// Test dump
   boost::test_tools::output_test_stream dumpOuput;
@@ -116,16 +116,16 @@ BOOST_AUTO_TEST_CASE(DiscTrapezoidalBoundsProperties) {
 BOOST_AUTO_TEST_CASE(DiscTrapezoidalBoundsAssignment) {
   double minHalfX(1.0), maxHalfX(5.0), rMin(2.0), rMax(6.0), averagePhi(0.0),
       stereo(0.1);
-  DiscTrapezoidalBounds discTrapezoidalBoundsObject(minHalfX, maxHalfX, rMin,
-                                                    rMax, averagePhi, stereo);
+  DiscTrapezoidalBounds discTrapezoidalBoundsObject(
+      minHalfX, maxHalfX, rMin, rMax, averagePhi, stereo);
   // operator == not implemented in this class
   //
   /// Test assignment
-  DiscTrapezoidalBounds assignedDiscTrapezoidalBoundsObject(2.1, 6.6, 3.4, 4.2,
-                                                            33.);
+  DiscTrapezoidalBounds assignedDiscTrapezoidalBoundsObject(
+      2.1, 6.6, 3.4, 4.2, 33.);
   assignedDiscTrapezoidalBoundsObject = discTrapezoidalBoundsObject;
-  BOOST_CHECK_EQUAL(assignedDiscTrapezoidalBoundsObject,
-                    discTrapezoidalBoundsObject);
+  BOOST_CHECK_EQUAL(
+      assignedDiscTrapezoidalBoundsObject, discTrapezoidalBoundsObject);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

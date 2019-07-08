@@ -18,15 +18,22 @@
 #include "Acts/Utilities/Helpers.hpp"
 
 Acts::CartesianSegmentation::CartesianSegmentation(
-    const std::shared_ptr<const PlanarBounds>& mBounds, size_t numCellsX,
+    const std::shared_ptr<const PlanarBounds>& mBounds,
+    size_t numCellsX,
     size_t numCellsY)
     : m_activeBounds(mBounds), m_binUtility(nullptr) {
   auto mutableBinUtility = std::make_shared<BinUtility>(
-      numCellsX, -mBounds->boundingBox().halflengthX(),
-      mBounds->boundingBox().halflengthX(), Acts::open, Acts::binX);
-  (*mutableBinUtility) +=
-      BinUtility(numCellsY, -mBounds->boundingBox().halflengthY(),
-                 mBounds->boundingBox().halflengthY(), Acts::open, Acts::binY);
+      numCellsX,
+      -mBounds->boundingBox().halflengthX(),
+      mBounds->boundingBox().halflengthX(),
+      Acts::open,
+      Acts::binX);
+  (*mutableBinUtility) += BinUtility(
+      numCellsY,
+      -mBounds->boundingBox().halflengthY(),
+      mBounds->boundingBox().halflengthY(),
+      Acts::open,
+      Acts::binY);
   m_binUtility = std::const_pointer_cast<const BinUtility>(mutableBinUtility);
 }
 
@@ -42,10 +49,14 @@ Acts::CartesianSegmentation::CartesianSegmentation(
 
 Acts::CartesianSegmentation::~CartesianSegmentation() = default;
 
-void Acts::CartesianSegmentation::createSegmentationSurfaces(
-    SurfacePtrVector& boundarySurfaces, SurfacePtrVector& segmentationSurfacesX,
-    SurfacePtrVector& segmentationSurfacesY, double halfThickness,
-    int readoutDirection, double lorentzAngle) const {
+void
+Acts::CartesianSegmentation::createSegmentationSurfaces(
+    SurfacePtrVector& boundarySurfaces,
+    SurfacePtrVector& segmentationSurfacesX,
+    SurfacePtrVector& segmentationSurfacesY,
+    double halfThickness,
+    int readoutDirection,
+    double lorentzAngle) const {
   // may be needed throughout
   double lorentzAngleTan = tan(lorentzAngle);
   double lorentzPlaneShiftX = halfThickness * lorentzAngleTan;
@@ -57,9 +68,9 @@ void Acts::CartesianSegmentation::createSegmentationSurfaces(
   // there are some things to consider
   // - they share the RectangleBounds only if the lorentzAngle is 0
   // otherwise only the readout surface has full length bounds like the module
-  std::shared_ptr<const PlanarBounds> moduleBounds(
-      new RectangleBounds(m_activeBounds->boundingBox().halflengthX(),
-                          m_activeBounds->boundingBox().halflengthY()));
+  std::shared_ptr<const PlanarBounds> moduleBounds(new RectangleBounds(
+      m_activeBounds->boundingBox().halflengthX(),
+      m_activeBounds->boundingBox().halflengthY()));
   // - they are separated by half a thickness in z
   auto mutableReadoutPlaneTransform =
       std::make_shared<Transform3D>(Transform3D::Identity());
@@ -82,8 +93,8 @@ void Acts::CartesianSegmentation::createSegmentationSurfaces(
     double lorentzReducedHalfX =
         m_activeBounds->boundingBox().halflengthX() - fabs(lorentzPlaneShiftX);
     std::shared_ptr<const PlanarBounds> lorentzReducedBounds(
-        new RectangleBounds(lorentzReducedHalfX,
-                            m_activeBounds->boundingBox().halflengthY()));
+        new RectangleBounds(
+            lorentzReducedHalfX, m_activeBounds->boundingBox().halflengthY()));
     counterPlaneBounds = lorentzReducedBounds;
     // now we shift the counter plane in position - this depends on lorentz
     // angle
@@ -118,9 +129,9 @@ void Acts::CartesianSegmentation::createSegmentationSurfaces(
   std::shared_ptr<const PlanarBounds> lorentzPlaneBounds =
       (lorentzAngle == 0.)
           ? xBinBounds
-          : std::shared_ptr<const PlanarBounds>(
-                new RectangleBounds(m_activeBounds->boundingBox().halflengthY(),
-                                    lorentzPlaneHalfX));
+          : std::shared_ptr<const PlanarBounds>(new RectangleBounds(
+                m_activeBounds->boundingBox().halflengthY(),
+                lorentzPlaneHalfX));
 
   // now the rotation matrix for the xBins
   RotationMatrix3D xBinRotationMatrix;
@@ -218,8 +229,8 @@ void Acts::CartesianSegmentation::createSegmentationSurfaces(
   }
 }
 
-Acts::Vector2D Acts::CartesianSegmentation::cellPosition(
-    const DigitizationCell& dCell) const {
+Acts::Vector2D
+Acts::CartesianSegmentation::cellPosition(const DigitizationCell& dCell) const {
   double bX = m_binUtility->bins(0) > 1
                   ? m_binUtility->binningData()[0].center(dCell.channel0)
                   : 0.;
@@ -231,9 +242,13 @@ Acts::Vector2D Acts::CartesianSegmentation::cellPosition(
 
 /** Get the digitization cell from 3D position, it used the projection to the
  * readout surface to estimate the 2D positon */
-Acts::DigitizationStep Acts::CartesianSegmentation::digitizationStep(
-    const Vector3D& startStep, const Vector3D& endStep, double halfThickness,
-    int readoutDirection, double lorentzAngle) const {
+Acts::DigitizationStep
+Acts::CartesianSegmentation::digitizationStep(
+    const Vector3D& startStep,
+    const Vector3D& endStep,
+    double halfThickness,
+    int readoutDirection,
+    double lorentzAngle) const {
   Vector3D stepCenter = 0.5 * (startStep + endStep);
   // take the full drift length
   // this is the absolute drift in z
@@ -248,6 +263,12 @@ Acts::DigitizationStep Acts::CartesianSegmentation::digitizationStep(
   Acts::DigitizationCell dCell = cell(stepCenterProjected);
   Vector2D cellCenter = cellPosition(dCell);
   // we are ready to return what we have
-  return DigitizationStep((endStep - startStep).norm(), driftLength, dCell,
-                          startStep, endStep, stepCenterProjected, cellCenter);
+  return DigitizationStep(
+      (endStep - startStep).norm(),
+      driftLength,
+      dCell,
+      startStep,
+      endStep,
+      stepCenterProjected,
+      cellCenter);
 }

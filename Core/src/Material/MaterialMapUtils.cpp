@@ -16,14 +16,19 @@
 using Acts::VectorHelpers::perp;
 using Acts::VectorHelpers::phi;
 
-auto Acts::materialMapperRZ(
-    const std::function<size_t(std::array<size_t, 2> binsRZ,
-                               std::array<size_t, 2> nBinsRZ)>&
+auto
+Acts::materialMapperRZ(
+    const std::function<
+        size_t(std::array<size_t, 2> binsRZ, std::array<size_t, 2> nBinsRZ)>&
         materialVectorToGridMapper,
-    std::vector<double> rPos, std::vector<double> zPos,
-    std::vector<Acts::Material> material, double lengthUnit)
-    -> MaterialMapper<detail::Grid<ActsVectorF<5>, detail::EquidistantAxis,
-                                   detail::EquidistantAxis>> {
+    std::vector<double> rPos,
+    std::vector<double> zPos,
+    std::vector<Acts::Material> material,
+    double lengthUnit)
+    -> MaterialMapper<detail::Grid<
+        ActsVectorF<5>,
+        detail::EquidistantAxis,
+        detail::EquidistantAxis>> {
   // [1] Decompose material
   std::vector<ActsVectorF<5>> materialVector;
   materialVector.reserve(material.size());
@@ -64,8 +69,8 @@ auto Acts::materialMapperRZ(
   detail::EquidistantAxis zAxis(zMin * lengthUnit, zMax * lengthUnit, nBinsZ);
 
   // Create the grid
-  using Grid_t = detail::Grid<ActsVectorF<5>, detail::EquidistantAxis,
-                              detail::EquidistantAxis>;
+  using Grid_t = detail::
+      Grid<ActsVectorF<5>, detail::EquidistantAxis, detail::EquidistantAxis>;
   Grid_t grid(std::make_tuple(std::move(rAxis), std::move(zAxis)));
 
   // [3] Set the material values
@@ -93,20 +98,27 @@ auto Acts::materialMapperRZ(
 
   // [5] Create the mapper & BField Service
   // create material mapping
-  return MaterialMapper<detail::Grid<ActsVectorF<5>, detail::EquidistantAxis,
-                                     detail::EquidistantAxis>>(transformPos,
-                                                               std::move(grid));
+  return MaterialMapper<detail::Grid<
+      ActsVectorF<5>,
+      detail::EquidistantAxis,
+      detail::EquidistantAxis>>(transformPos, std::move(grid));
 }
 
-auto Acts::materialMapperXYZ(
-    const std::function<size_t(std::array<size_t, 3> binsXYZ,
-                               std::array<size_t, 3> nBinsXYZ)>&
+auto
+Acts::materialMapperXYZ(
+    const std::function<
+        size_t(std::array<size_t, 3> binsXYZ, std::array<size_t, 3> nBinsXYZ)>&
         materialVectorToGridMapper,
-    std::vector<double> xPos, std::vector<double> yPos,
-    std::vector<double> zPos, std::vector<Material> material, double lengthUnit)
-    -> MaterialMapper<
-        detail::Grid<ActsVectorF<5>, detail::EquidistantAxis,
-                     detail::EquidistantAxis, detail::EquidistantAxis>> {
+    std::vector<double> xPos,
+    std::vector<double> yPos,
+    std::vector<double> zPos,
+    std::vector<Material> material,
+    double lengthUnit)
+    -> MaterialMapper<detail::Grid<
+        ActsVectorF<5>,
+        detail::EquidistantAxis,
+        detail::EquidistantAxis,
+        detail::EquidistantAxis>> {
   // [1] Decompose material
   std::vector<ActsVectorF<5>> materialVector;
   materialVector.reserve(material.size());
@@ -158,8 +170,11 @@ auto Acts::materialMapperXYZ(
   detail::EquidistantAxis yAxis(yMin * lengthUnit, yMax * lengthUnit, nBinsY);
   detail::EquidistantAxis zAxis(zMin * lengthUnit, zMax * lengthUnit, nBinsZ);
   // Create the grid
-  using Grid_t = detail::Grid<ActsVectorF<5>, detail::EquidistantAxis,
-                              detail::EquidistantAxis, detail::EquidistantAxis>;
+  using Grid_t = detail::Grid<
+      ActsVectorF<5>,
+      detail::EquidistantAxis,
+      detail::EquidistantAxis,
+      detail::EquidistantAxis>;
   Grid_t grid(
       std::make_tuple(std::move(xAxis), std::move(yAxis), std::move(zAxis)));
 
@@ -189,8 +204,9 @@ auto Acts::materialMapperXYZ(
 
   // [5] Create the mapper & BField Service
   // create material mapping
-  return MaterialMapper<
-      detail::Grid<ActsVectorF<5>, detail::EquidistantAxis,
-                   detail::EquidistantAxis, detail::EquidistantAxis>>(
-      transformPos, std::move(grid));
+  return MaterialMapper<detail::Grid<
+      ActsVectorF<5>,
+      detail::EquidistantAxis,
+      detail::EquidistantAxis,
+      detail::EquidistantAxis>>(transformPos, std::move(grid));
 }

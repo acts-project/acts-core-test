@@ -42,8 +42,10 @@ class StrawSurface : public LineSurface {
   /// frame
   /// @param radius is the straw radius
   /// @param halez is the half length in z
-  StrawSurface(std::shared_ptr<const Transform3D> htrans, double radius,
-               double halez);
+  StrawSurface(
+      std::shared_ptr<const Transform3D> htrans,
+      double radius,
+      double halez);
 
   /// Constructor from Transform3D and a shared bounds object
   ///
@@ -51,16 +53,18 @@ class StrawSurface : public LineSurface {
   /// frame
   /// @param lbounds are the bounds describing the straw dimensions, can be
   /// optionally nullptr
-  StrawSurface(std::shared_ptr<const Transform3D> htrans,
-               std::shared_ptr<const LineBounds> lbounds = nullptr);
+  StrawSurface(
+      std::shared_ptr<const Transform3D> htrans,
+      std::shared_ptr<const LineBounds> lbounds = nullptr);
 
   /// Constructor from DetectorElementBase : Element proxy
   ///
   /// @param lbounds are the bounds describing the straw dimensions, they must
   /// not be nullptr
   /// @param detelement for which this surface is (at least) one representation
-  StrawSurface(const std::shared_ptr<const LineBounds>& lbounds,
-               const DetectorElementBase& detelement);
+  StrawSurface(
+      const std::shared_ptr<const LineBounds>& lbounds,
+      const DetectorElementBase& detelement);
 
   /// Copy constructor
   ///
@@ -72,8 +76,10 @@ class StrawSurface : public LineSurface {
   /// @param gctx The current geometry context object, e.g. alignment
   /// @param other is the source cone surface
   /// @param transf is the additional transfrom applied after copying
-  StrawSurface(const GeometryContext& gctx, const StrawSurface& other,
-               const Transform3D& transf);
+  StrawSurface(
+      const GeometryContext& gctx,
+      const StrawSurface& other,
+      const Transform3D& transf);
 
  public:
   /// Destructor - defaulted
@@ -88,8 +94,9 @@ class StrawSurface : public LineSurface {
   ///
   /// @param gctx The current geometry context object, e.g. alignment
   /// @param shift applied to the surface
-  std::shared_ptr<StrawSurface> clone(const GeometryContext& gctx,
-                                      const Transform3D& shift) const;
+  std::shared_ptr<StrawSurface> clone(
+      const GeometryContext& gctx,
+      const Transform3D& shift) const;
 
   /// Return the surface type
   SurfaceType type() const final;
@@ -102,22 +109,27 @@ class StrawSurface : public LineSurface {
   /// @param l0div Number of divisions along l0 (phi)
   /// @param l1div Number of divisions along l1 (z)
   virtual PolyhedronRepresentation polyhedronRepresentation(
-      const GeometryContext& gctx, size_t l0div = 10, size_t l1div = 1) const;
+      const GeometryContext& gctx,
+      size_t l0div = 10,
+      size_t l1div = 1) const;
 
  private:
   /// Clone method implementation
   ///
   /// @param gctx The current geometry context object, e.g. alignment
   /// @param shift applied to the surface
-  StrawSurface* clone_impl(const GeometryContext& gctx,
-                           const Transform3D& shift) const override;
+  StrawSurface* clone_impl(
+      const GeometryContext& gctx,
+      const Transform3D& shift) const override;
 };
 
-inline Surface::SurfaceType StrawSurface::type() const {
+inline Surface::SurfaceType
+StrawSurface::type() const {
   return Surface::Straw;
 }
 
-inline std::string Acts::StrawSurface::name() const {
+inline std::string
+Acts::StrawSurface::name() const {
   return "Acts::StrawSurface";
 }
 

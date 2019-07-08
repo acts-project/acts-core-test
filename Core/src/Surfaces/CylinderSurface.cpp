@@ -27,21 +27,26 @@ using Acts::VectorHelpers::phi;
 Acts::CylinderSurface::CylinderSurface(const CylinderSurface& other)
     : GeometryObject(), Surface(other), m_bounds(other.m_bounds) {}
 
-Acts::CylinderSurface::CylinderSurface(const GeometryContext& gctx,
-                                       const CylinderSurface& other,
-                                       const Transform3D& transf)
+Acts::CylinderSurface::CylinderSurface(
+    const GeometryContext& gctx,
+    const CylinderSurface& other,
+    const Transform3D& transf)
     : GeometryObject(),
       Surface(gctx, other, transf),
       m_bounds(other.m_bounds) {}
 
 Acts::CylinderSurface::CylinderSurface(
-    std::shared_ptr<const Transform3D> htrans, double radius, double hlength)
+    std::shared_ptr<const Transform3D> htrans,
+    double radius,
+    double hlength)
     : GeometryObject(),
       Surface(std::move(htrans)),
       m_bounds(std::make_shared<const CylinderBounds>(radius, hlength)) {}
 
 Acts::CylinderSurface::CylinderSurface(
-    std::shared_ptr<const Transform3D> htrans, double radius, double hphi,
+    std::shared_ptr<const Transform3D> htrans,
+    double radius,
+    double hphi,
     double hlength)
     : GeometryObject(),
       Surface(std::move(htrans)),
@@ -62,8 +67,8 @@ Acts::CylinderSurface::CylinderSurface(
   throw_assert(cbounds, "CylinderBounds must not be nullptr");
 }
 
-Acts::CylinderSurface& Acts::CylinderSurface::operator=(
-    const CylinderSurface& other) {
+Acts::CylinderSurface&
+Acts::CylinderSurface::operator=(const CylinderSurface& other) {
   if (this != &other) {
     Surface::operator=(other);
     m_bounds = other.m_bounds;
@@ -72,15 +77,17 @@ Acts::CylinderSurface& Acts::CylinderSurface::operator=(
 }
 
 // return the binning position for ordering in the BinnedArray
-const Acts::Vector3D Acts::CylinderSurface::binningPosition(
-    const GeometryContext& gctx, BinningValue bValue) const {
+const Acts::Vector3D
+Acts::CylinderSurface::binningPosition(
+    const GeometryContext& gctx,
+    BinningValue bValue) const {
   const Acts::Vector3D& sfCenter = center(gctx);
   // special binning type for R-type methods
   if (bValue == Acts::binR || bValue == Acts::binRPhi) {
     double R = bounds().r();
     double phi = m_bounds ? m_bounds->averagePhi() : 0.;
-    return Vector3D(sfCenter.x() + R * cos(phi), sfCenter.y() + R * sin(phi),
-                    sfCenter.z());
+    return Vector3D(
+        sfCenter.x() + R * cos(phi), sfCenter.y() + R * sin(phi), sfCenter.z());
   }
   // give the center as default for all of these binning types
   // binX, binY, binZ, binR, binPhi, binRPhi, binH, binEta
@@ -88,8 +95,10 @@ const Acts::Vector3D Acts::CylinderSurface::binningPosition(
 }
 
 // return the measurement frame: it's the tangential plane
-const Acts::RotationMatrix3D Acts::CylinderSurface::referenceFrame(
-    const GeometryContext& gctx, const Vector3D& gpos,
+const Acts::RotationMatrix3D
+Acts::CylinderSurface::referenceFrame(
+    const GeometryContext& gctx,
+    const Vector3D& gpos,
     const Vector3D& /*unused*/) const {
   RotationMatrix3D mFrame;
   // construct the measurement frame
@@ -107,14 +116,17 @@ const Acts::RotationMatrix3D Acts::CylinderSurface::referenceFrame(
   return mFrame;
 }
 
-Acts::Surface::SurfaceType Acts::CylinderSurface::type() const {
+Acts::Surface::SurfaceType
+Acts::CylinderSurface::type() const {
   return Surface::Cylinder;
 }
 
-void Acts::CylinderSurface::localToGlobal(const GeometryContext& gctx,
-                                          const Vector2D& lpos,
-                                          const Vector3D& /*unused*/,
-                                          Vector3D& gpos) const {
+void
+Acts::CylinderSurface::localToGlobal(
+    const GeometryContext& gctx,
+    const Vector2D& lpos,
+    const Vector3D& /*unused*/,
+    Vector3D& gpos) const {
   // create the position in the local 3d frame
   double r = bounds().r();
   double phi = lpos[Acts::eLOC_RPHI] / r;
@@ -122,10 +134,12 @@ void Acts::CylinderSurface::localToGlobal(const GeometryContext& gctx,
   gpos = transform(gctx) * gpos;
 }
 
-bool Acts::CylinderSurface::globalToLocal(const GeometryContext& gctx,
-                                          const Vector3D& gpos,
-                                          const Vector3D& /*unused*/,
-                                          Vector2D& lpos) const {
+bool
+Acts::CylinderSurface::globalToLocal(
+    const GeometryContext& gctx,
+    const Vector3D& gpos,
+    const Vector3D& /*unused*/,
+    Vector2D& lpos) const {
   // get the transform & transform global position into cylinder frame
   // @todo clean up intolerance parameters
   // transform it to the globalframe: CylinderSurfaces are allowed to have 0
@@ -145,29 +159,38 @@ bool Acts::CylinderSurface::globalToLocal(const GeometryContext& gctx,
   return ((std::abs(radius - bounds().r()) > inttol) ? false : true);
 }
 
-std::string Acts::CylinderSurface::name() const {
+std::string
+Acts::CylinderSurface::name() const {
   return "Acts::CylinderSurface";
 }
 
-std::shared_ptr<Acts::CylinderSurface> Acts::CylinderSurface::clone(
-    const GeometryContext& gctx, const Transform3D& shift) const {
+std::shared_ptr<Acts::CylinderSurface>
+Acts::CylinderSurface::clone(
+    const GeometryContext& gctx,
+    const Transform3D& shift) const {
   return std::shared_ptr<CylinderSurface>(this->clone_impl(gctx, shift));
 }
 
-Acts::CylinderSurface* Acts::CylinderSurface::clone_impl(
-    const GeometryContext& gctx, const Transform3D& shift) const {
+Acts::CylinderSurface*
+Acts::CylinderSurface::clone_impl(
+    const GeometryContext& gctx,
+    const Transform3D& shift) const {
   return new CylinderSurface(gctx, *this, shift);
 }
 
-const Acts::Vector3D Acts::CylinderSurface::normal(
-    const GeometryContext& gctx, const Acts::Vector2D& lpos) const {
+const Acts::Vector3D
+Acts::CylinderSurface::normal(
+    const GeometryContext& gctx,
+    const Acts::Vector2D& lpos) const {
   double phi = lpos[Acts::eLOC_RPHI] / m_bounds->r();
   Vector3D localNormal(cos(phi), sin(phi), 0.);
   return Vector3D(transform(gctx).matrix().block<3, 3>(0, 0) * localNormal);
 }
 
-const Acts::Vector3D Acts::CylinderSurface::normal(
-    const GeometryContext& gctx, const Acts::Vector3D& gpos) const {
+const Acts::Vector3D
+Acts::CylinderSurface::normal(
+    const GeometryContext& gctx,
+    const Acts::Vector3D& gpos) const {
   const Transform3D& sfTransform = transform(gctx);
   // get it into the cylinder frame
   Vector3D pos3D = sfTransform.inverse() * gpos;
@@ -177,20 +200,26 @@ const Acts::Vector3D Acts::CylinderSurface::normal(
   return sfTransform.linear() * pos3D.normalized();
 }
 
-double Acts::CylinderSurface::pathCorrection(const GeometryContext& gctx,
-                                             const Acts::Vector3D& gpos,
-                                             const Acts::Vector3D& mom) const {
+double
+Acts::CylinderSurface::pathCorrection(
+    const GeometryContext& gctx,
+    const Acts::Vector3D& gpos,
+    const Acts::Vector3D& mom) const {
   Vector3D normalT = normal(gctx, gpos);
   double cosAlpha = normalT.dot(mom.normalized());
   return std::fabs(1. / cosAlpha);
 }
 
-const Acts::CylinderBounds& Acts::CylinderSurface::bounds() const {
+const Acts::CylinderBounds&
+Acts::CylinderSurface::bounds() const {
   return (*m_bounds.get());
 }
 
-Acts::PolyhedronRepresentation Acts::CylinderSurface::polyhedronRepresentation(
-    const GeometryContext& gctx, size_t l0div, size_t /*unused*/) const {
+Acts::PolyhedronRepresentation
+Acts::CylinderSurface::polyhedronRepresentation(
+    const GeometryContext& gctx,
+    size_t l0div,
+    size_t /*unused*/) const {
   std::vector<Vector3D> vertices;
   std::vector<std::vector<size_t>> faces;
 

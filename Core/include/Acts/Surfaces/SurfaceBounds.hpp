@@ -76,8 +76,8 @@ class SurfaceBounds {
   /// @param lpos Local position (assumed to be in right surface frame)
   /// @param bcheck boundary check directive
   /// @return boolean indicator for the success of this operation
-  virtual bool inside(const Vector2D& lpos,
-                      const BoundaryCheck& bcheck) const = 0;
+  virtual bool inside(const Vector2D& lpos, const BoundaryCheck& bcheck)
+      const = 0;
 
   /// Minimal distance to boundary ( > 0 if outside and <=0 if inside)
   ///
@@ -91,18 +91,21 @@ class SurfaceBounds {
   virtual std::ostream& toStream(std::ostream& os) const = 0;
 };
 
-inline bool operator==(const SurfaceBounds& lhs, const SurfaceBounds& rhs) {
+inline bool
+operator==(const SurfaceBounds& lhs, const SurfaceBounds& rhs) {
   if (&lhs == &rhs) {
     return true;
   }
   return (lhs.type() == rhs.type()) && (lhs.valueStore() == rhs.valueStore());
 }
 
-inline bool operator!=(const SurfaceBounds& lhs, const SurfaceBounds& rhs) {
+inline bool
+operator!=(const SurfaceBounds& lhs, const SurfaceBounds& rhs) {
   return !(lhs == rhs);
 }
 
-inline std::ostream& operator<<(std::ostream& os, const SurfaceBounds& sb) {
+inline std::ostream&
+operator<<(std::ostream& os, const SurfaceBounds& sb) {
   return sb.toStream(os);
 }
 

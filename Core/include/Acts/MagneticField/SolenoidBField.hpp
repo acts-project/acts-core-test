@@ -116,8 +116,9 @@ class SolenoidBField {
   ///
   /// @note currently the derivative is not calculated
   /// @todo return derivative
-  Vector3D getFieldGradient(const Vector3D& position,
-                            ActsMatrixD<3, 3>& /*derivative*/) const;
+  Vector3D getFieldGradient(
+      const Vector3D& position,
+      ActsMatrixD<3, 3>& /*derivative*/) const;
 
   /// @brief retrieve magnetic field value & its gradient
   ///
@@ -128,9 +129,10 @@ class SolenoidBField {
   ///
   /// @note currently the derivative is not calculated
   /// @todo return derivative
-  Vector3D getFieldGradient(const Vector3D& position,
-                            ActsMatrixD<3, 3>& /*derivative*/,
-                            Cache& /*cache*/) const;
+  Vector3D getFieldGradient(
+      const Vector3D& position,
+      ActsMatrixD<3, 3>& /*derivative*/,
+      Cache& /*cache*/) const;
 
  private:
   Config m_cfg;

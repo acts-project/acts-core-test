@@ -65,9 +65,14 @@ gridBoxFactory(size_t n = NBOXES, double hl = 1000, size_t octd = 5) {
   auto tvBounds =
       std::make_shared<CuboidVolumeBounds>(hl * 1.1, hl * 1.1, hl * 1.1);
 
-  auto tv =
-      TrackingVolume::create(tvTrf, tvBounds, std::move(boxStore),
-                             std::move(volumes), top, nullptr, "TheVolume");
+  auto tv = TrackingVolume::create(
+      tvTrf,
+      tvBounds,
+      std::move(boxStore),
+      std::move(volumes),
+      top,
+      nullptr,
+      "TheVolume");
 
   auto tg = std::make_shared<TrackingGeometry>(tv);
 
@@ -78,23 +83,37 @@ auto [volumes, tg] = gridBoxFactory();
 
 BOOST_DATA_TEST_CASE(
     bvhnavigation_test,
-    bdata::random((bdata::seed = 7, bdata::engine = std::mt19937(),
-                   bdata::distribution = std::uniform_real_distribution<>(-5,
-                                                                          5))) ^
-        bdata::random((bdata::seed = 2, bdata::engine = std::mt19937(),
-                       bdata::distribution =
-                           std::uniform_real_distribution<>(-M_PI, M_PI))) ^
-        bdata::random((bdata::seed = 3, bdata::engine = std::mt19937(),
-                       bdata::distribution =
-                           std::uniform_real_distribution<>(-100, 100))) ^
-        bdata::random((bdata::seed = 4, bdata::engine = std::mt19937(),
-                       bdata::distribution =
-                           std::uniform_real_distribution<>(-100, 100))) ^
-        bdata::random((bdata::seed = 5, bdata::engine = std::mt19937(),
-                       bdata::distribution =
-                           std::uniform_real_distribution<>(-100, 100))) ^
+    bdata::random(
+        (bdata::seed = 7,
+         bdata::engine = std::mt19937(),
+         bdata::distribution = std::uniform_real_distribution<>(-5, 5))) ^
+        bdata::random(
+            (bdata::seed = 2,
+             bdata::engine = std::mt19937(),
+             bdata::distribution =
+                 std::uniform_real_distribution<>(-M_PI, M_PI))) ^
+        bdata::random(
+            (bdata::seed = 3,
+             bdata::engine = std::mt19937(),
+             bdata::distribution =
+                 std::uniform_real_distribution<>(-100, 100))) ^
+        bdata::random(
+            (bdata::seed = 4,
+             bdata::engine = std::mt19937(),
+             bdata::distribution =
+                 std::uniform_real_distribution<>(-100, 100))) ^
+        bdata::random(
+            (bdata::seed = 5,
+             bdata::engine = std::mt19937(),
+             bdata::distribution =
+                 std::uniform_real_distribution<>(-100, 100))) ^
         bdata::xrange(NTESTS),
-    eta, phi, x, y, z, index) {
+    eta,
+    phi,
+    x,
+    y,
+    z,
+    index) {
   using namespace Acts::UnitLiterals;
   (void)index;
 
@@ -114,8 +133,8 @@ BOOST_DATA_TEST_CASE(
     Acts::NavigationOptions<Acts::Surface> no(Acts::forward, true);
     for (const auto& bndSrf : bndSurfaces) {
       const auto& srf = bndSrf->surfaceRepresentation();
-      auto sri = srf.surfaceIntersectionEstimate(tgContext, ray.origin(),
-                                                 ray.dir(), no);
+      auto sri = srf.surfaceIntersectionEstimate(
+          tgContext, ray.origin(), ray.dir(), no);
       if (sri) {
         // does intersect
         hits.push_back(std::move(sri));
@@ -144,8 +163,8 @@ BOOST_DATA_TEST_CASE(
   using ActionList = Acts::ActionList<SteppingLogger, DebugOutput>;
   using AbortConditions = Acts::AbortList<>;
 
-  Acts::PropagatorOptions<ActionList, AbortConditions> options(tgContext,
-                                                               mfContext);
+  Acts::PropagatorOptions<ActionList, AbortConditions> options(
+      tgContext, mfContext);
 
   options.debug = false;
   options.pathLimit = 20_m;
@@ -153,8 +172,8 @@ BOOST_DATA_TEST_CASE(
   // this should be irrelevant.
   double mom = 50_GeV;
 
-  Acts::CurvilinearParameters startPar(nullptr, ray.origin(), ray.dir() * mom,
-                                       +1, 0.);
+  Acts::CurvilinearParameters startPar(
+      nullptr, ray.origin(), ray.dir() * mom, +1, 0.);
 
   const auto result = propagator.propagate(startPar, options).value();
 

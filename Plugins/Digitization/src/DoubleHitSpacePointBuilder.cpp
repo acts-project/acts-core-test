@@ -21,7 +21,8 @@ Acts::SpacePointBuilder<Acts::DoubleHitSpacePoint>::SpacePointBuilder(
 
 double
 Acts::SpacePointBuilder<Acts::DoubleHitSpacePoint>::differenceOfClustersChecked(
-    const Vector3D& pos1, const Vector3D& pos2) const {
+    const Vector3D& pos1,
+    const Vector3D& pos2) const {
   // Check if measurements are close enough to each other
   if ((pos1 - pos2).norm() > m_cfg.diffDist) {
     return -1.;
@@ -50,7 +51,8 @@ Acts::SpacePointBuilder<Acts::DoubleHitSpacePoint>::differenceOfClustersChecked(
   return diffTheta2 + diffPhi2;
 }
 
-Acts::Vector2D Acts::SpacePointBuilder<Acts::DoubleHitSpacePoint>::localCoords(
+Acts::Vector2D
+Acts::SpacePointBuilder<Acts::DoubleHitSpacePoint>::localCoords(
     const PlanarModuleCluster& cluster) const {
   // Local position information
   auto par = cluster.parameters();
@@ -58,8 +60,10 @@ Acts::Vector2D Acts::SpacePointBuilder<Acts::DoubleHitSpacePoint>::localCoords(
   return local;
 }
 
-Acts::Vector3D Acts::SpacePointBuilder<Acts::DoubleHitSpacePoint>::globalCoords(
-    const GeometryContext& gctx, const PlanarModuleCluster& cluster) const {
+Acts::Vector3D
+Acts::SpacePointBuilder<Acts::DoubleHitSpacePoint>::globalCoords(
+    const GeometryContext& gctx,
+    const PlanarModuleCluster& cluster) const {
   // Receive corresponding surface
   auto& clusterSurface = cluster.referenceSurface();
 
@@ -70,12 +74,14 @@ Acts::Vector3D Acts::SpacePointBuilder<Acts::DoubleHitSpacePoint>::globalCoords(
   return pos;
 }
 
-void Acts::SpacePointBuilder<Acts::DoubleHitSpacePoint>::makeClusterPairs(
+void
+Acts::SpacePointBuilder<Acts::DoubleHitSpacePoint>::makeClusterPairs(
     const GeometryContext& gctx,
     const std::vector<const PlanarModuleCluster*>& clustersFront,
     const std::vector<const PlanarModuleCluster*>& clustersBack,
-    std::vector<std::pair<const PlanarModuleCluster*,
-                          const PlanarModuleCluster*>>& clusterPairs) const {
+    std::vector<
+        std::pair<const PlanarModuleCluster*, const PlanarModuleCluster*>>&
+        clusterPairs) const {
   // Return if no clusters are given in a vector
   if (clustersFront.empty() || clustersBack.empty()) {
     return;
@@ -108,11 +114,12 @@ void Acts::SpacePointBuilder<Acts::DoubleHitSpacePoint>::makeClusterPairs(
 
     // Store the best (=closest) result
     if (clusterMinDist < clustersBack.size()) {
-      std::pair<const Acts::PlanarModuleCluster*,
-                const Acts::PlanarModuleCluster*>
+      std::pair<
+          const Acts::PlanarModuleCluster*,
+          const Acts::PlanarModuleCluster*>
           clusterPair;
-      clusterPair = std::make_pair(clustersFront[iClustersFront],
-                                   clustersBack[clusterMinDist]);
+      clusterPair = std::make_pair(
+          clustersFront[iClustersFront], clustersBack[clusterMinDist]);
       clusterPairs.push_back(clusterPair);
     }
   }
@@ -163,8 +170,11 @@ Acts::SpacePointBuilder<Acts::DoubleHitSpacePoint>::endsOfStrip(
   return std::make_pair(topGlobal, bottomGlobal);
 }
 
-double Acts::SpacePointBuilder<Acts::DoubleHitSpacePoint>::calcPerpProj(
-    const Acts::Vector3D& a, const Acts::Vector3D& c, const Acts::Vector3D& q,
+double
+Acts::SpacePointBuilder<Acts::DoubleHitSpacePoint>::calcPerpProj(
+    const Acts::Vector3D& a,
+    const Acts::Vector3D& c,
+    const Acts::Vector3D& q,
     const Acts::Vector3D& r) const {
   /// This approach assumes that no vertex is available. This option aims to
   /// approximate the space points from cosmic data.
@@ -189,7 +199,8 @@ double Acts::SpacePointBuilder<Acts::DoubleHitSpacePoint>::calcPerpProj(
   return 1.;
 }
 
-bool Acts::SpacePointBuilder<Acts::DoubleHitSpacePoint>::recoverSpacePoint(
+bool
+Acts::SpacePointBuilder<Acts::DoubleHitSpacePoint>::recoverSpacePoint(
     Acts::SpacePointBuilder<DoubleHitSpacePoint>::SpacePointParameters& spaPoPa)
     const {
   /// Consider some cases that would allow an easy exit
@@ -269,11 +280,12 @@ bool Acts::SpacePointBuilder<Acts::DoubleHitSpacePoint>::recoverSpacePoint(
   return false;
 }
 
-void Acts::SpacePointBuilder<Acts::DoubleHitSpacePoint>::calculateSpacePoints(
+void
+Acts::SpacePointBuilder<Acts::DoubleHitSpacePoint>::calculateSpacePoints(
     const GeometryContext& gctx,
-    const std::vector<std::pair<const Acts::PlanarModuleCluster*,
-                                const Acts::PlanarModuleCluster*>>&
-        clusterPairs,
+    const std::vector<std::pair<
+        const Acts::PlanarModuleCluster*,
+        const Acts::PlanarModuleCluster*>>& clusterPairs,
     std::vector<Acts::DoubleHitSpacePoint>& spacePoints) const {
   /// Source of algorithm: Athena, SiSpacePointMakerTool::makeSCT_SpacePoint()
 
@@ -337,8 +349,9 @@ void Acts::SpacePointBuilder<Acts::DoubleHitSpacePoint>::calculateSpacePoints(
 
     // Check if m and n can be resolved in the interval (-1, 1)
     if (fabs(spaPoPa.m) <= spaPoPa.limit &&
-        fabs(spaPoPa.n = -spaPoPa.t.dot(spaPoPa.qs) /
-                         spaPoPa.r.dot(spaPoPa.qs)) <= spaPoPa.limit) {
+        fabs(
+            spaPoPa.n = -spaPoPa.t.dot(spaPoPa.qs) /
+                        spaPoPa.r.dot(spaPoPa.qs)) <= spaPoPa.limit) {
       // Store the space point
       Acts::DoubleHitSpacePoint sp;
       sp.clusterFront = cp.first;

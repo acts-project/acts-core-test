@@ -74,12 +74,13 @@ using has_phi_method = concept ::is_detected<phi_method_t, T>;
 /// in case of dynamic size, will abort execution if that is not the case.
 /// @return The value of the angle in the transverse plane.
 template <typename Derived>
-double phi(const Eigen::MatrixBase<Derived>& v) noexcept {
+double
+phi(const Eigen::MatrixBase<Derived>& v) noexcept {
   constexpr int rows = Eigen::MatrixBase<Derived>::RowsAtCompileTime;
   if constexpr (rows != -1) {
     // static size, do compile time check
-    static_assert(rows >= 2,
-                  "Phi function not valid for vectors not at least 2D");
+    static_assert(
+        rows >= 2, "Phi function not valid for vectors not at least 2D");
   } else {
     // dynamic size
     if (v.rows() < 2) {
@@ -97,9 +98,11 @@ double phi(const Eigen::MatrixBase<Derived>& v) noexcept {
 /// @tparam T anything that has a phi method
 /// @param v Any type that implements a phi method
 /// @return The phi value
-template <typename T,
-          std::enable_if_t<detail::has_phi_method<T>::value, int> = 0>
-double phi(const T& v) noexcept {
+template <
+    typename T,
+    std::enable_if_t<detail::has_phi_method<T>::value, int> = 0>
+double
+phi(const T& v) noexcept {
   return v.phi();
 }
 
@@ -110,12 +113,13 @@ double phi(const T& v) noexcept {
 /// in case of dynamic size, will abort execution if that is not the case.
 /// @return The transverse radius value.
 template <typename Derived>
-double perp(const Eigen::MatrixBase<Derived>& v) noexcept {
+double
+perp(const Eigen::MatrixBase<Derived>& v) noexcept {
   constexpr int rows = Eigen::MatrixBase<Derived>::RowsAtCompileTime;
   if constexpr (rows != -1) {
     // static size, do compile time check
-    static_assert(rows >= 2,
-                  "Perp function not valid for vectors not at least 2D");
+    static_assert(
+        rows >= 2, "Perp function not valid for vectors not at least 2D");
   } else {
     // dynamic size
     if (v.rows() < 2) {
@@ -134,7 +138,8 @@ double perp(const Eigen::MatrixBase<Derived>& v) noexcept {
 /// in case of dynamic size, will abort execution if that is not the case.
 /// @return The theta value
 template <typename Derived>
-double theta(const Eigen::MatrixBase<Derived>& v) noexcept {
+double
+theta(const Eigen::MatrixBase<Derived>& v) noexcept {
   constexpr int rows = Eigen::MatrixBase<Derived>::RowsAtCompileTime;
   if constexpr (rows != -1) {
     // static size, do compile time check
@@ -157,7 +162,8 @@ double theta(const Eigen::MatrixBase<Derived>& v) noexcept {
 /// in case of dynamic size, will abort execution if that is not the case.
 /// @return The pseudorapidity value
 template <typename Derived>
-double eta(const Eigen::MatrixBase<Derived>& v) noexcept {
+double
+eta(const Eigen::MatrixBase<Derived>& v) noexcept {
   constexpr int rows = Eigen::MatrixBase<Derived>::RowsAtCompileTime;
   if constexpr (rows != -1) {
     // static size, do compile time check
@@ -179,7 +185,8 @@ double eta(const Eigen::MatrixBase<Derived>& v) noexcept {
 /// @param [in] m Matrix that will be used for cross products
 /// @param [in] v Vector for cross products
 /// @return Constructed matrix
-inline ActsMatrixD<3, 3> cross(const ActsMatrixD<3, 3>& m, const Vector3D& v) {
+inline ActsMatrixD<3, 3>
+cross(const ActsMatrixD<3, 3>& m, const Vector3D& v) {
   ActsMatrixD<3, 3> r;
   r.col(0) = m.col(0).cross(v);
   r.col(1) = m.col(1).cross(v);
@@ -192,7 +199,8 @@ inline ActsMatrixD<3, 3> cross(const ActsMatrixD<3, 3>& m, const Vector3D& v) {
 ///
 /// @param spacePointVec The SpacePointVector
 /// @return Reference to the time component
-inline ParValue_t& time(SpacePointVector& spacePointVec) {
+inline ParValue_t&
+time(SpacePointVector& spacePointVec) {
   return spacePointVec[3];
 }
 
@@ -201,7 +209,8 @@ inline ParValue_t& time(SpacePointVector& spacePointVec) {
 ///
 /// @param spacePointVec The SpacePointVector
 /// @return Reference to the time component
-inline const ParValue_t& time(const SpacePointVector& spacePointVec) {
+inline const ParValue_t&
+time(const SpacePointVector& spacePointVec) {
   return spacePointVec[3];
 }
 
@@ -209,7 +218,8 @@ inline const ParValue_t& time(const SpacePointVector& spacePointVec) {
 ///
 /// @param boundVec The BoundVector
 /// @return Reference to the time component
-inline ParValue_t& time(BoundVector& boundVec) {
+inline ParValue_t&
+time(BoundVector& boundVec) {
   return boundVec[eT];
 }
 
@@ -218,7 +228,8 @@ inline ParValue_t& time(BoundVector& boundVec) {
 ///
 /// @param boundVec The BoundVector
 /// @return Reference to the time component
-inline const ParValue_t& time(const BoundVector& boundVec) {
+inline const ParValue_t&
+time(const BoundVector& boundVec) {
   return boundVec[eT];
 }
 
@@ -226,7 +237,8 @@ inline const ParValue_t& time(const BoundVector& boundVec) {
 ///
 /// @param freeVec The FreeVector
 /// @return Reference to the time component
-inline ParValue_t& time(FreeVector& freeVec) {
+inline ParValue_t&
+time(FreeVector& freeVec) {
   return freeVec[7];
 }
 
@@ -235,7 +247,8 @@ inline ParValue_t& time(FreeVector& freeVec) {
 ///
 /// @param freeVec The FreeVector
 /// @return Reference to the time component
-inline const ParValue_t& time(const FreeVector& freeVec) {
+inline const ParValue_t&
+time(const FreeVector& freeVec) {
   return freeVec[7];
 }
 
@@ -243,7 +256,8 @@ inline const ParValue_t& time(const FreeVector& freeVec) {
 ///
 /// @param spacePointVec The SpacePointVector
 /// @return Reference to the position components
-inline auto position(SpacePointVector& spacePointVec) {
+inline auto
+position(SpacePointVector& spacePointVec) {
   return spacePointVec.head<3>();
 }
 
@@ -252,7 +266,8 @@ inline auto position(SpacePointVector& spacePointVec) {
 ///
 /// @param spacePointVec The SpacePointVector
 /// @return Reference to the position components
-inline auto position(const SpacePointVector& spacePointVec) {
+inline auto
+position(const SpacePointVector& spacePointVec) {
   return spacePointVec.head<3>();
 }
 
@@ -261,7 +276,8 @@ inline auto position(const SpacePointVector& spacePointVec) {
 ///
 /// @param freeVec The SpacePointVector
 /// @return Reference to the position components
-inline auto position(FreeVector& freeVec) {
+inline auto
+position(FreeVector& freeVec) {
   return freeVec.head<3>();
 }
 
@@ -270,7 +286,8 @@ inline auto position(FreeVector& freeVec) {
 ///
 /// @param freeVec The SpacePointVector
 /// @return Reference to the position components
-inline auto position(const FreeVector& freeVec) {
+inline auto
+position(const FreeVector& freeVec) {
   return freeVec.head<3>();
 }
 
@@ -278,7 +295,8 @@ inline auto position(const FreeVector& freeVec) {
 
 namespace detail {
 
-inline double roundWithPrecision(double val, int precision) {
+inline double
+roundWithPrecision(double val, int precision) {
   if (val < 0 && std::abs(val) * std::pow(10, precision) < 1.) {
     return -val;
   }
@@ -291,8 +309,11 @@ inline double roundWithPrecision(double val, int precision) {
 /// @param precision Numeric output precision
 /// @param offset Offset in front of matrix lines
 /// @return The printed string
-inline std::string toString(const ActsMatrixXd& matrix, int precision = 4,
-                            const std::string& offset = "") {
+inline std::string
+toString(
+    const ActsMatrixXd& matrix,
+    int precision = 4,
+    const std::string& offset = "") {
   std::ostringstream sout;
 
   sout << std::setiosflags(std::ios::fixed) << std::setprecision(precision);
@@ -334,8 +355,8 @@ inline std::string toString(const ActsMatrixXd& matrix, int precision = 4,
 /// @param matrix The translation to print
 /// @param precision Numeric output precision
 /// @return The printed string
-inline std::string toString(const Acts::Translation3D& translation,
-                            int precision = 4) {
+inline std::string
+toString(const Acts::Translation3D& translation, int precision = 4) {
   Acts::Vector3D trans;
   trans[0] = translation.x();
   trans[1] = translation.y();
@@ -348,8 +369,11 @@ inline std::string toString(const Acts::Translation3D& translation,
 /// @param precision Numeric output precision
 /// @param offset Offset in front of matrix lines
 /// @return The printed string
-inline std::string toString(const Acts::Transform3D& transform,
-                            int precision = 4, const std::string& offset = "") {
+inline std::string
+toString(
+    const Acts::Transform3D& transform,
+    int precision = 4,
+    const std::string& offset = "") {
   std::ostringstream sout;
   sout << "Translation : " << toString(transform.translation(), precision)
        << std::endl;
@@ -365,8 +389,8 @@ inline std::string toString(const Acts::Transform3D& transform,
 /// @param items The vector of @c shared_ptr
 /// @return The unpacked vector
 template <typename T>
-std::vector<T*> unpack_shared_vector(
-    const std::vector<std::shared_ptr<T>>& items) {
+std::vector<T*>
+unpack_shared_vector(const std::vector<std::shared_ptr<T>>& items) {
   std::vector<T*> rawPtrs;
   rawPtrs.reserve(items.size());
   for (const std::shared_ptr<T>& item : items) {
@@ -381,8 +405,8 @@ std::vector<T*> unpack_shared_vector(
 /// @param items The vector of @c shared_ptr
 /// @return The unpacked vector
 template <typename T>
-std::vector<const T*> unpack_shared_vector(
-    const std::vector<std::shared_ptr<const T>>& items) {
+std::vector<const T*>
+unpack_shared_vector(const std::vector<std::shared_ptr<const T>>& items) {
   std::vector<const T*> rawPtrs;
   rawPtrs.reserve(items.size());
   for (const std::shared_ptr<const T>& item : items) {
@@ -408,16 +432,20 @@ std::vector<const T*> unpack_shared_vector(
 /// @param args Additional arguments passed to @c Callable::invoke().
 /// @note @c Callable is expected to have a static member function @c invoke
 /// that is callable with @c Args
-template <template <size_t> class Callable, size_t N, size_t NMAX,
-          typename... Args>
-decltype(Callable<N>::invoke(std::declval<Args>()...)) template_switch(
-    size_t v, Args&&... args) {
+template <
+    template <size_t>
+    class Callable,
+    size_t N,
+    size_t NMAX,
+    typename... Args>
+decltype(Callable<N>::invoke(std::declval<Args>()...))
+template_switch(size_t v, Args&&... args) {
   if (v == N) {
     return Callable<N>::invoke(std::forward<Args>(args)...);
   }
   if constexpr (N < NMAX) {
-    return template_switch<Callable, N + 1, NMAX>(v,
-                                                  std::forward<Args>(args)...);
+    return template_switch<Callable, N + 1, NMAX>(
+        v, std::forward<Args>(args)...);
   }
   std::cerr << "template_switch<Fn, " << N << ", " << NMAX << ">(v=" << v
             << ") is not valid (v > NMAX)" << std::endl;

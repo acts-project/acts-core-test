@@ -42,17 +42,19 @@ BOOST_AUTO_TEST_CASE(PerigeeSurfaceConstruction) {
   /// Constructor with Vector3D
   Vector3D unitXYZ{1., 1., 1.};
   auto perigeeSurfaceObject = Surface::makeShared<PerigeeSurface>(unitXYZ);
-  BOOST_CHECK_EQUAL(Surface::makeShared<PerigeeSurface>(unitXYZ)->type(),
-                    Surface::Perigee);
+  BOOST_CHECK_EQUAL(
+      Surface::makeShared<PerigeeSurface>(unitXYZ)->type(), Surface::Perigee);
   //
   /// Constructor with transform pointer, null or valid
   Translation3D translation{0., 1., 2.};
   auto pTransform = std::make_shared<const Transform3D>(translation);
   auto pNullTransform = std::make_shared<const Transform3D>();
-  BOOST_CHECK_EQUAL(Surface::makeShared<PerigeeSurface>(pNullTransform)->type(),
-                    Surface::Perigee);
-  BOOST_CHECK_EQUAL(Surface::makeShared<PerigeeSurface>(pTransform)->type(),
-                    Surface::Perigee);
+  BOOST_CHECK_EQUAL(
+      Surface::makeShared<PerigeeSurface>(pNullTransform)->type(),
+      Surface::Perigee);
+  BOOST_CHECK_EQUAL(
+      Surface::makeShared<PerigeeSurface>(pTransform)->type(),
+      Surface::Perigee);
   //
   /// Copy constructor
   auto copiedPerigeeSurface =
@@ -79,8 +81,8 @@ BOOST_AUTO_TEST_CASE(PerigeeSurfaceProperties) {
   BOOST_CHECK_EQUAL(perigeeSurfaceObject->type(), Surface::Perigee);
   //
   /// Test name
-  BOOST_CHECK_EQUAL(perigeeSurfaceObject->name(),
-                    std::string("Acts::PerigeeSurface"));
+  BOOST_CHECK_EQUAL(
+      perigeeSurfaceObject->name(), std::string("Acts::PerigeeSurface"));
   //
   /// Test dump
   boost::test_tools::output_test_stream dumpOuput;

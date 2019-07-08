@@ -50,9 +50,11 @@ MagneticFieldContext mfContext = MagneticFieldContext();
 /// @param nnomal The nominal normal direction
 /// @param angleT Rotation around the norminal normal
 /// @param angleU Roation around the original U axis
-std::shared_ptr<Transform3D> createCylindricTransform(const Vector3D& nposition,
-                                                      double angleX,
-                                                      double angleY) {
+std::shared_ptr<Transform3D>
+createCylindricTransform(
+    const Vector3D& nposition,
+    double angleX,
+    double angleY) {
   Transform3D ctransform;
   ctransform.setIdentity();
   ctransform.pretranslate(nposition);
@@ -68,10 +70,12 @@ std::shared_ptr<Transform3D> createCylindricTransform(const Vector3D& nposition,
 /// @param nnomal The nominal normal direction
 /// @param angleT Rotation around the norminal normal
 /// @param angleU Roation around the original U axis
-std::shared_ptr<Transform3D> createPlanarTransform(const Vector3D& nposition,
-                                                   const Vector3D& nnormal,
-                                                   double angleT,
-                                                   double angleU) {
+std::shared_ptr<Transform3D>
+createPlanarTransform(
+    const Vector3D& nposition,
+    const Vector3D& nnormal,
+    double angleT,
+    double angleU) {
   // the rotation of the destination surface
   Vector3D T = nnormal.normalized();
   Vector3D U = std::abs(T.dot(Vector3D::UnitZ())) < 0.99
@@ -109,7 +113,8 @@ std::shared_ptr<Transform3D> createPlanarTransform(const Vector3D& nposition,
 /// Az ->P[6]  dAz/   P[14]   P[22]   P[30]   P[38]   P[46]  P[54]
 /// CM ->P[7]  dCM/   P[15]   P[23]   P[31]   P[39]   P[47]  P[55]
 
-BoundToFreeMatrix convertToMatrix(const double* P) {
+BoundToFreeMatrix
+convertToMatrix(const double* P) {
   // initialize to zero
   BoundToFreeMatrix jMatrix = BoundToFreeMatrix::Zero();
   for (size_t j = 0; j < BoundParsDim; ++j) {
@@ -127,7 +132,8 @@ BoundToFreeMatrix convertToMatrix(const double* P) {
 /// @tparam Parameters the parameter type
 /// @param pars the parameter object
 template <typename Parameters>
-void testJacobianToGlobal(const Parameters& pars) {
+void
+testJacobianToGlobal(const Parameters& pars) {
   // Jacobian creation for Propagator/Steppers
   // a) ATLAS stepper
   AtlasStepperType::State astepState(tgContext, mfContext, pars);
@@ -174,8 +180,8 @@ BOOST_AUTO_TEST_CASE(JacobianCylinderToGlobalTest) {
   BoundVector pars;
   pars << 182.34, -82., 0.134, 0.85, 1. / (100_GeV), 0;
 
-  BoundParameters atCylinder(tgContext, std::move(covPtr), std::move(pars),
-                             cSurface);
+  BoundParameters atCylinder(
+      tgContext, std::move(covPtr), std::move(pars), cSurface);
 
   // run the test
   testJacobianToGlobal(atCylinder);
@@ -196,8 +202,8 @@ BOOST_AUTO_TEST_CASE(JacobianDiscToGlobalTest) {
   BoundVector pars;
   pars << 192.34, 1.823, 0.734, 0.235, 1. / (100_GeV), 0;
 
-  BoundParameters atDisc(tgContext, std::move(covPtr), std::move(pars),
-                         dSurface);
+  BoundParameters atDisc(
+      tgContext, std::move(covPtr), std::move(pars), dSurface);
 
   // run the test
   testJacobianToGlobal(atDisc);
@@ -220,8 +226,8 @@ BOOST_AUTO_TEST_CASE(JacobianPlaneToGlobalTest) {
   BoundVector pars;
   pars << 12.34, -8722., 2.134, 0.85, 1. / (100_GeV), 0;
 
-  BoundParameters atPlane(tgContext, std::move(covPtr), std::move(pars),
-                          pSurface);
+  BoundParameters atPlane(
+      tgContext, std::move(covPtr), std::move(pars), pSurface);
 
   // run the test
   testJacobianToGlobal(atPlane);
@@ -239,8 +245,8 @@ BOOST_AUTO_TEST_CASE(JacobianPerigeeToGlobalTest) {
   BoundVector pars;
   pars << -3.34, -822., -0.734, 0.85, 1. / (100_GeV), 0;
 
-  BoundParameters perigee(tgContext, std::move(covPtr), std::move(pars),
-                          pSurface);
+  BoundParameters perigee(
+      tgContext, std::move(covPtr), std::move(pars), pSurface);
 
   // run the test
   testJacobianToGlobal(perigee);
@@ -260,8 +266,8 @@ BOOST_AUTO_TEST_CASE(JacobianStrawToGlobalTest) {
   BoundVector pars;
   pars << -8.34, 812., 0.734, 0.25, 1. / (100_GeV), 0;
 
-  BoundParameters atStraw(tgContext, std::move(covPtr), std::move(pars),
-                          sSurface);
+  BoundParameters atStraw(
+      tgContext, std::move(covPtr), std::move(pars), sSurface);
 
   // run the test
   testJacobianToGlobal(atStraw);

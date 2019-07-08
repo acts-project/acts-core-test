@@ -32,8 +32,10 @@ namespace Acts {
 /// @tparam input_track_t Track object type
 /// @tparam propagator_t Propagator type
 
-template <typename bfield_t, typename input_track_t,
-          typename propagator_t = Propagator<EigenStepper<bfield_t>>>
+template <
+    typename bfield_t,
+    typename input_track_t,
+    typename propagator_t = Propagator<EigenStepper<bfield_t>>>
 class FullBilloirVertexFitter
     : public IVertexFitter<input_track_t, propagator_t> {
  public:
@@ -59,10 +61,11 @@ class FullBilloirVertexFitter
           propagator(propagatorIn) {}
 
     /// Constructor with default propagator
-    template <typename T = propagator_t,
-              std::enable_if_t<
-                  std::is_same<T, Propagator<EigenStepper<bfield_t>>>::value,
-                  int> = 0>
+    template <
+        typename T = propagator_t,
+        std::enable_if_t<
+            std::is_same<T, Propagator<EigenStepper<bfield_t>>>::value,
+            int> = 0>
     Config(const bfield_t& bIn)
         : bField(bIn),
           ltConfig(bIn),
@@ -75,8 +78,9 @@ class FullBilloirVertexFitter
   /// @brief Constructor used if input_track_t type == BoundParameters
   ///
   /// @param cfg Configuration object
-  template <typename T = input_track_t,
-            std::enable_if_t<std::is_same<T, BoundParameters>::value, int> = 0>
+  template <
+      typename T = input_track_t,
+      std::enable_if_t<std::is_same<T, BoundParameters>::value, int> = 0>
   FullBilloirVertexFitter(const Config& cfg)
       : m_cfg(cfg), extractParameters([](T params) { return params; }) {}
 
@@ -84,8 +88,9 @@ class FullBilloirVertexFitter
   ///
   /// @param cfg Configuration object
   /// @param func Function extracting BoundParameters from input_track_t object
-  FullBilloirVertexFitter(const Config& cfg,
-                          std::function<BoundParameters(input_track_t)> func)
+  FullBilloirVertexFitter(
+      const Config& cfg,
+      std::function<BoundParameters(input_track_t)> func)
       : m_cfg(cfg), extractParameters(func) {}
 
   /// @brief Default destructor
@@ -118,8 +123,9 @@ class FullBilloirVertexFitter
   /// @param thetaIn Theta
   ///
   /// @return Pair of (corrected phi, corrected theta)
-  std::pair<double, double> correctPhiThetaPeriodicity(double phiIn,
-                                                       double thetaIn) const;
+  std::pair<double, double> correctPhiThetaPeriodicity(
+      double phiIn,
+      double thetaIn) const;
 };
 
 }  // namespace Acts

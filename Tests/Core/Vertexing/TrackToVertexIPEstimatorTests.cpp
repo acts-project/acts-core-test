@@ -110,8 +110,9 @@ BOOST_AUTO_TEST_CASE(track_to_vertex_ip_estimator_test) {
   double z0_v = z;
 
   // Create TrackToVertexIPEstimator
-  TrackToVertexIPEstimator<BoundParameters,
-                           Propagator<EigenStepper<ConstantBField>>>
+  TrackToVertexIPEstimator<
+      BoundParameters,
+      Propagator<EigenStepper<ConstantBField>>>
       ipEst;
 
   // Construct random track emerging from vicinity of vertex position

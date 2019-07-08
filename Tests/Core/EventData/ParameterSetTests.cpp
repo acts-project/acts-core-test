@@ -35,11 +35,13 @@ namespace {
 // tolerance used for floating point comparison in this translation unit
 const double tol = 1e-6;
 
-double get_cyclic_value(double value, double min, double max) {
+double
+get_cyclic_value(double value, double min, double max) {
   return value - (max - min) * std::floor((value - min) / (max - min));
 }
 
-double get_cyclic_difference(double a, double b, double min, double max) {
+double
+get_cyclic_difference(double a, double b, double min, double max) {
   const double period = max - min;
   const double half_period = period / 2;
   a = get_cyclic_value(a, min, max);
@@ -52,7 +54,8 @@ double get_cyclic_difference(double a, double b, double min, double max) {
   return diff;
 }
 
-void check_residuals_for_bound_parameters() {
+void
+check_residuals_for_bound_parameters() {
   const double max = par_type_t<ParID_t::eTHETA>::max;
   const double min = par_type_t<ParID_t::eTHETA>::min;
   double theta_1 = 0.7 * M_PI;
@@ -114,7 +117,8 @@ void check_residuals_for_bound_parameters() {
   CHECK_CLOSE_REL(bound2.residual(bound1), dTheta, tol);
 }
 
-void check_residuals_for_cyclic_parameters() {
+void
+check_residuals_for_cyclic_parameters() {
   const double max = par_type_t<ParID_t::ePHI>::max;
   const double min = par_type_t<ParID_t::ePHI>::min;
 
@@ -149,7 +153,8 @@ void check_residuals_for_cyclic_parameters() {
   CHECK_CLOSE_REL(cyclic2.residual(cyclic1), -dPhi, tol);
 }
 
-void random_residual_tests() {
+void
+random_residual_tests() {
   // random number generators
   std::default_random_engine e;
   std::uniform_real_distribution<float> uniform_dist(-1000, 300);
@@ -206,10 +211,12 @@ void random_residual_tests() {
     // phi is a cyclic parameter -> check that (unsigned) difference is not
     // larger than half period
     // check that corrected(corrected(phi_2) + residual) == corrected(phi_1)
-    if (std::abs(get_cyclic_value(
-                     get_cyclic_value(phi_2, phi_min, phi_max) + residual(2),
-                     phi_min, phi_max) -
-                 get_cyclic_value(phi_1, phi_min, phi_max)) > tol or
+    if (std::abs(
+            get_cyclic_value(
+                get_cyclic_value(phi_2, phi_min, phi_max) + residual(2),
+                phi_min,
+                phi_max) -
+            get_cyclic_value(phi_1, phi_min, phi_max)) > tol or
         std::abs(residual(2)) > (phi_max - phi_min) / 2) {
       BOOST_CHECK(false);
       break;
@@ -282,12 +289,12 @@ BOOST_AUTO_TEST_CASE(parset_consistency_tests) {
   // check stored covariance
   BOOST_CHECK(parSet_with_cov.getCovariance() != 0);
   BOOST_CHECK(*parSet_with_cov.getCovariance() == cov);
-  BOOST_CHECK(parSet_with_cov.getUncertainty<ParID_t::eLOC_0>() ==
-              sqrt(cov(0, 0)));
-  BOOST_CHECK(parSet_with_cov.getUncertainty<ParID_t::eLOC_1>() ==
-              sqrt(cov(1, 1)));
-  BOOST_CHECK(parSet_with_cov.getUncertainty<ParID_t::ePHI>() ==
-              sqrt(cov(2, 2)));
+  BOOST_CHECK(
+      parSet_with_cov.getUncertainty<ParID_t::eLOC_0>() == sqrt(cov(0, 0)));
+  BOOST_CHECK(
+      parSet_with_cov.getUncertainty<ParID_t::eLOC_1>() == sqrt(cov(1, 1)));
+  BOOST_CHECK(
+      parSet_with_cov.getUncertainty<ParID_t::ePHI>() == sqrt(cov(2, 2)));
 
   // same parameter set without covariance matrix
   ParameterSet<ParID_t::eLOC_0, ParID_t::eLOC_1, ParID_t::ePHI>
@@ -297,8 +304,8 @@ BOOST_AUTO_TEST_CASE(parset_consistency_tests) {
   BOOST_CHECK(parSet_without_cov.getUncertainty<ParID_t::eLOC_0>() < 0);
   BOOST_CHECK(parSet_without_cov.getUncertainty<ParID_t::eLOC_1>() < 0);
   BOOST_CHECK(parSet_without_cov.getUncertainty<ParID_t::ePHI>() < 0);
-  BOOST_CHECK(parSet_without_cov.getParameters() ==
-              parSet_with_cov.getParameters());
+  BOOST_CHECK(
+      parSet_without_cov.getParameters() == parSet_with_cov.getParameters());
 
   // set new covariance matrix
   parSet_without_cov.setCovariance(
@@ -484,22 +491,36 @@ BOOST_AUTO_TEST_CASE(parset_projection_tests) {
       0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1;
 
   BOOST_CHECK((ParameterSet<ParID_t::ePHI>::projector() == phi_proj));
-  BOOST_CHECK((ParameterSet<ParID_t::eLOC_0, ParID_t::eQOP>::projector() ==
-               loc0_qop_proj));
-  BOOST_CHECK((ParameterSet<ParID_t::eLOC_1, ParID_t::eTHETA>::projector() ==
-               loc1_theta_proj));
-  BOOST_CHECK((ParameterSet<ParID_t::eLOC_0, ParID_t::eLOC_1,
-                            ParID_t::ePHI>::projector() == loc0_loc1_phi_proj));
   BOOST_CHECK(
-      (ParameterSet<ParID_t::eLOC_0, ParID_t::ePHI, ParID_t::eTHETA,
-                    ParID_t::eQOP>::projector() == loc0_phi_theta_qop_proj));
-  BOOST_CHECK((ParameterSet<ParID_t::eLOC_0, ParID_t::eLOC_1, ParID_t::ePHI,
-                            ParID_t::eTHETA, ParID_t::eQOP>::projector() ==
-               loc0_loc1_phi_theta_qop_proj));
+      (ParameterSet<ParID_t::eLOC_0, ParID_t::eQOP>::projector() ==
+       loc0_qop_proj));
   BOOST_CHECK(
-      (ParameterSet<ParID_t::eLOC_0, ParID_t::eLOC_1, ParID_t::ePHI,
-                    ParID_t::eTHETA, ParID_t::eQOP, ParID_t::eT>::projector() ==
-       loc0_loc1_phi_theta_qop_t_proj));
+      (ParameterSet<ParID_t::eLOC_1, ParID_t::eTHETA>::projector() ==
+       loc1_theta_proj));
+  BOOST_CHECK(
+      (ParameterSet<ParID_t::eLOC_0, ParID_t::eLOC_1, ParID_t::ePHI>::
+           projector() == loc0_loc1_phi_proj));
+  BOOST_CHECK(
+      (ParameterSet<
+           ParID_t::eLOC_0,
+           ParID_t::ePHI,
+           ParID_t::eTHETA,
+           ParID_t::eQOP>::projector() == loc0_phi_theta_qop_proj));
+  BOOST_CHECK(
+      (ParameterSet<
+           ParID_t::eLOC_0,
+           ParID_t::eLOC_1,
+           ParID_t::ePHI,
+           ParID_t::eTHETA,
+           ParID_t::eQOP>::projector() == loc0_loc1_phi_theta_qop_proj));
+  BOOST_CHECK(
+      (ParameterSet<
+           ParID_t::eLOC_0,
+           ParID_t::eLOC_1,
+           ParID_t::ePHI,
+           ParID_t::eTHETA,
+           ParID_t::eQOP,
+           ParID_t::eT>::projector() == loc0_loc1_phi_theta_qop_t_proj));
 }
 
 /**
@@ -526,11 +547,13 @@ BOOST_AUTO_TEST_CASE(parset_residual_tests) {
 
   // check bound parameter type
   ParameterSet<ParID_t::eTHETA> bound(nullptr, small_number);
-  BOOST_CHECK((bound.getParameter<ParID_t::eTHETA>() ==
-               par_type_t<ParID_t::eTHETA>::min));
+  BOOST_CHECK(
+      (bound.getParameter<ParID_t::eTHETA>() ==
+       par_type_t<ParID_t::eTHETA>::min));
   bound.setParameter<ParID_t::eTHETA>(large_number);
-  BOOST_CHECK((bound.getParameter<ParID_t::eTHETA>() ==
-               par_type_t<ParID_t::eTHETA>::max));
+  BOOST_CHECK(
+      (bound.getParameter<ParID_t::eTHETA>() ==
+       par_type_t<ParID_t::eTHETA>::max));
   bound.setParameter<ParID_t::eTHETA>(normal_number);
   BOOST_CHECK((bound.getParameter<ParID_t::eTHETA>() == normal_number));
 

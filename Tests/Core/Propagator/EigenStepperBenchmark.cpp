@@ -21,7 +21,8 @@ namespace po = boost::program_options;
 using namespace Acts;
 using namespace Acts::UnitLiterals;
 
-int main(int argc, char* argv[]) {
+int
+main(int argc, char* argv[]) {
   unsigned int toys = 1;
   double ptInGeV = 1;
   double BzInT = 1;
@@ -62,8 +63,9 @@ int main(int argc, char* argv[]) {
   ACTS_LOCAL_LOGGER(std::move(myLogger));
 
   // print information about profiling setup
-  ACTS_INFO("propagating " << toys << " tracks with pT = " << ptInGeV
-                           << "GeV in a " << BzInT << "T B-field");
+  ACTS_INFO(
+      "propagating " << toys << " tracks with pT = " << ptInGeV << "GeV in a "
+                     << BzInT << "T B-field");
 
   using BField_type = ConstantBField;
   using Stepper_type = EigenStepper<BField_type>;
@@ -98,10 +100,11 @@ int main(int argc, char* argv[]) {
   double totalPathLength = 0;
   for (unsigned int i = 0; i < toys; ++i) {
     auto r = propagator.propagate(pars, options).value();
-    ACTS_DEBUG("reached position (" << r.endParameters->position().x() << ", "
-                                    << r.endParameters->position().y() << ", "
-                                    << r.endParameters->position().z()
-                                    << ") in " << r.steps << " steps");
+    ACTS_DEBUG(
+        "reached position (" << r.endParameters->position().x() << ", "
+                             << r.endParameters->position().y() << ", "
+                             << r.endParameters->position().z() << ") in "
+                             << r.steps << " steps");
     totalPathLength += r.pathLength;
   }
 

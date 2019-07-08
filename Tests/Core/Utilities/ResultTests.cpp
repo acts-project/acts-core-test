@@ -23,7 +23,8 @@ using namespace std::string_literals;
 namespace {
 enum class MyError { Failure = 1, SomethingElse = 2 };
 
-std::error_code make_error_code(MyError e) {
+std::error_code
+make_error_code(MyError e) {
   return {static_cast<int>(e), std::generic_category()};
 }
 }  // namespace
@@ -180,7 +181,8 @@ struct NoCopy {
   int num;
 };
 
-Result<NoCopy> make_nocopy(int i, bool v = true) {
+Result<NoCopy>
+make_nocopy(int i, bool v = true) {
   if (!v) {
     return MyError::Failure;
   }
@@ -216,7 +218,8 @@ BOOST_AUTO_TEST_CASE(CopyBehaviour) {
   BOOST_CHECK_EQUAL(n4.num, 8);
 }
 
-Result<void> void_res_func(int b) {
+Result<void>
+void_res_func(int b) {
   (void)b;
   if (b > 5) {
     return MyError::SomethingElse;

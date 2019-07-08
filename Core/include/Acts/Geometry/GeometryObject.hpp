@@ -44,7 +44,8 @@ class GeometryObject {
   /// assignment operator
   ///
   /// @param geoID the source geoID
-  GeometryObject& operator=(const GeometryObject& geoID) {
+  GeometryObject&
+  operator=(const GeometryObject& geoID) {
     if (&geoID != this) {
       m_geoID = geoID.m_geoID;
     }
@@ -61,8 +62,9 @@ class GeometryObject {
   /// @param bValue is the value in which you want to bin
   ///
   /// @return vector 3D used for the binning schema
-  virtual const Vector3D binningPosition(const GeometryContext& gctx,
-                                         BinningValue bValue) const = 0;
+  virtual const Vector3D binningPosition(
+      const GeometryContext& gctx,
+      BinningValue bValue) const = 0;
 
   /// Implement the binningValue
   ///
@@ -70,8 +72,8 @@ class GeometryObject {
   /// @param bValue is the dobule in which you want to bin
   ///
   /// @return float to be used for the binning schema
-  double binningPositionValue(const GeometryContext& gctx,
-                              BinningValue bValue) const;
+  double binningPositionValue(const GeometryContext& gctx, BinningValue bValue)
+      const;
 
   /// Set the value
   ///
@@ -82,16 +84,20 @@ class GeometryObject {
   GeometryID m_geoID;
 };
 
-inline const GeometryID& GeometryObject::geoID() const {
+inline const GeometryID&
+GeometryObject::geoID() const {
   return m_geoID;
 }
 
-inline void GeometryObject::assignGeoID(const GeometryID& geoID) {
+inline void
+GeometryObject::assignGeoID(const GeometryID& geoID) {
   m_geoID = geoID;
 }
 
-inline double GeometryObject::binningPositionValue(const GeometryContext& gctx,
-                                                   BinningValue bValue) const {
+inline double
+GeometryObject::binningPositionValue(
+    const GeometryContext& gctx,
+    BinningValue bValue) const {
   using VectorHelpers::perp;
   // now switch
   switch (bValue) {

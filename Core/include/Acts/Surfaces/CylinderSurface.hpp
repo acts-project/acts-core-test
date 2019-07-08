@@ -48,8 +48,10 @@ class CylinderSurface : public Surface {
   /// @note if htrans == nullptr, the cylinder is positioned around (0.,0.,0.)
   /// @param radius is the radius of the cylinder
   /// @param hlength is the half length of the cylinder in z
-  CylinderSurface(std::shared_ptr<const Transform3D> htrans, double radius,
-                  double hlength);
+  CylinderSurface(
+      std::shared_ptr<const Transform3D> htrans,
+      double radius,
+      double hlength);
 
   /// Constructor from Transform3D, radius halfphi, and halflength
   ///
@@ -58,15 +60,19 @@ class CylinderSurface : public Surface {
   /// @param radius is the radius of the cylinder
   /// @param hphi is the half length in phi of the cylinder
   /// @param hlength is the half length of the cylinder in z
-  CylinderSurface(std::shared_ptr<const Transform3D> htrans, double radius,
-                  double hphi, double hlength);
+  CylinderSurface(
+      std::shared_ptr<const Transform3D> htrans,
+      double radius,
+      double hphi,
+      double hlength);
 
   /// Constructor from DetectorElementBase: Element proxy
   ///
   /// @param cbounds are the provided cylinder bounds (shared)
   /// @param detelement is the linked detector element to this surface
-  CylinderSurface(std::shared_ptr<const CylinderBounds> cbounds,
-                  const DetectorElementBase& detelement);
+  CylinderSurface(
+      std::shared_ptr<const CylinderBounds> cbounds,
+      const DetectorElementBase& detelement);
 
   /// Constructor from Transform3D and CylinderBounds
   ///
@@ -74,8 +80,9 @@ class CylinderSurface : public Surface {
   /// @note if htrans == nullptr, the cylinder is positioned around (0.,0.,0.)
   /// @param cbounds is a shared pointer to a cylindeer bounds object,
   /// it must exist (assert test)
-  CylinderSurface(std::shared_ptr<const Transform3D> htrans,
-                  const std::shared_ptr<const CylinderBounds>& cbounds);
+  CylinderSurface(
+      std::shared_ptr<const Transform3D> htrans,
+      const std::shared_ptr<const CylinderBounds>& cbounds);
 
   /// Copy constructor
   ///
@@ -87,8 +94,10 @@ class CylinderSurface : public Surface {
   /// @param gctx The current geometry context object, e.g. alignment
   /// @param other is the source cone surface
   /// @param transf is the additional transfrom applied after copying
-  CylinderSurface(const GeometryContext& gctx, const CylinderSurface& other,
-                  const Transform3D& transf);
+  CylinderSurface(
+      const GeometryContext& gctx,
+      const CylinderSurface& other,
+      const Transform3D& transf);
 
  public:
   /// Destructor - defaulted
@@ -103,8 +112,9 @@ class CylinderSurface : public Surface {
   ///
   /// @param gctx The current geometry context object, e.g. alignment
   /// @param shift applied to the surface
-  std::shared_ptr<CylinderSurface> clone(const GeometryContext& gctx,
-                                         const Transform3D& shift) const;
+  std::shared_ptr<CylinderSurface> clone(
+      const GeometryContext& gctx,
+      const Transform3D& shift) const;
 
   /// The binning position method - is overloaded for r-type binning
   ///
@@ -112,8 +122,9 @@ class CylinderSurface : public Surface {
   /// @param bValue is the type of global binning to be done
   ///
   /// @return is the global position to be used for binning
-  const Vector3D binningPosition(const GeometryContext& gctx,
-                                 BinningValue bValue) const final;
+  const Vector3D binningPosition(
+      const GeometryContext& gctx,
+      BinningValue bValue) const final;
 
   /// Return the measurement frame - this is needed for alignment, in particular
   /// The measurement frame of a cylinder is the tangential plane at a given
@@ -123,9 +134,10 @@ class CylinderSurface : public Surface {
   /// @param gpos is the position where the measurement frame is defined
   /// @param mom is the momentum vector (ignored)
   /// @return rotation matrix that defines the measurement frame
-  const RotationMatrix3D referenceFrame(const GeometryContext& gctx,
-                                        const Vector3D& gpos,
-                                        const Vector3D& mom) const final;
+  const RotationMatrix3D referenceFrame(
+      const GeometryContext& gctx,
+      const Vector3D& gpos,
+      const Vector3D& mom) const final;
 
   /// Return the surface type
   SurfaceType type() const override;
@@ -137,8 +149,8 @@ class CylinderSurface : public Surface {
   /// @param gctx The current geometry context object, e.g. alignment
   /// @param lpos is the local postion for which the normal vector is requested
   /// @return normal vector at the local position
-  const Vector3D normal(const GeometryContext& gctx,
-                        const Vector2D& lpos) const final;
+  const Vector3D normal(const GeometryContext& gctx, const Vector2D& lpos)
+      const final;
 
   /// Return method for surface normal information
   /// @note for a Cylinder a local position is always required for the normal
@@ -147,8 +159,8 @@ class CylinderSurface : public Surface {
   /// @param gctx The current geometry context object, e.g. alignment
   /// @param gpos is the global postion for which the normal vector is requested
   /// @return normal vector at the global position
-  const Vector3D normal(const GeometryContext& gctx,
-                        const Vector3D& gpos) const final;
+  const Vector3D normal(const GeometryContext& gctx, const Vector3D& gpos)
+      const final;
 
   /// Normal vector return without argument
   using Surface::normal;
@@ -169,8 +181,11 @@ class CylinderSurface : public Surface {
   /// @param lpos is the local position to be transformed
   /// @param mom is the global momentum (ignored in this operation)
   /// @param gpos is the global position shich is filled
-  void localToGlobal(const GeometryContext& gctx, const Vector2D& lpos,
-                     const Vector3D& mom, Vector3D& gpos) const final;
+  void localToGlobal(
+      const GeometryContext& gctx,
+      const Vector2D& lpos,
+      const Vector3D& mom,
+      Vector3D& gpos) const final;
 
   /// Global to local transfomration
   ///
@@ -180,8 +195,11 @@ class CylinderSurface : public Surface {
   /// @param lpos is hte local position to be filled
   ///
   /// @return is a boolean indicating if the transformation succeeded
-  bool globalToLocal(const GeometryContext& gctx, const Vector3D& gpos,
-                     const Vector3D& mom, Vector2D& lpos) const final;
+  bool globalToLocal(
+      const GeometryContext& gctx,
+      const Vector3D& gpos,
+      const Vector3D& mom,
+      Vector2D& lpos) const final;
 
   /// Straight line intersection schema - provides closest intersection
   ///  and (signed) path length
@@ -226,11 +244,13 @@ class CylinderSurface : public Surface {
   /// reinsertion into the line equation.
   ///
   /// @return is the intersection object
-  Intersection intersectionEstimate(const GeometryContext& gctx,
-                                    const Vector3D& gpos, const Vector3D& gdir,
-                                    NavigationDirection navDir = forward,
-                                    const BoundaryCheck& bcheck = false,
-                                    CorrFnc correct = nullptr) const final;
+  Intersection intersectionEstimate(
+      const GeometryContext& gctx,
+      const Vector3D& gpos,
+      const Vector3D& gdir,
+      NavigationDirection navDir = forward,
+      const BoundaryCheck& bcheck = false,
+      CorrFnc correct = nullptr) const final;
 
   /// Path correction due to incident of the track
   ///
@@ -239,8 +259,10 @@ class CylinderSurface : public Surface {
   /// @param mom is the global momentum at the starting point
   ///
   /// @return is the correction factor due to incident
-  double pathCorrection(const GeometryContext& gctx, const Vector3D& gpos,
-                        const Vector3D& mom) const final;
+  double pathCorrection(
+      const GeometryContext& gctx,
+      const Vector3D& gpos,
+      const Vector3D& mom) const final;
 
   /// Return method for properly formatted output string
   std::string name() const override;
@@ -251,7 +273,9 @@ class CylinderSurface : public Surface {
   /// @param l0div Number of divisions along l0 (phi)
   /// @param l1div Number of divisions along l1 (z)
   virtual PolyhedronRepresentation polyhedronRepresentation(
-      const GeometryContext& gctx, size_t l0div = 10, size_t l1div = 1) const;
+      const GeometryContext& gctx,
+      size_t l0div = 10,
+      size_t l1div = 1) const;
 
  protected:
   std::shared_ptr<const CylinderBounds> m_bounds;  //!< bounds (shared)
@@ -261,8 +285,9 @@ class CylinderSurface : public Surface {
   ///
   /// @param gctx The current geometry context object, e.g. alignment
   /// @param shift applied to the surface
-  CylinderSurface* clone_impl(const GeometryContext& gctx,
-                              const Transform3D& shift) const override;
+  CylinderSurface* clone_impl(
+      const GeometryContext& gctx,
+      const Transform3D& shift) const override;
 };
 
 #include "Acts/Surfaces/detail/CylinderSurface.ipp"

@@ -62,9 +62,10 @@ class Seedfinder {
   /// found seeds
   template <typename spacepoint_iterator_t>
   Acts::SeedfinderState<external_spacepoint_t> initState(
-      spacepoint_iterator_t spBegin, spacepoint_iterator_t spEnd,
-      std::function<Acts::Vector2D(const external_spacepoint_t&, float, float,
-                                   float)>
+      spacepoint_iterator_t spBegin,
+      spacepoint_iterator_t spEnd,
+      std::function<
+          Acts::Vector2D(const external_spacepoint_t&, float, float, float)>
           covTool,
       std::shared_ptr<Acts::IBinFinder<external_spacepoint_t>> bottomBinFinder,
       std::shared_ptr<Acts::IBinFinder<external_spacepoint_t>> topBinFinder)
@@ -83,7 +84,8 @@ class Seedfinder {
  private:
   void transformCoordinates(
       std::vector<const InternalSpacePoint<external_spacepoint_t>*>& vec,
-      const InternalSpacePoint<external_spacepoint_t>& spM, bool bottom,
+      const InternalSpacePoint<external_spacepoint_t>& spM,
+      bool bottom,
       std::vector<LinCircle>& linCircleVec) const;
 
   Acts::SeedfinderConfig<external_spacepoint_t> m_config;

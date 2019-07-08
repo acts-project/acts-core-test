@@ -10,7 +10,8 @@
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Utilities/Intersection.hpp"
 
-void Acts::GenericApproachDescriptor::registerLayer(const Layer& lay) {
+void
+Acts::GenericApproachDescriptor::registerLayer(const Layer& lay) {
   // go through the surfaces
   for (auto& sf : m_surfaceCache) {
     auto mutableSf = const_cast<Surface*>(sf);
@@ -19,12 +20,13 @@ void Acts::GenericApproachDescriptor::registerLayer(const Layer& lay) {
 }
 
 Acts::ObjectIntersection<Acts::Surface>
-Acts::GenericApproachDescriptor::approachSurface(const GeometryContext& gctx,
-                                                 const Vector3D& gpos,
-                                                 const Vector3D& gdir,
-                                                 NavigationDirection navDir,
-                                                 const BoundaryCheck& bcheck,
-                                                 CorrFnc corrfnc) const {
+Acts::GenericApproachDescriptor::approachSurface(
+    const GeometryContext& gctx,
+    const Vector3D& gpos,
+    const Vector3D& gdir,
+    NavigationDirection navDir,
+    const BoundaryCheck& bcheck,
+    CorrFnc corrfnc) const {
   // the intersection estimates
   std::vector<ObjectIntersection<Surface>> sIntersections;
   sIntersections.reserve(m_surfaceCache.size());

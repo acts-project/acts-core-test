@@ -69,8 +69,11 @@ class CylinderBounds : public SurfaceBounds {
   /// @param avphi is the middle phi position of the segment
   /// @param halfphi is the half opening angle
   /// @param halez is the half length in z
-  CylinderBounds(double radius, double averagePhi, double halfPhi,
-                 double halfZ);
+  CylinderBounds(
+      double radius,
+      double averagePhi,
+      double halfPhi,
+      double halfZ);
 
   ~CylinderBounds() override;
 
@@ -128,19 +131,23 @@ class CylinderBounds : public SurfaceBounds {
   ActsSymMatrixD<2> jacobian() const;
 };
 
-inline double CylinderBounds::r() const {
+inline double
+CylinderBounds::r() const {
   return m_radius;
 }
 
-inline double CylinderBounds::averagePhi() const {
+inline double
+CylinderBounds::averagePhi() const {
   return m_avgPhi;
 }
 
-inline double CylinderBounds::halfPhiSector() const {
+inline double
+CylinderBounds::halfPhiSector() const {
   return m_halfPhi;
 }
 
-inline double CylinderBounds::halflengthZ() const {
+inline double
+CylinderBounds::halflengthZ() const {
   return m_halfZ;
 }
 }  // namespace Acts

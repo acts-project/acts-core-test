@@ -38,10 +38,10 @@ struct SpacePointGridConfig {
 template <typename SpacePoint>
 using SpacePointGrid = detail::Grid<
     std::vector<std::unique_ptr<const InternalSpacePoint<SpacePoint>>>,
-    detail::Axis<detail::AxisType::Equidistant,
-                 detail::AxisBoundaryType::Closed>,
-    detail::Axis<detail::AxisType::Equidistant,
-                 detail::AxisBoundaryType::Bound>>;
+    detail::
+        Axis<detail::AxisType::Equidistant, detail::AxisBoundaryType::Closed>,
+    detail::
+        Axis<detail::AxisType::Equidistant, detail::AxisBoundaryType::Bound>>;
 
 class SpacePointGridCreator {
  public:

@@ -62,8 +62,8 @@ BOOST_AUTO_TEST_CASE(NavigationLayerProperties, *utf::expected_failures(1)) {
   // binningPosition(), needs a better test
   BOOST_CHECK_EQUAL(pNavigationLayer->binningPosition(tgContext, b), origin);
   // surfaceRepresentation() [looks dangerous]
-  BOOST_CHECK_EQUAL(rawSurfacePtr,
-                    &(pNavigationLayer->surfaceRepresentation()));
+  BOOST_CHECK_EQUAL(
+      rawSurfacePtr, &(pNavigationLayer->surfaceRepresentation()));
   // isOnLayer()
   BOOST_CHECK(pNavigationLayer->isOnLayer(tgContext, origin, true));
   // isOnLayer()

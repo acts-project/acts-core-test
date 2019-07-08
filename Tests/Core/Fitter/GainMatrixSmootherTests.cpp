@@ -37,12 +37,12 @@ GeometryContext tgContext = GeometryContext();
 
 BOOST_AUTO_TEST_CASE(gain_matrix_smoother) {
   // Make dummy measurement
-  auto plane1 = Surface::makeShared<PlaneSurface>(Vector3D::UnitX() * 1,
-                                                  Vector3D::UnitX());
-  auto plane2 = Surface::makeShared<PlaneSurface>(Vector3D::UnitX() * 2,
-                                                  Vector3D::UnitX());
-  auto plane3 = Surface::makeShared<PlaneSurface>(Vector3D::UnitX() * 3,
-                                                  Vector3D::UnitX());
+  auto plane1 = Surface::makeShared<PlaneSurface>(
+      Vector3D::UnitX() * 1, Vector3D::UnitX());
+  auto plane2 = Surface::makeShared<PlaneSurface>(
+      Vector3D::UnitX() * 2, Vector3D::UnitX());
+  auto plane3 = Surface::makeShared<PlaneSurface>(
+      Vector3D::UnitX() * 3, Vector3D::UnitX());
 
   ActsSymMatrixD<2> cov;
   cov << 0.04, 0, 0, 0.1;
@@ -71,13 +71,15 @@ BOOST_AUTO_TEST_CASE(gain_matrix_smoother) {
   BoundParameters pars(
       tgContext,
       std::make_unique<const BoundParameters::CovMatrix_t>(std::move(covTrk)),
-      parValues, plane1);
+      parValues,
+      plane1);
 
   parValues << 0.301, 0.503, 0.5 * M_PI, 0., 1 / 100., 0.;
   BoundParameters filt(
       tgContext,
       std::make_unique<const BoundParameters::CovMatrix_t>(std::move(covTrk)),
-      parValues, plane1);
+      parValues,
+      plane1);
 
   TrackState ts{SourceLink{&meas1}};
 
@@ -94,12 +96,14 @@ BOOST_AUTO_TEST_CASE(gain_matrix_smoother) {
   pars = BoundParameters(
       tgContext,
       std::make_unique<const BoundParameters::CovMatrix_t>(std::move(covTrk)),
-      parValues, plane2);
+      parValues,
+      plane2);
   parValues << 0.27, 0.53, 0.5 * M_PI, 0., 1 / 100., 0.;
   filt = BoundParameters(
       tgContext,
       std::make_unique<const BoundParameters::CovMatrix_t>(std::move(covTrk)),
-      parValues, plane2);
+      parValues,
+      plane2);
 
   ts.parameter.predicted = std::move(pars);
   ts.parameter.filtered = std::move(filt);
@@ -114,12 +118,14 @@ BOOST_AUTO_TEST_CASE(gain_matrix_smoother) {
   pars = BoundParameters(
       tgContext,
       std::make_unique<const BoundParameters::CovMatrix_t>(std::move(covTrk)),
-      parValues, plane3);
+      parValues,
+      plane3);
   parValues << 0.33, 0.43, 0.5 * M_PI, 0., 1 / 100., 0.;
   filt = BoundParameters(
       tgContext,
       std::make_unique<const BoundParameters::CovMatrix_t>(std::move(covTrk)),
-      parValues, plane3);
+      parValues,
+      plane3);
 
   ts.parameter.predicted = std::move(pars);
   ts.parameter.filtered = std::move(filt);
@@ -138,8 +144,9 @@ BOOST_AUTO_TEST_CASE(gain_matrix_smoother) {
 
   auto& ts1 = trackStates.at(0);
   BOOST_CHECK(ts1.parameter.smoothed);
-  BOOST_CHECK_NE(ts1.parameter.filtered->parameters(),
-                 ts1.parameter.smoothed->parameters());
+  BOOST_CHECK_NE(
+      ts1.parameter.filtered->parameters(),
+      ts1.parameter.smoothed->parameters());
 
   double tol = 1e-6;
 
@@ -154,8 +161,9 @@ BOOST_AUTO_TEST_CASE(gain_matrix_smoother) {
 
   auto& ts2 = trackStates.at(1);
   BOOST_CHECK(ts2.parameter.smoothed);
-  BOOST_CHECK_NE(ts2.parameter.filtered->parameters(),
-                 ts2.parameter.smoothed->parameters());
+  BOOST_CHECK_NE(
+      ts2.parameter.filtered->parameters(),
+      ts2.parameter.smoothed->parameters());
 
   expPars << 0.2500000, 0.4700000, 1.5707963, 0.0000000, 0.0100000, 0.0000000;
   CHECK_CLOSE_ABS(ts2.parameter.smoothed->parameters(), expPars, tol);
@@ -164,8 +172,9 @@ BOOST_AUTO_TEST_CASE(gain_matrix_smoother) {
   auto& ts3 = trackStates.at(2);
   BOOST_CHECK(ts3.parameter.smoothed);
   // last one, smoothed == filtered
-  BOOST_CHECK_EQUAL(ts3.parameter.filtered->parameters(),
-                    ts3.parameter.smoothed->parameters());
+  BOOST_CHECK_EQUAL(
+      ts3.parameter.filtered->parameters(),
+      ts3.parameter.smoothed->parameters());
 
   expPars << 0.3300000, 0.4300000, 1.5707963, 0.0000000, 0.0100000, 0.0000000;
   CHECK_CLOSE_ABS(ts3.parameter.smoothed->parameters(), expPars, tol);
