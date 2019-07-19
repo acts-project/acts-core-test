@@ -121,6 +121,7 @@ BOOST_DATA_TEST_CASE(
   PropagatorOptions<> options(tgContext, mfContext);
   options.maxStepSize = 10_cm;
   options.pathLimit = 25_cm;
+  options.debug = debugMode;
 
   BOOST_CHECK(epropagator.propagate(start, options).value().endParameters !=
               nullptr);

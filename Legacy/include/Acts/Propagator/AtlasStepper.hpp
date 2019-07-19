@@ -358,12 +358,8 @@ class AtlasStepper {
   /// @param[in] Corrector& navigator corrections
   /// @param[in] stepSize the step size
   /// @param[in] release flag steers if the step is released first
-  void
-  updateStepSize(State&           state,
-                 const Corrector& navCorr,
-                 double           stepSize,
-                 bool             release = false) const
-  {
+  void updateStepSize(State& state, const Corrector& navCorr, double stepSize,
+                      bool release = false) const {
     state.stepSize.update(stepSize, cstep::actor, release);
     navCorr(state.stepSize);
   }
@@ -372,17 +368,12 @@ class AtlasStepper {
   /// @param[in,out] state The state object for the step length
   /// @param[in] step the step size
   /// @param[in] default update the aborter stepsize
-  void
-  updateStepSize(State&      state,
-                 double      abortStep,
-                 cstep::Type type = cstep::aborter) const
-  {
+  void updateStepSize(State& state, double abortStep,
+                      cstep::Type type = cstep::aborter) const {
     state.stepSize.update(abortStep, type);
   }
 
-  void
-  releaseStep(State& state, cstep::Type type = cstep::actor) const
-  {
+  void releaseStep(State& state, cstep::Type type = cstep::actor) const {
     state.stepSize.release(type);
   }
 

@@ -82,8 +82,7 @@ struct PathLimitReached {
   ///
   /// @param [in,out] state The propagation state object
   template <typename propagator_state_t, typename stepper_t>
-  bool operator()(propagator_state_t& state,
-                  const stepper_t& stepper) const {
+  bool operator()(propagator_state_t& state, const stepper_t& stepper) const {
     if (state.navigation.targetReached) {
       return true;
     }
@@ -92,8 +91,7 @@ struct PathLimitReached {
     double limit = std::min(internalLimit, state.options.pathLimit);
     double distance = limit - state.stepping.pathAccumulated;
     double tolerance = state.options.targetTolerance;
-	stepper.updateStepSize(
-		state.stepping, distance, ConstrainedStep::aborter);
+    stepper.updateStepSize(state.stepping, distance, ConstrainedStep::aborter);
     bool limitReached = (distance * distance < tolerance * tolerance);
     if (limitReached) {
       targetDebugLog(state, "x", [&] {
@@ -176,8 +174,7 @@ struct SurfaceReached {
         stepper.direction(state.stepping), anyDirection);
     const double distance = intersection.pathLength;
     // Adjust the step size so that we cannot cross the target surface
-      stepper.updateStepSize(
-          state.stepping, distance, ConstrainedStep::aborter);
+    stepper.updateStepSize(state.stepping, distance, ConstrainedStep::aborter);
     // return true if you fall below tolerance
     bool targetReached = (distance * distance <= tolerance * tolerance);
     if (targetReached) {

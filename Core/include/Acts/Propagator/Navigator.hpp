@@ -614,8 +614,8 @@ class Navigator {
         return dstream.str();
       });
       // Now intersect (should exclude punch-through)
-      auto surfaceIntersect
-          = stepper.targetSurface(state.stepping, surface, navOpts, navCorr);
+      auto surfaceIntersect =
+          stepper.targetSurface(state.stepping, surface, navOpts, navCorr);
       if (!surfaceIntersect) {
         debugLog(state, [&] {
           std::stringstream dstream;
@@ -741,9 +741,9 @@ class Navigator {
                 state.navigation.navSurfaces.begin();
             state.navigation.navLayers = {};
             state.navigation.navLayerIter = state.navigation.navLayers.end();
-            updateStep(state, navCorr,
-                       state.navigation.navSurfaceIter->intersection.pathLength,
-                       true);
+            stepper.updateStepSize(
+                state.stepping, navCorr,
+                state.navigation.navSurfaceIter->intersection.pathLength, true);
             return true;
           }
         }
@@ -774,8 +774,8 @@ class Navigator {
       }
       // Otherwise try to step towards it
       NavigationOptions<Surface> navOpts(state.stepping.navDir, true);
-      auto                       layerIntersect = stepper.targetSurface(
-          state.stepping, layerSurface, navOpts, navCorr);
+      auto layerIntersect =
+          stepper.targetSurface(state.stepping, layerSurface, navOpts, navCorr);
       // check if the intersect is invalid
       if (!layerIntersect) {
         debugLog(state, [&] {
@@ -1086,8 +1086,7 @@ class Navigator {
       // Update the navigation step size before you return to the stepper
       // This is a new navigation stream, release the former step size first
       stepper.targetSurface(state.stepping,
-                            state.navigation.navSurfaceIter->object,
-                            navOpts,
+                            state.navigation.navSurfaceIter->object, navOpts,
                             navCorr);
       return true;
     }
@@ -1162,8 +1161,7 @@ class Navigator {
         // update the navigation step size before you return
         stepper.targetSurface(state.stepping,
                               state.navigation.navLayerIter->representation,
-                              navOpts,
-                              navCorr);
+                              navOpts, navCorr);
         // Trigger the return to the propagator
         return true;
       }
@@ -1178,8 +1176,8 @@ class Navigator {
     });
     // Update the navigation step to the target step to trigger
     // step modification when requested
-    stepper.updateStepSize(
-        state.stepping, navCorr, state.stepping.stepSize.value(Cstep::aborter));
+    stepper.updateStepSize(state.stepping, navCorr,
+                           state.stepping.stepSize.value(Cstep::aborter));
 
     return false;
   }

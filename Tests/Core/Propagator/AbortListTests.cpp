@@ -72,6 +72,7 @@ struct PropagatorState {
 
     // adaptive sep size of the runge-kutta integration
     cstep stepSize = std::numeric_limits<double>::max();
+  };
 
   /// emulate the options template
   struct Options {
@@ -100,18 +101,14 @@ struct PropagatorState {
   NavigatorState navigation;
 };
 
-  /// This is a struct to mimic the stepper
-  struct Stepper
-  {
-    template <typename state_type>
-    void
-    updateStepSize(state_type& state,
-                   double      abortStep,
-                   cstep::Type type = cstep::aborter) const
-    {
-      state.stepSize.update(abortStep, type);
-    }
-  };
+/// This is a struct to mimic the stepper
+struct Stepper {
+  template <typename state_type>
+  void updateStepSize(state_type& state, double abortStep,
+                      cstep::Type type = cstep::aborter) const {
+    state.stepSize.update(abortStep, type);
+  }
+};
 
 /// This is a simple result struct to mimic the
 /// propagator result

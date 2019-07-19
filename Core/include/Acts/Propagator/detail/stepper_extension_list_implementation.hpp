@@ -44,9 +44,12 @@ struct stepper_extension_list_impl {
   template <typename propagator_state_t, typename stepper_t, typename... T>
   static void bid(const std::tuple<T...>& obs_tuple,
                   const propagator_state_t& state, const stepper_t& stepper,
+                  const typename stepper_t::state_type& component_state,
                   std::array<int, sizeof...(T)>& bids) {
-    std::get<N - 1>(bids) = std::get<N - 1>(obs_tuple).bid(state, stepper);
-    stepper_extension_list_impl<N - 1>::bid(obs_tuple, state, stepper, bids);
+    std::get<N - 1>(bids) =
+        std::get<N - 1>(obs_tuple).bid(state, stepper, component_state);
+    stepper_extension_list_impl<N - 1>::bid(obs_tuple, state, stepper,
+                                            component_state, bids);
   }
 
   /// The extension list call implementation
@@ -54,26 +57,25 @@ struct stepper_extension_list_impl {
   /// - then broadcasts the extension call to the remaining tuple
   template <typename propagator_state_t, typename stepper_t, typename... T>
   static bool k(std::tuple<T...>& obs_tuple, const propagator_state_t& state,
-                const stepper_t& stepper, 
-				const typename stepper_t::state_type& component_state,
-				Vector3D& knew,
-                const Vector3D& bField,
+                const stepper_t& stepper,
+                const typename stepper_t::state_type& component_state,
+                Vector3D& knew, const Vector3D& bField,
                 const std::array<bool, sizeof...(T)>& validExtensions,
                 const int i = 0, const double h = 0,
                 const Vector3D& kprev = Vector3D()) {
     // If element is invalid: continue
     if (!std::get<N - 1>(validExtensions)) {
       return stepper_extension_list_impl<N - 1>::k(
-          obs_tuple, state, stepper, component_state, knew, bField, validExtensions, i, h,
-          kprev);
+          obs_tuple, state, stepper, component_state, knew, bField,
+          validExtensions, i, h, kprev);
     }
 
     // Continue as long as evaluations are 'true'
-    if (std::get<N - 1>(obs_tuple).k(state, stepper, component_state, knew, bField, i, h,
-                                     kprev)) {
+    if (std::get<N - 1>(obs_tuple).k(state, stepper, component_state, knew,
+                                     bField, i, h, kprev)) {
       return stepper_extension_list_impl<N - 1>::k(
-          obs_tuple, state, stepper, component_state, knew, bField, validExtensions, i, h,
-          kprev);
+          obs_tuple, state, stepper, component_state, knew, bField,
+          validExtensions, i, h, kprev);
     } else {
       // Break at false
       return false;
@@ -85,7 +87,8 @@ struct stepper_extension_list_impl {
   /// - then broadcasts the extension call to the remaining tuple
   template <typename propagator_state_t, typename stepper_t, typename... T>
   static bool finalize(const std::tuple<T...>& obs_tuple,
-                       propagator_state_t& state, const stepper_t& stepper, typename stepper_t::state_type& component_state,
+                       propagator_state_t& state, const stepper_t& stepper,
+                       typename stepper_t::state_type& component_state,
                        const double h, FreeMatrix& D,
                        const std::array<bool, sizeof...(T)>& validExtensions) {
     // If element is invalid: continue
@@ -95,7 +98,8 @@ struct stepper_extension_list_impl {
     }
 
     // Continue as long as evaluations are 'true'
-    if (std::get<N - 1>(obs_tuple).finalize(state, stepper, component_state, h, D)) {
+    if (std::get<N - 1>(obs_tuple).finalize(state, stepper, component_state, h,
+                                            D)) {
       return stepper_extension_list_impl<N - 1>::finalize(
           obs_tuple, state, stepper, component_state, h, D, validExtensions);
     } else {
@@ -109,7 +113,8 @@ struct stepper_extension_list_impl {
   /// - then broadcasts the extension call to the remaining tuple
   template <typename propagator_state_t, typename stepper_t, typename... T>
   static bool finalize(const std::tuple<T...>& obs_tuple,
-                       propagator_state_t& state, const stepper_t& stepper, typename stepper_t::state_type& component_state,
+                       propagator_state_t& state, const stepper_t& stepper,
+                       typename stepper_t::state_type& component_state,
                        const double h,
                        const std::array<bool, sizeof...(T)>& validExtensions) {
     // If element is invalid: continue
@@ -119,7 +124,8 @@ struct stepper_extension_list_impl {
     }
 
     // Continue as long as evaluations are 'true'
-    if (std::get<N - 1>(obs_tuple).finalize(state, stepper, component_state, h)) {
+    if (std::get<N - 1>(obs_tuple).finalize(state, stepper, component_state,
+                                            h)) {
       return stepper_extension_list_impl<N - 1>::finalize(
           obs_tuple, state, stepper, component_state, h, validExtensions);
     } else {
@@ -137,16 +143,16 @@ struct stepper_extension_list_impl<0u> {
   static void bid(const std::tuple<T...>& /*unused*/,
                   const propagator_state_t& /*unused*/,
                   const stepper_t& /*unused*/,
-				  const typename stepper_t::state_type& /*unused*/,
+                  const typename stepper_t::state_type& /*unused*/,
                   std::array<int, sizeof...(T)>& /*unused*/) {}
 
   /// The empty extension list call implementation
   template <typename propagator_state_t, typename stepper_t, typename... T>
   static bool k(std::tuple<T...>& /*unused*/,
                 const propagator_state_t& /*unused*/,
-                const stepper_t& /*unused*/, Vector3D& /*unused*/,
-				const typename stepper_t::state_type& /*unused*/,
-                const Vector3D& /*unused*/,
+                const stepper_t& /*unused*/,
+                const typename stepper_t::state_type& /*unused*/,
+                Vector3D& /*unused*/, const Vector3D& /*unused*/,
                 const std::array<bool, sizeof...(T)>& /*unused*/,
                 const int /*unused*/, const double /*unused*/,
                 const Vector3D& /*unused*/) {
@@ -158,9 +164,8 @@ struct stepper_extension_list_impl<0u> {
   static bool finalize(const std::tuple<T...>& /*unused*/,
                        propagator_state_t& /*unused*/,
                        const stepper_t& /*unused*/,
-					   typename stepper_t::state_type& /*unused*/,
-					   const double /*unused*/,
-                       FreeMatrix& /*unused*/,
+                       typename stepper_t::state_type& /*unused*/,
+                       const double /*unused*/, FreeMatrix& /*unused*/,
                        const std::array<bool, sizeof...(T)>& /*unused*/) {
     return true;
   }
@@ -170,8 +175,8 @@ struct stepper_extension_list_impl<0u> {
   static bool finalize(const std::tuple<T...>& /*unused*/,
                        propagator_state_t& /*unused*/,
                        const stepper_t& /*unused*/,
-					   typename stepper_t::state_type& /*unused*/,
-					   const double /*unused*/,
+                       typename stepper_t::state_type& /*unused*/,
+                       const double /*unused*/,
                        const std::array<bool, sizeof...(T)>& /*unused*/) {
     return true;
   }

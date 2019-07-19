@@ -60,7 +60,8 @@ struct DenseEnvironmentExtension {
   /// @param [in] state State of the propagator
   /// @return Boolean flag if the step would be valid
   template <typename propagator_state_t, typename stepper_t>
-  int bid(const propagator_state_t& state, const stepper_t& stepper, const typename stepper_t::state_type& component_state) const {
+  int bid(const propagator_state_t& state, const stepper_t& stepper,
+          const typename stepper_t::state_type& component_state) const {
     // Check for valid particle properties
     if (stepper.charge(state.stepping) == 0. || state.options.mass == 0. ||
         stepper.momentum(component_state) < state.options.momentumCutOff) {
@@ -88,9 +89,10 @@ struct DenseEnvironmentExtension {
   /// @param [in] kprev Evaluated k_{i - 1}
   /// @return Boolean flag if the calculation is valid
   template <typename propagator_state_t, typename stepper_t>
-  bool k(const propagator_state_t& state, const stepper_t& stepper, const typename stepper_t::state_type& component_state,
-         Vector3D& knew, const Vector3D& bField, const int i = 0,
-         const double h = 0., const Vector3D& kprev = Vector3D()) {
+  bool k(const propagator_state_t& state, const stepper_t& stepper,
+         const typename stepper_t::state_type& component_state, Vector3D& knew,
+         const Vector3D& bField, const int i = 0, const double h = 0.,
+         const Vector3D& kprev = Vector3D()) {
     // i = 0 is used for setup and evaluation of k
     if (i == 0) {
       // Set up container for energy loss
@@ -141,7 +143,8 @@ struct DenseEnvironmentExtension {
   /// @param [in] h Step size
   /// @return Boolean flag if the calculation is valid
   template <typename propagator_state_t, typename stepper_t>
-  bool finalize(propagator_state_t& state, const stepper_t& stepper, typename stepper_t::state_type& component_state,
+  bool finalize(propagator_state_t& state, const stepper_t& stepper,
+                typename stepper_t::state_type& component_state,
                 const double h) const {
     // Evaluate the new momentum
     double newMomentum =
@@ -184,9 +187,11 @@ struct DenseEnvironmentExtension {
   /// @param [out] D Transport matrix
   /// @return Boolean flag if the calculation is valid
   template <typename propagator_state_t, typename stepper_t>
-  bool finalize(propagator_state_t& state, const stepper_t& stepper, typename stepper_t::state_type& component_state,
-                const double h, FreeMatrix& D) const {
-    return finalize(state, stepper, component_state, h) && transportMatrix(state, stepper, component_state, h, D);
+  bool finalize(propagator_state_t& state, const stepper_t& stepper,
+                typename stepper_t::state_type& component_state, const double h,
+                FreeMatrix& D) const {
+    return finalize(state, stepper, component_state, h) &&
+           transportMatrix(state, stepper, component_state, h, D);
   }
 
  private:
@@ -199,7 +204,8 @@ struct DenseEnvironmentExtension {
   /// @param [out] D Transport matrix
   /// @return Boolean flag if evaluation is valid
   template <typename propagator_state_t, typename stepper_t>
-  bool transportMatrix(propagator_state_t& state, const stepper_t& stepper, typename stepper_t::state_type& component_state,
+  bool transportMatrix(propagator_state_t& state, const stepper_t& stepper,
+                       typename stepper_t::state_type& component_state,
                        const double h, FreeMatrix& D) const {
     /// The calculations are based on ATL-SOFT-PUB-2009-002. The update of the
     /// Jacobian matrix is requires only the calculation of eq. 17 and 18.

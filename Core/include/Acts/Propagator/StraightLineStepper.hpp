@@ -193,12 +193,9 @@ class StraightLineStepper {
   //
   /// targetSurface method
   template <typename options_t, typename corrector_t>
-  auto
-  targetSurface(State&             state,
-                const Surface*     surface,
-                const options_t&   navOpts,
-                const corrector_t& navCorr) const -> SurfaceIntersection
-  {
+  auto targetSurface(State& state, const Surface* surface,
+                     const options_t& navOpts, const corrector_t& navCorr) const
+      -> SurfaceIntersection {
     // Intersect the surface
     auto surfaceIntersect = surface->surfaceIntersectionEstimate(
         state.geoContext, state.pos, state.dir, navOpts, navCorr);
@@ -452,25 +449,18 @@ class StraightLineStepper {
   }
 
   /// updateStepSize method
-  void
-  updateStepSize(State&                           state,
-                 const VoidIntersectionCorrector& navCorr,
-                 double                           navigationStep,
-                 bool                             release = false) const
-  {
+  void updateStepSize(State& state, const VoidIntersectionCorrector& navCorr,
+                      double navigationStep, bool release = false) const {
     state.stepSize.update(navigationStep, cstep::actor, release);
-    if (state.pathAccumulated == 0) navCorr(state.stepSize);
+    if (state.pathAccumulated == 0)
+      navCorr(state.stepSize);
   }
 
-  void
-  updateStepSize(State& state, double stepSize, cstep::Type type) const
-  {
+  void updateStepSize(State& state, double stepSize, cstep::Type type) const {
     state.stepSize.update(stepSize, type);
   }
 
-  void
-  releaseStep(State& state, cstep::Type type) const
-  {
+  void releaseStep(State& state, cstep::Type type) const {
     state.stepSize.release(type);
   }
 

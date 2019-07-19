@@ -148,6 +148,35 @@ struct PropagatorState {
       // get the field from the cell
       return Vector3D(0., 0., 0.);
     }
+
+    /// updateStepSize method
+    void updateStepSize(State& state, const VoidIntersectionCorrector& navCorr,
+                        double navigationStep, bool release = false) const {
+      state.stepSize.update(navigationStep, Cstep::actor, release);
+      if (state.pathAccumulated == 0)
+        navCorr(state.stepSize);
+    }
+
+    /// release method
+    void releaseStep(State& state, Cstep::Type type) const {
+      state.stepSize.release(type);
+    }
+
+    template <typename options_t, typename corrector_t>
+    auto targetSurface(State& state, const Surface* surface,
+                       const options_t& navOpts,
+                       const corrector_t& navCorr) const
+        -> SurfaceIntersection {
+      // Intersect the surface
+      auto surfaceIntersect = surface->surfaceIntersectionEstimate(
+          tgContext, state.pos, state.dir, navOpts, navCorr);
+      if (surfaceIntersect) {
+        // update the stepsize
+        double ssize = surfaceIntersect.intersection.pathLength;
+        updateStepSize(state, navCorr, ssize, true);
+      }
+      return surfaceIntersect;
+    }
   };
 
   static_assert(StepperConcept<Stepper>,

@@ -61,8 +61,9 @@ struct StepperExtensionList : private detail::Extendable<extensions...> {
   /// @param [in] state State of the propagator
   /// @param [in] stepper Stepper of the propagation
   template <typename propagator_state_t, typename stepper_t>
-  bool validExtensionForStep(const propagator_state_t& state,
-                             const stepper_t& stepper, const typename stepper_t::state_type& component_state) {
+  bool validExtensionForStep(
+      const propagator_state_t& state, const stepper_t& stepper,
+      const typename stepper_t::state_type& component_state) {
     std::array<int, nExtensions> bids;
     // Ask all extensions for a boolean statement of their validity
     impl::bid(tuple(), state, stepper, component_state, bids);
@@ -78,60 +79,66 @@ struct StepperExtensionList : private detail::Extendable<extensions...> {
   /// passes them forward for evaluation and returns a boolean as indicator if
   /// the evaluation is valid.
   template <typename propagator_state_t, typename stepper_t>
-  bool k1(const propagator_state_t& state, const stepper_t& stepper, const typename stepper_t::state_type& component_state,
-          Vector3D& knew, const Vector3D& bField) {
-    return impl::k(tuple(), state, stepper, component_state, knew, bField, validExtensions);
+  bool k1(const propagator_state_t& state, const stepper_t& stepper,
+          const typename stepper_t::state_type& component_state, Vector3D& knew,
+          const Vector3D& bField) {
+    return impl::k(tuple(), state, stepper, component_state, knew, bField,
+                   validExtensions);
   }
 
   /// @brief This functions broadcasts the call for evaluating k2. It collects
   /// all arguments and extensions and passes them forward for evaluation and
   /// returns a boolean as indicator if the evaluation is valid.
   template <typename propagator_state_t, typename stepper_t>
-  bool k2(const propagator_state_t& state, const stepper_t& stepper, const typename stepper_t::state_type& component_state,
-          Vector3D& knew, const Vector3D& bField, const double h,
-          const Vector3D& kprev) {
-    return impl::k(tuple(), state, stepper, component_state, knew, bField, validExtensions, 1, h,
-                   kprev);
+  bool k2(const propagator_state_t& state, const stepper_t& stepper,
+          const typename stepper_t::state_type& component_state, Vector3D& knew,
+          const Vector3D& bField, const double h, const Vector3D& kprev) {
+    return impl::k(tuple(), state, stepper, component_state, knew, bField,
+                   validExtensions, 1, h, kprev);
   }
 
   /// @brief This functions broadcasts the call for evaluating k3. It collects
   /// all arguments and extensions and passes them forward for evaluation and
   /// returns a boolean as indicator if the evaluation is valid.
   template <typename propagator_state_t, typename stepper_t>
-  bool k3(const propagator_state_t& state, const stepper_t& stepper, const typename stepper_t::state_type& component_state,
-          Vector3D& knew, const Vector3D& bField, const double h,
-          const Vector3D& kprev) {
-    return impl::k(tuple(), state, stepper, component_state, knew, bField, validExtensions, 2, h,
-                   kprev);
+  bool k3(const propagator_state_t& state, const stepper_t& stepper,
+          const typename stepper_t::state_type& component_state, Vector3D& knew,
+          const Vector3D& bField, const double h, const Vector3D& kprev) {
+    return impl::k(tuple(), state, stepper, component_state, knew, bField,
+                   validExtensions, 2, h, kprev);
   }
 
   /// @brief This functions broadcasts the call for evaluating k4. It collects
   /// all arguments and extensions and passes them forward for evaluation and
   /// returns a boolean as indicator if the evaluation is valid.
   template <typename propagator_state_t, typename stepper_t>
-  bool k4(const propagator_state_t& state, const stepper_t& stepper, const typename stepper_t::state_type& component_state,
-          Vector3D& knew, const Vector3D& bField, const double h,
-          const Vector3D& kprev) {
-    return impl::k(tuple(), state, stepper, knew, bField, validExtensions, 3, h,
-                   kprev);
+  bool k4(const propagator_state_t& state, const stepper_t& stepper,
+          const typename stepper_t::state_type& component_state, Vector3D& knew,
+          const Vector3D& bField, const double h, const Vector3D& kprev) {
+    return impl::k(tuple(), state, stepper, component_state, knew, bField,
+                   validExtensions, 3, h, kprev);
   }
 
   /// @brief This functions broadcasts the call of the method finalize(). It
   /// collects all extensions and arguments and passes them forward for
   /// evaluation and returns a boolean.
   template <typename propagator_state_t, typename stepper_t>
-  bool finalize(propagator_state_t& state, const stepper_t& stepper, typename stepper_t::state_type& component_state,
-                const double h, FreeMatrix& D) {
-    return impl::finalize(tuple(), state, stepper, component_state, h, D, validExtensions);
+  bool finalize(propagator_state_t& state, const stepper_t& stepper,
+                typename stepper_t::state_type& component_state, const double h,
+                FreeMatrix& D) {
+    return impl::finalize(tuple(), state, stepper, component_state, h, D,
+                          validExtensions);
   }
 
   /// @brief This functions broadcasts the call of the method finalize(). It
   /// collects all extensions and arguments and passes them forward for
   /// evaluation and returns a boolean.
   template <typename propagator_state_t, typename stepper_t>
-  bool finalize(propagator_state_t& state, const stepper_t& stepper, typename stepper_t::state_type& component_state,
+  bool finalize(propagator_state_t& state, const stepper_t& stepper,
+                typename stepper_t::state_type& component_state,
                 const double h) {
-    return impl::finalize(tuple(), state, stepper, component_state, h, validExtensions);
+    return impl::finalize(tuple(), state, stepper, component_state, h,
+                          validExtensions);
   }
 };
 

@@ -242,11 +242,9 @@ class EigenStepper {
   //
   /// @return Boolean statement if there is an intersection
   template <typename options_t>
-  SurfaceIntersection
-  targetSurface(State&           state,
-                const Surface*   surface,
-                const options_t& navOpts,
-                const Corrector& navCorr) const;
+  SurfaceIntersection targetSurface(State& state, const Surface* surface,
+                                    const options_t& navOpts,
+                                    const Corrector& navCorr) const;
 
   /// Create and return the bound state at the current position
   ///
@@ -300,9 +298,7 @@ class EigenStepper {
 
   /// Return a corrector
   template <typename state_type_t>
-  Corrector
-  corrector(state_type_t& state) const
-  {
+  Corrector corrector(state_type_t& state) const {
     return Corrector(state.startPos, state.startDir, state.pathAccumulated);
   }
 
@@ -337,23 +333,17 @@ class EigenStepper {
   /// @param[in] Corrector& navigator corrections
   /// @param[in] stepSize the step size
   /// @param[in] release flag steers if the step is released first
-  void
-  updateStepSize(State&           state,
-                 const Corrector& navCorr,
-                 double           stepSize,
-                 bool             release = false) const;
-  void
-  releaseStep(State& state, cstep::Type type = cstep::actor) const;
+  void updateStepSize(State& state, const Corrector& navCorr, double stepSize,
+                      bool release = false) const;
+  void releaseStep(State& state, cstep::Type type = cstep::actor) const;
 
   /// This method call at the Standard abort
   //
   /// @param[in,out] state The state object for the step length
   /// @param[in] step the step size
   /// @param[in] default update the aborter stepsize
-  void
-  updateStepSize(State&      state,
-                 double      stepSize,
-                 cstep::Type type = cstep::aborter) const;
+  void updateStepSize(State& state, double stepSize,
+                      cstep::Type type = cstep::aborter) const;
 
   /// Perform a Runge-Kutta track parameter propagation step
   ///

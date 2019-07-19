@@ -11,12 +11,11 @@
 #include <cmath>
 #include <sstream>
 #include <utility>
-#include "Acts/Extrapolator/detail/InteractionFormulas.hpp"
-#include "Acts/Extrapolator/detail/MaterialEffect.hpp"
 #include "Acts/Material/ISurfaceMaterial.hpp"
 #include "Acts/Material/Material.hpp"
 #include "Acts/Material/MaterialProperties.hpp"
 #include "Acts/Propagator/detail/InteractionFormulas.hpp"
+#include "Acts/Propagator/detail/MaterialEffect.hpp"
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Utilities/Helpers.hpp"
 
@@ -44,12 +43,10 @@ struct MaterialInteraction {
   /// it is the material and the actual (corrected) path length
   MaterialProperties materialProperties = MaterialProperties();
 
-  bool
-  operator==(const MaterialInteraction& others) const
-  {
-    if (fabs((this->direction - others.direction).norm()) > 1e-10
-        || fabs((this->position - others.position).norm()) > 1e-10
-        || this->surface != others.surface) {
+  bool operator==(const MaterialInteraction& others) const {
+    if (fabs((this->direction - others.direction).norm()) > 1e-10 ||
+        fabs((this->position - others.position).norm()) > 1e-10 ||
+        this->surface != others.surface) {
       return false;
     }
     return true;
@@ -195,8 +192,8 @@ struct MaterialInteractor {
           // Retrieve the scattering contribution
           double sigmaScat = process_scattering(p, lbeta, tInX0);
           // apply on the covariance matrix
-          multiscattering(
-              state, stepper, state.stepping, sigmaScat, mInteraction);
+          multiscattering(state, stepper, state.stepping, sigmaScat,
+                          mInteraction);
         }
 
         // Apply the Energy loss
@@ -209,8 +206,8 @@ struct MaterialInteractor {
           std::pair<double, double> eLoss = process_ionisationloss.dEds(
               m, lbeta, lgamma, mat, 1. * units::_mm);
           // Apply the energy loss
-          const double dEdl   = state.stepping.navDir * eLoss.first;
-          const double dE     = mProperties.thickness() * dEdl;
+          const double dEdl = state.stepping.navDir * eLoss.first;
+          const double dE = mProperties.thickness() * dEdl;
           const double sigmaE = state.stepping.navDir * eLoss.second;
           // Screen output
           debugLog(state, [&] {
@@ -218,14 +215,7 @@ struct MaterialInteractor {
             dstream << "Energy loss calculated to " << dE / 1_GeV << " GeV";
             return dstream.str();
           });
-          energyloss(state,
-                     stepper,
-                     state.stepping,
-                     p,
-                     m,
-                     E,
-                     dE,
-                     sigmaE,
+          energyloss(state, stepper, state.stepping, p, m, E, dE, sigmaE,
                      mInteraction);
         }
 
@@ -245,7 +235,7 @@ struct MaterialInteractor {
     }
   }
 
-private:
+ private:
   /// The private propagation debug logging
   ///
   /// It needs to be fed by a lambda function that returns a string,
