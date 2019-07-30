@@ -148,9 +148,13 @@ class MultiEigenStepper
   using EigenStepperType::getField;
   using EigenStepperType::momentum;
   using EigenStepperType::position;
+  using EigenStepperType::time;
 
   /// Charge access
   double charge(const State& state) const { return state.q; }
+
+  /// Time access
+  double time(const State& state) const;
 
   /// Constructor requires knowledge of the detector's magnetic field
   MultiEigenStepper(BField bField = BField()) : EigenStepperType(bField) {}

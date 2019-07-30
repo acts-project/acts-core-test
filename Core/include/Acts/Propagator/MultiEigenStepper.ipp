@@ -47,6 +47,18 @@ double Acts::MultiEigenStepper<B, C, E, A>::momentum(const State& state) const {
 }
 
 template <typename B, typename C, typename E, typename A>
+double Acts::MultiEigenStepper<B, C, E, A>::time(const State& state) const {
+  double total_time = 0.;
+  for (const auto& tuple_state : state.stateCol) {
+    if (std::get<2>(tuple_state) != StateStatus::Free)
+      continue;
+    double component_time = EigenStepperType::time(std::get<0>(tuple_state));
+    total_time += component_time * std::get<1>(tuple_state);
+  }
+  return total_time;
+}
+
+template <typename B, typename C, typename E, typename A>
 bool Acts::MultiEigenStepper<B, C, E, A>::surfaceReached(
     State& state, const Surface* surface) const {
   // status is true when there all free components are on surface
@@ -185,6 +197,7 @@ void Acts::MultiEigenStepper<B, C, E, A>::updateStepSize(
     auto& singlestate = std::get<0>(tuple_state);
     EigenStepperType::updateStepSize(singlestate, abortStep, type);
   }
+  state.stepSize.update(abortStep, cstep::aborter);
 }
 
 template <typename B, typename C, typename E, typename A>
@@ -235,8 +248,10 @@ template <typename B, typename C, typename E, typename A>
 void Acts::MultiEigenStepper<B, C, E, A>::update(SingleStateType& singlestate,
                                                  const Vector3D& uposition,
                                                  const Vector3D& udirection,
-                                                 double up, double time) const {
-  EigenStepperType::update(singlestate, uposition, udirection, up, time);
+                                                 double up,
+                                                 double component_time) const {
+  EigenStepperType::update(singlestate, uposition, udirection, up,
+                           component_time);
 }
 
 template <typename B, typename C, typename E, typename A>

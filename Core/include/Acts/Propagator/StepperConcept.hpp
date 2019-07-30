@@ -16,6 +16,14 @@
 namespace Acts {
 class Surface;
 
+/// @note: Since the single-stepper and multi-stepper have some
+/// members/functions which can not be implemented in the same interfaces,
+/// currently turn off these concept static checks to make it works for both
+/// stepper.
+/// @to do: split the concept into 3 different concepts:
+/// 1.StepperConcept, 2.SingleComponentStepperConcept, 3.MultiComponentStepperConcept,
+/// at that point one requires that given a certain stepper a specific
+/// ActionList or AbortList fulfills a either the 1. and 2. or the 1. and 3
 namespace concept {
   namespace Stepper {
 
@@ -63,6 +71,7 @@ namespace concept {
     template <typename S>
     constexpr bool StepperStateConcept
       = require<has_member<S, cov_transport_t, bool>,
+                //has_member<S, cov_t, BoundSymMatrix>,
                 has_member<S, nav_dir_t, NavigationDirection>,
                 has_member<S, path_accumulated_t, double>,
                 has_member<S, step_size_t, detail::ConstrainedStep>
@@ -94,15 +103,15 @@ namespace concept {
         static_assert(momentum_exists, "momentum method not found");
         constexpr static bool charge_exists = has_method<const S, double, charge_t, const state&>;
         static_assert(charge_exists, "charge method not found");
-        //constexpr static bool time_exists = has_method<const S, double, timet, const state&>;
-        //static_assert(time_exists, "time method not found");
-        //constexpr static bool surface_reached_exists = has_method<const S, bool, surface_reached_t, const state&, const Surface*>;
-        //static_assert(surface_reached_exists, "surfaceReached method not found");
+        constexpr static bool time_exists = has_method<const S, double, timet, const state&>;
+        static_assert(time_exists, "time method not found");
         constexpr static bool bound_state_method_exists= has_method<const S, typename S::BoundState, bound_state_method_t, state&, const Surface&, bool>;
         static_assert(bound_state_method_exists, "boundState method not found");
         constexpr static bool curvilinear_state_method_exists = has_method<const S, typename S::CurvilinearState, curvilinear_state_method_t, state&, bool>;
         static_assert(curvilinear_state_method_exists, "curvilinearState method not found");
 
+        //constexpr static bool surface_reached_exists = has_method<const S, bool, surface_reached_t, const state&, const Surface*>;
+        //static_assert(surface_reached_exists, "surfaceReached method not found");
         //constexpr static bool update_method_exists = require<has_method<const S, void, update_t, state&, const BoundParameters&>,
         //                                                     has_method<const S, void, update_t, state&, const Vector3D&, const Vector3D&, double, double>>;
         //static_assert(update_method_exists, "update method not found");
@@ -118,17 +127,17 @@ namespace concept {
                                               bound_state_exists,
                                               curvilinear_state_exists,
                                               return_type_exists,
-                                              //get_field_exists,
+                                              get_field_exists,
                                               position_exists,
                                               direction_exists,
                                               momentum_exists,
                                               charge_exists,
-                                              //time_exists,
-                                              //surface_reached_exists,
+                                              time_exists,
                                               bound_state_method_exists,
                                               curvilinear_state_method_exists>;
+                                              //surface_reached_exists,
                                               //update_method_exists,
-                                              //corrector_exists>;
+                                              //corrector_exists,
                                               //covariance_transport_exists>;
       };
   // clang-format on
