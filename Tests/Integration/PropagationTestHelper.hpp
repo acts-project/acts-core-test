@@ -275,6 +275,13 @@ std::pair<Vector3D, double> to_cylinder(
     covOpt = cov;
   }
 
+  // do propagation of the start parameters
+  TrackParametersBase* start;
+  if (q == 0.)
+    start = new NeutralCurvilinearParameters(covOpt, pos, mom, time);
+  else
+    start = new CurvilinearParameters(covOpt, pos, mom, q, time);
+
   // The transform at the destination
   auto seTransform = createCylindricTransform(Vector3D(0., 0., 0.),
                                               0.04 * rand1, 0.04 * rand2);
@@ -480,6 +487,7 @@ Covariance covariance_curvilinear(const Propagator_type& propagator, double pT,
 
   // do propagation of the start parameters
   CurvilinearParameters start(cov, pos, mom, q, time);
+  CurvilinearParameters start_wo_c(std::nullopt, pos, mom, q, time);
 
   const auto result = propagator.propagate(start, options).value();
   const auto& tp = result.endParameters;
@@ -545,6 +553,8 @@ Covariance covariance_bound(const Propagator_type& propagator, double pT,
   auto startSurface =
       Surface::makeShared<StartSurface_type>(ssTransform, nullptr);
   BoundParameters start(tgContext, cov, pos, mom, q, time, startSurface);
+  BoundParameters start_wo_c(tgContext, std::nullopt, pos, mom, q, time,
+                             startSurface);
 
   // increase the path limit - to be safe hitting the surface
   options.pathLimit *= 2;

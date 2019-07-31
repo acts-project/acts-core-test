@@ -69,7 +69,7 @@ void Acts::EigenStepper<B, C, E, A>::update(State& state,
   state.dir = mom.normalized();
   state.p = mom.norm();
   state.dt = pars.time();
-  
+
   if (pars.covariance()) {
     state.cov = (*(pars.covariance()));
   }
