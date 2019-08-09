@@ -237,7 +237,7 @@ class MultiEigenStepper
 
   /// @brief update for the single state, update singlestate direction and p
   void update(SingleStateType& singlestate, const Vector3D& uposition,
-              const Vector3D& udirection, double up, double time) const;
+              const Vector3D& udirection, double up, double component_time) const;
 
   /// Perform a Runge-Kutta track parameter propagation step
   ///
