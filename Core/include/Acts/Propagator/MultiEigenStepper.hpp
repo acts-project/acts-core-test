@@ -18,10 +18,11 @@ enum class StateStatus { Free = 0, Locked = 1, Dead = 2 };
 /// implementation developed for Gaussian Sum Filter (GSF)
 ///
 /// The state of mcs contains a list of single states,
-/// each component contains its own pos, dir, stepSize. In the step() method, 
+/// each component contains its own pos, dir, stepSize. In the step() method,
 /// loop all the single components and do caculations as in Single Stepper.
 ///
-/// In surfaceReached() method, determine if all components are on the current surface.
+/// In surfaceReached() method, determine if all components are on the current
+/// surface.
 ///
 /// In targetSurface() method, collect the candidate surfaces in Navigator
 /// with the combination of components (pos,dir),
@@ -237,7 +238,7 @@ class MultiEigenStepper
   /// @brief update for the single state, update singlestate direction and p
   void update(SingleStateType& singlestate, const Vector3D& uposition,
               const Vector3D& udirection, double up,
-			  double component_time) const;
+              double component_time) const;
 
   /// Perform a Runge-Kutta track parameter propagation step
   /// Loop all the single states
