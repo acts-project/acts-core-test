@@ -17,24 +17,23 @@ enum class StateStatus { Free = 0, Locked = 1, Dead = 2 };
 /// @brief multicomponent stepper(mcs) is based on the Single Stepper
 /// implementation developed for Gaussian Sum Filter (GSF)
 ///
-/// the state of MC contains a list of single state
-/// each component contains its own pos, dirand stepSize
-/// in the step() method,
-/// loop all the single components and do caculating as in
-/// the single stepper.
-/// In surfaceReached() method, determine if all components
-/// are on the current surface.
+/// The state of mcs contains a list of single states,
+/// each component contains its own pos, dir, stepSize. In the step() method, 
+/// loop all the single components and do caculations as in Single Stepper.
+///
+/// In surfaceReached() method, determine if all components are on the current surface.
+///
 /// In targetSurface() method, collect the candidate surfaces in Navigator
 /// with the combination of components (pos,dir),
-/// and update the stepSize of each components
+/// and update the stepSize of each component.
 ///
-/// in mcs, each single component owns a status:
+/// In mcs, each single component owns a status:
 /// Free - not on surface
 /// Lock - on surface
 /// Dead - can not target the surface
 ///
 /// @to do move the job of deleting components to the Fitting stage
-/// @to do compliant with the MultiParameter class
+/// @to be compatible with the MultiTrackParameters class
 
 template <typename BField, typename corrector_t = VoidIntersectionCorrector,
           typename extensionlist_t = StepperExtensionList<DefaultExtension>,
@@ -49,24 +48,25 @@ class MultiEigenStepper
   using Jacobian = BoundMatrix;
   using Covariance = BoundSymMatrix;
 
-  /// @note Currently the BoundState/CurvilinearState is defined for Single
-  /// component which is a combination of all components, the Jacobian for this
+  /// @note Currently the BoundState/CurvilinearState is defined for single
+  /// component which is a combination of all components, the Jacobian at this
   /// meaning is nonsense
-  /// This should be replaced by
+  ///
+  /// @to do This should be replaced by
   /// std::tuple<MultiBoundParameters,std::list<Jacobian>,double> or other wise
   /// structure with Jacobians
+  ///
   using BoundState = std::tuple<BoundParameters, Jacobian, double>;
   using CurvilinearState = std::tuple<CurvilinearParameters, Jacobian, double>;
   using EigenStepperType =
       EigenStepper<BField, corrector_t, extensionlist_t, auctioneer_t>;
   using SingleStateType = typename EigenStepperType::State;
-
   using SurfaceIntersection = ObjectIntersection<Surface>;
 
   /// @brief State for track parameter propagation
   ///
-  /// the State behave like the SingleState in Navigator, while contains
-  /// information of each single components
+  /// The State behave like the SingleState in Navigator, while contains
+  /// information of each single component
   struct State {
     /// Constructor from the initial track parameters
     /// construct the multi components from one single component
@@ -166,12 +166,12 @@ class MultiEigenStepper
                                       pos);
   }
 
-  /// @brief Tests if all the single states reach a surface
+  /// @brief Tests if all the single states reach a surface,
   /// if all single states reach(except the dead ones) successfully,
   /// return true; otherwise return false;
   ///
-  /// the single state that is successfully reached is set to locked
-  /// then if all single states locked, free all of them
+  /// the single state that is successfully reached is set locked
+  /// when all single states locked, then free all of them
   ///
   /// @param [in] state State is the mcs state
   /// @param [in] surface Surface that is tested
@@ -198,12 +198,11 @@ class MultiEigenStepper
                                     const options_t& navOpts,
                                     const Corrector& navCorr) const;
 
-  /// @brief reweight the free components
+  /// @brief Reweight the free components
   /// the free and locked components are reweighted to 1
   void normalizeComponents(State& state) const;
 
   /// @brief The method to delete the dead components
-  /// this would be done at Fitting step - in the future
   void deleteComponents(State& state) const;
 
   /// @brief get a sinlge parameter of combination of multi component on a
@@ -232,14 +231,16 @@ class MultiEigenStepper
   void updateStepSize(State& state, double abortStep,
                       cstep::Type type = cstep::aborter) const;
 
-  /// @brief update for the single state, update singlestate to some parameters
+  /// @brief update for the single state, update singlestate to parameters
   void update(SingleStateType& singlestate, const BoundParameters& pars) const;
 
   /// @brief update for the single state, update singlestate direction and p
   void update(SingleStateType& singlestate, const Vector3D& uposition,
-              const Vector3D& udirection, double up, double component_time) const;
+              const Vector3D& udirection, double up,
+			  double component_time) const;
 
   /// Perform a Runge-Kutta track parameter propagation step
+  /// Loop all the single states
   ///
   /// @param [in,out] state is the propagation state associated with the track
   /// parameters that are being propagated.

@@ -182,8 +182,8 @@ BOOST_DATA_TEST_CASE(
 // 2. multi stepper with 1 component
 // 3. multi stepper with multi-material-interactor : when meet materail
 // surface, each component copy themselves into 2 components
-// 4. multi stepper with multi-material-interactor and a DiractionChange actor
-// : when meet materail surface, each component copy themselves into 2
+// 4. multi stepper with MultiMaterialInteractor and a DiractionChange actor
+// : when meet materail surface, each component copy itselves into 2
 // components, then the first component flip its direction and reweight it to
 // a small number to mimic a dead component
 // all the above cases should collect same surface hit results

@@ -119,7 +119,7 @@ BOOST_AUTO_TEST_CASE(multi_material_interactor) {
   BOOST_CHECK(numOfComponents == 64);
 
   // Test at each surface if all material interactions recorded are the same
-  // because the component split don't change anything, just copy component at
+  // since the component split don't change anything, just copy component at
   // current status
   const auto& material_interactions_result =
       result.template get<MultiMaterialInteractor::result_type>()

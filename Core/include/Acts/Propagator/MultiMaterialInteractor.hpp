@@ -64,16 +64,17 @@ struct MultiMaterialInteractor {
   /// @brief Interaction with detector material for the ActionList
   /// of the Propagator
   ///
-  /// only contains a split function currently
+  /// contains a energy split function currently
   ///
   /// It checks if the state has a current surface, in which case
   /// the action is performed: the covariance is transported to the position,
   /// the energy loss part are assumed to be Bethe-Heitler function,
   /// which allows to split one component
-  /// into several components with (weight,deltaE,variance),
-  /// currently the Bethe-Heitler does nothing but split into same components,
+  /// into several components with (weight,deltaE,variance).
+  ///
+  /// Currently the Bethe-Heitler does nothing but split into same components,
   /// to test if they collect same results in the multi-stepper.
-  /// Then the multiple scattering part is considered.
+  /// After energy split, the multiple scattering part is considered.
   ///
   /// @tparam propagator_state_t is the type of Propagagor state
   /// @tparam stepper_t Type of the stepper of the propagation
@@ -183,7 +184,7 @@ struct MultiMaterialInteractor {
           // carries (weight,dmean,dvariance)
           // weight represents the weight of each newly created component
           // dmean and dvariance represents the delta Energyloss and the delta
-          // variance from the newly created component.
+          // variance from the newly created components.
           //
           // @note current not use the Bethe-Heitler pdf, just make a list of
           // copied component, to see if they act equally in the multi-stepper,
