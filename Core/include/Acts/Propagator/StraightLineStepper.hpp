@@ -45,7 +45,7 @@ class StraightLineStepper {
 
   using Corrector = VoidIntersectionCorrector;
   using Jacobian = BoundMatrix;
-  using Covariance = BoundSymMatrix;
+  using Covariance = FreeSymMatrix;
   using BoundState = std::tuple<BoundParameters, Jacobian, double>;
   using CurvilinearState = std::tuple<CurvilinearParameters, Jacobian, double>;
 
@@ -78,13 +78,18 @@ class StraightLineStepper {
           stepSize(ndir * std::abs(ssize)),
           geoContext(gctx) {
       if (par.covariance()) {
+		  // set the covariance transport flag to true
+			covTransport = true;
+		  if(typeid(parameters_t::CovMatrix_t) == typeid(BoundSymMatrix))
+		  {
         // Get the reference surface for navigation
         const auto& surface = par.referenceSurface();
-        // set the covariance transport flag to true and copy
-        covTransport = true;
-        cov = BoundSymMatrix(*par.covariance());
+        // Copy the covariance and get its global representation
         surface.initJacobianToGlobal(gctx, jacToGlobal, pos, dir,
                                      par.parameters());
+                                     
+           cov = jacToGlobal * BoundSymMatrix(*par.covariance());
+          }
       }
     }
 
