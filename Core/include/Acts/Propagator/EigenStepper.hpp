@@ -230,7 +230,7 @@ class EigenStepper {
   ///
   /// @param [in,out] state State object that will be updated
   /// @param [in] pars Parameters that will be written into @p state
-  void update(State& state, const BoundParameters& pars) const;
+  void update(GeometryContext& gctx, State& state, const BoundParameters& pars) const;
 
   /// Method to update momentum, direction and p
   ///
@@ -258,7 +258,7 @@ class EigenStepper {
   /// @param [in] surface is the surface to which the covariance is forwarded to
   /// @note no check is done if the position is actually on the surface
   void covarianceTransport(State& state, const Surface& surface) const;
-
+  
   /// Perform a Runge-Kutta track parameter propagation step
   ///
   /// @param [in,out] state is the propagation state associated with the track
