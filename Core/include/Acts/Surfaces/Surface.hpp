@@ -404,10 +404,6 @@ class Surface : public virtual GeometryObject,
   virtual const FreeRowVector derivativeFactors(
       const GeometryContext& gctx, const Vector3D& gpos, const Vector3D& dir,
       const RotationMatrix3D& rft, const FreeMatrix& jac) const;
-      
-  virtual const BoundRowVector derivativeFactors(
-      const GeometryContext& gctx, const Vector3D& gpos, const Vector3D& dir,
-      const RotationMatrix3D& rft, const BoundToFreeMatrix& jac) const;
 
   /// Calucation of the path correction for incident
   ///
