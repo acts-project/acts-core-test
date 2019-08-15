@@ -62,7 +62,7 @@ auto Acts::EigenStepper<B, C, E, A>::curvilinearState(State& state,
 }
 
 template <typename B, typename C, typename E, typename A>
-void Acts::EigenStepper<B, C, E, A>::update(State& state,
+void Acts::EigenStepper<B, C, E, A>::update(GeometryContext& gctx, State& state,
                                             const BoundParameters& pars) const {
   const auto& mom = pars.momentum();
   state.pos = pars.position();
@@ -125,39 +125,25 @@ void Acts::EigenStepper<B, C, E, A>::covarianceTransport(
   jacToCurv(2, 5) = cosPhi * invSinTheta;
   jacToCurv(3, 6) = -invSinTheta;
   jacToCurv(4, 7) = 1;
-  // Apply the transport from the steps on the jacobian
-  state.jacToGlobal = state.jacTransport * state.jacToGlobal;
+
   // Transport the covariance
   ActsRowVectorD<3> normVec(state.dir);
-  const BoundRowVector sfactors =
-      normVec * state.jacToGlobal.template topLeftCorner<3, BoundParsDim>();
+  const FreeRowVector sfactors =
+      normVec * state.jacTransport.template topLeftCorner<3, FreeParsDim>();
   // The full jacobian is ([to local] jacobian) * ([transport] jacobian)
-  const Jacobian jacFull =
-      jacToCurv * (state.jacToGlobal - state.derivative * sfactors);
+  const Jacobian jacFull = state.jacTransport - state.derivative * sfactors;
+  
   // Apply the actual covariance transport
   state.cov = (jacFull * state.cov * jacFull.transpose());
   // Reinitialize if asked to do so
   // this is useful for interruption calls
   if (reinitialize) {
-    // reset the jacobians
-    state.jacToGlobal = BoundToFreeMatrix::Zero();
+    // reset the jacobian
     state.jacTransport = FreeMatrix::Identity();
-    // fill the jacobian to global for next transport
-    state.jacToGlobal(0, eLOC_0) = -sinPhi;
-    state.jacToGlobal(0, eLOC_1) = -cosPhi * cosTheta;
-    state.jacToGlobal(1, eLOC_0) = cosPhi;
-    state.jacToGlobal(1, eLOC_1) = -sinPhi * cosTheta;
-    state.jacToGlobal(2, eLOC_1) = sinTheta;
-    state.jacToGlobal(3, eT) = 1.;
-    state.jacToGlobal(4, ePHI) = -sinTheta * sinPhi;
-    state.jacToGlobal(4, eTHETA) = cosTheta * cosPhi;
-    state.jacToGlobal(5, ePHI) = sinTheta * cosPhi;
-    state.jacToGlobal(5, eTHETA) = cosTheta * sinPhi;
-    state.jacToGlobal(6, eTHETA) = -sinTheta;
-    state.jacToGlobal(7, eQOP) = 1.;
   }
   // Store The global and bound jacobian (duplication for the moment)
   state.jacobian = jacFull * state.jacobian;
+  return jacToCurv * state.cov * jacToCurv.transpose();
 }
 
 template <typename B, typename C, typename E, typename A>
@@ -170,35 +156,25 @@ void Acts::EigenStepper<B, C, E, A>::covarianceTransport(
   // initalize the jacobian to local, returns the transposed ref frame
   auto rframeT = surface.initJacobianToLocal(state.geoContext, jacToLocal,
                                              state.pos, state.dir);
-  // Update the jacobian with the transport from the steps
-  state.jacToGlobal = state.jacTransport * state.jacToGlobal;
+
   // calculate the form factors for the derivatives
-  const BoundRowVector sVec = surface.derivativeFactors(
-      state.geoContext, state.pos, state.dir, rframeT, state.jacToGlobal);
+  const FreeRowVector sVec = surface.derivativeFactors(
+      state.geoContext, state.pos, state.dir, rframeT, state.jacTransport);
   // the full jacobian is ([to local] jacobian) * ([transport] jacobian)
-  const Jacobian jacFull =
-      jacToLocal * (state.jacToGlobal - state.derivative * sVec);
+  const Jacobian jacFull = state.jacTransport - state.derivative * sVec;
   // Apply the actual covariance transport
   state.cov = (jacFull * state.cov * jacFull.transpose());
   // Reinitialize if asked to do so
   // this is useful for interruption calls
   if (reinitialize) {
-    // reset the jacobians
-    state.jacToGlobal = BoundToFreeMatrix::Zero();
+    // reset the jacobian
     state.jacTransport = FreeMatrix::Identity();
     // reset the derivative
     state.derivative = FreeVector::Zero();
-    // fill the jacobian to global for next transport
-    Vector2D loc{0., 0.};
-    surface.globalToLocal(state.geoContext, state.pos, state.dir, loc);
-    BoundVector pars;
-    pars << loc[eLOC_0], loc[eLOC_1], phi(state.dir), theta(state.dir),
-        state.q / state.p, state.t0 + state.dt;
-    surface.initJacobianToGlobal(state.geoContext, state.jacToGlobal, state.pos,
-                                 state.dir, pars);
   }
   // Store The global and bound jacobian (duplication for the moment)
   state.jacobian = jacFull * state.jacobian;
+  return jacToCurv * state.cov * jacToCurv.transpose();
 }
 
 template <typename B, typename C, typename E, typename A>

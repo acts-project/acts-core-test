@@ -58,8 +58,8 @@ class EigenStepper {
   using Corrector = corrector_t;
 
   /// Jacobian, Covariance and State defintions
-  using Jacobian = BoundMatrix;
-  using Covariance = BoundSymMatrix;
+  using Jacobian = FreeMatrix;
+  using Covariance = FreeSymMatrix;
   using BoundState = std::tuple<BoundParameters, Jacobian, double>;
   using CurvilinearState = std::tuple<CurvilinearParameters, Jacobian, double>;
 
@@ -99,13 +99,19 @@ class EigenStepper {
       startDir = dir;
       // Init the jacobian matrix if needed
       if (par.covariance()) {
-        // Get the reference surface for navigation
-        const auto& surface = par.referenceSurface();
-        // set the covariance transport flag to true and copy
-        covTransport = true;
-        cov = BoundSymMatrix(*par.covariance());
-        surface.initJacobianToGlobal(gctx, jacToGlobal, pos, dir,
-                                     par.parameters());
+		  // Set the covariance transport flag to true
+		  covTransport = true;
+		  // Get the covariance
+		  if(typeid(parameters_t::CovMatrix_t) == typeid(BoundSymMatrix))
+		  {
+            cov = par.globalCovariance(gctx);
+          }
+          else
+          {
+			  cov = Covariance(*par.covariance());
+			  startedInFreeParameters = true;
+		  }
+
       }
     }
 
@@ -139,11 +145,8 @@ class EigenStepper {
     /// The full jacobian of the transport entire transport
     Jacobian jacobian = Jacobian::Identity();
 
-    /// Jacobian from local to the global frame
-    BoundToFreeMatrix jacToGlobal = BoundToFreeMatrix::Zero();
-
     /// Pure transport jacobian part from runge kutta integration
-    FreeMatrix jacTransport = FreeMatrix::Identity();
+    Jacobian jacTransport = Jacobian::Identity();
 
     /// The propagation derivative
     FreeVector derivative = FreeVector::Zero();
@@ -267,7 +270,7 @@ class EigenStepper {
   ///
   /// @param [in,out] state State object that will be updated
   /// @param [in] pars Parameters that will be written into @p state
-  void update(State& state, const BoundParameters& pars) const;
+  void update(GeometryContext& gctx, State& state, const BoundParameters& pars) const;
 
   /// Method to update momentum, direction and p
   ///
@@ -292,7 +295,7 @@ class EigenStepper {
   /// reinitialized at the new position
   ///
   /// @return the full transport jacobian
-  void covarianceTransport(State& state, bool reinitialize = false) const;
+  BoundSymMatrix covarianceTransport(State& state, bool reinitialize = false) const;
 
   /// Method for on-demand transport of the covariance
   /// to a new curvilinear frame at current position,
@@ -305,7 +308,7 @@ class EigenStepper {
   /// @param [in] reinitialize is a flag to steer whether the state should be
   /// reinitialized at the new position
   /// @note no check is done if the position is actually on the surface
-  void covarianceTransport(State& state, const Surface& surface,
+  BoundSymMatrix covarianceTransport(State& state, const Surface& surface,
                            bool reinitialize = true) const;
 
   /// Perform a Runge-Kutta track parameter propagation step
