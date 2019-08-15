@@ -185,8 +185,8 @@ class SingleCurvilinearTrackParameters
   {
 	  BoundToFreeMatrix jacToGlobal = BoundToFreeMatrix::Zero();
       m_upSurface->initJacobianToGlobal(gctx, jacToGlobal,
-                                   position(), momentum().normalized(), parameters());
-      return jacToGlobal * (*covariance()) * jacToGlobal.transpose();
+                                   this->position(), this->momentum().normalized(), this->parameters());
+      return jacToGlobal * (*this->covariance()) * jacToGlobal.transpose();
   }
 
 

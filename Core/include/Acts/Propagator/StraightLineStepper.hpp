@@ -78,8 +78,9 @@ class StraightLineStepper {
           stepSize(ndir * std::abs(ssize)),
           geoContext(gctx) {
       if (par.covariance()) {
-		  // set the covariance transport flag to true
-			covTransport = true;
+		  // Set the covariance transport flag to true
+		  covTransport = true;
+		  // Get the covariance
 		  if(typeid(parameters_t::CovMatrix_t) == typeid(BoundSymMatrix))
 		  {
             cov = par.globalCovariance(gctx);
@@ -261,7 +262,7 @@ class StraightLineStepper {
   ///
   /// @param [in,out] state State object that will be updated
   /// @param [in] pars Parameters that will be written into @p state
-  void update(State& state, const BoundParameters& pars) const {
+  void update(GeometryContext& gctx, State& state, const BoundParameters& pars) const {
     const auto& mom = pars.momentum();
     state.pos = pars.position();
     state.dir = mom.normalized();
@@ -340,27 +341,12 @@ class StraightLineStepper {
     jacToCurv(3, 6) = -invSinTheta;
     jacToCurv(4, 7) = 1.;
     
-    const Jacobian jacFull;
-    if(startedInFreeParameters)
-    {
-	    // Transport the covariance
-		ActsRowVectorD<3> normVec(state.dir);
-	    const FreeRowVector sfactors =
-	        normVec * state.jacToGlobal.template topLeftCorner<3, FreeParsDim>();
-	    // The full jacobian is
-		jacFull = state.jacTransport - state.derivative * sfactors;
-	}
-	else
-	{
-	    // Apply the transport from the steps on the jacobian
-	    state.jacToGlobal = state.jacTransport * state.jacToGlobal;
-	    // Transport the covariance
-	    ActsRowVectorD<3> normVec(state.dir);
-	    const BoundRowVector sfactors =
-	        normVec * state.jacToGlobal.template topLeftCorner<3, BoundParsDim>();
-	    // The full jacobian is
-	    jacFull = state.jacToGlobal - state.derivative * sfactors;
-	}
+    // Transport the covariance
+	ActsRowVectorD<3> normVec(state.dir);
+    const FreeRowVector sfactors =
+        normVec * state.jacToGlobal.template topLeftCorner<3, FreeParsDim>();
+    // The full jacobian is
+	const Jacobian jacFull  = state.jacTransport - state.derivative * sfactors;
 	
     // Apply the actual covariance transport
     state.cov = (jacFull * state.cov * jacFull.transpose());

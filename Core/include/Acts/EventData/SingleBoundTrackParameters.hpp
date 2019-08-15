@@ -232,8 +232,8 @@ class SingleBoundTrackParameters : public SingleTrackParameters<ChargePolicy> {
   {
 	  BoundToFreeMatrix jacToGlobal = BoundToFreeMatrix::Zero();
       m_pSurface->initJacobianToGlobal(gctx, jacToGlobal,
-                                   position(), momentum().normalized(), parameters());
-      return jacToGlobal * (*covariance()) * jacToGlobal.transpose();
+                                   this->position(), this->momentum().normalized(), this->parameters());
+      return jacToGlobal * (*this->covariance()) * jacToGlobal.transpose();
   }
 
  private:

@@ -400,10 +400,10 @@ class Surface : public virtual GeometryObject,
   /// @param rft is the transposed reference frame (avoids recalculation)
   /// @param jac is the transport jacobian
   ///
-  /// @return a five-dim vector
-  virtual const BoundRowVector derivativeFactors(
+  /// @return a 8-dim vector
+  virtual const FreeRowVector derivativeFactors(
       const GeometryContext& gctx, const Vector3D& gpos, const Vector3D& dir,
-      const RotationMatrix3D& rft, const BoundToFreeMatrix& jac) const;
+      const RotationMatrix3D& rft, const FreeMatrix& jac) const;
 
   /// Calucation of the path correction for incident
   ///
