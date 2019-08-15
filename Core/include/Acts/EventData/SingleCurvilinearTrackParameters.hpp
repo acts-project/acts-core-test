@@ -179,6 +179,15 @@ class SingleCurvilinearTrackParameters
   RotationMatrix3D referenceFrame(const GeometryContext& gctx) const {
     return m_upSurface->transform(gctx).linear();
   }
+  
+  /// @copydoc TrackParametersBase::globalCovariance
+  FreeSymMatrix globalCovariance(GeometryContext& gctx) const final
+  {
+	  BoundToFreeMatrix jacToGlobal = BoundToFreeMatrix::Zero();
+      m_upSurface->initJacobianToGlobal(gctx, jacToGlobal,
+                                   this->position(), this->momentum().normalized(), this->parameters());
+      return jacToGlobal * (*this->covariance()) * jacToGlobal.transpose();
+  }
 
  private:
   std::shared_ptr<PlaneSurface> m_upSurface;
