@@ -80,10 +80,8 @@ class StraightLineStepper {
       if (par.covariance()) { // TODO: constructors might be combined but a covariance setter is then templated
 		  // Set the covariance transport flag to true
 		  covTransport = true;
-		  // Get the covariance          
-		  par.referenceSurface().initJacobianToGlobal(gctx, *jacToGlobal,
-									   par.position(), par.momentum().normalized(), par.parameters());
-		  cov = (*jacToGlobal) * (*par.covariance()) * (*jacToGlobal).transpose();
+		  // Get the covariance
+          cov = par.globalCovariance(gctx);
       }
     }
     
@@ -113,20 +111,7 @@ class StraightLineStepper {
 		  // Set the covariance transport flag to true
 		  covTransport = true;
 		  // Get the covariance
-		  if(typeid(parameters_t::CovMatrix_t) == typeid(BoundSymMatrix))
-		  {
-			// Get the reference surface for navigation
-			const auto& surface = par.referenceSurface();
-			// Copy the covariance and get its global representation
-			surface.initJacobianToGlobal(gctx, jacToGlobal, pos, dir,
-                                     par.parameters());
-                                     
-            cov = jacToGlobal * (*par.covariance()) * jacToGlobal.transpose();
-          }
-          else
-          {
-			  cov = Covariance(*par.covariance());
-		  }
+          cov = *par.covariance();
       }
     }
 
@@ -312,7 +297,7 @@ class StraightLineStepper {
   ///
   /// @param [in,out] state State object that will be updated
   /// @param [in] pars Parameters that will be written into @p state
-  void update(GeometryContext& gctx, State& state, const BoundParameters& pars) const {
+  void update(State& state, const BoundParameters& pars) const {
     const auto& mom = pars.momentum();
     state.pos = pars.position();
     state.dir = mom.normalized();
@@ -320,7 +305,7 @@ class StraightLineStepper {
     state.dt = pars.time();
 
     if (pars.covariance() != nullptr) {	
-      state.cov = pars.globalCovariance(gctx);
+      state.cov = pars.globalCovariance(state.geoContext);
     }
   }
 
@@ -447,7 +432,7 @@ class StraightLineStepper {
 	surface.initJacobianToLocal(state.geoContext, jacToLocal,
                                                state.pos, state.dir);
     // calculate the form factors for the derivatives
-    const BoundRowVector sVec = surface.derivativeFactors(
+    const FreeRowVector sVec = surface.derivativeFactors(
         state.geoContext, state.pos, state.dir, rframeT, state.jacTransport);
     // the full jacobian is
     const Jacobian jacFull = state.jacTransport - state.derivative * sVec;
