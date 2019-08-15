@@ -82,13 +82,7 @@ class StraightLineStepper {
 			covTransport = true;
 		  if(typeid(parameters_t::CovMatrix_t) == typeid(BoundSymMatrix))
 		  {
-			// Get the reference surface for navigation
-			const auto& surface = par.referenceSurface();
-			// Copy the covariance and get its global representation
-			surface.initJacobianToGlobal(gctx, jacToGlobal, pos, dir,
-                                     par.parameters());
-                                     
-            cov = jacToGlobal * (*par.covariance()) * jacToGlobal.transpose();
+            cov = par.globalCovariance(gctx);
           }
           else
           {
@@ -97,10 +91,7 @@ class StraightLineStepper {
 		  }
       }
     }
-
-    /// Jacobian from local to the global frame
-    BoundToFreeMatrix jacToGlobal = BoundToFreeMatrix::Zero(); // This could become a boost::optional
-
+    
     /// Pure transport jacobian part from runge kutta integration
     Jacobian jacTransport = Jacobian::Identity();
 
@@ -376,22 +367,8 @@ class StraightLineStepper {
     // Reinitialize if asked to do so
     // this is useful for interruption calls
     if (reinitialize) {
-      // reset the jacobians
-      state.jacToGlobal = BoundToFreeMatrix::Zero();
+      // reset the jacobian
       state.jacTransport = Jacobian::Identity();
-      // fill the jacobian to global for next transport
-      state.jacToGlobal(0, eLOC_0) = -sinPhi;
-      state.jacToGlobal(0, eLOC_1) = -cosPhi * cosTheta;
-      state.jacToGlobal(1, eLOC_0) = cosPhi;
-      state.jacToGlobal(1, eLOC_1) = -sinPhi * cosTheta;
-      state.jacToGlobal(2, eLOC_1) = sinTheta;
-      state.jacToGlobal(3, eT) = 1;
-      state.jacToGlobal(4, ePHI) = -sinTheta * sinPhi;
-      state.jacToGlobal(4, eTHETA) = cosTheta * cosPhi;
-      state.jacToGlobal(5, ePHI) = sinTheta * cosPhi;
-      state.jacToGlobal(5, eTHETA) = cosTheta * sinPhi;
-      state.jacToGlobal(6, eTHETA) = -sinTheta;
-      state.jacToGlobal(7, eQOP) = 1;
     }
     // Store The global and bound jacobian (duplication for the moment)
     state.jacobian = jacFull * state.jacobian;
@@ -433,19 +410,10 @@ class StraightLineStepper {
     // Reinitialize if asked to do so
     // this is useful for interruption calls
     if (reinitialize) {
-      // reset the jacobians
-      state.jacToGlobal = BoundToFreeMatrix::Zero();
+      // reset the jacobian
       state.jacTransport = FreeMatrix::Identity();
       // reset the derivative
       state.derivative = FreeVector::Zero();
-      // fill the jacobian to global for next transport
-      Vector2D loc{0., 0.};
-      surface.globalToLocal(state.geoContext, state.pos, state.dir, loc);
-      BoundVector pars;
-      pars << loc[eLOC_0], loc[eLOC_1], phi(state.dir), theta(state.dir),
-          state.q / state.p, state.t0 + state.dt;
-      surface.initJacobianToGlobal(state.geoContext, state.jacToGlobal,
-                                   state.pos, state.dir, pars);
     }
     // Store The global and bound jacobian (duplication for the moment)
     state.jacobian = jacFull * state.jacobian;
