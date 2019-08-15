@@ -228,7 +228,7 @@ class SingleBoundTrackParameters : public SingleTrackParameters<ChargePolicy> {
   }
   
   /// @copydoc TrackParametersBase::globalCovariance
-  FreeSymMatrix globalCovariance(GeometryContext& gctx) const final
+  FreeSymMatrix globalCovariance(const GeometryContext& gctx) const final
   {
 	  BoundToFreeMatrix jacToGlobal = BoundToFreeMatrix::Zero();
       m_pSurface->initJacobianToGlobal(gctx, jacToGlobal,

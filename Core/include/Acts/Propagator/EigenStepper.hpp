@@ -80,7 +80,7 @@ class EigenStepper {
     /// @param [in] ssize is the maximum step size
     ///
     /// @note the covariance matrix is copied when needed
-    template <typename parameters_t>
+    template <typename parameters_t, std::enable_if_t<std::is_same<typename parameters_t::CovMatrix_t, BoundSymMatrix>::value, int> = 0>
     explicit State(std::reference_wrapper<const GeometryContext> gctx,
                    std::reference_wrapper<const MagneticFieldContext> mctx,
                    const parameters_t& par, NavigationDirection ndir = forward,
@@ -102,16 +102,42 @@ class EigenStepper {
 		  // Set the covariance transport flag to true
 		  covTransport = true;
 		  // Get the covariance
-		  if(typeid(parameters_t::CovMatrix_t) == typeid(BoundSymMatrix))
-		  {
             cov = par.globalCovariance(gctx);
-          }
-          else
-          {
-			  cov = Covariance(*par.covariance());
-			  startedInFreeParameters = true;
-		  }
-
+      }
+    }
+    
+    /// Constructor from the initial track parameters
+    ///
+    /// @param [in] gctx is the context object for the geometry
+    /// @param [in] mctx is the context object for the magnetic field
+    /// @param [in] par The track parameters at start
+    /// @param [in] ndir The navigation direciton w.r.t momentum
+    /// @param [in] ssize is the maximum step size
+    ///
+    /// @note the covariance matrix is copied when needed
+    template <typename parameters_t, std::enable_if_t<std::is_same<typename parameters_t::CovMatrix_t, FreeSymMatrix>::value, int> = 0>
+    explicit State(std::reference_wrapper<const GeometryContext> gctx,
+                   std::reference_wrapper<const MagneticFieldContext> mctx,
+                   const parameters_t& par, NavigationDirection ndir = forward,
+                   double ssize = std::numeric_limits<double>::max())
+        : pos(par.position()),
+          dir(par.momentum().normalized()),
+          p(par.momentum().norm()),
+          q(par.charge()),
+          t0(par.time()),
+          navDir(ndir),
+          stepSize(ndir * std::abs(ssize)),
+          fieldCache(mctx),
+          geoContext(gctx) {
+      // remember the start parameters
+      startPos = pos;
+      startDir = dir;
+      // Init the jacobian matrix if needed
+      if (par.covariance()) {
+		  // Set the covariance transport flag to true
+		  covTransport = true;
+		  // Get the covariance
+	      cov = Covariance(*par.covariance());
       }
     }
 
@@ -270,7 +296,7 @@ class EigenStepper {
   ///
   /// @param [in,out] state State object that will be updated
   /// @param [in] pars Parameters that will be written into @p state
-  void update(GeometryContext& gctx, State& state, const BoundParameters& pars) const;
+  void update(State& state, const BoundParameters& pars) const;
 
   /// Method to update momentum, direction and p
   ///

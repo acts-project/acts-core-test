@@ -64,7 +64,37 @@ class StraightLineStepper {
     /// @param [in] par The track parameters at start
     /// @param [in] ndir is the navigation direction
     /// @param [in] ssize is the (absolute) maximum step size
-    template <typename parameters_t>
+    template <typename parameters_t, std::enable_if_t<std::is_same<typename parameters_t::CovMatrix_t, BoundSymMatrix>::value, int> = 0>
+    explicit State(std::reference_wrapper<const GeometryContext> gctx,
+                   std::reference_wrapper<const MagneticFieldContext> /*mctx*/,
+                   const parameters_t& par, NavigationDirection ndir = forward,
+                   double ssize = std::numeric_limits<double>::max())
+        : pos(par.position()),
+          dir(par.momentum().normalized()),
+          p(par.momentum().norm()),
+          q(par.charge()),
+          t0(par.time()),
+          navDir(ndir),
+          stepSize(ndir * std::abs(ssize)),
+          geoContext(gctx) {
+      if (par.covariance()) { // TODO: constructors might be combined but a covariance setter is then templated
+		  // Set the covariance transport flag to true
+		  covTransport = true;
+		  // Get the covariance
+          cov = par.globalCovariance(gctx);
+      }
+    }
+    
+    /// Constructor from the initial track parameters
+    ///
+    /// @tparam parameters_t the Type of the track parameters
+    ///
+    /// @param [in] gctx is the context object for the geometery
+    /// @param [in] mctx is the context object for the magnetic field
+    /// @param [in] par The track parameters at start
+    /// @param [in] ndir is the navigation direction
+    /// @param [in] ssize is the (absolute) maximum step size
+    template <typename parameters_t, std::enable_if_t<std::is_same<typename parameters_t::CovMatrix_t, FreeSymMatrix>::value, int> = 0>
     explicit State(std::reference_wrapper<const GeometryContext> gctx,
                    std::reference_wrapper<const MagneticFieldContext> /*mctx*/,
                    const parameters_t& par, NavigationDirection ndir = forward,
@@ -81,14 +111,7 @@ class StraightLineStepper {
 		  // Set the covariance transport flag to true
 		  covTransport = true;
 		  // Get the covariance
-		  if(typeid(parameters_t::CovMatrix_t) == typeid(BoundSymMatrix))
-		  {
-            cov = par.globalCovariance(gctx);
-          }
-          else
-          {
-			  cov = Covariance(*par.covariance());
-		  }
+          cov = *par.covariance();
       }
     }
     
@@ -260,7 +283,7 @@ class StraightLineStepper {
   ///
   /// @param [in,out] state State object that will be updated
   /// @param [in] pars Parameters that will be written into @p state
-  void update(GeometryContext& gctx, State& state, const BoundParameters& pars) const {
+  void update(State& state, const BoundParameters& pars) const {
     const auto& mom = pars.momentum();
     state.pos = pars.position();
     state.dir = mom.normalized();
@@ -383,7 +406,7 @@ class StraightLineStepper {
     auto rframeT = surface.initJacobianToLocal(state.geoContext, jacToLocal,
                                                state.pos, state.dir);
     // calculate the form factors for the derivatives
-    const BoundRowVector sVec = surface.derivativeFactors(
+    const FreeRowVector sVec = surface.derivativeFactors(
         state.geoContext, state.pos, state.dir, rframeT, state.jacTransport);
     // the full jacobian is
     const Jacobian jacFull = state.jacTransport - state.derivative * sVec;

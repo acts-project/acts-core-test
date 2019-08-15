@@ -37,7 +37,8 @@ class TrackState {
  public:
   using SourceLink = source_link_t;
   using Parameters = parameters_t;
-  using Jacobian = typename Parameters::CovMatrix_t;
+  //~ using Jacobian = typename Parameters::CovMatrix_t;
+  using Jacobian = FreeMatrix;
 
   /// Constructor from (uncalibrated) measurement
   ///
