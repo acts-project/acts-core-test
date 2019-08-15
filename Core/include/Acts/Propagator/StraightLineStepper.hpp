@@ -110,13 +110,28 @@ class StraightLineStepper {
           stepSize(ndir * std::abs(ssize)),
           geoContext(gctx) {
       if (par.covariance()) {
-		  // Set the covariance transport flag to true
-		  covTransport = true;
-		  // Get the covariance
-          cov = *par.covariance();
+		  // set the covariance transport flag to true
+			covTransport = true;
+		  if(typeid(parameters_t::CovMatrix_t) == typeid(BoundSymMatrix))
+		  {
+			// Get the reference surface for navigation
+			const auto& surface = par.referenceSurface();
+			// Copy the covariance and get its global representation
+			surface.initJacobianToGlobal(gctx, jacToGlobal, pos, dir,
+                                     par.parameters());
+                                     
+            cov = jacToGlobal * (*par.covariance()) * jacToGlobal.transpose();
+          }
+          else
+          {
+			  cov = Covariance(*par.covariance());
+		  }
       }
     }
-    
+
+    /// Jacobian from local to the global frame
+    BoundToFreeMatrix jacToGlobal = BoundToFreeMatrix::Identity();
+
     /// Pure transport jacobian part from runge kutta integration
     Jacobian jacTransport = Jacobian::Identity();
 
@@ -302,11 +317,9 @@ class StraightLineStepper {
     state.dir = mom.normalized();
     state.p = mom.norm();
     state.dt = pars.time();
-
-    if (pars.covariance().has_value()) {	
-		pars.referenceSurface().initJacobianToGlobal(state.geoContext, (*state.jacToGlobal),
-									   state.pos, state.dir, pars.parameters());
-		  state.cov = (*state.jacToGlobal) * (*pars.covariance()) * (*state.jacToGlobal).transpose();
+    
+    if (pars.covariance()) {
+      state.cov = jacToGlobal * (*pars.covariance()) * jacToGlobal.transpose();
     }
   }
 
@@ -338,7 +351,46 @@ class StraightLineStepper {
   /// @param [in] reinitialize is a flag to steer whether the
   ///        state should be reinitialized at the new
   ///        position
-  void covarianceTransport(State& state, bool reinitialize = false) const {
+  BoundSymMatrix covarianceTransport(State& state, bool reinitialize = false) const {
+    // Optimized trigonometry on the propagation direction
+    const double x = state.dir(0);  // == cos(phi) * sin(theta)
+    const double y = state.dir(1);  // == sin(phi) * sin(theta)
+    const double z = state.dir(2);  // == cos(theta)
+    // can be turned into cosine/sine
+    const double cosTheta = z;
+    const double sinTheta = sqrt(x * x + y * y);
+    const double invSinTheta = 1. / sinTheta;
+    const double cosPhi = x * invSinTheta;
+    const double sinPhi = y * invSinTheta;
+    // prepare the jacobian to curvilinear
+    FreeToBoundMatrix jacToCurv = FreeToBoundMatrix::Zero();
+    if (std::abs(cosTheta) < s_curvilinearProjTolerance) {
+      // We normally operate in curvilinear coordinates defined as follows
+      jacToCurv(0, 0) = -sinPhi;
+      jacToCurv(0, 1) = cosPhi;
+      jacToCurv(1, 0) = -cosPhi * cosTheta;
+      jacToCurv(1, 1) = -sinPhi * cosTheta;
+      jacToCurv(1, 2) = sinTheta;
+    } else {
+      // Under grazing incidence to z, the above coordinate system definition
+      // becomes numerically unstable, and we need to switch to another one
+      const double c = sqrt(y * y + z * z);
+      const double invC = 1. / c;
+      jacToCurv(0, 1) = -z * invC;
+      jacToCurv(0, 2) = y * invC;
+      jacToCurv(1, 0) = c;
+      jacToCurv(1, 1) = -x * y * invC;
+      jacToCurv(1, 2) = -x * z * invC;
+    }
+    // Time parameter
+    jacToCurv(5, 3) = 1.;
+    // Directional and momentum parameters for curvilinear
+    jacToCurv(2, 4) = -sinPhi * invSinTheta;
+    jacToCurv(2, 5) = cosPhi * invSinTheta;
+    jacToCurv(3, 6) = -invSinTheta;
+    jacToCurv(4, 7) = 1.;
+    // Apply the transport from the steps on the jacobian
+    state.jacToGlobal = state.jacTransport * state.jacToGlobal;
     // Transport the covariance
 	ActsRowVectorD<3> normVec(state.dir);
     const FreeRowVector sfactors =
@@ -356,6 +408,7 @@ class StraightLineStepper {
     }
     // Store The global and bound jacobian (duplication for the moment)
     state.jacobian = jacFull * state.jacobian;
+    return jacToCurv * state.cov * jacToCurv.transpose();
   }
 
   /// Method for on-demand transport of the covariance
@@ -372,8 +425,7 @@ class StraightLineStepper {
   ///        position
   /// @note no check is done if the position is actually on the surface
   ///
-  /// @return Projection jacobian from global to bound parameters
-  FreeToBoundMatrix covarianceTransport(State& state, const Surface& surface,
+  BoundSymMatrix covarianceTransport(State& state, const Surface& surface,
                            bool reinitialize = false) const {
 	// Initialize the transport final frame jacobian
 	FreeToBoundMatrix jacToLocal = FreeToBoundMatrix::Zero();
@@ -399,8 +451,7 @@ class StraightLineStepper {
     }
     // Store The global and bound jacobian (duplication for the moment)
     state.jacobian = jacFull * state.jacobian;
-    
-    return jacToLocal;
+    return jacToLocal * state.cov * jacToLocal.transpose();
   }
 
   /// Perform a straight line propagation step
