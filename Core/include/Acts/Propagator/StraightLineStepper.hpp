@@ -44,7 +44,7 @@ class StraightLineStepper {
   using cstep = detail::ConstrainedStep;
 
   using Corrector = VoidIntersectionCorrector;
-  using Jacobian = BoundMatrix;
+  using Jacobian = FreeMatrix;
   using Covariance = FreeSymMatrix;
   using BoundState = std::tuple<BoundParameters, Jacobian, double>;
   using CurvilinearState = std::tuple<CurvilinearParameters, Jacobian, double>;
@@ -93,15 +93,16 @@ class StraightLineStepper {
           else
           {
 			  cov = Covariance(*par.covariance());
+			  startedInFreeParameters = true;
 		  }
       }
     }
 
     /// Jacobian from local to the global frame
-    BoundToFreeMatrix jacToGlobal = BoundToFreeMatrix::Identity();
+    BoundToFreeMatrix jacToGlobal = BoundToFreeMatrix::Zero(); // This could become a boost::optional
 
     /// Pure transport jacobian part from runge kutta integration
-    FreeMatrix jacTransport = FreeMatrix::Identity();
+    Jacobian jacTransport = Jacobian::Identity();
 
     /// The full jacobian of the transport entire transport
     Jacobian jacobian = Jacobian::Identity();
@@ -111,6 +112,7 @@ class StraightLineStepper {
 
     /// Boolean to indiciate if you need covariance transport
     bool covTransport = false;
+    bool startedInFreeParameters = false;
     Covariance cov = Covariance::Zero();
 
     /// Global particle position
@@ -346,15 +348,29 @@ class StraightLineStepper {
     jacToCurv(2, 5) = cosPhi * invSinTheta;
     jacToCurv(3, 6) = -invSinTheta;
     jacToCurv(4, 7) = 1.;
-    // Apply the transport from the steps on the jacobian
-    state.jacToGlobal = state.jacTransport * state.jacToGlobal;
-    // Transport the covariance
-    ActsRowVectorD<3> normVec(state.dir);
-    const BoundRowVector sfactors =
-        normVec * state.jacToGlobal.template topLeftCorner<3, BoundParsDim>();
-    // The full jacobian is ([to local] jacobian) * ([transport] jacobian)
-    const Jacobian jacFull =
-        jacToCurv * (state.jacToGlobal - state.derivative * sfactors);
+    
+    const Jacobian jacFull;
+    if(startedInFreeParameters)
+    {
+	    // Transport the covariance
+		ActsRowVectorD<3> normVec(state.dir);
+	    const FreeRowVector sfactors =
+	        normVec * state.jacToGlobal.template topLeftCorner<3, FreeParsDim>();
+	    // The full jacobian is
+		jacFull = state.jacTransport - state.derivative * sfactors;
+	}
+	else
+	{
+	    // Apply the transport from the steps on the jacobian
+	    state.jacToGlobal = state.jacTransport * state.jacToGlobal;
+	    // Transport the covariance
+	    ActsRowVectorD<3> normVec(state.dir);
+	    const BoundRowVector sfactors =
+	        normVec * state.jacToGlobal.template topLeftCorner<3, BoundParsDim>();
+	    // The full jacobian is
+	    jacFull = state.jacToGlobal - state.derivative * sfactors;
+	}
+	
     // Apply the actual covariance transport
     state.cov = (jacFull * state.cov * jacFull.transpose());
     // Reinitialize if asked to do so
@@ -362,7 +378,7 @@ class StraightLineStepper {
     if (reinitialize) {
       // reset the jacobians
       state.jacToGlobal = BoundToFreeMatrix::Zero();
-      state.jacTransport = FreeMatrix::Identity();
+      state.jacTransport = Jacobian::Identity();
       // fill the jacobian to global for next transport
       state.jacToGlobal(0, eLOC_0) = -sinPhi;
       state.jacToGlobal(0, eLOC_1) = -cosPhi * cosTheta;
@@ -411,8 +427,7 @@ class StraightLineStepper {
     const BoundRowVector sVec = surface.derivativeFactors(
         state.geoContext, state.pos, state.dir, rframeT, state.jacToGlobal);
     // the full jacobian is ([to local] jacobian) * ([transport] jacobian)
-    const Jacobian jacFull =
-        jacToLocal * (state.jacToGlobal - state.derivative * sVec);
+    const Jacobian jacFull = state.jacToGlobal - state.derivative * sVec;
     // Apply the actual covariance transport
     state.cov = (jacFull * state.cov * jacFull.transpose());
     // Reinitialize if asked to do so
