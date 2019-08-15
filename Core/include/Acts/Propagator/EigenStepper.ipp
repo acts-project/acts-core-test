@@ -18,8 +18,7 @@ auto Acts::EigenStepper<B, C, E, A>::boundState(State& state,
   // Transport the covariance to here
   std::optional<Covariance> covOpt = std::nullopt;
   if (state.covTransport) {
-    covarianceTransport(state, surface, reinitialize);
-    covOpt = state.cov;
+    covOpt = std::optional<Covariance>(covarianceTransport(state, surface, reinitialize));
   }
   // Create the bound parameters
   BoundParameters parameters(state.geoContext, std::move(covOpt), state.pos,
@@ -43,8 +42,7 @@ auto Acts::EigenStepper<B, C, E, A>::curvilinearState(State& state,
   // Transport the covariance to here
   std::optional<Covariance> covOpt = std::nullopt;
   if (state.covTransport) {
-    covarianceTransport(state, reinitialize);
-    covOpt = state.cov;
+    covPtr = std::optional<Covariance>(covarianceTransport(state, reinitialize));
   }
   // Create the curvilinear parameters
   CurvilinearParameters parameters(std::move(state.cov), state.pos,
@@ -62,7 +60,7 @@ auto Acts::EigenStepper<B, C, E, A>::curvilinearState(State& state,
 }
 
 template <typename B, typename C, typename E, typename A>
-void Acts::EigenStepper<B, C, E, A>::update(State& state,
+void Acts::EigenStepper<B, C, E, A>::update(GeometryContext& gctx, State& state,
                                             const BoundParameters& pars) const {
   const auto& mom = pars.momentum();
   state.pos = pars.position();
@@ -71,7 +69,7 @@ void Acts::EigenStepper<B, C, E, A>::update(State& state,
   state.dt = pars.time();
 
   if (pars.covariance()) {
-    state.cov = (*(pars.covariance()));
+    state.cov = pars.globalCovariance(gctx);
   }
 }
 
@@ -106,6 +104,7 @@ void Acts::EigenStepper<B, C, E, A>::covarianceTransport(
   }
   // Store The global and bound jacobian (duplication for the moment)
   state.jacobian = jacFull * state.jacobian;
+  return jacToCurv * state.cov * jacToCurv.transpose();
 }
 
 template <typename B, typename C, typename E, typename A>
@@ -134,6 +133,7 @@ void Acts::EigenStepper<B, C, E, A>::covarianceTransport(
   }
   // Store The global and bound jacobian (duplication for the moment)
   state.jacobian = jacFull * state.jacobian;
+  return jacToCurv * state.cov * jacToCurv.transpose();
 }
 
 template <typename B, typename C, typename E, typename A>

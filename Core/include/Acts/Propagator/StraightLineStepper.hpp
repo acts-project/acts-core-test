@@ -130,7 +130,6 @@ class StraightLineStepper {
 
     /// Boolean to indiciate if you need covariance transport
     bool covTransport = false;
-    bool startedInFreeParameters = false;
     Covariance cov = Covariance::Zero();
 
     /// Global particle position
