@@ -46,8 +46,8 @@ template <typename bfield_t,
 class EigenStepper {
  public:
   /// Jacobian, Covariance and State defintions
-  using Jacobian = BoundMatrix;
-  using Covariance = BoundSymMatrix;
+  using Jacobian = FreeMatrix;
+  using Covariance = FreeSymMatrix;
   using BoundState = std::tuple<BoundParameters, Jacobian, double>;
   using CurvilinearState = std::tuple<CurvilinearParameters, Jacobian, double>;
   using BField = bfield_t;
@@ -231,7 +231,7 @@ class EigenStepper {
   ///
   /// @param [in,out] state State object that will be updated
   /// @param [in] pars Parameters that will be written into @p state
-  void update(State& state, const BoundParameters& pars) const;
+  void update(GeometryContext& gctx, State& state, const BoundParameters& pars) const;
 
   /// Method to update momentum, direction and p
   ///
