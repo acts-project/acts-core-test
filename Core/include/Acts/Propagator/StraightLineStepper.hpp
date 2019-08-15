@@ -293,9 +293,9 @@ class StraightLineStepper {
     state.dir = mom.normalized();
     state.p = mom.norm();
     state.dt = pars.time();
-
+    
     if (pars.covariance()) {
-      state.cov = (*(pars.covariance()));
+      state.cov = jacToGlobal * (*pars.covariance()) * jacToGlobal.transpose();
     }
   }
 
@@ -345,6 +345,7 @@ class StraightLineStepper {
     }
     // Store The global and bound jacobian (duplication for the moment)
     state.jacobian = jacFull * state.jacobian;
+    return jacToCurv * state.cov * jacToCurv.transpose();
   }
 
   /// Method for on-demand transport of the covariance
