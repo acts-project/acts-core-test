@@ -288,15 +288,15 @@ class StraightLineStepper {
   ///
   /// @param [in,out] state State object that will be updated
   /// @param [in] pars Parameters that will be written into @p state
-  void update(State& state, const BoundParameters& pars) const {
+  void update(GeometryContext& gctx, State& state, const BoundParameters& pars) const {
     const auto& mom = pars.momentum();
     state.pos = pars.position();
     state.dir = mom.normalized();
     state.p = mom.norm();
     state.dt = pars.time();
-    
-    if (pars.covariance()) {
-      state.cov = state.jacToGlobal * (*pars.covariance()) * state.jacToGlobal.transpose();
+
+    if (pars.covariance() != nullptr) {	
+      state.cov = pars.globalCovariance(gctx);
     }
   }
 
