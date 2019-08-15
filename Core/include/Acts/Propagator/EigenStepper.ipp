@@ -34,7 +34,7 @@ void Acts::EigenStepper<B, E, A>::update(State& state,
   state.p = mom.norm();
   state.t = pars.time();
   if (pars.covariance()) {
-    state.cov = pars.globalCovariance(gctx);
+    state.cov = pars.globalCovariance(state.geoContext);
   }
 }
 

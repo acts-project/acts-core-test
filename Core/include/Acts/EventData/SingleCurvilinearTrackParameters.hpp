@@ -181,7 +181,7 @@ class SingleCurvilinearTrackParameters
   }
   
   /// @copydoc TrackParametersBase::globalCovariance
-  FreeSymMatrix globalCovariance(GeometryContext& gctx) const final
+  FreeSymMatrix globalCovariance(const GeometryContext& gctx) const final
   {
 	  BoundToFreeMatrix jacToGlobal = BoundToFreeMatrix::Zero();
       m_upSurface->initJacobianToGlobal(gctx, jacToGlobal,
