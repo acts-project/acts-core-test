@@ -67,7 +67,6 @@ class EigenStepper {
     /// @param [in] stolerance is the stepping tolerance
     ///
     /// @note the covariance matrix is copied when needed
-    template <typename parameters_t>
     explicit State(std::reference_wrapper<const GeometryContext> gctx,
                    std::reference_wrapper<const MagneticFieldContext> mctx,
                    const parameters_t& par, NavigationDirection ndir = forward,
@@ -231,7 +230,7 @@ class EigenStepper {
   ///
   /// @param [in,out] state State object that will be updated
   /// @param [in] pars Parameters that will be written into @p state
-  void update(GeometryContext& gctx, State& state, const BoundParameters& pars) const;
+  void update(State& state, const BoundParameters& pars) const;
 
   /// Method to update momentum, direction and p
   ///

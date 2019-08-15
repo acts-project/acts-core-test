@@ -47,7 +47,6 @@ namespace Test {
 
 // A few initialisations and definitionas
 using SourceLink = MinimalSourceLink;
-using Jacobian = BoundParameters::CovMatrix_t;
 using Covariance = BoundSymMatrix;
 
 using TrackState = TrackState<SourceLink, BoundParameters>;
@@ -193,7 +192,7 @@ struct MaterialScattering {
     // Check if there is a surface with material and a covariance is existing
     if (state.navigation.currentSurface &&
         state.navigation.currentSurface->surfaceMaterial() &&
-        state.stepping.cov != Covariance::Zero()) {
+        state.stepping.cov != typename stepper_t::Covariance::Zero()) {
       // Sample angles
       std::normal_distribution<double> scatterAngle(
           0., 0.017);  //< \approx 1 degree
