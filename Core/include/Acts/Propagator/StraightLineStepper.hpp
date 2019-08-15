@@ -136,6 +136,10 @@ class StraightLineStepper {
     std::reference_wrapper<const GeometryContext> geoContext;
   };
 
+  /// Always use the same propagation state type, independently of the initial
+  /// track parameter type and of the target surface
+  using state_type = State;
+
   /// Return parameter types depend on the propagation mode:
   /// - when propagating to a surface we return BoundParameters
   /// - otherwise CurvilinearParameters
