@@ -207,7 +207,7 @@ class MultiEigenStepper
   void deleteComponents(State& state) const;
 
   /// @brief get a sinlge parameter of combination of multi component on a
-  /// surface, the jocobian is nonsence here
+  /// surface, the jacobian is nonsense here
   /// the pathAccumulated is a combination calculated in the step()
   /// @to do parameter would be MultiBoundParameters
   BoundState boundState(State& state, const Surface& surface,
