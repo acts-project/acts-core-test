@@ -62,6 +62,8 @@ using BoundSymMatrix = ActsSymMatrix<ParValue_t, BoundParsDim>;
 
 /// Vector of free track parameters
 using FreeVector = ActsVector<ParValue_t, FreeParsDim>;
+/// Row vector of bound parameters
+using FreeRowVector = ActsRowVector<ParValue_t, FreeParsDim>;
 /// Matrix of free-to-free parameters
 using FreeMatrix = ActsMatrix<ParValue_t, FreeParsDim, FreeParsDim>;
 /// Symmetrical matrix of free-to-free parameters
