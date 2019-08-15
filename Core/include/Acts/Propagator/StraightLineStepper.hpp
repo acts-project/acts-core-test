@@ -130,6 +130,7 @@ class StraightLineStepper {
 
     /// Boolean to indiciate if you need covariance transport
     bool covTransport = false;
+    bool startedInFreeParameters = false;
     Covariance cov = Covariance::Zero();
 
     /// Global particle position
@@ -295,7 +296,7 @@ class StraightLineStepper {
     state.dt = pars.time();
     
     if (pars.covariance()) {
-      state.cov = jacToGlobal * (*pars.covariance()) * jacToGlobal.transpose();
+      state.cov = state.jacToGlobal * (*pars.covariance()) * state.jacToGlobal.transpose();
     }
   }
 
