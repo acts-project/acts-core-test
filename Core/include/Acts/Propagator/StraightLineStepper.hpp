@@ -82,19 +82,23 @@ class StraightLineStepper {
 			covTransport = true;
 		  if(typeid(parameters_t::CovMatrix_t) == typeid(BoundSymMatrix))
 		  {
-        // Get the reference surface for navigation
-        const auto& surface = par.referenceSurface();
-        // Copy the covariance and get its global representation
-        surface.initJacobianToGlobal(gctx, jacToGlobal, pos, dir,
+			// Get the reference surface for navigation
+			const auto& surface = par.referenceSurface();
+			// Copy the covariance and get its global representation
+			surface.initJacobianToGlobal(gctx, jacToGlobal, pos, dir,
                                      par.parameters());
                                      
-           cov = jacToGlobal * BoundSymMatrix(*par.covariance());
+            cov = jacToGlobal * (*par.covariance()) * jacToGlobal.transpose();
           }
+          else
+          {
+			  cov = Covariance(*par.covariance());
+		  }
       }
     }
 
     /// Jacobian from local to the global frame
-    BoundToFreeMatrix jacToGlobal = BoundToFreeMatrix::Zero();
+    BoundToFreeMatrix jacToGlobal = BoundToFreeMatrix::Identity();
 
     /// Pure transport jacobian part from runge kutta integration
     FreeMatrix jacTransport = FreeMatrix::Identity();
@@ -150,10 +154,6 @@ class StraightLineStepper {
   /// - otherwise CurvilinearParameters
   template <typename parameters_t, typename surface_t = int>
   using return_parameter_type = typename s<parameters_t, surface_t>::type;
-
-  /// Intermediate track parameters are always in curvilinear parametrization
-  template <typename parameters_t>
-  using step_parameter_type = CurvilinearParameters;
 
   /// Constructor
   StraightLineStepper() = default;
@@ -308,7 +308,7 @@ class StraightLineStepper {
   /// @param [in] reinitialize is a flag to steer whether the
   ///        state should be reinitialized at the new
   ///        position
-  void covarianceTransport(State& state, bool reinitialize = false) const {
+  BoundSymMatrix covarianceTransport(State& state, bool reinitialize = false) const {
     // Optimized trigonometry on the propagation direction
     const double x = state.dir(0);  // == cos(phi) * sin(theta)
     const double y = state.dir(1);  // == sin(phi) * sin(theta)
@@ -379,6 +379,7 @@ class StraightLineStepper {
     }
     // Store The global and bound jacobian (duplication for the moment)
     state.jacobian = jacFull * state.jacobian;
+    return jacToCurv * state.cov * jacToCurv.transpose();
   }
 
   /// Method for on-demand transport of the covariance
@@ -395,7 +396,7 @@ class StraightLineStepper {
   ///        position
   /// @note no check is done if the position is actually on the surface
   ///
-  void covarianceTransport(State& state, const Surface& surface,
+  BoundSymMatrix covarianceTransport(State& state, const Surface& surface,
                            bool reinitialize = false) const {
     using VectorHelpers::phi;
     using VectorHelpers::theta;
@@ -433,6 +434,7 @@ class StraightLineStepper {
     }
     // Store The global and bound jacobian (duplication for the moment)
     state.jacobian = jacFull * state.jacobian;
+    return jacToLocal * state.cov * jacToLocal.transpose();
   }
 
   /// Perform a straight line propagation step
