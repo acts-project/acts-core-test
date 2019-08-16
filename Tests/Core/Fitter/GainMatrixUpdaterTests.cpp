@@ -24,7 +24,7 @@
 namespace Acts {
 namespace Test {
 
-using Jacobian = FreeMatrix;
+using Jacobian = BoundMatrix;
 using Covariance = BoundSymMatrix;
 
 using SourceLink = MinimalSourceLink;

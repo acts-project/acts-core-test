@@ -194,7 +194,7 @@ struct MaterialInteractor {
                 state.stepping.navDir * sigmaDeltaThetaSq;
           } else {
             // We check if the covariance stays positive
-            double sEphi = state.stepping.cov(ePHI, ePHI);
+            double sEphi = state.stepping.cov(ePHI, ePHI); // TODO: need to access right elements in the right way
             double sEtheta = state.stepping.cov(eTHETA, eTHETA);
             if (sEphi > sigmaDeltaPhiSq && sEtheta > sigmaDeltaThetaSq) {
               // Noise removal is not applied if variance would fall below 0

@@ -60,8 +60,8 @@ class EigenStepper {
   /// Jacobian, Covariance and State defintions
   using Jacobian = FreeMatrix;
   using Covariance = FreeSymMatrix;
-  using BoundState = std::tuple<BoundParameters, Jacobian, double>;
-  using CurvilinearState = std::tuple<CurvilinearParameters, Jacobian, double>;
+  using BoundState = std::tuple<BoundParameters, const BoundMatrix, double>;
+  using CurvilinearState = std::tuple<CurvilinearParameters, const BoundMatrix, double>;
 
   /// @brief State for track parameter propagation
   ///
@@ -102,8 +102,10 @@ class EigenStepper {
 		  // Set the covariance transport flag to true
 		  covTransport = true;
 		  // Get the covariance
-            cov = par.globalCovariance(gctx);
-      }
+		  par.referenceSurface().initJacobianToGlobal(geoContext, *jacToGlobal,
+									   pos, dir, par.parameters());
+		  cov = (*jacToGlobal) * (*par.covariance()) * (*jacToGlobal).transpose();      
+	  }
     }
     
     /// Constructor from the initial track parameters
@@ -174,6 +176,8 @@ class EigenStepper {
     /// Pure transport jacobian part from runge kutta integration
     Jacobian jacTransport = Jacobian::Identity();
 
+	std::optional<BoundToFreeMatrix> jacToGlobal;
+	
     /// The propagation derivative
     FreeVector derivative = FreeVector::Zero();
 
@@ -319,9 +323,7 @@ class EigenStepper {
   /// @param [in,out] state State of the stepper
   /// @param [in] reinitialize is a flag to steer whether the state should be
   /// reinitialized at the new position
-  ///
-  /// @return the full transport jacobian
-  BoundSymMatrix covarianceTransport(State& state, bool reinitialize = false) const;
+  void covarianceTransport(State& state, bool reinitialize = false) const;
 
   /// Method for on-demand transport of the covariance
   /// to a new curvilinear frame at current position,
@@ -334,7 +336,7 @@ class EigenStepper {
   /// @param [in] reinitialize is a flag to steer whether the state should be
   /// reinitialized at the new position
   /// @note no check is done if the position is actually on the surface
-  BoundSymMatrix covarianceTransport(State& state, const Surface& surface,
+  void covarianceTransport(State& state, const Surface& surface,
                            bool reinitialize = true) const;
 
   /// Perform a Runge-Kutta track parameter propagation step
@@ -351,6 +353,14 @@ class EigenStepper {
   Result<double> step(propagator_state_t& state) const;
 
  private:
+ 
+ 	/// @brief Evaluate the projection Jacobian from free to curvilinear parameters
+	///
+	/// @param [in] state State that will be projected
+	///
+	/// @return Projection Jacobian
+  FreeToBoundMatrix freeToBoundJacobian(const State& state) const;
+
   /// Magnetic field inside of the detector
   BField m_bField;
 };
