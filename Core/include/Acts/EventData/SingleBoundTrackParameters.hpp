@@ -226,15 +226,6 @@ class SingleBoundTrackParameters : public SingleTrackParameters<ChargePolicy> {
     return std::move(
         m_pSurface->referenceFrame(gctx, this->position(), this->momentum()));
   }
-  
-  /// @copydoc TrackParametersBase::globalCovariance
-  FreeSymMatrix globalCovariance(const GeometryContext& gctx) const final
-  {
-	  BoundToFreeMatrix jacToGlobal = BoundToFreeMatrix::Zero();
-      m_pSurface->initJacobianToGlobal(gctx, jacToGlobal,
-                                   this->position(), this->momentum().normalized(), this->parameters());
-      return jacToGlobal * (*this->covariance()) * jacToGlobal.transpose();
-  }
 
  private:
   std::shared_ptr<const Surface> m_pSurface;

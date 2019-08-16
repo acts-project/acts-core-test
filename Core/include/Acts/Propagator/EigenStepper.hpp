@@ -48,8 +48,8 @@ class EigenStepper {
   /// Jacobian, Covariance and State defintions
   using Jacobian = FreeMatrix;
   using Covariance = FreeSymMatrix;
-  using BoundState = std::tuple<BoundParameters, Jacobian, double>;
-  using CurvilinearState = std::tuple<CurvilinearParameters, Jacobian, double>;
+  using BoundState = std::tuple<BoundParameters, BoundMatrix, double>;
+  using CurvilinearState = std::tuple<CurvilinearParameters, BoundMatrix, double>;
   using BField = bfield_t;
 
   /// @brief The state object. This object extends the general container @c
@@ -246,8 +246,6 @@ class EigenStepper {
   /// or direction of the state
   ///
   /// @param [in,out] state State of the stepper
-  ///
-  /// @return the full transport jacobian
   void covarianceTransport(State& state) const;
 
   /// Method for on-demand transport of the covariance
@@ -275,6 +273,14 @@ class EigenStepper {
   Result<double> step(propagator_state_t& state) const;
 
  private:
+ 
+ 	/// @brief Evaluate the projection Jacobian from free to curvilinear parameters
+	///
+	/// @param [in] state State that will be projected
+	///
+	/// @return Projection Jacobian
+  FreeToBoundMatrix freeToBoundJacobian(const State& state) const;
+
   /// Magnetic field inside of the detector
   BField m_bField;
 
