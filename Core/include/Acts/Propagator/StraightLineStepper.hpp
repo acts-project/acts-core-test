@@ -46,13 +46,8 @@ class StraightLineStepper {
   using Corrector = VoidIntersectionCorrector;
   using Jacobian = FreeMatrix;
   using Covariance = FreeSymMatrix;
-<<<<<<< HEAD
   using BoundState = std::tuple<BoundParameters, const BoundMatrix, double>;
   using CurvilinearState = std::tuple<CurvilinearParameters, const BoundMatrix, double>;
-=======
-  using BoundState = std::tuple<BoundParameters, BoundMatrix, double>;
-  using CurvilinearState = std::tuple<CurvilinearParameters, BoundMatrix, double>;
->>>>>>> Cloaking new behavior of SLS to the outer world
 
   /// State for track parameter propagation
   ///
@@ -218,49 +213,6 @@ class StraightLineStepper {
                                 direction(state), true);
   }
 
-	FreeToBoundMatrix freeToCurvilinearJacobian(State& state)
-	{
-		// Optimized trigonometry on the propagation direction
-		const double x = state.dir(0);  // == cos(phi) * sin(theta)
-		const double y = state.dir(1);  // == sin(phi) * sin(theta)
-		const double z = state.dir(2);  // == cos(theta)
-		// can be turned into cosine/sine
-		const double cosTheta = z;
-		const double sinTheta = sqrt(x * x + y * y);
-		const double invSinTheta = 1. / sinTheta;
-		const double cosPhi = x * invSinTheta;
-		const double sinPhi = y * invSinTheta;
-		// prepare the jacobian to curvilinear
-		FreeToBoundMatrix jacToCurv = FreeToBoundMatrix::Zero();
-		if (std::abs(cosTheta) < s_curvilinearProjTolerance) {
-		  // We normally operate in curvilinear coordinates defined as follows
-		  jacToCurv(0, 0) = -sinPhi;
-		  jacToCurv(0, 1) = cosPhi;
-		  jacToCurv(1, 0) = -cosPhi * cosTheta;
-		  jacToCurv(1, 1) = -sinPhi * cosTheta;
-		  jacToCurv(1, 2) = sinTheta;
-		} else {
-		  // Under grazing incidence to z, the above coordinate system definition
-		  // becomes numerically unstable, and we need to switch to another one
-		  const double c = sqrt(y * y + z * z);
-		  const double invC = 1. / c;
-		  jacToCurv(0, 1) = -z * invC;
-		  jacToCurv(0, 2) = y * invC;
-		  jacToCurv(1, 0) = c;
-		  jacToCurv(1, 1) = -x * y * invC;
-		  jacToCurv(1, 2) = -x * z * invC;
-		}
-		// Time parameter
-		jacToCurv(5, 3) = 1.;
-		// Directional and momentum parameters for curvilinear
-		jacToCurv(2, 4) = -sinPhi * invSinTheta;
-		jacToCurv(2, 5) = cosPhi * invSinTheta;
-		jacToCurv(3, 6) = -invSinTheta;
-		jacToCurv(4, 7) = 1.;
-		
-		return jacToCurv;
-	}
-
   /// Create and return the bound state at the current position
   ///
   /// @brief It does not check if the transported state is at the surface, this
@@ -281,18 +233,13 @@ class StraightLineStepper {
     std::unique_ptr<Covariance> cov = std::nullopt;
     BoundMatrix jacobian = BoundMatrix::Identity();
     if (state.covTransport) {
-		covarianceTransport(state, surface, reinitialize);
 		
 		// Initialize the transport final frame jacobian
-		FreeToBoundMatrix jacToLocal = FreeToBoundMatrix::Zero();
-		// initalize the jacobian to local, returns the transposed ref frame
-		auto rframeT = surface.initJacobianToLocal(state.geoContext, jacToLocal,
-                                               state.pos, state.dir);
-                                               
-    		jacobian = jacToLocal * state.jacobian * jacToLocal.transpose();
+		const FreeToBoundMatrix jacToLocal = 	covarianceTransport(state, surface, reinitialize);
+		// TODO: handle case of non-existing jacToGlobal                                   
+		jacobian = jacToLocal * state.jacobian * (*state.jacToGlobal);
 		
-		
-      cov = std::optional<Covariance>(jacToLocal * state.cov * jacToLocal.transpose(););
+      cov = std::optional<Covariance>(jacToLocal * state.cov * jacToLocal.transpose());
     }
     // Create the bound parameters
     BoundParameters parameters(state.geoContext, cov, state.pos,
@@ -327,9 +274,9 @@ class StraightLineStepper {
     BoundMatrix jacobian = BoundMatrix::Identity();
     if (state.covTransport) {
 		covarianceTransport(state, reinitialize);
-		FreeToBoundMatrix jacToCurv = freeToBoundJacobian(state);
-		jacobian = jacToCurv * state.jacobian * jacToCurv.transpose();
-      cov = std::optional<Covariance>(jacToCurv * state.cov * jacToCurv.transpose());
+		const FreeToBoundMatrix jacToCurv = freeToCurvilinearJacobian(state);
+		jacobian = jacToCurv * state.jacobian * (*state.jacToGlobal);
+      cov = std::optional<Covariance>(jacobian * state.cov * jacobian.transpose());
     }
     // Create the curvilinear parameters
     CurvilinearParameters parameters(cov, state.pos, state.p * state.dir,
@@ -357,7 +304,9 @@ class StraightLineStepper {
     state.dt = pars.time();
 
     if (pars.covariance() != nullptr) {	
-      state.cov = pars.globalCovariance(state.geoContext);
+		pars.referenceSurface().initJacobianToGlobal(state.geoContext, (*state.jacToGlobal),
+									   state.pos, state.dir, pars.parameters());
+		  state.cov = (*state.jacToGlobal) * (*pars.covariance()) * (*state.jacToGlobal).transpose();
     }
   }
 

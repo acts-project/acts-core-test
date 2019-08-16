@@ -17,8 +17,18 @@ auto Acts::EigenStepper<B, C, E, A>::boundState(State& state,
     -> BoundState {                       
   // Transport the covariance to here
   std::optional<BoundSymMatrix> covOpt = std::nullopt;
+  BoundMatrix jacobian = BoundMatrix::Identity();
   if (state.covTransport) {
-    covOpt = std::optional<BoundSymMatrix>(covarianceTransport(state, surface, reinitialize));
+	covarianceTransport(state, surface, reinitialize);
+	
+	  // Initialize the transport final frame jacobian
+	  FreeToBoundMatrix jacToLocal = FreeToBoundMatrix::Zero();
+	  // initalize the jacobian to local, returns the transposed ref frame
+	  surface.initJacobianToLocal(state.geoContext, jacToLocal,
+                                             state.pos, state.dir);
+      jacobian = jacToLocal * state.jacobian * (*state.jacToGlobal);
+                                             
+    covOpt = std::optional<BoundSymMatrix>(jacobian * state.cov * jacobian.transpose());
   }
   // Create the bound parameters
   BoundParameters parameters(state.geoContext, std::move(covOpt), state.pos,
@@ -41,8 +51,12 @@ auto Acts::EigenStepper<B, C, E, A>::curvilinearState(State& state,
     -> CurvilinearState {  
   // Transport the covariance to here
   std::optional<BoundSymMatrix> covOpt = std::nullopt;
+  BoundMatrix jacobian = BoundMatrix::Identity();
   if (state.covTransport) {
-    covPtr = std::optional<Covariance>(covarianceTransport(state, reinitialize));
+	  covarianceTransport(state, reinitialize);
+	  const FreeToBoundMatrix jacToCurv = freeToBoundJacobian(state);
+	  jacobian = jacToCurv * state.jacobian * (*state.jacToGlobal);
+    covPtr = std::make_unique<BoundSymMatrix>(jacobian * state.cov * jacobian.transpose());
   }
   // Create the curvilinear parameters
   CurvilinearParameters parameters(std::move(state.cov), state.pos,
@@ -85,7 +99,7 @@ void Acts::EigenStepper<B, C, E, A>::update(State& state,
 }
 
 template <typename B, typename C, typename E, typename A>
-Acts::BoundSymMatrix Acts::EigenStepper<B, C, E, A>::covarianceTransport(
+void Acts::EigenStepper<B, C, E, A>::covarianceTransport(
     State& state, bool reinitialize) const {
   // Transport the covariance
   ActsRowVectorD<3> normVec(state.dir);
@@ -104,11 +118,10 @@ Acts::BoundSymMatrix Acts::EigenStepper<B, C, E, A>::covarianceTransport(
   }
   // Store The global and bound jacobian (duplication for the moment)
   state.jacobian = jacFull * state.jacobian;
-  return jacToCurv * state.cov * jacToCurv.transpose();
 }
 
 template <typename B, typename C, typename E, typename A>
-Acts::BoundSymMatrix Acts::EigenStepper<B, C, E, A>::covarianceTransport(
+void Acts::EigenStepper<B, C, E, A>::covarianceTransport(
     State& state, const Surface& surface, bool reinitialize) const {
 		// TODO: Get rid of jacToLocal & rframeT
 		// Initialize the transport final frame jacobian
@@ -133,7 +146,6 @@ Acts::BoundSymMatrix Acts::EigenStepper<B, C, E, A>::covarianceTransport(
   }
   // Store The global and bound jacobian (duplication for the moment)
   state.jacobian = jacFull * state.jacobian;
-  return jacToLocal * state.cov * jacToLocal.transpose();
 }
 
 template <typename B, typename C, typename E, typename A>
