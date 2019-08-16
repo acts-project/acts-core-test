@@ -46,8 +46,8 @@ class StraightLineStepper {
   using Corrector = VoidIntersectionCorrector;
   using Jacobian = FreeMatrix;
   using Covariance = FreeSymMatrix;
-  using BoundState = std::tuple<BoundParameters, const BoundMatrix, double>;
-  using CurvilinearState = std::tuple<CurvilinearParameters, const BoundMatrix, double>;
+  using BoundState = std::tuple<BoundParameters, BoundMatrix, double>;
+  using CurvilinearState = std::tuple<CurvilinearParameters, BoundMatrix, double>;
 
   /// State for track parameter propagation
   ///
@@ -80,8 +80,10 @@ class StraightLineStepper {
       if (par.covariance()) { // TODO: constructors might be combined but a covariance setter is then templated
 		  // Set the covariance transport flag to true
 		  covTransport = true;
-		  // Get the covariance
-          cov = par.globalCovariance(gctx);
+		  // Get the covariance          
+		  par.referenceSurface().initJacobianToGlobal(gctx, jacToGlobal,
+									   par.position(), par.momentum().normalized(), par.parameters());
+		  cov = jacToGlobal * (*par.covariance()) * jacToGlobal.transpose();
       }
     }
     
@@ -214,6 +216,49 @@ class StraightLineStepper {
                                 direction(state), true);
   }
 
+	FreeToBoundMatrix freeToCurvilinearJacobian(State& state)
+	{
+		// Optimized trigonometry on the propagation direction
+		const double x = state.dir(0);  // == cos(phi) * sin(theta)
+		const double y = state.dir(1);  // == sin(phi) * sin(theta)
+		const double z = state.dir(2);  // == cos(theta)
+		// can be turned into cosine/sine
+		const double cosTheta = z;
+		const double sinTheta = sqrt(x * x + y * y);
+		const double invSinTheta = 1. / sinTheta;
+		const double cosPhi = x * invSinTheta;
+		const double sinPhi = y * invSinTheta;
+		// prepare the jacobian to curvilinear
+		FreeToBoundMatrix jacToCurv = FreeToBoundMatrix::Zero();
+		if (std::abs(cosTheta) < s_curvilinearProjTolerance) {
+		  // We normally operate in curvilinear coordinates defined as follows
+		  jacToCurv(0, 0) = -sinPhi;
+		  jacToCurv(0, 1) = cosPhi;
+		  jacToCurv(1, 0) = -cosPhi * cosTheta;
+		  jacToCurv(1, 1) = -sinPhi * cosTheta;
+		  jacToCurv(1, 2) = sinTheta;
+		} else {
+		  // Under grazing incidence to z, the above coordinate system definition
+		  // becomes numerically unstable, and we need to switch to another one
+		  const double c = sqrt(y * y + z * z);
+		  const double invC = 1. / c;
+		  jacToCurv(0, 1) = -z * invC;
+		  jacToCurv(0, 2) = y * invC;
+		  jacToCurv(1, 0) = c;
+		  jacToCurv(1, 1) = -x * y * invC;
+		  jacToCurv(1, 2) = -x * z * invC;
+		}
+		// Time parameter
+		jacToCurv(5, 3) = 1.;
+		// Directional and momentum parameters for curvilinear
+		jacToCurv(2, 4) = -sinPhi * invSinTheta;
+		jacToCurv(2, 5) = cosPhi * invSinTheta;
+		jacToCurv(3, 6) = -invSinTheta;
+		jacToCurv(4, 7) = 1.;
+		
+		return jacToCurv;
+	}
+
   /// Create and return the bound state at the current position
   ///
   /// @brief It does not check if the transported state is at the surface, this
@@ -231,16 +276,21 @@ class StraightLineStepper {
   BoundState boundState(State& state, const Surface& surface,
                         bool reinitialize) const {
     // Transport the covariance to here
-    std::optional<BoundSymMatrix> cov = std::nullopt;
+    std::unique_ptr<Covariance> cov = std::nullopt;
     BoundMatrix jacobian = BoundMatrix::Identity();
     if (state.covTransport) {
+		covarianceTransport(state, surface, reinitialize);
 		
 		// Initialize the transport final frame jacobian
-		const FreeToBoundMatrix jacToLocal = 	covarianceTransport(state, surface, reinitialize);
-		// TODO: handle case of non-existing jacToGlobal                                   
-		jacobian = jacToLocal * state.jacobian * (*state.jacToGlobal);
+		FreeToBoundMatrix jacToLocal = FreeToBoundMatrix::Zero();
+		// initalize the jacobian to local, returns the transposed ref frame
+		auto rframeT = surface.initJacobianToLocal(state.geoContext, jacToLocal,
+                                               state.pos, state.dir);
+                                               
+    		jacobian = jacToLocal * state.jacobian * jacToLocal.transpose();
 		
-      cov = std::optional<BoundSymMatrix>(jacToLocal * state.cov * jacToLocal.transpose());
+		
+      cov = std::optional<Covariance>(jacToLocal * state.cov * jacToLocal.transpose(););
     }
     // Create the bound parameters
     BoundParameters parameters(state.geoContext, cov, state.pos,
@@ -271,13 +321,13 @@ class StraightLineStepper {
   ///   - and the path length (from start - for ordering)
   CurvilinearState curvilinearState(State& state, bool reinitialize) const {
     // Transport the covariance to here
-    std::optional<BoundSymMatrix> cov = std::nullopt;
+    std::optional<Covariance> cov = std::nullopt;
     BoundMatrix jacobian = BoundMatrix::Identity();
     if (state.covTransport) {
 		covarianceTransport(state, reinitialize);
-		const FreeToBoundMatrix jacToCurv = freeToCurvilinearJacobian(state);
-		jacobian = jacToCurv * state.jacobian * (*state.jacToGlobal);
-      cov = std::optional<BoundSymMatrix>(jacToCurv * state.cov * jacToCurv.transpose());
+		FreeToBoundMatrix jacToCurv = freeToBoundJacobian(state);
+		jacobian = jacToCurv * state.jacobian * jacToCurv.transpose();
+      cov = std::optional<Covariance>(jacToCurv * state.cov * jacToCurv.transpose());
     }
     // Create the curvilinear parameters
     CurvilinearParameters parameters(cov, state.pos, state.p * state.dir,
@@ -337,45 +387,7 @@ class StraightLineStepper {
   /// @param [in] reinitialize is a flag to steer whether the
   ///        state should be reinitialized at the new
   ///        position
-  BoundSymMatrix covarianceTransport(State& state, bool reinitialize = false) const {
-    // Optimized trigonometry on the propagation direction
-    const double x = state.dir(0);  // == cos(phi) * sin(theta)
-    const double y = state.dir(1);  // == sin(phi) * sin(theta)
-    const double z = state.dir(2);  // == cos(theta)
-    // can be turned into cosine/sine
-    const double cosTheta = z;
-    const double sinTheta = sqrt(x * x + y * y);
-    const double invSinTheta = 1. / sinTheta;
-    const double cosPhi = x * invSinTheta;
-    const double sinPhi = y * invSinTheta;
-    // prepare the jacobian to curvilinear
-    FreeToBoundMatrix jacToCurv = FreeToBoundMatrix::Zero();
-    if (std::abs(cosTheta) < s_curvilinearProjTolerance) {
-      // We normally operate in curvilinear coordinates defined as follows
-      jacToCurv(0, 0) = -sinPhi;
-      jacToCurv(0, 1) = cosPhi;
-      jacToCurv(1, 0) = -cosPhi * cosTheta;
-      jacToCurv(1, 1) = -sinPhi * cosTheta;
-      jacToCurv(1, 2) = sinTheta;
-    } else {
-      // Under grazing incidence to z, the above coordinate system definition
-      // becomes numerically unstable, and we need to switch to another one
-      const double c = sqrt(y * y + z * z);
-      const double invC = 1. / c;
-      jacToCurv(0, 1) = -z * invC;
-      jacToCurv(0, 2) = y * invC;
-      jacToCurv(1, 0) = c;
-      jacToCurv(1, 1) = -x * y * invC;
-      jacToCurv(1, 2) = -x * z * invC;
-    }
-    // Time parameter
-    jacToCurv(5, 3) = 1.;
-    // Directional and momentum parameters for curvilinear
-    jacToCurv(2, 4) = -sinPhi * invSinTheta;
-    jacToCurv(2, 5) = cosPhi * invSinTheta;
-    jacToCurv(3, 6) = -invSinTheta;
-    jacToCurv(4, 7) = 1.;
-    
+  void covarianceTransport(State& state, bool reinitialize = false) const {
     // Transport the covariance
 	ActsRowVectorD<3> normVec(state.dir);
     const FreeRowVector sfactors =
@@ -407,7 +419,6 @@ class StraightLineStepper {
     }
     // Store The global and bound jacobian (duplication for the moment)
     state.jacobian = jacFull * state.jacobian;
-    return jacToCurv * state.cov * jacToCurv.transpose();
   }
 
   /// Method for on-demand transport of the covariance
@@ -424,13 +435,8 @@ class StraightLineStepper {
   ///        position
   /// @note no check is done if the position is actually on the surface
   ///
-  BoundSymMatrix covarianceTransport(State& state, const Surface& surface,
+  void covarianceTransport(State& state, const Surface& surface,
                            bool reinitialize = false) const {
-	// Initialize the transport final frame jacobian
-	FreeToBoundMatrix jacToLocal = FreeToBoundMatrix::Zero();
-	// initalize the jacobian to local, returns the transposed ref frame
-	surface.initJacobianToLocal(state.geoContext, jacToLocal,
-                                               state.pos, state.dir);
     // calculate the form factors for the derivatives
     const FreeRowVector sVec = surface.derivativeFactors(
         state.geoContext, state.pos, state.dir, rframeT, state.jacTransport);
@@ -448,7 +454,6 @@ class StraightLineStepper {
     }
     // Store The global and bound jacobian (duplication for the moment)
     state.jacobian = jacFull * state.jacobian;
-    return jacToLocal * state.cov * jacToLocal.transpose();
   }
 
   /// Perform a straight line propagation step
