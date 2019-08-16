@@ -44,7 +44,7 @@ struct PropagatorResult : private detail::Extendable<result_list...> {
   std::unique_ptr<const parameters_t> endParameters = nullptr;
 
   /// Full transport jacobian
-  std::unique_ptr<const FreeMatrix> transportJacobian = nullptr;
+  std::unique_ptr<const BoundMatrix> transportJacobian = nullptr;
 
   /// Number of propagation steps that were carried out
   unsigned int steps = 0;
@@ -195,7 +195,7 @@ struct PropagatorOptions {
 ///
 template <typename stepper_t, typename navigator_t = detail::VoidNavigator>
 class Propagator final {
-  using Jacobian = FreeMatrix;
+  using Jacobian = BoundMatrix;
   using BoundState = std::tuple<BoundParameters, Jacobian, double>;
   using CurvilinearState = std::tuple<CurvilinearParameters, Jacobian, double>;
 
