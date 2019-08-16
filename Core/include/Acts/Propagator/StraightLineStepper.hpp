@@ -32,8 +32,8 @@ class StraightLineStepper {
  public:
   using Jacobian = BoundMatrix;
   using Covariance = FreeSymMatrix;
-  using BoundState = std::tuple<BoundParameters, Jacobian, double>;
-  using CurvilinearState = std::tuple<CurvilinearParameters, Jacobian, double>;
+  using BoundState = std::tuple<BoundParameters, BoundMatrix, double>;
+  using CurvilinearState = std::tuple<CurvilinearParameters, BoundMatrix, double>;
   using BField = NullBField;
 
   /// Always use the same propagation state type, independently of the initial
@@ -140,6 +140,49 @@ class StraightLineStepper {
   std::string outputStepSize(const State& state) const {
     return state.stepSize.toString();
   }
+
+	FreeToBoundMatrix freeToCurvilinearJacobian(State& state)
+	{
+		// Optimized trigonometry on the propagation direction
+		const double x = state.dir(0);  // == cos(phi) * sin(theta)
+		const double y = state.dir(1);  // == sin(phi) * sin(theta)
+		const double z = state.dir(2);  // == cos(theta)
+		// can be turned into cosine/sine
+		const double cosTheta = z;
+		const double sinTheta = sqrt(x * x + y * y);
+		const double invSinTheta = 1. / sinTheta;
+		const double cosPhi = x * invSinTheta;
+		const double sinPhi = y * invSinTheta;
+		// prepare the jacobian to curvilinear
+		FreeToBoundMatrix jacToCurv = FreeToBoundMatrix::Zero();
+		if (std::abs(cosTheta) < s_curvilinearProjTolerance) {
+		  // We normally operate in curvilinear coordinates defined as follows
+		  jacToCurv(0, 0) = -sinPhi;
+		  jacToCurv(0, 1) = cosPhi;
+		  jacToCurv(1, 0) = -cosPhi * cosTheta;
+		  jacToCurv(1, 1) = -sinPhi * cosTheta;
+		  jacToCurv(1, 2) = sinTheta;
+		} else {
+		  // Under grazing incidence to z, the above coordinate system definition
+		  // becomes numerically unstable, and we need to switch to another one
+		  const double c = sqrt(y * y + z * z);
+		  const double invC = 1. / c;
+		  jacToCurv(0, 1) = -z * invC;
+		  jacToCurv(0, 2) = y * invC;
+		  jacToCurv(1, 0) = c;
+		  jacToCurv(1, 1) = -x * y * invC;
+		  jacToCurv(1, 2) = -x * z * invC;
+		}
+		// Time parameter
+		jacToCurv(5, 3) = 1.;
+		// Directional and momentum parameters for curvilinear
+		jacToCurv(2, 4) = -sinPhi * invSinTheta;
+		jacToCurv(2, 5) = cosPhi * invSinTheta;
+		jacToCurv(3, 6) = -invSinTheta;
+		jacToCurv(4, 7) = 1.;
+		
+		return jacToCurv;
+	}
 
   /// Create and return the bound state at the current position
   ///
