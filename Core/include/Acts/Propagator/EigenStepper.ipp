@@ -19,13 +19,8 @@ auto Acts::EigenStepper<B, C, E, A>::boundState(State& state,
   std::optional<BoundSymMatrix> covOpt = std::nullopt;
   BoundMatrix jacobian = BoundMatrix::Identity();
   if (state.covTransport) {
-	covarianceTransport(state, surface, reinitialize);
-	
 	  // Initialize the transport final frame jacobian
-	  FreeToBoundMatrix jacToLocal = FreeToBoundMatrix::Zero();
-	  // initalize the jacobian to local, returns the transposed ref frame
-	  surface.initJacobianToLocal(state.geoContext, jacToLocal,
-                                             state.pos, state.dir);
+	  FreeToBoundMatrix jacToLocal = covarianceTransport(state, surface, reinitialize);
       jacobian = jacToLocal * state.jacobian * (*state.jacToGlobal);
                                              
     covOpt = std::optional<BoundSymMatrix>(jacobian * state.cov * jacobian.transpose());
@@ -121,7 +116,7 @@ void Acts::EigenStepper<B, C, E, A>::covarianceTransport(
 }
 
 template <typename B, typename C, typename E, typename A>
-void Acts::EigenStepper<B, C, E, A>::covarianceTransport(
+Acts::FreeToBoundMatrix Acts::EigenStepper<B, C, E, A>::covarianceTransport(
     State& state, const Surface& surface, bool reinitialize) const {
 		// TODO: Get rid of jacToLocal & rframeT
 		// Initialize the transport final frame jacobian
@@ -130,8 +125,8 @@ void Acts::EigenStepper<B, C, E, A>::covarianceTransport(
 	  auto rframeT = surface.initJacobianToLocal(state.geoContext, jacToLocal,
                                              state.pos, state.dir);
   // calculate the form factors for the derivatives
-  const FreeRowVector sVec = surface.derivativeFactors(
-      state.geoContext, state.pos, state.dir, rframeT, state.jacTransport);
+  const BoundRowVector sVec = surface.derivativeFactors(
+      state.geoContext, state.pos, state.dir, rframeT, state.jacTransport * (*state.jacToGlobal)); // TODO: Let's see what happens
   // the full jacobian is ([to local] jacobian) * ([transport] jacobian)
   const Jacobian jacFull = state.jacTransport - state.derivative * sVec;
   // Apply the actual covariance transport
@@ -146,6 +141,8 @@ void Acts::EigenStepper<B, C, E, A>::covarianceTransport(
   }
   // Store The global and bound jacobian (duplication for the moment)
   state.jacobian = jacFull * state.jacobian;
+  
+  return jacToLocal;
 }
 
 template <typename B, typename C, typename E, typename A>

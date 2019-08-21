@@ -336,7 +336,9 @@ class EigenStepper {
   /// @param [in] reinitialize is a flag to steer whether the state should be
   /// reinitialized at the new position
   /// @note no check is done if the position is actually on the surface
-  void covarianceTransport(State& state, const Surface& surface,
+  ///
+  /// @return Projection jacobian from global to bound parameters
+  FreeToBoundMatrix covarianceTransport(State& state, const Surface& surface,
                            bool reinitialize = true) const;
 
   /// Perform a Runge-Kutta track parameter propagation step

@@ -372,6 +372,7 @@ class StraightLineStepper {
   ///        position
   /// @note no check is done if the position is actually on the surface
   ///
+  /// @return Projection jacobian from global to bound parameters
   FreeToBoundMatrix covarianceTransport(State& state, const Surface& surface,
                            bool reinitialize = false) const {
 	// Initialize the transport final frame jacobian
