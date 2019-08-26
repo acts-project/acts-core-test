@@ -269,7 +269,7 @@ class MultiTrackParameters : public TrackParametersBase {
     for (const auto& weightTrack : m_mWeightTracks) {
       parValues +=
           weightTrack.first *
-          weightTrack.second.getParameterSet().template getParameters();
+          weightTrack.second.getParameterSet().getParameters();
     }
     return parSet;
   }
