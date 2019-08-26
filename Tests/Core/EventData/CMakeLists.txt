@@ -37,3 +37,10 @@ add_executable (MeasurementHelpersTests MeasurementHelpersTests.cpp)
 target_include_directories (MeasurementHelpersTests PRIVATE ${Boost_INCLUDE_DIRS})
 target_link_libraries (MeasurementHelpersTests PRIVATE ActsCore ActsTestsCommonHelpers ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 add_test (NAME MeasurementHelpersTests COMMAND MeasurementHelpersTests)
+
+add_executable (MultiTrackParametersTests MultiTrackParametersTests.cpp)
+target_include_directories (MultiTrackParametersTests PRIVATE ${Boost_INCLUDE_DIRS})
+target_link_libraries (MultiTrackParametersTests PRIVATE ActsCore ActsTestsCommonHelpers ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+add_test (NAME MultiTrackParametersUnitTests COMMAND MultiTrackParametersTests)
+acts_add_test_to_cdash_project (PROJECT ACore TEST MultiTrackParametersUnitTests TARGETS MultiTrackParametersTests)
+

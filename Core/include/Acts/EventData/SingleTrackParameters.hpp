@@ -50,7 +50,7 @@ class SingleTrackParameters : public TrackParametersBase {
   ~SingleTrackParameters() override = default;
 
   /// @brief virtual constructor
-  SingleTrackParameters<ChargePolicy>* clone() const override = 0;
+  virtual SingleTrackParameters<ChargePolicy>* clone() const = 0;
 
   /// @copydoc TrackParametersBase::position
   ActsVectorD<3> position() const final { return m_vPosition; }

@@ -44,9 +44,6 @@ class TrackParametersBase {
   /// @brief virtual default destructor to allow for inheritance
   virtual ~TrackParametersBase() = default;
 
-  /// @brief virtual constructor
-  virtual TrackParametersBase* clone() const = 0;
-
   /// @brief equality operator
   virtual bool operator==(const TrackParametersBase& rhs) const = 0;
 

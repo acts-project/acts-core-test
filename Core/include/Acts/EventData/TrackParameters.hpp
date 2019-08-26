@@ -11,9 +11,12 @@
 #include "Acts/EventData/SingleBoundTrackParameters.hpp"
 #include "Acts/EventData/SingleCurvilinearTrackParameters.hpp"
 #include "Acts/EventData/SingleTrackParameters.hpp"
+#include "Acts/EventData/MultiTrackParameters.hpp"
 
 namespace Acts {
 using TrackParameters = SingleTrackParameters<ChargedPolicy>;
 using CurvilinearParameters = SingleCurvilinearTrackParameters<ChargedPolicy>;
 using BoundParameters = SingleBoundTrackParameters<ChargedPolicy>;
+template<typename T>
+    using MultipleTrackParameters = MultiTrackParameters<ChargedPolicy, T>;
 }  // namespace Acts

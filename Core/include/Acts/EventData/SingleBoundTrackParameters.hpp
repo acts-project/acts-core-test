@@ -28,6 +28,7 @@ class SingleBoundTrackParameters : public SingleTrackParameters<ChargePolicy> {
  public:
   using ParVector_t = typename SingleTrackParameters<ChargePolicy>::ParVector_t;
   using CovMatrix_t = typename SingleTrackParameters<ChargePolicy>::CovMatrix_t;
+  using surfaceType = const Surface;
 
   /// @brief Constructor of track parameters bound to a surface
   /// This is the constructor from global parameters, enabled only

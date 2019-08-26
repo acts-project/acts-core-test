@@ -28,6 +28,7 @@ class SingleCurvilinearTrackParameters
  public:
   /// type of covariance matrix
   using CovMatrix_t = typename SingleTrackParameters<ChargePolicy>::CovMatrix_t;
+  using surfaceType = PlaneSurface;
 
   /// @brief constructor for curvilienear representation
   /// This is the constructor from global parameters, enabled only
