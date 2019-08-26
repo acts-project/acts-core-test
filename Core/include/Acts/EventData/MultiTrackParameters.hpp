@@ -267,9 +267,8 @@ class MultiTrackParameters : public TrackParametersBase {
         pars_array[4], pars_array[5];
     FullParameterSet parSet(std::nullopt, parValues);
     for (const auto& weightTrack : m_mWeightTracks) {
-      parValues +=
-          weightTrack.first *
-          weightTrack.second.getParameterSet().getParameters();
+      parValues += weightTrack.first *
+                   weightTrack.second.getParameterSet().getParameters();
     }
     return parSet;
   }
