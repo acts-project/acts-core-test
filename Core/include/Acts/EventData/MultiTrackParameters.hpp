@@ -185,7 +185,7 @@ class MultiTrackParameters : public TrackParametersBase {
     assert(&para.referenceSurface() == m_mSurface.get());
     m_mWeightTracks.insert(std::make_pair(weight, std::move(para)));
     m_oChargePolicy = weightCharge();
-    m_oParameters = getParameterSet();
+    m_oParameters = weightParameterSet();
     m_oTime = weightTime();
     m_vPosition = weightPosition();
     m_vMomentum = weightMomentum();
@@ -197,7 +197,7 @@ class MultiTrackParameters : public TrackParametersBase {
               SingleCurvilinearTrackParameters<ChargedPolicy>&& para) {
     m_mWeightTracks.insert(std::make_pair(weight, std::move(para)));
     m_oChargePolicy = weightCharge();
-    m_oParameters = getParameterSet();
+    m_oParameters = weightParameterSet();
     m_oTime = weightTime();
     m_vPosition = weightPosition();
     m_vMomentum = weightMomentum();
