@@ -196,11 +196,7 @@ class MultiTrackParameters : public TrackParametersBase {
   }
   /// getter functions for charge
   double charge() const final { 
-    double charge = 0.;
-    for (const auto& weightTrack : m_mWeightTracks) {
-      charge += weightTrack.first * weightTrack.second.charge();
-    }
-    return charge;
+	return  m_mWeightTracks.begin()->second.charge();
   }
 
   /// getter functions for parset
@@ -209,11 +205,11 @@ class MultiTrackParameters : public TrackParametersBase {
     ParVector_t parValues;
     parValues << pars_array[0], pars_array[1], pars_array[2], pars_array[3],
         pars_array[4], pars_array[5];
-    FullParameterSet parSet(std::nullopt, parValues);
     for (const auto& weightTrack : m_mWeightTracks) {
       parValues += weightTrack.first *
                    weightTrack.second.getParameterSet().getParameters();
     }
+    FullParameterSet parSet(std::nullopt, parValues);
     return std::move(parSet);
   }
 
@@ -229,7 +225,9 @@ class MultiTrackParameters : public TrackParametersBase {
   ParameterMapWeightTrack& getTrackList() { return m_mWeightTracks; }
 
   /// @note get combined parameter
-  ParVector_t parameters() const { return getParameterSet().getParameters(); }
+  ParVector_t parameters() const { 
+	return getParameterSet().getParameters(); 
+  }
   /// @brief currently this is in no-use
   /// @to do: add combined covariance
   ParVector_t uncertainty() const { return getParameterSet().getUncertainty(); }
@@ -246,5 +244,6 @@ class MultiTrackParameters : public TrackParametersBase {
   ParameterMapWeightTrack m_mWeightTracks;
 
   std::shared_ptr<multiSurfaceType> m_mSurface;
+
 };
 }  // namespace Acts

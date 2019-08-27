@@ -53,15 +53,12 @@ BOOST_AUTO_TEST_CASE(multi_curvilinear_initialization) {
   Vector3D mom0(1000._GeV, 1000._GeV, -0.100_GeV);
   Vector3D mom1(1000.01_GeV, 1000._GeV, -0.100_GeV);
   Vector3D mom2(1000.02_GeV, 1000._GeV, -0.100_GeV);
-  Vector3D dir0(mom0.normalized());
-  Vector3D dir1(mom1.normalized());
-  Vector3D dir2(mom2.normalized());
   Vector3D dir_combine = (0.1 * mom0 + 0.6 * mom1 + 0.3 * mom2).normalized();
   Vector3D mom_combine = 0.1 * mom0 + 0.6 * mom1 + 0.3 * mom2;
   Vector3D pos_combine = 0.1 * pos0 + 0.6 * pos1 + 0.3 * pos2;
   Vector3D z_axis_global(0., 0., 1.);
-  /// create curvilinear parameters without covariance +1/-1 charge
 
+  /// create curvilinear parameters without covariance +1 charge
   CurvilinearParameters curvilinear_pos_0(std::nullopt, pos0, mom0, 1_e, 1_s);
   CurvilinearParameters curvilinear_pos_1(std::nullopt, pos1, mom1, 1_e, 1_s);
   CurvilinearParameters curvilinear_pos_2(std::nullopt, pos2, mom2, 1_e, 1_s);
@@ -72,19 +69,21 @@ BOOST_AUTO_TEST_CASE(multi_curvilinear_initialization) {
   multi_curvilinear_pos.append(0.3, std::move(curvilinear_pos_2));
   BOOST_CHECK_EQUAL(multi_curvilinear_pos.size(), 3);
 
+  /// check local coordinates
+  const auto fphi = phi(mom_combine);
+  const auto ftheta = theta(mom_combine);
+  const double oOp = 1. / mom_combine.norm();
+  // check parameters
+  consistencyCheck(multi_curvilinear_pos, pos_combine, mom_combine, +1_e, 1_s,
+                   {0., 0., fphi, ftheta, oOp, 1_s});
+
   // test sort in the trackMap
-  // MultipleTrackParameters<CurvilinearParameters>::ParameterMapWeightTrack::const_iterator
-  // it
   auto it = multi_curvilinear_pos.getTrackList().begin();
   BOOST_CHECK_EQUAL((*it).first, 0.6);
   ++it;
   BOOST_CHECK_EQUAL((*it).first, 0.3);
   ++it;
   BOOST_CHECK_EQUAL((*it).first, 0.1);
-
-  // test pos/mom
-  CHECK_CLOSE_REL(multi_curvilinear_pos.position(), pos_combine, 1e-6);
-  CHECK_CLOSE_REL(multi_curvilinear_pos.momentum(), mom_combine, 1e-6);
 
   // check that the created surface is at the position
   CHECK_CLOSE_REL(multi_curvilinear_pos.referenceSurface().center(tgContext),
@@ -106,6 +105,11 @@ BOOST_AUTO_TEST_CASE(multi_curvilinear_initialization) {
   mFrame.col(2) = tAxis;
   CHECK_CLOSE_OR_SMALL(mFrame, multi_curvilinear_pos.referenceFrame(tgContext),
                        1e-6, 1e-6);
+
+  /// copy construction test
+  MultipleTrackParameters<CurvilinearParameters> multi_curvilinear_pos_copy(multi_curvilinear_pos);
+  BOOST_CHECK_EQUAL(multi_curvilinear_pos, multi_curvilinear_pos_copy);
+
 }  // BOOST Test for MultiCurvileaner
 
 /// @brief Unit test for parameters at a plane
@@ -155,6 +159,15 @@ BOOST_DATA_TEST_CASE(
   pars << pars_array[0], pars_array[1], pars_array[2], pars_array[3],
       pars_array[4], pars_array[5];
 
+  const double phi = pars_array[2];
+  const double theta = pars_array[3];
+  double p = fabs(1. / pars_array[4]);
+  Vector3D direction(cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta));
+  Vector3D mom = p * direction;
+  // the global position
+  Vector3D pos =
+      center + pars_array[0] * rot.col(0) + pars_array[1] * rot.col(1);
+
   BoundParameters ataPlane_from_pars_0(tgContext, std::nullopt, pars,
                                        pSurface);  //+2
   BoundParameters ataPlane_from_pars_1(tgContext, std::nullopt, pars,
@@ -165,9 +178,11 @@ BOOST_DATA_TEST_CASE(
       {{0.3, std::move(ataPlane_from_pars_0)}}, pSurface);  //+4
   multi_ataPlane_from_pars.append(0.7, std::move(ataPlane_from_pars_1));
 
+  // check parameters
+  consistencyCheck(multi_ataPlane_from_pars, pos, mom, 1., 21.,
+                  pars_array);
+
   // test the append method
-  // MultipleTrackParameters<BoundParameters>::ParameterMapWeightTrack::const_iterator
-  // it
   auto it = multi_ataPlane_from_pars.getTrackList().begin();
   BOOST_CHECK_EQUAL((*it).first, 0.7);
   ++it;
@@ -181,6 +196,10 @@ BOOST_DATA_TEST_CASE(
   // check that the reference frame is the rotation matrix
   CHECK_CLOSE_REL(multi_ataPlane_from_pars.referenceFrame(tgContext), rot,
                   1e-6);
+
+  /// copy construction test
+  MultipleTrackParameters<BoundParameters> multi_ataPlane_from_pars_copy(multi_ataPlane_from_pars);
+  BOOST_CHECK_EQUAL(multi_ataPlane_from_pars, multi_ataPlane_from_pars_copy);
 }
 }  // namespace Test
 }  // namespace Acts
