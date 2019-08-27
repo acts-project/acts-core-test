@@ -50,31 +50,28 @@ class MultiTrackParameters : public TrackParametersBase {
   using CovPtr_t = std::unique_ptr<const CovMatrix_t>;
 
   /// The TrackMap sort the track by weight automatically
+  /// The structure is used in component reduction in GSF
   using ParameterWeightTrack = std::pair<double, ParametersT>;
   using ParameterMapWeightTrack =
       std::multimap<double, ParametersT, std::greater<double>>;
 
   using multiSurfaceType = typename ParametersT::surfaceType;
 
-  /// @brief standard constructor for track parameters of charged particles
-  /// param list of BoundParameters
+  /// @brief standard constructor for bound track parameters of charged particles 
+    /// @param[in] weightParList is the list of BoundParameters moved in
+	/// @param[in] surface The reference surface the parameters are bound to
   template <typename P = ParametersT, typename T = ChargePolicy,
             std::enable_if_t<std::is_same<T, ChargedPolicy>::value, int> = 0>
   MultiTrackParameters(std::list<std::pair<double, P>>&& weightParList,
                        std::shared_ptr<multiSurfaceType> surface)
       : TrackParametersBase(),
         m_mWeightTracks(weightParList.begin(), weightParList.end()),
-        m_mSurface(std::move(surface)),
-        m_oChargePolicy(weightCharge()),
-        m_oParameters(weightParameterSet()),
-        m_oTime(weightTime()),
-        m_vPosition(weightPosition()),
-        m_vMomentum(weightMomentum()) {
-    assert(m_mSurface);
+        m_mSurface(std::move(surface)){
+		  assert(m_mSurface);
   }
 
-  /// @brief standard constructor for track parameters of charged particles
-  /// param list of CurvilinearParameters
+  /// @brief standard constructor for curv track parameters of charged particles
+    /// @param[in] weightParList is the list of BoundParameters moved in
   template <typename T = ChargePolicy,
             std::enable_if_t<std::is_same<T, ChargedPolicy>::value, int> = 0>
   MultiTrackParameters(
@@ -82,56 +79,42 @@ class MultiTrackParameters : public TrackParametersBase {
           std::pair<double, SingleCurvilinearTrackParameters<ChargedPolicy>>>&&
           weightParList)
       : TrackParametersBase(),
-        m_mWeightTracks(weightParList.begin(), weightParList.end()),
-        m_oChargePolicy(weightCharge()),
-        m_oParameters(weightParameterSet()),
-        m_oTime(weightTime()),
-        m_vPosition(weightPosition()),
-        m_vMomentum(weightMomentum()) {
+        m_mWeightTracks(weightParList.begin(), weightParList.end()){
     m_mSurface = Surface::makeShared<PlaneSurface>(position(), momentum());
   }
 
-  /// @brief standard constructor for track parameters of neutral particles
-  ///
-  /// @param list of BoundParameters
+  /// @brief standard constructor for bound track parameters of neutral particles
+    /// @param[in] weightParList is the list of BoundParameters moved in
+	/// @param[in] surface The reference surface the parameters are bound to
   template <typename P = ParametersT, typename T = ChargePolicy,
             std::enable_if_t<std::is_same<T, NeutralPolicy>::value, int> = 0>
   MultiTrackParameters(std::list<std::pair<double, P>>&& weightParList,
                        std::shared_ptr<multiSurfaceType> surface)
       : TrackParametersBase(),
         m_mWeightTracks(weightParList.begin(), weightParList.end()),
-        m_mSurface(std::move(surface)),
-        m_oChargePolicy(weightCharge()),
-        m_oParameters(weightParameterSet()),
-        m_oTime(weightTime()),
-        m_vPosition(weightPosition()),
-        m_vMomentum(weightMomentum()) {
-    assert(m_mSurface);
+        m_mSurface(std::move(surface)){
+		  assert(m_mSurface);
   }
-  /// @brief standard constructor for track parameters of neutral particles
-  ///
-  /// @param list of CurvilinearParameters
+  /// @brief standard constructor for curv track parameters of neutral particles
+    /// @param[in] weightParList is the list of BoundParameters moved in
   template <typename T = ChargePolicy,
             std::enable_if_t<std::is_same<T, NeutralPolicy>::value, int> = 0>
   MultiTrackParameters(
       std::list<
-          std::pair<double, SingleCurvilinearTrackParameters<ChargedPolicy>>>&&
+          std::pair<double, SingleCurvilinearTrackParameters<NeutralPolicy>>>&&
           weightParList)
       : TrackParametersBase(),
-        m_mWeightTracks(weightParList.begin(), weightParList.end()),
-        m_oChargePolicy(weightCharge()),
-        m_oParameters(weightParameterSet()),
-        m_oTime(weightTime()),
-        m_vPosition(weightPosition()),
-        m_vMomentum(weightMomentum()) {
+        m_mWeightTracks(weightParList.begin(), weightParList.end()){
     m_mSurface = Surface::makeShared<PlaneSurface>(position(), momentum());
   }
 
   /// @brief copy constructor
+  /// @param[in] copy The source parameters
   MultiTrackParameters(
       const MultiTrackParameters<ChargePolicy, ParametersT>& copy) = default;
 
   /// @brief default move constructor
+  /// @param[in] copy The source parameters
   MultiTrackParameters(MultiTrackParameters<ChargePolicy, ParametersT>&& copy) =
       default;
 
@@ -140,11 +123,6 @@ class MultiTrackParameters : public TrackParametersBase {
       const MultiTrackParameters<ChargePolicy, ParametersT>& rhs) {
     // check for self-assignment
     if (this != &rhs) {
-      m_oChargePolicy = rhs.m_oChargePolicy;
-      m_oTime = rhs.m_oTime;
-      m_oParameters = rhs.m_oParameters;
-      m_vPosition = rhs.m_vPosition;
-      m_vMomentum = rhs.m_vMomentum;
       m_mWeightTracks = rhs.m_mWeightTracks;
       m_mSurface = rhs.m_mSurface;
     }
@@ -158,11 +136,6 @@ class MultiTrackParameters : public TrackParametersBase {
       MultiTrackParameters<ChargePolicy, ParametersT>&& rhs) {
     // check for self-assignment
     if (this != &rhs) {
-      m_oChargePolicy = std::move(rhs.m_oChargePolicy);
-      m_oTime = std::move(rhs.m_oTime);
-      m_oParameters = std::move(rhs.m_oParameters);
-      m_vPosition = std::move(rhs.m_vPosition);
-      m_vMomentum = std::move(rhs.m_vMomentum);
       m_mWeightTracks = std::move(rhs.m_mWeightTracks);
       m_mSurface = std::move(rhs.m_mSurface);
     }
@@ -170,7 +143,7 @@ class MultiTrackParameters : public TrackParametersBase {
   }
 
   /// @brief default virtual destructor
-  ~MultiTrackParameters() final = default;
+  ~MultiTrackParameters() override = default;
 
   /// @brief equality operator
   ///
@@ -178,79 +151,51 @@ class MultiTrackParameters : public TrackParametersBase {
     return true;
   }
 
-  /// @brief append a single parameter to the track map for BoundParameters
+  /// @brief move a single parameter to the track map for BoundParameters
+  /// @param weight the parameter weight
+  /// @param para the bound parameter 
   template <typename P = ParametersT>
   void append(double weight, P&& para) {
     // They should be on the same surface
     assert(&para.referenceSurface() == m_mSurface.get());
     m_mWeightTracks.insert(std::make_pair(weight, std::move(para)));
-    m_oChargePolicy = weightCharge();
-    m_oParameters = weightParameterSet();
-    m_oTime = weightTime();
-    m_vPosition = weightPosition();
-    m_vMomentum = weightMomentum();
   }
 
-  /// @brief append a single parameter to the track map for
-  /// CurvilinearParameters
+  /// @brief move a single parameter to the track map for CurvilinearParameters
+  /// @param weight the parameter weight
+  /// @param para the curvilinear parameter 
   void append(double weight,
-              SingleCurvilinearTrackParameters<ChargedPolicy>&& para) {
+              SingleCurvilinearTrackParameters<ChargePolicy>&& para) {
     m_mWeightTracks.insert(std::make_pair(weight, std::move(para)));
-    m_oChargePolicy = weightCharge();
-    m_oParameters = weightParameterSet();
-    m_oTime = weightTime();
-    m_vPosition = weightPosition();
-    m_vMomentum = weightMomentum();
     m_mSurface = Surface::makeShared<PlaneSurface>(position(), momentum());
   }
 
-  /// getter functions for position
-  ActsVectorD<3> position() const final { return m_vPosition; }
-  /// getter functions for momentum
-  ActsVectorD<3> momentum() const final { return m_vMomentum; }
-  /// getter functions for time
-  double time() const final { return m_oTime; }
-  /// getter functions for charge
-  double charge() const final { return m_oChargePolicy.getCharge(); }
-
-  /// getter functions for parset
-  const FullParameterSet& getParameterSet() const final {
-    return m_oParameters;
-  }
-
-  /// The position weighting method
-  /// @brief get weighted combination of position
-  ActsVectorD<3> weightPosition() const {
+  /// getter functions for position 
+  ActsVectorD<3> position() const final {
     Vector3D pos = Vector3D(0, 0, 0);
     for (const auto& weightTrack : m_mWeightTracks) {
       pos += weightTrack.first * weightTrack.second.position();
     }
     return pos;
   }
-
-  /// The momentum() weighting method
-  /// @brief get weighted combination of momentum
-  ActsVectorD<3> weightMomentum() const {
+  /// getter functions for momentum
+  ActsVectorD<3> momentum() const final { 
     Vector3D mom = Vector3D(0, 0, 0);
     for (const auto& weightTrack : m_mWeightTracks) {
       mom += weightTrack.first * weightTrack.second.momentum();
     }
     return mom;
   }
-
-  /// The time() weighting method
-  /// @brief get weighted combination of time
-  double weightTime() const {
+  /// getter functions for time
+  double time() const final {
     double time = 0.;
     for (const auto& weightTrack : m_mWeightTracks) {
       time += weightTrack.first * weightTrack.second.time();
     }
     return time;
   }
-
-  /// The charge() getter method
-  /// @brief get weighted combination of charge
-  double weightCharge() const {
+  /// getter functions for charge
+  double charge() const final { 
     double charge = 0.;
     for (const auto& weightTrack : m_mWeightTracks) {
       charge += weightTrack.first * weightTrack.second.charge();
@@ -258,9 +203,8 @@ class MultiTrackParameters : public TrackParametersBase {
     return charge;
   }
 
-  /// @note currently get combined full parameter, without covariance
-  /// @to do: add combination of covariances
-  FullParameterSet weightParameterSet() const {
+  /// getter functions for parset
+  const FullParameterSet& getParameterSet() const final {
     std::array<double, 6> pars_array = {{0., 0., 0., 0., 0., 0.}};
     ParVector_t parValues;
     parValues << pars_array[0], pars_array[1], pars_array[2], pars_array[3],
@@ -270,7 +214,7 @@ class MultiTrackParameters : public TrackParametersBase {
       parValues += weightTrack.first *
                    weightTrack.second.getParameterSet().getParameters();
     }
-    return parSet;
+    return std::move(parSet);
   }
 
   /// @brief return the size of track map
@@ -302,13 +246,5 @@ class MultiTrackParameters : public TrackParametersBase {
   ParameterMapWeightTrack m_mWeightTracks;
 
   std::shared_ptr<multiSurfaceType> m_mSurface;
-
-  ChargePolicy m_oChargePolicy;    ///< charge policy object distinguishing
-                                   /// between charged and neutral tracks
-  FullParameterSet m_oParameters;  ///< ParameterSet object holding the
-                                   /// parameter values and covariance matrix
-  double m_oTime;                  ///< time of the track parametrisation
-  ActsVectorD<3> m_vPosition;      ///< 3D vector with global position
-  ActsVectorD<3> m_vMomentum;      ///< 3D vector with global momentum
 };
 }  // namespace Acts
