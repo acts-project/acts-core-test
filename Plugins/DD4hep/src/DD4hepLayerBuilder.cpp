@@ -103,6 +103,7 @@ const Acts::LayerVector Acts::DD4hepLayerBuilder::negativeLayers(
 
         // check if layer has surfaces
         if (layerSurfaces.empty()) {
+          ACTS_VERBOSE("[L] Disc layer has no senstive surfaces.");
           // in case no surfaces are handed over the layer thickness will be set
           // to a default value to allow attaching material layers
           double z = (zMin + zMax) * 0.5;
@@ -115,6 +116,9 @@ const Acts::LayerVector Acts::DD4hepLayerBuilder::negativeLayers(
           pl.envR = {0., 0.};
           pl.envZ = {0., 0.};
         } else {
+          ACTS_VERBOSE("[L] Disc layer has " << layerSurfaces.size()
+                                             << " senstive surfaces.");
+
           // set the values of the proto layer in case dimensions are given by
           // geometry
           pl.envZ = {std::abs(zMin - pl.minZ), std::abs(zMax - pl.maxZ)};

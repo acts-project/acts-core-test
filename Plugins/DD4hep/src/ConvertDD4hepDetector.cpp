@@ -51,6 +51,7 @@ std::unique_ptr<const TrackingGeometry> convertDD4hepDetector(
   std::shared_ptr<const CylinderVolumeBuilder> beamPipeVolumeBuilder;
   // loop over the sub detectors
   for (auto& subDetector : subDetectors) {
+    ACTS_INFO("Translating DD4hep sub detector: " << subDetector.name());
     // create volume builder
     auto volBuilder = volumeBuilder_dd4hep(
         subDetector, loggingLevel, bTypePhi, bTypeR, bTypeZ, layerEnvelopeR,
@@ -116,6 +117,8 @@ std::shared_ptr<const CylinderVolumeBuilder> volumeBuilder_dd4hep(
   auto DD4hepConverterlogger =
       Acts::getDefaultLogger("DD4hepConversion", loggingLevel);
   ACTS_LOCAL_LOGGER(DD4hepConverterlogger);
+
+  ACTS_VERBOSE("[D] Processing detector element:  " << subDetector.name());
 
   Acts::ActsExtension* subDetExtension = nullptr;
   // at this stage not every DetElement needs to have an Extension attached
@@ -322,16 +325,16 @@ std::shared_ptr<const CylinderVolumeBuilder> volumeBuilder_dd4hep(
         ddmaterial.Z(), ddmaterial.density() / pow(Acts::UnitConstants::cm, 3),
         fabs(tube->GetRmax() - tube->GetRmin()) * UnitConstants::cm);
 
-    // configure the beam pipe layer builder
-    Acts::PassiveLayerBuilder::Config bplConfig;
-    bplConfig.layerIdentification = subDetector.name();
-    bplConfig.centralLayerRadii = std::vector<double>(1, 0.5 * (rMax + rMin));
-    bplConfig.centralLayerHalflengthZ = std::vector<double>(1, halfZ);
-    bplConfig.centralLayerThickness = std::vector<double>(1, fabs(rMax - rMin));
-    bplConfig.centralLayerMaterial = {
+    // configure the passive layer builder
+    Acts::PassiveLayerBuilder::Config plbConfig;
+    plbConfig.layerIdentification = subDetector.name();
+    plbConfig.centralLayerRadii = std::vector<double>(1, 0.5 * (rMax + rMin));
+    plbConfig.centralLayerHalflengthZ = std::vector<double>(1, halfZ);
+    plbConfig.centralLayerThickness = std::vector<double>(1, fabs(rMax - rMin));
+    plbConfig.centralLayerMaterial = {
         std::make_shared<const HomogeneousSurfaceMaterial>(pcMaterial)};
     auto pcLayerBuilder = std::make_shared<const Acts::PassiveLayerBuilder>(
-        bplConfig, Acts::getDefaultLogger(subDetector.name(), loggingLevel));
+        plbConfig, Acts::getDefaultLogger(subDetector.name(), loggingLevel));
 
     // the configuration object of the volume builder
     Acts::CylinderVolumeBuilder::Config cvbConfig;
