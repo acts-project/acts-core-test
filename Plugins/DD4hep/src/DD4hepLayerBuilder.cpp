@@ -1,6 +1,6 @@
 // This file is part of the Acts project.
 //
-// Copyright (C) 2017-2018 CERN for the benefit of the Acts project
+// Copyright (C) 2017-2019 CERN for the benefit of the Acts project
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -13,8 +13,9 @@
 #include "Acts/Geometry/Layer.hpp"
 #include "Acts/Geometry/LayerCreator.hpp"
 #include "Acts/Geometry/ProtoLayer.hpp"
-#include "Acts/Material/ProtoSurfaceMaterial.hpp"
+#include "Acts/Material/ISurfaceMaterial.hpp"
 #include "Acts/Plugins/DD4hep/ActsExtension.hpp"
+#include "Acts/Plugins/DD4hep/ConvertDD4hepMaterial.hpp"
 #include "Acts/Plugins/DD4hep/DD4hepDetectorElement.hpp"
 #include "Acts/Plugins/TGeo/TGeoPrimitivesHelpers.hpp"
 #include "Acts/Surfaces/CylinderSurface.hpp"
@@ -29,7 +30,6 @@
 #include "TGeoMatrix.h"
 
 #include <boost/algorithm/string.hpp>
-#include "Acts/Material/HomogeneousSurfaceMaterial.hpp"
 
 Acts::DD4hepLayerBuilder::DD4hepLayerBuilder(
     const Acts::DD4hepLayerBuilder::Config& config,
@@ -45,17 +45,19 @@ void Acts::DD4hepLayerBuilder::setConfiguration(
   m_cfg = config;
 }
 
-const Acts::LayerVector Acts::DD4hepLayerBuilder::negativeLayers(
-    const GeometryContext& gctx) const {
+const Acts::LayerVector Acts::DD4hepLayerBuilder::endcapLayers(
+    const GeometryContext& gctx,
+    const std::vector<dd4hep::DetElement>& dendcapLayers,
+    const std::string& side) const {
   LayerVector layers;
-  if (m_cfg.negativeLayers.empty()) {
-    ACTS_VERBOSE("[L] No layers handed over for negative volume.");
+  if (dendcapLayers.empty()) {
+    ACTS_VERBOSE("[L] No layers handed over for " << side << " volume!");
   } else {
-    ACTS_VERBOSE(
-        "[L] Received layers for negative volume -> creating "
-        "disc layers");
+    ACTS_VERBOSE("[L] Received layers for " << side
+                                            << " volume -> creating "
+                                               "disc layers");
     // go through layers
-    for (auto& detElement : m_cfg.negativeLayers) {
+    for (auto& detElement : dendcapLayers) {
       // prepare the layer surfaces
       std::vector<std::shared_ptr<const Surface>> layerSurfaces;
       // access the extension of the layer
@@ -100,7 +102,6 @@ const Acts::LayerVector Acts::DD4hepLayerBuilder::negativeLayers(
         if (zMin > zMax) {
           std::swap(zMin, zMax);
         }
-
         // check if layer has surfaces
         if (layerSurfaces.empty()) {
           ACTS_VERBOSE("[L] Disc layer has no senstive surfaces.");
@@ -118,7 +119,6 @@ const Acts::LayerVector Acts::DD4hepLayerBuilder::negativeLayers(
         } else {
           ACTS_VERBOSE("[L] Disc layer has " << layerSurfaces.size()
                                              << " senstive surfaces.");
-
           // set the values of the proto layer in case dimensions are given by
           // geometry
           pl.envZ = {std::abs(zMin - pl.minZ), std::abs(zMax - pl.maxZ)};
@@ -128,17 +128,16 @@ const Acts::LayerVector Acts::DD4hepLayerBuilder::negativeLayers(
         throw std::logic_error(
             std::string("Layer DetElement: ") + detElement.name() +
             std::string(" has neither a shape nor tolerances for envelopes "
-                        "added to it¥s extension. Please check your detector "
+                        "added to its extension. Please check your detector "
                         "constructor!"));
       }
 
-      std::shared_ptr<Layer> negativeLayer = nullptr;
+      std::shared_ptr<Layer> endcapLayer = nullptr;
       // In case the layer is sensitive
       if (detElement.volume().isSensitive()) {
         // Create the sensitive surface
         auto sensitiveSurf = createSensitiveSurface(detElement, true);
         // Create the surfaceArray
-
         std::unique_ptr<Acts::SurfaceArray> sArray =
             std::make_unique<SurfaceArray>(sensitiveSurf);
 
@@ -146,41 +145,26 @@ const Acts::LayerVector Acts::DD4hepLayerBuilder::negativeLayers(
         auto dBounds = std::make_shared<const RadialBounds>(pl.minR, pl.maxR);
         double thickness = std::fabs(pl.maxZ - pl.minZ);
         // Create the layer containing the sensitive surface
-        negativeLayer = DiscLayer::create(transform, dBounds, std::move(sArray),
-                                          thickness, nullptr, Acts::active);
+        endcapLayer = DiscLayer::create(transform, dBounds, std::move(sArray),
+                                        thickness, nullptr, Acts::active);
 
       } else {
-        negativeLayer = m_cfg.layerCreator->discLayer(
+        endcapLayer = m_cfg.layerCreator->discLayer(
             gctx, layerSurfaces, m_cfg.bTypeR, m_cfg.bTypePhi, pl, transform,
             nullptr);
       }
-
-      // get the possible material if no surfaces are handed over
-      std::shared_ptr<const HomogeneousSurfaceMaterial> surfMaterial = nullptr;
-
-      dd4hep::Material ddmaterial = detElement.volume().material();
-      if (!boost::iequals(ddmaterial.name(), "vacuum")) {
-        Material layerMaterial(
-            ddmaterial.radLength() * Acts::UnitConstants::cm,
-            ddmaterial.intLength() * Acts::UnitConstants::cm, ddmaterial.A(),
-            ddmaterial.Z(),
-            ddmaterial.density() / pow(Acts::UnitConstants::cm, 3));
-
-        MaterialProperties materialProperties(layerMaterial,
-                                              fabs(pl.maxR - pl.minR));
-
-        surfMaterial = std::make_shared<const HomogeneousSurfaceMaterial>(
-            materialProperties);
-      }
-
-      negativeLayer->surfaceRepresentation().assignSurfaceMaterial(
-          surfMaterial);
+      // Add the ProtoMaterial if present
+      addDiscProtoMaterial(detElement, *endcapLayer);
       // push back created layer
-      layers.push_back(negativeLayer);
+      layers.push_back(endcapLayer);
     }
   }
-
   return layers;
+}
+
+const Acts::LayerVector Acts::DD4hepLayerBuilder::negativeLayers(
+    const GeometryContext& gctx) const {
+  return endcapLayers(gctx, m_cfg.negativeLayers, "negative");
 }
 
 const Acts::LayerVector Acts::DD4hepLayerBuilder::centralLayers(
@@ -281,29 +265,8 @@ const Acts::LayerVector Acts::DD4hepLayerBuilder::centralLayers(
             gctx, layerSurfaces, m_cfg.bTypePhi, m_cfg.bTypeZ, pl, transform,
             nullptr);
       }
-
-      // get the possible material if no surfaces are handed over
-      std::shared_ptr<const HomogeneousSurfaceMaterial> surfMaterial = nullptr;
-
-      dd4hep::Material ddmaterial = detElement.volume().material();
-      if (!boost::iequals(ddmaterial.name(), "vacuum")) {
-        Material layerMaterial(
-            ddmaterial.radLength() * Acts::UnitConstants::cm,
-            ddmaterial.intLength() * Acts::UnitConstants::cm, ddmaterial.A(),
-            ddmaterial.Z(),
-            ddmaterial.density() / pow(Acts::UnitConstants::cm, 3));
-
-        MaterialProperties materialProperties(layerMaterial,
-                                              fabs(pl.maxR - pl.minR));
-
-        surfMaterial = std::make_shared<const HomogeneousSurfaceMaterial>(
-            materialProperties);
-
-        //   innerBoundary->assignSurfaceMaterial(surfMaterial);
-      }
-
-      centralLayer->surfaceRepresentation().assignSurfaceMaterial(surfMaterial);
-
+      // Add the ProtoMaterial if present
+      addCylinderProtoMaterial(detElement, *centralLayer);
       // push back created layer
       layers.push_back(centralLayer);
     }
@@ -313,133 +276,7 @@ const Acts::LayerVector Acts::DD4hepLayerBuilder::centralLayers(
 
 const Acts::LayerVector Acts::DD4hepLayerBuilder::positiveLayers(
     const GeometryContext& gctx) const {
-  LayerVector layers;
-  if (m_cfg.positiveLayers.empty()) {
-    ACTS_VERBOSE("[L] No layers handed over for positive volume!");
-  } else {
-    ACTS_VERBOSE(
-        "[L] Received layers for positive volume -> creating "
-        "disc layers");
-    // go through layers
-    for (auto& detElement : m_cfg.positiveLayers) {
-      // prepare the layer surfaces
-      std::vector<std::shared_ptr<const Surface>> layerSurfaces;
-      // access the extension of the layer
-      // at this stage all layer detElements have extension (checked in
-      // ConvertDD4hepDetector)
-      Acts::ActsExtension* detExtension =
-          detElement.extension<Acts::ActsExtension>();
-      // collect the sensitive detector elements possibly contained by the layer
-      resolveSensitive(detElement, layerSurfaces);
-      // access the global transformation matrix of the layer
-      auto transform =
-          convertTransform(&(detElement.nominal().worldTransformation()));
-      // get the shape of the layer
-      TGeoShape* geoShape =
-          detElement.placement().ptr()->GetVolume()->GetShape();
-      // create the proto layer
-      ProtoLayer pl(gctx, layerSurfaces);
-      if (detExtension->hasValue("r", "envelope") &&
-          detExtension->hasValue("z", "envelope")) {
-        // set the values of the proto layer in case enevelopes are handed over
-        pl.envR = {detExtension->getValue("r", "envelope"),
-                   detExtension->getValue("r", "envelope")};
-        pl.envZ = {detExtension->getValue("z", "envelope"),
-                   detExtension->getValue("z", "envelope")};
-      } else if (geoShape != nullptr) {
-        TGeoTubeSeg* tube = dynamic_cast<TGeoTubeSeg*>(geoShape);
-        if (tube == nullptr)
-          ACTS_ERROR(
-              "[L] Disc layer has wrong shape - needs to be TGeoTubeSeg!");
-        // extract the boundaries
-        double rMin = tube->GetRmin() * UnitConstants::cm;
-        double rMax = tube->GetRmax() * UnitConstants::cm;
-        double zMin =
-            (transform->translation() -
-             transform->rotation().col(2) * tube->GetDz() * UnitConstants::cm)
-                .z();
-        double zMax =
-            (transform->translation() +
-             transform->rotation().col(2) * tube->GetDz() * UnitConstants::cm)
-                .z();
-        if (zMin > zMax) {
-          std::swap(zMin, zMax);
-        }
-
-        // check if layer has surfaces
-        if (layerSurfaces.empty()) {
-          // in case no surfaces are handed over the layer thickness will be set
-          // to a default value to allow attaching material layers
-          double z = (zMin + zMax) * 0.5;
-          // create layer without surfaces
-          // manually create protolayer
-          pl.minZ = (z != 0.) ? z - m_cfg.defaultThickness : 0.;
-          pl.maxZ = (z != 0.) ? z + m_cfg.defaultThickness : 0.;
-          pl.minR = rMin;
-          pl.maxR = rMax;
-          pl.envR = {0., 0.};
-          pl.envZ = {0., 0.};
-        } else {
-          // set the values of the proto layer in case dimensions are given by
-          // geometry
-          pl.envZ = {std::abs(zMin - pl.minZ), std::abs(zMax - pl.maxZ)};
-          pl.envR = {std::abs(rMin - pl.minR), std::abs(rMax - pl.maxR)};
-        }
-      } else {
-        throw std::logic_error(
-            std::string("Layer DetElement: ") + detElement.name() +
-            std::string(" has neither a shape nor tolerances for envelopes "
-                        "added to it¥s extension. Please check your detector "
-                        "constructor!"));
-      }
-
-      std::shared_ptr<Layer> positiveLayer = nullptr;
-      // In case the layer is sensitive
-      if (detElement.volume().isSensitive()) {
-        // Create the sensitive surface
-        auto sensitiveSurf = createSensitiveSurface(detElement, true);
-        // Create the surfaceArray
-        std::unique_ptr<Acts::SurfaceArray> sArray =
-            std::make_unique<SurfaceArray>(sensitiveSurf);
-
-        // create the share disc bounds
-        auto dBounds = std::make_shared<const RadialBounds>(pl.minR, pl.maxR);
-        double thickness = std::fabs(pl.maxZ - pl.minZ);
-        // Create the layer containing the sensitive surface
-        positiveLayer = DiscLayer::create(transform, dBounds, std::move(sArray),
-                                          thickness, nullptr, Acts::active);
-
-      } else {
-        positiveLayer = m_cfg.layerCreator->discLayer(
-            gctx, layerSurfaces, m_cfg.bTypeR, m_cfg.bTypePhi, pl, transform,
-            nullptr);
-      }
-
-      // get the possible material if no surfaces are handed over
-      std::shared_ptr<const HomogeneousSurfaceMaterial> surfMaterial = nullptr;
-
-      dd4hep::Material ddmaterial = detElement.volume().material();
-      if (!boost::iequals(ddmaterial.name(), "vacuum")) {
-        Material layerMaterial(
-            ddmaterial.radLength() * Acts::UnitConstants::cm,
-            ddmaterial.intLength() * Acts::UnitConstants::cm, ddmaterial.A(),
-            ddmaterial.Z(),
-            ddmaterial.density() / pow(Acts::UnitConstants::cm, 3));
-
-        MaterialProperties materialProperties(layerMaterial,
-                                              fabs(pl.maxR - pl.minR));
-
-        surfMaterial = std::make_shared<const HomogeneousSurfaceMaterial>(
-            materialProperties);
-      }
-      positiveLayer->surfaceRepresentation().assignSurfaceMaterial(
-          surfMaterial);
-
-      // push back created layer
-      layers.push_back(positiveLayer);
-    }
-  }
-  return layers;
+  return endcapLayers(gctx, m_cfg.positiveLayers, "positive");
 }
 
 void Acts::DD4hepLayerBuilder::resolveSensitive(
@@ -461,8 +298,6 @@ void Acts::DD4hepLayerBuilder::resolveSensitive(
 std::shared_ptr<const Acts::Surface>
 Acts::DD4hepLayerBuilder::createSensitiveSurface(
     const dd4hep::DetElement& detElement, bool isDisc) const {
-  // access the possible material
-  std::shared_ptr<const Acts::ISurfaceMaterial> material = nullptr;
   // access the possible extension of the DetElement
   Acts::ActsExtension* detExtension = nullptr;
   try {
@@ -474,7 +309,7 @@ Acts::DD4hepLayerBuilder::createSensitiveSurface(
   // Create the corresponding detector element !- memory leak --!
   Acts::DD4hepDetectorElement* dd4hepDetElement =
       new Acts::DD4hepDetectorElement(detElement, detAxis, UnitConstants::cm,
-                                      isDisc, material, nullptr);
+                                      isDisc, nullptr, nullptr);
 
   // return the surface
   return dd4hepDetElement->surface().getSharedPtr();
