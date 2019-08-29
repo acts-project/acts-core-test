@@ -31,7 +31,7 @@ struct EmptyEffect {
     // make non effect, just means copy the components in material effect
     std::vector<ComponentValues> comp(number_of_component,
                                       {1. / number_of_component, 0., 0.});
-    return std::move(comp);
+    return comp;
   }
 };
 }  // namespace detail
