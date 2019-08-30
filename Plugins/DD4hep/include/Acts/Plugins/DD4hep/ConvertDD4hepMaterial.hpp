@@ -16,7 +16,7 @@
 
 namespace Acts {
 
-class ISurfaceMaterial;
+class ProtoSurfaceMaterial;
 class Layer;
 
 /// Helper method to translate DD4hep material to Acts::ISurfaceMaterial
@@ -28,7 +28,7 @@ class Layer;
 /// @param loggingLevel is the output level for the conversion
 ///
 /// @return a map of the identification string and a surface material
-void addCylinderProtoMaterial(
+void addCylinderLayerProtoMaterial(
     dd4hep::DetElement detElement, Layer& cylinderLayer,
     Logging::Level loggingLevel = Logging::Level::INFO);
 
@@ -41,8 +41,9 @@ void addCylinderProtoMaterial(
 /// @param loggingLevel is the output level for the conversion
 ///
 /// @return a map of the identification string and a surface material
-void addDiscProtoMaterial(dd4hep::DetElement detElement, Layer& discLayer,
-                          Logging::Level loggingLevel = Logging::Level::INFO);
+void addDiscLayerProtoMaterial(
+    dd4hep::DetElement detElement, Layer& discLayer,
+    Logging::Level loggingLevel = Logging::Level::INFO);
 
 /// Helper method to be called for Cylinder and Disc Proto material
 ///
@@ -50,11 +51,23 @@ void addDiscProtoMaterial(dd4hep::DetElement detElement, Layer& discLayer,
 ///
 /// @param aExtension the ActsExtension for the binning parameters
 /// @param layer the Layer to assign the proto material
-/// @param openBinning the open part of the binning (binR, binZ)
-/// @param openBinValue the corresponding binning value
-void addProtoMaterial(const ActsExtension& actsExtension, Layer& layer,
-                      const std::string& openBinning,
-                      Acts::BinningValue openBinVal);
+/// @param binning the Binning prescription for the ActsExtension
+void addLayerProtoMaterial(
+    const ActsExtension& actsExtension, Layer& layer,
+    const std::vector<std::pair<const std::string, Acts::BinningOption> >&
+        binning);
+
+/// Helper method to create proto material - to be called form the
+/// addProto(...) methods
+///
+/// @param actsExtension the ActExtension to be checked
+/// @param valueTag the xml tag for to ActsExtension to be parsed
+/// @param firstBinning string lookup for first bin
+/// @param binning the Binning prescription for the ActsExtension
+std::shared_ptr<Acts::ProtoSurfaceMaterial> createProtoMaterial(
+    const ActsExtension& actsExtension, const std::string& valueTag,
+    const std::vector<std::pair<const std::string, Acts::BinningOption> >&
+        binning);
 
 /// Helper method that decorates an ActsExtension with proto material
 /// description,

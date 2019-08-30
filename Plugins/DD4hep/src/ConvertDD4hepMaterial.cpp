@@ -16,9 +16,37 @@
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Utilities/BinUtility.hpp"
 
-void Acts::addProtoMaterial(const ActsExtension& actsExtension, Layer& layer,
-                            const std::string& openBinning,
-                            Acts::BinningValue openBinVal) {
+std::shared_ptr<Acts::ProtoSurfaceMaterial> Acts::createProtoMaterial(
+    const ActsExtension& actsExtension, const std::string& valueTag,
+    const std::vector<std::pair<const std::string, Acts::BinningOption> >&
+        binning) {
+  // Create the bin utility
+  Acts::BinUtility bu;
+  // Loop over the bins
+  for (auto& bin : binning) {
+    // finding the iterator position to determine the binning value
+    auto bit = std::find(Acts::binningValueNames.begin(),
+                         Acts::binningValueNames.end(), bin.first);
+    size_t indx = std::distance(Acts::binningValueNames.begin(), bit);
+    Acts::BinningValue bval = Acts::BinningValue(indx);
+    Acts::BinningOption bopt = bin.second;
+    double min, max = 0.;
+    if (bopt == Acts::closed) {
+      min = -M_PI;
+      max = M_PI;
+    }
+    int bins = actsExtension.getValue(bin.first, valueTag);
+    if (bins > 1) {
+      bu += Acts::BinUtility(bins, min, max, bopt, bval);
+    }
+  }
+  return std::make_shared<Acts::ProtoSurfaceMaterial>(bu);
+}
+
+void Acts::addLayerProtoMaterial(
+    const ActsExtension& actsExtension, Layer& layer,
+    const std::vector<std::pair<const std::string, Acts::BinningOption> >&
+        binning) {
   // Start with the representing surface
   std::vector<std::string> materialOptions = {"layer_material_representing"};
   std::vector<const Surface*> materialSurfaces = {
@@ -38,20 +66,9 @@ void Acts::addProtoMaterial(const ActsExtension& actsExtension, Layer& layer,
   // Now loop over it and create the ProtoMaterial
   for (unsigned int is = 0; is < materialOptions.size(); ++is) {
     if (actsExtension.hasValue(materialOptions[is])) {
-      unsigned int binsPhi =
-          actsExtension.getValue("binsPhi", materialOptions[is]);
-      unsigned int binsOpen =
-          actsExtension.getValue(openBinning, materialOptions[is]);
-      // Create the bin utility
-      Acts::BinUtility bu;
-      if (binsPhi > 1) {
-        bu +=
-            Acts::BinUtility(binsPhi, -M_PI, M_PI, Acts::closed, Acts::binPhi);
-      }
-      if (binsOpen > 1) {
-        bu += Acts::BinUtility(binsOpen, -1., 1., Acts::open, openBinVal);
-      }
-      auto psMaterial = std::make_shared<Acts::ProtoSurfaceMaterial>(bu);
+      // Create the material and assign it
+      auto psMaterial =
+          createProtoMaterial(actsExtension, materialOptions[is], binning);
       // const_cast (ugly - to be changed after internal geometry stored
       // non-conast)
       Surface* surface = const_cast<Surface*>(materialSurfaces[is]);
@@ -60,9 +77,9 @@ void Acts::addProtoMaterial(const ActsExtension& actsExtension, Layer& layer,
   }
 }
 
-void Acts::addCylinderProtoMaterial(dd4hep::DetElement detElement,
-                                    Layer& cylinderLayer,
-                                    Logging::Level loggingLevel) {
+void Acts::addCylinderLayerProtoMaterial(dd4hep::DetElement detElement,
+                                         Layer& cylinderLayer,
+                                         Logging::Level loggingLevel) {
   auto DD4hepConverterlogger =
       Acts::getDefaultLogger("DD4hepConversion", loggingLevel);
   ACTS_LOCAL_LOGGER(DD4hepConverterlogger);
@@ -73,7 +90,8 @@ void Acts::addCylinderProtoMaterial(dd4hep::DetElement detElement,
   // Get the Acts extension in order to prepare the ProtoMaterial
   auto actsExtension = detElement.extension<ActsExtension>();
   if (actsExtension != nullptr and actsExtension->hasType("layer_material")) {
-    addProtoMaterial(*actsExtension, cylinderLayer, "binsZ", Acts::binZ);
+    addLayerProtoMaterial(*actsExtension, cylinderLayer,
+                          {{"binPhi", Acts::closed}, {"binZ", Acts::open}});
   }
 }
 
@@ -103,13 +121,14 @@ void Acts::xml2LayerProtoMaterial(
 
 void Acts::xml2CylinderProtoMaterial(const xml_comp_t& x_layer,
                                      ActsExtension& actsExtension) {
-  xml2LayerProtoMaterial(
-      x_layer, actsExtension, {"inner", "representing", "outer"},
-      std::pair<std::string, std::string>{"binsPhi", "binsZ"});
+  xml2LayerProtoMaterial(x_layer, actsExtension,
+                         {"inner", "representing", "outer"},
+                         std::pair<std::string, std::string>{"binPhi", "binZ"});
 }
 
-void Acts::addDiscProtoMaterial(dd4hep::DetElement detElement, Layer& discLayer,
-                                Logging::Level loggingLevel) {
+void Acts::addDiscLayerProtoMaterial(dd4hep::DetElement detElement,
+                                     Layer& discLayer,
+                                     Logging::Level loggingLevel) {
   auto DD4hepConverterlogger =
       Acts::getDefaultLogger("DD4hepConversion", loggingLevel);
   ACTS_LOCAL_LOGGER(DD4hepConverterlogger);
@@ -120,13 +139,14 @@ void Acts::addDiscProtoMaterial(dd4hep::DetElement detElement, Layer& discLayer,
   // Get the Acts extension
   auto actsExtension = detElement.extension<ActsExtension>();
   if (actsExtension != nullptr and actsExtension->hasType("layer_material")) {
-    addProtoMaterial(*actsExtension, discLayer, "binsR", Acts::binR);
+    addLayerProtoMaterial(*actsExtension, discLayer,
+                          {{"binPhi", Acts::closed}, {"binR", Acts::open}});
   }
 }
 
 void Acts::xml2DiscProtoMaterial(const xml_comp_t& x_layer,
                                  ActsExtension& actsExtension) {
-  xml2LayerProtoMaterial(
-      x_layer, actsExtension, {"inner", "representing", "outer"},
-      std::pair<std::string, std::string>{"binsPhi", "binsR"});
+  xml2LayerProtoMaterial(x_layer, actsExtension,
+                         {"inner", "representing", "outer"},
+                         std::pair<std::string, std::string>{"binPhi", "binR"});
 }

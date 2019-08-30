@@ -18,9 +18,13 @@
 #include "Acts/Geometry/TrackingVolumeArrayCreator.hpp"
 #include "Acts/Material/HomogeneousSurfaceMaterial.hpp"
 #include "Acts/Material/HomogeneousVolumeMaterial.hpp"
+#include "Acts/Material/ISurfaceMaterial.hpp"
 #include "Acts/Material/MaterialProperties.hpp"
+#include "Acts/Material/ProtoSurfaceMaterial.hpp"
 #include "Acts/Plugins/DD4hep/ActsExtension.hpp"
+#include "Acts/Plugins/DD4hep/ConvertDD4hepMaterial.hpp"
 #include "Acts/Plugins/DD4hep/DD4hepLayerBuilder.hpp"
+#include "Acts/Utilities/BinningData.hpp"
 #include "TGeoManager.h"
 
 namespace Acts {
@@ -320,12 +324,16 @@ std::shared_ptr<const CylinderVolumeBuilder> volumeBuilder_dd4hep(
         << rMin << " / " << rMax << " / " << halfZ << " )");
 
     // get the possible material of the surounding volume
-    dd4hep::Material ddmaterial = subDetector.volume().material();
-    Acts::MaterialProperties pcMaterial(
-        ddmaterial.radLength() * UnitConstants::cm,
-        ddmaterial.intLength() * UnitConstants::cm, ddmaterial.A(),
-        ddmaterial.Z(), ddmaterial.density() / pow(Acts::UnitConstants::cm, 3),
-        fabs(tube->GetRmax() - tube->GetRmin()) * UnitConstants::cm);
+    auto plMaterial = Acts::createProtoMaterial(
+        *subDetExtension, "layer_material_representing",
+        {{"binPhi", Acts::closed}, {"binZ", Acts::open}});
+
+    // dd4hep::Material ddmaterial = subDetector.volume().material();
+    // Acts::MaterialProperties pcMaterial(
+    //    ddmaterial.radLength() * UnitConstants::cm,
+    //    ddmaterial.intLength() * UnitConstants::cm, ddmaterial.A(),
+    //    ddmaterial.Z(), ddmaterial.density() / pow(Acts::UnitConstants::cm,
+    //    3), fabs(tube->GetRmax() - tube->GetRmin()) * UnitConstants::cm);
 
     // configure the passive layer builder
     Acts::PassiveLayerBuilder::Config plbConfig;
@@ -333,8 +341,7 @@ std::shared_ptr<const CylinderVolumeBuilder> volumeBuilder_dd4hep(
     plbConfig.centralLayerRadii = std::vector<double>(1, 0.5 * (rMax + rMin));
     plbConfig.centralLayerHalflengthZ = std::vector<double>(1, halfZ);
     plbConfig.centralLayerThickness = std::vector<double>(1, fabs(rMax - rMin));
-    plbConfig.centralLayerMaterial = {
-        std::make_shared<const HomogeneousSurfaceMaterial>(pcMaterial)};
+    plbConfig.centralLayerMaterial = {plMaterial};
     auto pcLayerBuilder = std::make_shared<const Acts::PassiveLayerBuilder>(
         plbConfig, Acts::getDefaultLogger(subDetector.name(), loggingLevel));
 
