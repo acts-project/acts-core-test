@@ -67,7 +67,7 @@ void Acts::addCylinderProtoMaterial(dd4hep::DetElement detElement,
       Acts::getDefaultLogger("DD4hepConversion", loggingLevel);
   ACTS_LOCAL_LOGGER(DD4hepConverterlogger);
 
-  ACTS_INFO(
+  ACTS_VERBOSE(
       "Translating DD4hep material into Acts material for CylinderLayer : "
       << detElement.name());
   // Get the Acts extension in order to prepare the ProtoMaterial
@@ -114,8 +114,8 @@ void Acts::addDiscProtoMaterial(dd4hep::DetElement detElement, Layer& discLayer,
       Acts::getDefaultLogger("DD4hepConversion", loggingLevel);
   ACTS_LOCAL_LOGGER(DD4hepConverterlogger);
 
-  ACTS_INFO("Translating DD4hep material into Acts material for DiscLayer : "
-            << detElement.name());
+  ACTS_VERBOSE("Translating DD4hep material into Acts material for DiscLayer : "
+               << detElement.name());
 
   // Get the Acts extension
   auto actsExtension = detElement.extension<ActsExtension>();
