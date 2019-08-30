@@ -154,7 +154,7 @@ const Acts::LayerVector Acts::DD4hepLayerBuilder::endcapLayers(
             nullptr);
       }
       // Add the ProtoMaterial if present
-      addDiscProtoMaterial(detElement, *endcapLayer);
+      addDiscLayerProtoMaterial(detElement, *endcapLayer);
       // push back created layer
       layers.push_back(endcapLayer);
     }
@@ -266,7 +266,7 @@ const Acts::LayerVector Acts::DD4hepLayerBuilder::centralLayers(
             nullptr);
       }
       // Add the ProtoMaterial if present
-      addCylinderProtoMaterial(detElement, *centralLayer);
+      addCylinderLayerProtoMaterial(detElement, *centralLayer);
       // push back created layer
       layers.push_back(centralLayer);
     }
