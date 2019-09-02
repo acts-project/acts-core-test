@@ -51,17 +51,31 @@ BOOST_AUTO_TEST_CASE(multi_curvilinear_initialization) {
   Vector3D pos1(2.01_mm, 2.01_mm, 3.01_mm);
   Vector3D pos2(3.02_mm, 2.02_mm, 3.02_mm);
   Vector3D mom0(1000._GeV, 1000._GeV, -0.100_GeV);
-  Vector3D mom1(1000.01_GeV, 1000._GeV, -0.100_GeV);
-  Vector3D mom2(1000.02_GeV, 1000._GeV, -0.100_GeV);
-  Vector3D dir_combine = (0.1 * mom0 + 0.6 * mom1 + 0.3 * mom2).normalized();
+  Vector3D mom1(1500._GeV, 100._GeV, -0.150_GeV);
+  Vector3D mom2(2000._GeV, 800._GeV, -0.200_GeV);
+  Vector3D dir_combine = (0.1 * mom0.normalized() + 0.6 * mom1.normalized() + 0.3 * mom2.normalized()).normalized();
   Vector3D mom_combine = 0.1 * mom0 + 0.6 * mom1 + 0.3 * mom2;
   Vector3D pos_combine = 0.1 * pos0 + 0.6 * pos1 + 0.3 * pos2;
   Vector3D z_axis_global(0., 0., 1.);
 
+  // covariance matrix
+  ActsSymMatrixD<6> cov_0, cov_1, cov_2;
+  cov_0 << 1, 0, 0, 0, 0, 0, 
+	     0, 1.2, 0.2, 0, 0, 0,
+		 0, 0.2, 0.7, 0 ,0 ,0 ,
+		 0, 0.2, 0.7, 0.9 ,0 ,0 ,
+		 0, 0.2, 0.7, 0.2 ,0.3 ,0 ,
+		 0, 0.2, 0.2, 0.2 ,0.3 ,0.7 ;
+  cov_1 = cov_0;
+  cov_2 = cov_0;
+
   /// create curvilinear parameters without covariance +1 charge
-  CurvilinearParameters curvilinear_pos_0(std::nullopt, pos0, mom0, 1_e, 1_s);
-  CurvilinearParameters curvilinear_pos_1(std::nullopt, pos1, mom1, 1_e, 1_s);
-  CurvilinearParameters curvilinear_pos_2(std::nullopt, pos2, mom2, 1_e, 1_s);
+  CurvilinearParameters curvilinear_pos_0(cov_0, pos0, mom0, 1_e, 1_s);
+  CurvilinearParameters curvilinear_pos_1(cov_1, pos1, mom1, 1_e, 1_s);
+  CurvilinearParameters curvilinear_pos_2(cov_2, pos2, mom2, 1_e, 1_s);
+//  std::cout<<"parameter0 "<<curvilinear_pos_0.parameters()<<std::endl;
+//  std::cout<<"parameter1 "<<curvilinear_pos_1.parameters()<<std::endl;
+//  std::cout<<"parameter2 "<<curvilinear_pos_2.parameters()<<std::endl;
 
   MultipleTrackParameters<CurvilinearParameters> multi_curvilinear_pos(
       {{0.1, std::move(curvilinear_pos_0)},
@@ -70,8 +84,8 @@ BOOST_AUTO_TEST_CASE(multi_curvilinear_initialization) {
   BOOST_CHECK_EQUAL(multi_curvilinear_pos.size(), 3);
 
   /// check local coordinates
-  const auto fphi = phi(mom_combine);
-  const auto ftheta = theta(mom_combine);
+  const auto fphi = phi(dir_combine);
+  const auto ftheta = theta(dir_combine);
   const double oOp = 1. / mom_combine.norm();
   // check parameters
   consistencyCheck(multi_curvilinear_pos, pos_combine, mom_combine, +1_e, 1_s,
@@ -159,6 +173,15 @@ BOOST_DATA_TEST_CASE(
   pars << pars_array[0], pars_array[1], pars_array[2], pars_array[3],
       pars_array[4], pars_array[5];
 
+  ActsSymMatrixD<6> cov_0, cov_1;
+  cov_0 << 1, 0, 0, 0, 0, 0, 
+	     0, 1.2, 0.2, 0, 0, 0,
+		 0, 0.2, 0.7, 0 ,0 ,0 ,
+		 0, 0.2, 0.7, 0.9 ,0 ,0 ,
+		 0, 0.2, 0.7, 0.2 ,0.3 ,0 ,
+		 0, 0.2, 0.2, 0.2 ,0.3 ,0.7 ;
+  cov_1 = cov_0;
+
   const double phi = pars_array[2];
   const double theta = pars_array[3];
   double p = fabs(1. / pars_array[4]);
@@ -168,9 +191,9 @@ BOOST_DATA_TEST_CASE(
   Vector3D pos =
       center + pars_array[0] * rot.col(0) + pars_array[1] * rot.col(1);
 
-  BoundParameters ataPlane_from_pars_0(tgContext, std::nullopt, pars,
+  BoundParameters ataPlane_from_pars_0(tgContext, cov_0, pars,
                                        pSurface);  //+2
-  BoundParameters ataPlane_from_pars_1(tgContext, std::nullopt, pars,
+  BoundParameters ataPlane_from_pars_1(tgContext, cov_1, pars,
                                        pSurface);  //+3
 
   // make multi bound par
@@ -201,5 +224,6 @@ BOOST_DATA_TEST_CASE(
   MultipleTrackParameters<BoundParameters> multi_ataPlane_from_pars_copy(multi_ataPlane_from_pars);
   BOOST_CHECK_EQUAL(multi_ataPlane_from_pars, multi_ataPlane_from_pars_copy);
 }
+
 }  // namespace Test
 }  // namespace Acts

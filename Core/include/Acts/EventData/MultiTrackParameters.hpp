@@ -209,7 +209,30 @@ class MultiTrackParameters : public TrackParametersBase {
       parValues += weightTrack.first *
                    weightTrack.second.getParameterSet().getParameters();
     }
-    FullParameterSet parSet(std::nullopt, parValues);
+
+	// Combine covariance
+	CovMatrix_t covPart_1 = CovMatrix_t::Zero();
+	CovMatrix_t covPart_2 = CovMatrix_t::Zero();
+	typename ParameterMapWeightTrack::const_iterator iter = m_mWeightTracks.begin();
+	double weightSum = 0.;
+	for ( ;iter != m_mWeightTracks.end(); iter++){
+			weightSum += (*iter).first;
+			covPart_1 += (*iter).first * (*(*iter).second.covariance());
+	typename ParameterMapWeightTrack::const_iterator iterRemaining = iter;
+	for ( ;iterRemaining != m_mWeightTracks.end(); iterRemaining++ ){
+	  if( iterRemaining == iter ) continue;
+	  auto paraDiff = (*iter).second.parameters() - (*iterRemaining).second.parameters();
+	  //std::cout<<"paraDiff "<<paraDiff<<std::endl;
+	  //std::cout<<"paraDiff transpose "<<paraDiff.transpose()<<std::endl;
+	  auto unity  = paraDiff * paraDiff.transpose();
+	  //std::cout<<"unity "<<unity<<std::endl;
+	  covPart_2 = (*iter).first * (*iterRemaining).first * unity;
+	}
+	}
+	CovMatrix_t covCombine = covPart_1/weightSum + covPart_2/(weightSum * weightSum);
+
+    FullParameterSet parSet(covCombine, parValues);
+		
     return std::move(parSet);
   }
 
