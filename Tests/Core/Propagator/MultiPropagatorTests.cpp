@@ -12,6 +12,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/test/data/test_case.hpp>
 #include <boost/test/output_test_stream.hpp>
+#include <optional>
 // clang-format on
 
 #include "Acts/EventData/TrackParameters.hpp"
@@ -104,7 +105,7 @@ BOOST_DATA_TEST_CASE(
   double q = dcharge;
   Vector3D pos(x, y, z);
   Vector3D mom(px, py, pz);
-  CurvilinearParameters start(nullptr, pos, mom, q, time);
+  CurvilinearParameters start(std::nullopt, pos, mom, q, time);
   PropagateState prop_state(start, options);
   VoidIntersectionCorrector corrector;
   Acts::NavigationOptions<Surface> opt(forward, true);
@@ -177,9 +178,9 @@ BOOST_DATA_TEST_CASE(
   // flip the mom(dir) to make a normal component that can not reach the
   // target surface
   Vector3D mom_3 = -1 * mom_1;
-  CurvilinearParameters start1(nullptr, pos, mom_1, q, time);
-  CurvilinearParameters start2(nullptr, pos, mom_2, q, time);
-  CurvilinearParameters start3(nullptr, pos, mom_3, q, time);
+  CurvilinearParameters start1(std::nullopt, pos, mom_1, q, time);
+  CurvilinearParameters start2(std::nullopt, pos, mom_2, q, time);
+  CurvilinearParameters start3(std::nullopt, pos, mom_3, q, time);
   PropagateState prop_state(start1, options);
   VoidIntersectionCorrector corrector;
   Acts::NavigationOptions<Surface> opt(forward, true);
@@ -352,6 +353,8 @@ BOOST_DATA_TEST_CASE(
   BOOST_CHECK_EQUAL_COLLECTIONS(reference_surface_check.begin(),
                                 reference_surface_check.end(),
                                 surface_check.begin(), surface_check.end());
+
 }
+
 }  // namespace Test
 }  // namespace Acts

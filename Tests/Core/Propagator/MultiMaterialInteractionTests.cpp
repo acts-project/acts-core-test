@@ -86,14 +86,13 @@ BOOST_AUTO_TEST_CASE(multi_material_interactor) {
   cov << 10_mm, 0, 0.123, 0, 0.5, 0, 0, 10_mm, 0, 0.162, 0, 0, 0.123, 0, 0.1, 0,
       0, 0, 0, 0.162, 0, 0.1, 0, 0, 0.5, 0, 0, 0, 1. / (10_GeV), 0, 0, 0, 0, 0,
       0, 0;
-  auto covPtr = std::make_unique<const Covariance>(cov);
 
   Vector3D rPos(-3. * units::_m, 10. * units::_um * gauss(generator),
                 100. * units::_um * gauss(generator));
   Vector3D rMom(1. * units::_GeV, 0.025 * units::_GeV * gauss(generator),
                 0.025 * units::_GeV * gauss(generator));
 
-  SingleCurvilinearTrackParameters<ChargedPolicy> rStart(std::move(covPtr),
+  SingleCurvilinearTrackParameters<ChargedPolicy> rStart(std::move(cov),
                                                          rPos, rMom, 1., 42.);
 
   PropagatorOptions<ActionList<DebugOutput, MultiMaterialInteractor>,

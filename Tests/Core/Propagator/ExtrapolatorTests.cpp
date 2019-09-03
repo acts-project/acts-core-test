@@ -325,7 +325,7 @@ BOOST_DATA_TEST_CASE(
   } else {
     CHECK_CLOSE_REL(status.pathLength, options.pathLimit, 1e-3);
   }
-}
 
+}
 }  // namespace Test
 }  // namespace Acts

@@ -205,11 +205,10 @@ auto Acts::MultiEigenStepper<B, C, E, A>::boundState(State& state,
                                                      const Surface& surface,
                                                      bool /*unused*/) const
     -> BoundState {
-  // covariance no use in the mcs
-  std::unique_ptr<const Covariance> covPtr = nullptr;
+  std::optional<Covariance> covOpt = std::nullopt;
   // Create the bound parameters
   BoundParameters parameters((std::get<0>(*state.stateCol.begin())).geoContext,
-                             std::move(covPtr), state.pos, state.p * state.dir,
+                             std::move(covOpt), state.pos, state.p * state.dir,
                              state.q,
                              (std::get<0>(*state.stateCol.begin())).t0 +
                                  (std::get<0>(*state.stateCol.begin())).dt,
@@ -224,10 +223,9 @@ auto Acts::MultiEigenStepper<B, C, E, A>::boundState(State& state,
 template <typename B, typename C, typename E, typename A>
 auto Acts::MultiEigenStepper<B, C, E, A>::curvilinearState(
     State& state, bool /*unused*/) const -> CurvilinearState {
-  // covariance no use in the mcs
-  std::unique_ptr<const Covariance> covPtr = nullptr;
+  std::optional<Covariance> covOpt = std::nullopt;
   // Create the curvilinear parameters
-  CurvilinearParameters parameters(std::move(covPtr), state.pos,
+  CurvilinearParameters parameters(std::move(covOpt), state.pos,
                                    state.p * state.dir, state.q,
                                    std::get<0>(*state.stateCol.begin()).t0 +
                                        std::get<0>(*state.stateCol.begin()).dt);
