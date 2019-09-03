@@ -43,6 +43,7 @@ GeometryContext tgContext = GeometryContext();
 
 /// @brief Unit test for Curvilinear parameters
 ///
+/*
 BOOST_AUTO_TEST_CASE(multi_curvilinear_initialization) {
   using namespace Acts::UnitLiterals;
 
@@ -125,6 +126,7 @@ BOOST_AUTO_TEST_CASE(multi_curvilinear_initialization) {
   BOOST_CHECK_EQUAL(multi_curvilinear_pos, multi_curvilinear_pos_copy);
 
 }  // BOOST Test for MultiCurvileaner
+*/
 
 /// @brief Unit test for parameters at a plane
 ///
@@ -165,36 +167,38 @@ BOOST_DATA_TEST_CASE(
   auto pSurface =
       Surface::makeShared<PlaneSurface>(transform, bounds);  // surface use +1
 
-  // now create parameters on this surface
-  // l_x, l_y, phi, theta, q/p (1/p)
   std::array<double, 6> pars_array = {
       {-0.1234, 9.8765, 0.45, 0.888, 0.001, 21.}};
-  TrackParametersBase::ParVector_t pars;
-  pars << pars_array[0], pars_array[1], pars_array[2], pars_array[3],
-      pars_array[4], pars_array[5];
-
-  ActsSymMatrixD<6> cov_0, cov_1;
-  cov_0 << 1, 0, 0, 0, 0, 0, 
+  ActsSymMatrixD<6> cov0, cov1;
+  cov0 << 1, 0, 0, 0, 0, 0, 
 	     0, 1.2, 0.2, 0, 0, 0,
 		 0, 0.2, 0.7, 0 ,0 ,0 ,
 		 0, 0.2, 0.7, 0.9 ,0 ,0 ,
 		 0, 0.2, 0.7, 0.2 ,0.3 ,0 ,
 		 0, 0.2, 0.2, 0.2 ,0.3 ,0.7 ;
-  cov_1 = cov_0;
+  cov1 = cov0;
+  // create parameter
+  auto generator = [&](std::array<double,6> parsArr, ActsSymMatrixD<6> cov, Vector3D& momentum, Vector3D& position) -> BoundParameters {
+	TrackParametersBase::ParVector_t pars;
+	pars << parsArr[0], parsArr[1], parsArr[2], parsArr[3], parsArr[4], parsArr[5];
+	const double phi = parsArr[2];
+	const double theta = parsArr[3];
+	double p = fabs(1. / parsArr[4]);
+	Vector3D direction(cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta));
+	momentum = p * direction;
+	// the global position
+	position =
+	  center + parsArr[0] * rot.col(0) + parsArr[1] * rot.col(1);
+	BoundParameters ataPlane_from_pars(tgContext, cov, pars,
+		pSurface);  //+2
+	return ataPlane_from_pars;
+  };
 
-  const double phi = pars_array[2];
-  const double theta = pars_array[3];
-  double p = fabs(1. / pars_array[4]);
-  Vector3D direction(cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta));
-  Vector3D mom = p * direction;
-  // the global position
-  Vector3D pos =
-      center + pars_array[0] * rot.col(0) + pars_array[1] * rot.col(1);
-
-  BoundParameters ataPlane_from_pars_0(tgContext, cov_0, pars,
-                                       pSurface);  //+2
-  BoundParameters ataPlane_from_pars_1(tgContext, cov_1, pars,
-                                       pSurface);  //+3
+  Vector3D mom0,mom1,pos0,pos1;
+  BoundParameters ataPlane_from_pars_0 = generator(pars_array, cov0, mom0, pos0);
+  BoundParameters ataPlane_from_pars_1 = generator(pars_array, cov1, mom1, pos1);
+  auto mom_combine = 0.3 * mom0 + 0.7 * mom1;
+  auto pos_combine = 0.3 * pos0 + 0.7 * pos1;
 
   // make multi bound par
   MultipleTrackParameters<BoundParameters> multi_ataPlane_from_pars(
@@ -202,7 +206,7 @@ BOOST_DATA_TEST_CASE(
   multi_ataPlane_from_pars.append(0.7, std::move(ataPlane_from_pars_1));
 
   // check parameters
-  consistencyCheck(multi_ataPlane_from_pars, pos, mom, 1., 21.,
+  consistencyCheck(multi_ataPlane_from_pars, pos_combine, mom_combine, 1., 21.,
                   pars_array);
 
   // test the append method
