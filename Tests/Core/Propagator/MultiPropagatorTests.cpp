@@ -353,7 +353,6 @@ BOOST_DATA_TEST_CASE(
   BOOST_CHECK_EQUAL_COLLECTIONS(reference_surface_check.begin(),
                                 reference_surface_check.end(),
                                 surface_check.begin(), surface_check.end());
-
 }
 
 }  // namespace Test

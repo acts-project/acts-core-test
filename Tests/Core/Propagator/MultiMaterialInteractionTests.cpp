@@ -92,8 +92,8 @@ BOOST_AUTO_TEST_CASE(multi_material_interactor) {
   Vector3D rMom(1. * units::_GeV, 0.025 * units::_GeV * gauss(generator),
                 0.025 * units::_GeV * gauss(generator));
 
-  SingleCurvilinearTrackParameters<ChargedPolicy> rStart(std::move(cov),
-                                                         rPos, rMom, 1., 42.);
+  SingleCurvilinearTrackParameters<ChargedPolicy> rStart(std::move(cov), rPos,
+                                                         rMom, 1., 42.);
 
   PropagatorOptions<ActionList<DebugOutput, MultiMaterialInteractor>,
                     AbortList<detail::EndOfWorldReached>>
