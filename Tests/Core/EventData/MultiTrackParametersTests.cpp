@@ -84,40 +84,41 @@ BOOST_DATA_TEST_CASE(
       {-0.1234, 9.8765, 0.45, 0.888, 0.001, 21.}};
   std::array<double, 6> pars_array_1 = {
       {-1.234, 0.8765, 0.65, 1.888, 0.011, 11.}};
-  std::array<double, 6> pars_array_combine ;
+  std::array<double, 6> pars_array_combine;
 
-  for (unsigned id = 0; id< 6; id++){
-	pars_array_combine[id] = pars_array[id] * 0.3 + pars_array_1[id] * 0.7;
+  for (unsigned id = 0; id < 6; id++) {
+    pars_array_combine[id] = pars_array[id] * 0.3 + pars_array_1[id] * 0.7;
   }
 
   ActsSymMatrixD<6> cov0, cov1;
-  cov0 << 1, 0, 0, 0, 0, 0, 
-	     0, 1.2, 0.2, 0, 0, 0,
-		 0, 0.2, 0.7, 0 ,0 ,0 ,
-		 0, 0.2, 0.7, 0.9 ,0 ,0 ,
-		 0, 0.2, 0.7, 0.2 ,0.3 ,0 ,
-		 0, 0.2, 0.2, 0.2 ,0.3 ,0.7 ;
+  cov0 << 1, 0, 0, 0, 0, 0, 0, 1.2, 0.2, 0, 0, 0, 0, 0.2, 0.7, 0, 0, 0, 0, 0.2,
+      0.7, 0.9, 0, 0, 0, 0.2, 0.7, 0.2, 0.3, 0, 0, 0.2, 0.2, 0.2, 0.3, 0.7;
   cov1 = cov0;
   // create parameter
-  auto generator = [&](std::array<double,6> parsArr, ActsSymMatrixD<6> cov, Vector3D& momentum, Vector3D& position) -> BoundParameters {
-	TrackParametersBase::ParVector_t pars;
-	pars << parsArr[0], parsArr[1], parsArr[2], parsArr[3], parsArr[4], parsArr[5];
-	const double phi = parsArr[2];
-	const double theta = parsArr[3];
-	double p = fabs(1. / parsArr[4]);
-	Vector3D direction(cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta));
-	momentum = p * direction;
-	// the global position
-	position =
-	  center + parsArr[0] * rot.col(0) + parsArr[1] * rot.col(1);
-	BoundParameters ataPlane_from_pars(tgContext, cov, pars,
-		pSurface);  //+2
-	return ataPlane_from_pars;
+  auto generator = [&](std::array<double, 6> parsArr, ActsSymMatrixD<6> cov,
+                       Vector3D& momentum,
+                       Vector3D& position) -> BoundParameters {
+    TrackParametersBase::ParVector_t pars;
+    pars << parsArr[0], parsArr[1], parsArr[2], parsArr[3], parsArr[4],
+        parsArr[5];
+    const double phi = parsArr[2];
+    const double theta = parsArr[3];
+    double p = fabs(1. / parsArr[4]);
+    Vector3D direction(cos(phi) * sin(theta), sin(phi) * sin(theta),
+                       cos(theta));
+    momentum = p * direction;
+    // the global position
+    position = center + parsArr[0] * rot.col(0) + parsArr[1] * rot.col(1);
+    BoundParameters ataPlane_from_pars(tgContext, cov, pars,
+                                       pSurface);  //+2
+    return ataPlane_from_pars;
   };
 
-  Vector3D mom0,mom1,pos0,pos1;
-  BoundParameters ataPlane_from_pars_0 = generator(pars_array, cov0, mom0, pos0);
-  BoundParameters ataPlane_from_pars_1 = generator(pars_array_1, cov1, mom1, pos1);
+  Vector3D mom0, mom1, pos0, pos1;
+  BoundParameters ataPlane_from_pars_0 =
+      generator(pars_array, cov0, mom0, pos0);
+  BoundParameters ataPlane_from_pars_1 =
+      generator(pars_array_1, cov1, mom1, pos1);
   auto mom_combine = 0.3 * mom0 + 0.7 * mom1;
   auto pos_combine = 0.3 * pos0 + 0.7 * pos1;
   auto time_combine = 0.3 * 21. + 0.7 * 11.;
@@ -128,8 +129,8 @@ BOOST_DATA_TEST_CASE(
   multi_ataPlane_from_pars.append(0.7, std::move(ataPlane_from_pars_1));
 
   // check parameters
-  consistencyCheck(multi_ataPlane_from_pars, pos_combine, mom_combine, 1., time_combine,
-                  pars_array_combine);
+  consistencyCheck(multi_ataPlane_from_pars, pos_combine, mom_combine, 1.,
+                   time_combine, pars_array_combine);
 
   // test the append method
   auto it = multi_ataPlane_from_pars.getTrackList().begin();
@@ -147,7 +148,8 @@ BOOST_DATA_TEST_CASE(
                   1e-6);
 
   /// copy construction test
-  MultipleTrackParameters<BoundParameters> multi_ataPlane_from_pars_copy(multi_ataPlane_from_pars);
+  MultipleTrackParameters<BoundParameters> multi_ataPlane_from_pars_copy(
+      multi_ataPlane_from_pars);
   BOOST_CHECK_EQUAL(multi_ataPlane_from_pars, multi_ataPlane_from_pars_copy);
 }
 
@@ -163,19 +165,16 @@ BOOST_AUTO_TEST_CASE(multi_curvilinear_initialization) {
   Vector3D mom0(1000._GeV, 1000._GeV, -0.100_GeV);
   Vector3D mom1(1500._GeV, 100._GeV, -0.150_GeV);
   Vector3D mom2(2000._GeV, 800._GeV, -0.200_GeV);
-  //Vector3D dir_combine = (0.1 * mom0.normalized() + 0.6 * mom1.normalized() + 0.3 * mom2.normalized()).normalized();
-  //Vector3D mom_combine = 0.1 * mom0 + 0.6 * mom1 + 0.3 * mom2;
-  //Vector3D pos_combine = 0.1 * pos0 + 0.6 * pos1 + 0.3 * pos2;
+  // Vector3D dir_combine = (0.1 * mom0.normalized() + 0.6 * mom1.normalized() +
+  // 0.3 * mom2.normalized()).normalized(); Vector3D mom_combine = 0.1 * mom0 +
+  // 0.6 * mom1 + 0.3 * mom2; Vector3D pos_combine = 0.1 * pos0 + 0.6 * pos1 +
+  // 0.3 * pos2;
   Vector3D z_axis_global(0., 0., 1.);
 
   // covariance matrix
   ActsSymMatrixD<6> cov_0, cov_1, cov_2;
-  cov_0 << 1, 0, 0, 0, 0, 0, 
-	     0, 1.2, 0.2, 0, 0, 0,
-		 0, 0.2, 0.7, 0 ,0 ,0 ,
-		 0, 0.2, 0.7, 0.9 ,0 ,0 ,
-		 0, 0.2, 0.7, 0.2 ,0.3 ,0 ,
-		 0, 0.2, 0.2, 0.2 ,0.3 ,0.7 ;
+  cov_0 << 1, 0, 0, 0, 0, 0, 0, 1.2, 0.2, 0, 0, 0, 0, 0.2, 0.7, 0, 0, 0, 0, 0.2,
+      0.7, 0.9, 0, 0, 0, 0.2, 0.7, 0.2, 0.3, 0, 0, 0.2, 0.2, 0.2, 0.3, 0.7;
   cov_1 = cov_0;
   cov_2 = cov_0;
 
@@ -199,14 +198,14 @@ BOOST_AUTO_TEST_CASE(multi_curvilinear_initialization) {
   BOOST_CHECK_EQUAL((*it).first, 0.1);
 
   /// copy construction test
-  MultipleTrackParameters<CurvilinearParameters> multi_curvilinear_pos_copy(multi_curvilinear_pos);
+  MultipleTrackParameters<CurvilinearParameters> multi_curvilinear_pos_copy(
+      multi_curvilinear_pos);
   BOOST_CHECK_EQUAL(multi_curvilinear_pos, multi_curvilinear_pos_copy);
 
   /*
-  /// check local coordinates - meaningless, the parSets are in different reference surfaces
-  const auto fphi = phi(dir_combine);
-  const auto ftheta = theta(dir_combine);
-  const double oOp = 1. / mom_combine.norm();
+  /// check local coordinates - meaningless, the parSets are in different
+  reference surfaces const auto fphi = phi(dir_combine); const auto ftheta =
+  theta(dir_combine); const double oOp = 1. / mom_combine.norm();
   consistencyCheck(multi_curvilinear_pos, pos_combine, mom_combine, +1_e, 1_s,
                    {0., 0., fphi, ftheta, oOp, 1_s});
 
@@ -230,7 +229,7 @@ BOOST_AUTO_TEST_CASE(multi_curvilinear_initialization) {
   mFrame.col(2) = tAxis;
   CHECK_CLOSE_OR_SMALL(mFrame, multi_curvilinear_pos.referenceFrame(tgContext),
                        1e-6, 1e-6);
-					   */
+                                           */
 }  // BOOST Test for MultiCurvileaner
 
 }  // namespace Test
