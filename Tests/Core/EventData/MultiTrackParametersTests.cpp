@@ -41,93 +41,6 @@ namespace Test {
 // Create a test context
 GeometryContext tgContext = GeometryContext();
 
-/// @brief Unit test for Curvilinear parameters
-///
-/*
-BOOST_AUTO_TEST_CASE(multi_curvilinear_initialization) {
-  using namespace Acts::UnitLiterals;
-
-  // some position and momentum
-  Vector3D pos0(1._mm, 2._mm, 3._mm);
-  Vector3D pos1(2.01_mm, 2.01_mm, 3.01_mm);
-  Vector3D pos2(3.02_mm, 2.02_mm, 3.02_mm);
-  Vector3D mom0(1000._GeV, 1000._GeV, -0.100_GeV);
-  Vector3D mom1(1500._GeV, 100._GeV, -0.150_GeV);
-  Vector3D mom2(2000._GeV, 800._GeV, -0.200_GeV);
-  Vector3D dir_combine = (0.1 * mom0.normalized() + 0.6 * mom1.normalized() + 0.3 * mom2.normalized()).normalized();
-  Vector3D mom_combine = 0.1 * mom0 + 0.6 * mom1 + 0.3 * mom2;
-  Vector3D pos_combine = 0.1 * pos0 + 0.6 * pos1 + 0.3 * pos2;
-  Vector3D z_axis_global(0., 0., 1.);
-
-  // covariance matrix
-  ActsSymMatrixD<6> cov_0, cov_1, cov_2;
-  cov_0 << 1, 0, 0, 0, 0, 0, 
-	     0, 1.2, 0.2, 0, 0, 0,
-		 0, 0.2, 0.7, 0 ,0 ,0 ,
-		 0, 0.2, 0.7, 0.9 ,0 ,0 ,
-		 0, 0.2, 0.7, 0.2 ,0.3 ,0 ,
-		 0, 0.2, 0.2, 0.2 ,0.3 ,0.7 ;
-  cov_1 = cov_0;
-  cov_2 = cov_0;
-
-  /// create curvilinear parameters without covariance +1 charge
-  CurvilinearParameters curvilinear_pos_0(cov_0, pos0, mom0, 1_e, 1_s);
-  CurvilinearParameters curvilinear_pos_1(cov_1, pos1, mom1, 1_e, 1_s);
-  CurvilinearParameters curvilinear_pos_2(cov_2, pos2, mom2, 1_e, 1_s);
-//  std::cout<<"parameter0 "<<curvilinear_pos_0.parameters()<<std::endl;
-//  std::cout<<"parameter1 "<<curvilinear_pos_1.parameters()<<std::endl;
-//  std::cout<<"parameter2 "<<curvilinear_pos_2.parameters()<<std::endl;
-
-  MultipleTrackParameters<CurvilinearParameters> multi_curvilinear_pos(
-      {{0.1, std::move(curvilinear_pos_0)},
-       {0.6, std::move(curvilinear_pos_1)}});
-  multi_curvilinear_pos.append(0.3, std::move(curvilinear_pos_2));
-  BOOST_CHECK_EQUAL(multi_curvilinear_pos.size(), 3);
-
-  /// check local coordinates
-  const auto fphi = phi(dir_combine);
-  const auto ftheta = theta(dir_combine);
-  const double oOp = 1. / mom_combine.norm();
-  // check parameters
-  consistencyCheck(multi_curvilinear_pos, pos_combine, mom_combine, +1_e, 1_s,
-                   {0., 0., fphi, ftheta, oOp, 1_s});
-
-  // test sort in the trackMap
-  auto it = multi_curvilinear_pos.getTrackList().begin();
-  BOOST_CHECK_EQUAL((*it).first, 0.6);
-  ++it;
-  BOOST_CHECK_EQUAL((*it).first, 0.3);
-  ++it;
-  BOOST_CHECK_EQUAL((*it).first, 0.1);
-
-  // check that the created surface is at the position
-  CHECK_CLOSE_REL(multi_curvilinear_pos.referenceSurface().center(tgContext),
-                  pos_combine, 1e-6);
-
-  // check that the z-axis of the created surface is along momentum direction
-  CHECK_CLOSE_REL(
-      multi_curvilinear_pos.referenceSurface().normal(tgContext, pos_combine),
-      dir_combine, 1e-6);
-
-  // check the reference frame of curvilinear parameters
-  // it is the x-y frame of the created surface
-  RotationMatrix3D mFrame = RotationMatrix3D::Zero();
-  Vector3D tAxis = dir_combine;
-  Vector3D uAxis = (z_axis_global.cross(tAxis)).normalized();
-  Vector3D vAxis = tAxis.cross(uAxis);
-  mFrame.col(0) = uAxis;
-  mFrame.col(1) = vAxis;
-  mFrame.col(2) = tAxis;
-  CHECK_CLOSE_OR_SMALL(mFrame, multi_curvilinear_pos.referenceFrame(tgContext),
-                       1e-6, 1e-6);
-
-  /// copy construction test
-  MultipleTrackParameters<CurvilinearParameters> multi_curvilinear_pos_copy(multi_curvilinear_pos);
-  BOOST_CHECK_EQUAL(multi_curvilinear_pos, multi_curvilinear_pos_copy);
-
-}  // BOOST Test for MultiCurvileaner
-*/
-
 /// @brief Unit test for parameters at a plane
 ///
 BOOST_DATA_TEST_CASE(
@@ -169,6 +82,14 @@ BOOST_DATA_TEST_CASE(
 
   std::array<double, 6> pars_array = {
       {-0.1234, 9.8765, 0.45, 0.888, 0.001, 21.}};
+  std::array<double, 6> pars_array_1 = {
+      {-1.234, 0.8765, 0.65, 1.888, 0.011, 11.}};
+  std::array<double, 6> pars_array_combine ;
+
+  for (unsigned id = 0; id< 6; id++){
+	pars_array_combine[id] = pars_array[id] * 0.3 + pars_array_1[id] * 0.7;
+  }
+
   ActsSymMatrixD<6> cov0, cov1;
   cov0 << 1, 0, 0, 0, 0, 0, 
 	     0, 1.2, 0.2, 0, 0, 0,
@@ -196,9 +117,10 @@ BOOST_DATA_TEST_CASE(
 
   Vector3D mom0,mom1,pos0,pos1;
   BoundParameters ataPlane_from_pars_0 = generator(pars_array, cov0, mom0, pos0);
-  BoundParameters ataPlane_from_pars_1 = generator(pars_array, cov1, mom1, pos1);
+  BoundParameters ataPlane_from_pars_1 = generator(pars_array_1, cov1, mom1, pos1);
   auto mom_combine = 0.3 * mom0 + 0.7 * mom1;
   auto pos_combine = 0.3 * pos0 + 0.7 * pos1;
+  auto time_combine = 0.3 * 21. + 0.7 * 11.;
 
   // make multi bound par
   MultipleTrackParameters<BoundParameters> multi_ataPlane_from_pars(
@@ -206,8 +128,8 @@ BOOST_DATA_TEST_CASE(
   multi_ataPlane_from_pars.append(0.7, std::move(ataPlane_from_pars_1));
 
   // check parameters
-  consistencyCheck(multi_ataPlane_from_pars, pos_combine, mom_combine, 1., 21.,
-                  pars_array);
+  consistencyCheck(multi_ataPlane_from_pars, pos_combine, mom_combine, 1., time_combine,
+                  pars_array_combine);
 
   // test the append method
   auto it = multi_ataPlane_from_pars.getTrackList().begin();
@@ -228,6 +150,88 @@ BOOST_DATA_TEST_CASE(
   MultipleTrackParameters<BoundParameters> multi_ataPlane_from_pars_copy(multi_ataPlane_from_pars);
   BOOST_CHECK_EQUAL(multi_ataPlane_from_pars, multi_ataPlane_from_pars_copy);
 }
+
+/// @brief Unit test for Curvilinear parameters
+///
+BOOST_AUTO_TEST_CASE(multi_curvilinear_initialization) {
+  using namespace Acts::UnitLiterals;
+
+  // some position and momentum
+  Vector3D pos0(1._mm, 2._mm, 3._mm);
+  Vector3D pos1(2.01_mm, 2.01_mm, 3.01_mm);
+  Vector3D pos2(3.02_mm, 2.02_mm, 3.02_mm);
+  Vector3D mom0(1000._GeV, 1000._GeV, -0.100_GeV);
+  Vector3D mom1(1500._GeV, 100._GeV, -0.150_GeV);
+  Vector3D mom2(2000._GeV, 800._GeV, -0.200_GeV);
+  //Vector3D dir_combine = (0.1 * mom0.normalized() + 0.6 * mom1.normalized() + 0.3 * mom2.normalized()).normalized();
+  //Vector3D mom_combine = 0.1 * mom0 + 0.6 * mom1 + 0.3 * mom2;
+  //Vector3D pos_combine = 0.1 * pos0 + 0.6 * pos1 + 0.3 * pos2;
+  Vector3D z_axis_global(0., 0., 1.);
+
+  // covariance matrix
+  ActsSymMatrixD<6> cov_0, cov_1, cov_2;
+  cov_0 << 1, 0, 0, 0, 0, 0, 
+	     0, 1.2, 0.2, 0, 0, 0,
+		 0, 0.2, 0.7, 0 ,0 ,0 ,
+		 0, 0.2, 0.7, 0.9 ,0 ,0 ,
+		 0, 0.2, 0.7, 0.2 ,0.3 ,0 ,
+		 0, 0.2, 0.2, 0.2 ,0.3 ,0.7 ;
+  cov_1 = cov_0;
+  cov_2 = cov_0;
+
+  /// create curvilinear parameters without covariance +1 charge
+  CurvilinearParameters curvilinear_pos_0(cov_0, pos0, mom0, 1_e, 1_s);
+  CurvilinearParameters curvilinear_pos_1(cov_1, pos1, mom1, 1_e, 1_s);
+  CurvilinearParameters curvilinear_pos_2(cov_2, pos2, mom2, 1_e, 1_s);
+
+  MultipleTrackParameters<CurvilinearParameters> multi_curvilinear_pos(
+      {{0.1, std::move(curvilinear_pos_0)},
+       {0.6, std::move(curvilinear_pos_1)}});
+  multi_curvilinear_pos.append(0.3, std::move(curvilinear_pos_2));
+  BOOST_CHECK_EQUAL(multi_curvilinear_pos.size(), 3);
+
+  // test sort in the trackMap
+  auto it = multi_curvilinear_pos.getTrackList().begin();
+  BOOST_CHECK_EQUAL((*it).first, 0.6);
+  ++it;
+  BOOST_CHECK_EQUAL((*it).first, 0.3);
+  ++it;
+  BOOST_CHECK_EQUAL((*it).first, 0.1);
+
+  /// copy construction test
+  MultipleTrackParameters<CurvilinearParameters> multi_curvilinear_pos_copy(multi_curvilinear_pos);
+  BOOST_CHECK_EQUAL(multi_curvilinear_pos, multi_curvilinear_pos_copy);
+
+  /*
+  /// check local coordinates - meaningless, the parSets are in different reference surfaces
+  const auto fphi = phi(dir_combine);
+  const auto ftheta = theta(dir_combine);
+  const double oOp = 1. / mom_combine.norm();
+  consistencyCheck(multi_curvilinear_pos, pos_combine, mom_combine, +1_e, 1_s,
+                   {0., 0., fphi, ftheta, oOp, 1_s});
+
+  // check that the created surface is at the position
+  CHECK_CLOSE_REL(multi_curvilinear_pos.referenceSurface().center(tgContext),
+                  pos_combine, 1e-6);
+
+  // check that the z-axis of the created surface is along momentum direction
+  CHECK_CLOSE_REL(
+      multi_curvilinear_pos.referenceSurface().normal(tgContext, pos_combine),
+      dir_combine, 1e-6);
+
+  // check the reference frame of curvilinear parameters
+  // it is the x-y frame of the created surface
+  RotationMatrix3D mFrame = RotationMatrix3D::Zero();
+  Vector3D tAxis = dir_combine;
+  Vector3D uAxis = (z_axis_global.cross(tAxis)).normalized();
+  Vector3D vAxis = tAxis.cross(uAxis);
+  mFrame.col(0) = uAxis;
+  mFrame.col(1) = vAxis;
+  mFrame.col(2) = tAxis;
+  CHECK_CLOSE_OR_SMALL(mFrame, multi_curvilinear_pos.referenceFrame(tgContext),
+                       1e-6, 1e-6);
+					   */
+}  // BOOST Test for MultiCurvileaner
 
 }  // namespace Test
 }  // namespace Acts

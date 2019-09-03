@@ -201,16 +201,17 @@ class MultiTrackParameters : public TrackParametersBase {
 
   /// getter functions for parset
   const FullParameterSet& getParameterSet() const final {
+	// Combine parameters 
     std::array<double, 6> pars_array = {{0., 0., 0., 0., 0., 0.}};
-    ParVector_t parValues;
-    parValues << pars_array[0], pars_array[1], pars_array[2], pars_array[3],
+    ParVector_t parsCombine;
+    parsCombine<< pars_array[0], pars_array[1], pars_array[2], pars_array[3],
         pars_array[4], pars_array[5];
     for (const auto& weightTrack : m_mWeightTracks) {
-      parValues += weightTrack.first *
+      parsCombine += weightTrack.first *
                    weightTrack.second.getParameterSet().getParameters();
     }
 
-	// Combine covariance
+	// Combine covariances
 	CovMatrix_t covPart_1 = CovMatrix_t::Zero();
 	CovMatrix_t covPart_2 = CovMatrix_t::Zero();
 	typename ParameterMapWeightTrack::const_iterator iter = m_mWeightTracks.begin();
@@ -222,17 +223,16 @@ class MultiTrackParameters : public TrackParametersBase {
 	for ( ;iterRemaining != m_mWeightTracks.end(); iterRemaining++ ){
 	  if( iterRemaining == iter ) continue;
 	  auto paraDiff = (*iter).second.parameters() - (*iterRemaining).second.parameters();
-	  //std::cout<<"paraDiff "<<paraDiff<<std::endl;
-	  //std::cout<<"paraDiff transpose "<<paraDiff.transpose()<<std::endl;
 	  auto unity  = paraDiff * paraDiff.transpose();
-	  //std::cout<<"unity "<<unity<<std::endl;
 	  covPart_2 = (*iter).first * (*iterRemaining).first * unity;
 	}
 	}
 	CovMatrix_t covCombine = covPart_1/weightSum + covPart_2/(weightSum * weightSum);
 
-    FullParameterSet parSet(covCombine, parValues);
+    FullParameterSet parSet(std::move(covCombine), parsCombine);
 		
+	// return to a const& is wrong
+	// @to be improved
     return std::move(parSet);
   }
 
