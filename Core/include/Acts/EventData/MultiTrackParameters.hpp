@@ -202,6 +202,7 @@ class MultiTrackParameters : public TrackParametersBase {
   }
 
   /// getter functions for parset
+  /// This is not decided, the single track par shouldn't change into return a copy
   const FullParameterSet& getParameterSet() const final {
     // Combine parameters
     std::array<double, 6> pars_array = {{0., 0., 0., 0., 0., 0.}};
