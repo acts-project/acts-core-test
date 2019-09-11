@@ -118,13 +118,13 @@ std::shared_ptr<const CylinderVolumeBuilder> volumeBuilder_dd4hep(
     double layerEnvelopeR, double layerEnvelopeZ,
     double defaultLayerThickness) {
   // create cylinder volume helper
-  auto volumeHelper = cylinderVolumeHelper_dd4hep();
+  auto volumeHelper = cylinderVolumeHelper_dd4hep(loggingLevel);
   // create local logger for conversion
   auto DD4hepConverterlogger =
-      Acts::getDefaultLogger("DD4hepConversion", loggingLevel);
+      Acts::getDefaultLogger("D2A_Logger", loggingLevel);
   ACTS_LOCAL_LOGGER(DD4hepConverterlogger);
 
-  ACTS_VERBOSE("[D] Processing detector element:  " << subDetector.name());
+  ACTS_VERBOSE("Processing detector element:  " << subDetector.name());
 
   Acts::ActsExtension* subDetExtension = nullptr;
   // at this stage not every DetElement needs to have an Extension attached
@@ -133,12 +133,13 @@ std::shared_ptr<const CylinderVolumeBuilder> volumeBuilder_dd4hep(
   } catch (std::runtime_error& e) {
   }
   if (subDetector.type() == "compound") {
-    ACTS_VERBOSE("[D] Subdetector : '"
+    ACTS_VERBOSE("Subdetector : '"
                  << subDetector.name()
-                 << "' has no ActsExtension and has type compound - "
-                    "handling as a compound volume (a hierachy of a "
-                    "barrel-endcap structure) and resolving the "
-                    "subvolumes...");
+                 << "' has no ActsExtension and has type compound ");
+    ACTS_VERBOSE(
+        "handling as a compound volume (a hierachy of a "
+        "barrel-endcap structure) and resolving the "
+        "subvolumes...");
     // Now create the Layerbuilders and Volumebuilder
     // the layers
     /// the dd4hep::DetElements of the layers of the negative volume
@@ -147,6 +148,9 @@ std::shared_ptr<const CylinderVolumeBuilder> volumeBuilder_dd4hep(
     std::vector<dd4hep::DetElement> centralLayers;
     /// the dd4hep::DetElements of the layers of the positive volume
     std::vector<dd4hep::DetElement> positiveLayers;
+
+    // the configuration object of the volume builder
+    Acts::CylinderVolumeBuilder::Config cvbConfig;
 
     // go through sub volumes
     std::vector<dd4hep::DetElement> compounds;
@@ -159,7 +163,7 @@ std::shared_ptr<const CylinderVolumeBuilder> volumeBuilder_dd4hep(
     bool pEndCap = false;
     bool barrel = false;
     for (auto& volumeDetElement : compounds) {
-      ACTS_VERBOSE("[V] Volume : '"
+      ACTS_VERBOSE("Volume : '"
                    << subDetector.name()
                    << "'is a compound volume -> resolve now the sub volumes");
 
@@ -185,7 +189,7 @@ std::shared_ptr<const CylinderVolumeBuilder> volumeBuilder_dd4hep(
         volumeExtension = volumeDetElement.extension<ActsExtension>();
       } catch (std::runtime_error& e) {
         throw std::logic_error(
-            std::string("[V] Current DetElement: ") + volumeDetElement.name() +
+            std::string("Current DetElement: ") + volumeDetElement.name() +
             std::string(" has no ActsExtension! At this stage it should be a "
                         "detector volume declared as Barrel or Endcap. Please"
                         "check your detector construction."));
@@ -193,53 +197,81 @@ std::shared_ptr<const CylinderVolumeBuilder> volumeBuilder_dd4hep(
 
       if (volumeExtension->hasType("endcap", "detector")) {
         ACTS_VERBOSE(
-            std::string("[V] Subvolume : '") + volumeDetElement.name() +
+            std::string("Subvolume : '") + volumeDetElement.name() +
             std::string("' is a disc volume -> handling as an endcap"));
         if (zPos < 0.) {
           if (nEndCap) {
             throw std::logic_error(
-                "[V] Negative Endcap was already given for this "
+                "Negative Endcap was already given for this "
                 "hierachy! Please create a new "
                 "DD4hep_SubDetectorAssembly for the next "
                 "hierarchy.");
           }
           nEndCap = true;
-          ACTS_VERBOSE("[V]       ->is negative endcap");
+          ACTS_VERBOSE("      ->is negative endcap");
           collectLayers_dd4hep(volumeDetElement, negativeLayers);
         } else {
           if (pEndCap) {
             throw std::logic_error(
-                "[V] Positive Endcap was already given for this "
+                "Positive Endcap was already given for this "
                 "hierachy! Please create a new "
                 "DD4hep_SubDetectorAssembly for the next "
                 "hierarchy.");
           }
           pEndCap = true;
-          ACTS_VERBOSE("[V]       ->is positive endcap");
+          ACTS_VERBOSE("      ->is positive endcap");
           collectLayers_dd4hep(volumeDetElement, positiveLayers);
         }
       } else if (volumeExtension->hasType("barrel", "detector")) {
         if (barrel) {
           throw std::logic_error(
-              "[V] Barrel was already given for this "
+              "Barrel was already given for this "
               "hierachy! Please create a new "
               "DD4hep_SubDetectorAssembly for the next "
               "hierarchy.");
         }
         barrel = true;
-        ACTS_VERBOSE("[V] Subvolume : "
+        ACTS_VERBOSE("Subvolume : "
                      << volumeDetElement.name()
                      << " is a cylinder volume -> handling as a barrel");
         collectLayers_dd4hep(volumeDetElement, centralLayers);
+        // Fill the volume material for barrel case
+        if (volumeExtension->hasType("boundary_material")) {
+          if (volumeExtension->hasValue("boundary_material_negative")) {
+            cvbConfig.boundaryMaterial[3] = Acts::createProtoMaterial(
+                *volumeExtension, "boundary_material_negative",
+                {{"binPhi", Acts::closed}, {"binR", Acts::open}});
+          }
+          if (volumeExtension->hasValue("boundary_material_positive")) {
+            cvbConfig.boundaryMaterial[4] = Acts::createProtoMaterial(
+                *volumeExtension, "boundary_material_positive",
+                {{"binPhi", Acts::closed}, {"binR", Acts::open}});
+          }
+        }
       } else {
         throw std::logic_error(
-            std::string("[V] Current DetElement: ") + volumeDetElement.name() +
+            std::string("Current DetElement: ") + volumeDetElement.name() +
             std::string(
                 " has wrong ActsExtension! At this stage it should be a "
                 "detector volume declared as Barrel or Endcap. Please "
                 "check your detector construction."));
       }
+
+      // Fill the volume material for the inner / outer cover
+      if (volumeExtension->hasType("boundary_material")) {
+        if (volumeExtension->hasValue("boundary_material_inner")) {
+          cvbConfig.boundaryMaterial[0] = Acts::createProtoMaterial(
+              *volumeExtension, "boundary_material_inner",
+              {{"binPhi", Acts::closed}, {"binZ", Acts::open}});
+        }
+        if (volumeExtension->hasValue("boundary_material_outer")) {
+          cvbConfig.boundaryMaterial[1] = Acts::createProtoMaterial(
+              *volumeExtension, "boundary_material_outer",
+              {{"binPhi", Acts::closed}, {"binZ", Acts::open}});
+        }
+      }
     }
+
     if ((pEndCap && !nEndCap) || (!pEndCap && nEndCap)) {
       throw std::logic_error(
           "Only one Endcap is given for the current "
@@ -251,12 +283,12 @@ std::shared_ptr<const CylinderVolumeBuilder> volumeBuilder_dd4hep(
     // configure SurfaceArrayCreator
     auto surfaceArrayCreator =
         std::make_shared<const Acts::SurfaceArrayCreator>(
-            Acts::getDefaultLogger("SurfaceArrayCreator", loggingLevel));
+            Acts::getDefaultLogger("D2A_SAC", loggingLevel));
     // configure LayerCreator
     Acts::LayerCreator::Config lcConfig;
     lcConfig.surfaceArrayCreator = surfaceArrayCreator;
     auto layerCreator = std::make_shared<const Acts::LayerCreator>(
-        lcConfig, Acts::getDefaultLogger("LayerCreator", loggingLevel));
+        lcConfig, Acts::getDefaultLogger("D2A_LAC", loggingLevel));
     // configure DD4hepLayerBuilder
     Acts::DD4hepLayerBuilder::Config lbConfig;
     lbConfig.configurationName = subDetector.name();
@@ -269,7 +301,9 @@ std::shared_ptr<const CylinderVolumeBuilder> volumeBuilder_dd4hep(
     lbConfig.bTypeZ = bTypeZ;
     lbConfig.defaultThickness = defaultLayerThickness;
     auto dd4hepLayerBuilder = std::make_shared<const Acts::DD4hepLayerBuilder>(
-        lbConfig, Acts::getDefaultLogger("DD4hepLayerBuilder", loggingLevel));
+        lbConfig,
+        Acts::getDefaultLogger(std::string("D2A_L:") + subDetector.name(),
+                               loggingLevel));
 
     // get the possible material of the surounding volume
     dd4hep::Material ddmaterial = subDetector.volume().material();
@@ -277,9 +311,6 @@ std::shared_ptr<const CylinderVolumeBuilder> volumeBuilder_dd4hep(
         std::make_shared<const Acts::HomogeneousVolumeMaterial>(Acts::Material(
             ddmaterial.radLength(), ddmaterial.intLength(), ddmaterial.A(),
             ddmaterial.Z(), ddmaterial.density()));
-
-    // the configuration object of the volume builder
-    Acts::CylinderVolumeBuilder::Config cvbConfig;
 
     // Create the sub volume
     // Dimensions are created automatically by adding a tolerance to the
@@ -294,14 +325,15 @@ std::shared_ptr<const CylinderVolumeBuilder> volumeBuilder_dd4hep(
     auto cylinderVolumeBuilder =
         std::make_shared<const Acts::CylinderVolumeBuilder>(
             cvbConfig,
-            Acts::getDefaultLogger("CylinderVolumeBuilder", loggingLevel));
+            Acts::getDefaultLogger(std::string("D2A_V:") + subDetector.name(),
+                                   loggingLevel));
     return cylinderVolumeBuilder;
 
   } else if ((subDetExtension != nullptr) &&
              (subDetExtension->hasType("passive cylinder", "layer") ||
               subDetExtension->hasType("beampipe", "layer"))) {
-    ACTS_VERBOSE("[D] Subdetector : " << subDetector.name()
-                                      << " - building a passive cylinder.");
+    ACTS_VERBOSE("Subdetector : " << subDetector.name()
+                                  << " - building a passive cylinder.");
     if (subDetExtension->hasType("beampipe", "layer")) {
       ACTS_VERBOSE("This is the beam pipe - will be built to r -> 0.");
     }
@@ -319,7 +351,7 @@ std::shared_ptr<const CylinderVolumeBuilder> volumeBuilder_dd4hep(
     double rMax = tube->GetRmax() * UnitConstants::cm + layerEnvelopeR;
     double halfZ = tube->GetDz() * UnitConstants::cm + layerEnvelopeZ;
     ACTS_VERBOSE(
-        "[V] Extracting cylindrical volume bounds ( rmin / rmax / "
+        "Extracting cylindrical volume bounds ( rmin / rmax / "
         "halfZ )=  ( "
         << rMin << " / " << rMax << " / " << halfZ << " )");
 
@@ -327,13 +359,6 @@ std::shared_ptr<const CylinderVolumeBuilder> volumeBuilder_dd4hep(
     auto plMaterial = Acts::createProtoMaterial(
         *subDetExtension, "layer_material_representing",
         {{"binPhi", Acts::closed}, {"binZ", Acts::open}});
-
-    // dd4hep::Material ddmaterial = subDetector.volume().material();
-    // Acts::MaterialProperties pcMaterial(
-    //    ddmaterial.radLength() * UnitConstants::cm,
-    //    ddmaterial.intLength() * UnitConstants::cm, ddmaterial.A(),
-    //    ddmaterial.Z(), ddmaterial.density() / pow(Acts::UnitConstants::cm,
-    //    3), fabs(tube->GetRmax() - tube->GetRmin()) * UnitConstants::cm);
 
     // configure the passive layer builder
     Acts::PassiveLayerBuilder::Config plbConfig;
@@ -343,7 +368,9 @@ std::shared_ptr<const CylinderVolumeBuilder> volumeBuilder_dd4hep(
     plbConfig.centralLayerThickness = std::vector<double>(1, fabs(rMax - rMin));
     plbConfig.centralLayerMaterial = {plMaterial};
     auto pcLayerBuilder = std::make_shared<const Acts::PassiveLayerBuilder>(
-        plbConfig, Acts::getDefaultLogger(subDetector.name(), loggingLevel));
+        plbConfig,
+        Acts::getDefaultLogger(std::string("D2A_PL:") + subDetector.name(),
+                               loggingLevel));
 
     // the configuration object of the volume builder
     Acts::CylinderVolumeBuilder::Config cvbConfig;
@@ -358,13 +385,13 @@ std::shared_ptr<const CylinderVolumeBuilder> volumeBuilder_dd4hep(
     // beam pipe / passive cylinder volume builder
     auto pcVolumeBuilder = std::make_shared<const Acts::CylinderVolumeBuilder>(
         cvbConfig,
-        Acts::getDefaultLogger(
-            subDetector.name() + std::string("VolumdeBuilder"), loggingLevel));
+        Acts::getDefaultLogger(std::string("D2A_V:") + subDetector.name(),
+                               loggingLevel));
     return pcVolumeBuilder;
 
   } else if ((subDetExtension != nullptr) &&
              subDetExtension->hasType("barrel", "detector")) {
-    ACTS_VERBOSE("[D] Subdetector: "
+    ACTS_VERBOSE("Subdetector: "
                  << subDetector.name()
                  << " is a (sensitive) Barrel volume - building barrel.");
     /// the dd4hep::DetElements of the layers of the central volume
@@ -374,12 +401,12 @@ std::shared_ptr<const CylinderVolumeBuilder> volumeBuilder_dd4hep(
     // configure SurfaceArrayCreator
     auto surfaceArrayCreator =
         std::make_shared<const Acts::SurfaceArrayCreator>(
-            Acts::getDefaultLogger("SurfaceArrayCreator", loggingLevel));
+            Acts::getDefaultLogger("D2A_SAC", loggingLevel));
     // configure LayerCreator
     Acts::LayerCreator::Config lcConfig;
     lcConfig.surfaceArrayCreator = surfaceArrayCreator;
     auto layerCreator = std::make_shared<const Acts::LayerCreator>(
-        lcConfig, Acts::getDefaultLogger("LayerCreator", loggingLevel));
+        lcConfig, Acts::getDefaultLogger("D2A_LAC", loggingLevel));
     // configure DD4hepLayerBuilder
     Acts::DD4hepLayerBuilder::Config lbConfig;
     lbConfig.configurationName = subDetector.name();
@@ -389,7 +416,9 @@ std::shared_ptr<const CylinderVolumeBuilder> volumeBuilder_dd4hep(
     lbConfig.bTypeZ = bTypeZ;
     lbConfig.defaultThickness = defaultLayerThickness;
     auto dd4hepLayerBuilder = std::make_shared<const Acts::DD4hepLayerBuilder>(
-        lbConfig, Acts::getDefaultLogger("DD4hepLayerBuilder", loggingLevel));
+        lbConfig,
+        Acts::getDefaultLogger(std::string("D2A_LB_") + subDetector.name(),
+                               loggingLevel));
 
     // the configuration object of the volume builder
     Acts::CylinderVolumeBuilder::Config cvbConfig;
@@ -420,12 +449,13 @@ std::shared_ptr<const CylinderVolumeBuilder> volumeBuilder_dd4hep(
     auto cylinderVolumeBuilder =
         std::make_shared<const Acts::CylinderVolumeBuilder>(
             cvbConfig,
-            Acts::getDefaultLogger("CylinderVolumeBuilder", loggingLevel));
+            Acts::getDefaultLogger(std::string("D2A_V:") + subDetector.name(),
+                                   loggingLevel));
     return cylinderVolumeBuilder;
 
   } else {
     ACTS_INFO(
-        "[D] Subdetector with name : '"
+        "Subdetector with name : '"
         << subDetector.name()
         << "' has wrong ActsExtension for translation and is not of type "
            "'compound'. If you want to have this DetElement be translated "
@@ -444,20 +474,21 @@ std::shared_ptr<const Acts::CylinderVolumeHelper> cylinderVolumeHelper_dd4hep(
   // hand over LayerArrayCreator
   Acts::LayerArrayCreator::Config lacConfig;
   auto layerArrayCreator = std::make_shared<const Acts::LayerArrayCreator>(
-      lacConfig, Acts::getDefaultLogger("LayArrayCreator", loggingLevel));
+      lacConfig, Acts::getDefaultLogger(std::string("D2A_LAC"), loggingLevel));
   // tracking volume array creator
   Acts::TrackingVolumeArrayCreator::Config tvacConfig;
   auto trackingVolumeArrayCreator =
       std::make_shared<const Acts::TrackingVolumeArrayCreator>(
           tvacConfig,
-          Acts::getDefaultLogger("TrkVolArrayCreator", loggingLevel));
+          Acts::getDefaultLogger(std::string("D2A_TVAC"), loggingLevel));
   // configure the cylinder volume helper
   Acts::CylinderVolumeHelper::Config cvhConfig;
   cvhConfig.layerArrayCreator = layerArrayCreator;
   cvhConfig.trackingVolumeArrayCreator = trackingVolumeArrayCreator;
   auto cylinderVolumeHelper =
       std::make_shared<const Acts::CylinderVolumeHelper>(
-          cvhConfig, Acts::getDefaultLogger("CylVolHelper", loggingLevel));
+          cvhConfig,
+          Acts::getDefaultLogger(std::string("D2A_CVH"), loggingLevel));
 
   return cylinderVolumeHelper;
 }

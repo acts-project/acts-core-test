@@ -51,11 +51,11 @@ const Acts::LayerVector Acts::DD4hepLayerBuilder::endcapLayers(
     const std::string& side) const {
   LayerVector layers;
   if (dendcapLayers.empty()) {
-    ACTS_VERBOSE("[L] No layers handed over for " << side << " volume!");
+    ACTS_VERBOSE(" No layers handed over for " << side << " volume!");
   } else {
-    ACTS_VERBOSE("[L] Received layers for " << side
-                                            << " volume -> creating "
-                                               "disc layers");
+    ACTS_VERBOSE(" Received layers for " << side
+                                         << " volume -> creating "
+                                            "disc layers");
     // go through layers
     for (auto& detElement : dendcapLayers) {
       // prepare the layer surfaces
@@ -85,8 +85,7 @@ const Acts::LayerVector Acts::DD4hepLayerBuilder::endcapLayers(
       } else if (geoShape != nullptr) {
         TGeoTubeSeg* tube = dynamic_cast<TGeoTubeSeg*>(geoShape);
         if (tube == nullptr) {
-          ACTS_ERROR(
-              "[L] Disc layer has wrong shape - needs to be TGeoTubeSeg!");
+          ACTS_ERROR(" Disc layer has wrong shape - needs to be TGeoTubeSeg!");
         }
         // extract the boundaries
         double rMin = tube->GetRmin() * UnitConstants::cm;
@@ -104,7 +103,7 @@ const Acts::LayerVector Acts::DD4hepLayerBuilder::endcapLayers(
         }
         // check if layer has surfaces
         if (layerSurfaces.empty()) {
-          ACTS_VERBOSE("[L] Disc layer has no senstive surfaces.");
+          ACTS_VERBOSE(" Disc layer has no senstive surfaces.");
           // in case no surfaces are handed over the layer thickness will be set
           // to a default value to allow attaching material layers
           double z = (zMin + zMax) * 0.5;
@@ -117,8 +116,8 @@ const Acts::LayerVector Acts::DD4hepLayerBuilder::endcapLayers(
           pl.envR = {0., 0.};
           pl.envZ = {0., 0.};
         } else {
-          ACTS_VERBOSE("[L] Disc layer has " << layerSurfaces.size()
-                                             << " senstive surfaces.");
+          ACTS_VERBOSE(" Disc layer has " << layerSurfaces.size()
+                                          << " senstive surfaces.");
           // set the values of the proto layer in case dimensions are given by
           // geometry
           pl.envZ = {std::abs(zMin - pl.minZ), std::abs(zMax - pl.maxZ)};
@@ -171,10 +170,10 @@ const Acts::LayerVector Acts::DD4hepLayerBuilder::centralLayers(
     const GeometryContext& gctx) const {
   LayerVector layers;
   if (m_cfg.centralLayers.empty()) {
-    ACTS_VERBOSE("[L] No layers handed over for central volume!");
+    ACTS_VERBOSE(" No layers handed over for central volume!");
   } else {
     ACTS_VERBOSE(
-        "[L] Received layers for central volume -> creating "
+        " Received layers for central volume -> creating "
         "cylindrical layers");
     // go through layers
     for (auto& detElement : m_cfg.centralLayers) {
@@ -206,7 +205,7 @@ const Acts::LayerVector Acts::DD4hepLayerBuilder::centralLayers(
         TGeoTubeSeg* tube = dynamic_cast<TGeoTubeSeg*>(geoShape);
         if (tube == nullptr)
           ACTS_ERROR(
-              "[L] Cylinder layer has wrong shape - needs to be TGeoTubeSeg!");
+              " Cylinder layer has wrong shape - needs to be TGeoTubeSeg!");
 
         // extract the boundaries
         double rMin = tube->GetRmin() * UnitConstants::cm;
