@@ -70,17 +70,22 @@ std::shared_ptr<Acts::ProtoSurfaceMaterial> createProtoMaterial(
         binning);
 
 /// Helper method that decorates an ActsExtension with proto material
+/// description for boundaries
+/// - it assigns bins for inner / representing / outer
+
+/// Helper method that decorates an ActsExtension with proto material
 /// description,
 /// - it assigns bins for inner / representing / outer
 ///
-/// @param x_layer the cylinder layer
+/// @param x_material the material tag to be inspected
 /// @param actsExtension the extension that is augmented
+/// @param baseTag the xml tag to be checked
 /// @param materialOptions the placement options (inner / representing / outer)
 /// @param binOptions the material binning options
-void xml2LayerProtoMaterial(
-    const xml_comp_t& x_layer, ActsExtension& actsExtension,
-    const std::vector<std::string>& materialOptions,
-    const std::pair<std::string, std::string>& binOptions);
+void xml2ProtoMaterial(const xml_comp_t& x_material,
+                       ActsExtension& actsExtension, const std::string& baseTag,
+                       const std::vector<std::string>& materialOptions,
+                       const std::pair<std::string, std::string>& binOptions);
 
 /// Helper method that decorates an ActsExtension with proto material
 /// description,

@@ -30,7 +30,8 @@ std::shared_ptr<Acts::ProtoSurfaceMaterial> Acts::createProtoMaterial(
     size_t indx = std::distance(Acts::binningValueNames.begin(), bit);
     Acts::BinningValue bval = Acts::BinningValue(indx);
     Acts::BinningOption bopt = bin.second;
-    double min, max = 0.;
+    double min = 0.;
+    double max = 0.;
     if (bopt == Acts::closed) {
       min = -M_PI;
       max = M_PI;
@@ -95,35 +96,38 @@ void Acts::addCylinderLayerProtoMaterial(dd4hep::DetElement detElement,
   }
 }
 
-void Acts::xml2LayerProtoMaterial(
-    const xml_comp_t& x_layer, ActsExtension& actsExtension,
-    const std::vector<std::string>& materialOptions,
+void Acts::xml2ProtoMaterial(
+    const xml_comp_t& x_material, ActsExtension& actsExtension,
+    const std::string& baseTag, const std::vector<std::string>& materialOptions,
     const std::pair<std::string, std::string>& binOptions) {
-  // Only continue if the layer has a material tag
-  if (x_layer.hasChild(_Unicode(layer_material))) {
-    xml_comp_t x_layer_material = x_layer.child(_Unicode(layer_material));
-    // Add the layer material flag
-    std::string baseTag = "layer_material";
-    actsExtension.addType(baseTag);
-    for (auto& materialOpt : materialOptions) {
-      if (x_layer_material.attr<bool>(materialOpt.c_str())) {
-        std::string materialTag = baseTag + std::string("_") + materialOpt;
-        std::string bin0 = binOptions.first;
-        actsExtension.addValue(x_layer_material.attr<int>(bin0.c_str()), bin0,
-                               materialTag);
-        std::string bin1 = binOptions.second;
-        actsExtension.addValue(x_layer_material.attr<int>(bin1.c_str()), bin1,
-                               materialTag);
-      }
+  // Add the layer material flag
+  actsExtension.addType(baseTag);
+  // Loop over the material options, check if they exist, and add
+  // to the extension
+  for (auto& materialOpt : materialOptions) {
+    // Check if the attribute exists
+    if (x_material.attr<bool>(materialOpt.c_str())) {
+      std::string materialTag = baseTag + std::string("_") + materialOpt;
+      std::string bin0 = binOptions.first;
+      actsExtension.addValue(x_material.attr<int>(bin0.c_str()), bin0,
+                             materialTag);
+      std::string bin1 = binOptions.second;
+      actsExtension.addValue(x_material.attr<int>(bin1.c_str()), bin1,
+                             materialTag);
     }
   }
 }
 
 void Acts::xml2CylinderProtoMaterial(const xml_comp_t& x_layer,
                                      ActsExtension& actsExtension) {
-  xml2LayerProtoMaterial(x_layer, actsExtension,
-                         {"inner", "representing", "outer"},
-                         std::pair<std::string, std::string>{"binPhi", "binZ"});
+  // Only continue if the layer has a material tag
+  if (x_layer.hasChild(_Unicode(layer_material))) {
+    xml_comp_t x_layer_material = x_layer.child(_Unicode(layer_material));
+    // create the entries to the proto material
+    xml2ProtoMaterial(x_layer_material, actsExtension, "layer_material",
+                      {"inner", "representing", "outer"},
+                      std::pair<std::string, std::string>{"binPhi", "binZ"});
+  }
 }
 
 void Acts::addDiscLayerProtoMaterial(dd4hep::DetElement detElement,
@@ -146,7 +150,11 @@ void Acts::addDiscLayerProtoMaterial(dd4hep::DetElement detElement,
 
 void Acts::xml2DiscProtoMaterial(const xml_comp_t& x_layer,
                                  ActsExtension& actsExtension) {
-  xml2LayerProtoMaterial(x_layer, actsExtension,
-                         {"inner", "representing", "outer"},
-                         std::pair<std::string, std::string>{"binPhi", "binR"});
+  if (x_layer.hasChild(_Unicode(layer_material))) {
+    xml_comp_t x_layer_material = x_layer.child(_Unicode(layer_material));
+    // create the entries to the proto material
+    xml2ProtoMaterial(x_layer_material, actsExtension, "layer_material",
+                      {"inner", "representing", "outer"},
+                      std::pair<std::string, std::string>{"binPhi", "binR"});
+  }
 }

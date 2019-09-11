@@ -14,6 +14,7 @@
 
 #include <limits>
 #include <string>
+#include <array>
 
 #include "Acts/Geometry/GeometryContext.hpp"
 #include "Acts/Geometry/ILayerBuilder.hpp"
@@ -37,6 +38,7 @@ namespace Acts {
 class TrackingVolume;
 class VolumeBounds;
 class IVolumeMaterial;
+class ISurfaceMaterial;
 
 /// @enum WrappingCondition
 enum WrappingCondition {
@@ -51,6 +53,7 @@ enum WrappingCondition {
 
 /// VolumeConfig struct to understand the layer config
 struct VolumeConfig {
+  
   bool present{false};   ///< layers are present
   bool wrapping{false};  ///< in what way they are binned
   double rMin;           ///< min parameter r
@@ -311,7 +314,7 @@ struct WrappingConfig {
       } else {
         // full wrapping or full insertion case
         if (existingVolumeConfig.rMax < containerVolumeConfig.rMin) {
-          // full wrapping case
+          // Full wrapping case
           // - set the rMin
           nVolumeConfig.rMin = existingVolumeConfig.rMax;
           cVolumeConfig.rMin = existingVolumeConfig.rMax;
@@ -485,6 +488,14 @@ class CylinderVolumeBuilder : public ITrackingVolumeBuilder {
                                                 1. * UnitConstants::mm};
     /// the additional envelope in Z to create zMin, zMax
     double layerEnvelopeZ = 10. * UnitConstants::mm;
+    
+    // The potential boundary material (MB) options - there are 6 at maximium
+    /// -------------------- MB (outer [1]) ---------------
+    /// | MB [2]  NEC  MB [3] |  B |  MB [4]  PEC  MB [5] |
+    /// -------------------- MB (inner [0]) ---------------
+    std::array< std::shared_ptr<const ISurfaceMaterial>, 6 >
+      boundaryMaterial{ nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+    
     /// the volume signature
     int volumeSignature = -1;
   };
@@ -565,6 +576,8 @@ class CylinderVolumeBuilder : public ITrackingVolumeBuilder {
                              VolumeConfig& layerConfig,
                              const VolumeConfig& insideConfig,
                              const VolumeConfig& volumeConfig, int sign) const;
+                             
+                               
 };
 
 /// Return the configuration object
