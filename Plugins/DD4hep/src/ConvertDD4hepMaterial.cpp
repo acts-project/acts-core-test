@@ -15,6 +15,7 @@
 #include "Acts/Material/ProtoSurfaceMaterial.hpp"
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Utilities/BinUtility.hpp"
+#include "XML/XMLElements.h"
 
 std::shared_ptr<Acts::ProtoSurfaceMaterial> Acts::createProtoMaterial(
     const ActsExtension& actsExtension, const std::string& valueTag,
@@ -106,7 +107,8 @@ void Acts::xml2ProtoMaterial(
   // to the extension
   for (auto& materialOpt : materialOptions) {
     // explicit conversion to XmlChar
-    const dd4hep::xml::XmlChar* materialAttr(materialOpt.c_str());
+    const dd4hep::xml::XmlChar* materialAttr =
+        (const dd4hep::xml::XmlChar*)materialOpt.c_str();
     // Check if the attribute exists
     if (x_material.hasAttr(materialAttr)) {
       std::string materialTag = baseTag + std::string("_") + materialOpt;
