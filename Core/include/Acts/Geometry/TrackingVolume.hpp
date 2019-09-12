@@ -308,7 +308,6 @@ class TrackingVolume : public Volume {
   void assignBoundaryMaterial(std::shared_ptr<const ISurfaceMaterial> material,
                               BoundarySurfaceFace bsFace);
 
-
   /// Set the volume material description
   ///
   /// The material is usually derived in a complicated way and loaded from
@@ -348,14 +347,14 @@ class TrackingVolume : public Volume {
   ///
   /// @param bsf is the boundary face indicater where to glue
   /// @param bs is the new boudnary surface
-  /// @param checkmaterial is a flag how to deal with material, if true: 
+  /// @param checkmaterial is a flag how to deal with material, if true:
   /// - if the old boundary surface had a material description
   ///   but the new one has not, keep the current one
-  /// - in all other cases just assign the new boundary surface   
+  /// - in all other cases just assign the new boundary surface
   void updateBoundarySurface(
       BoundarySurfaceFace bsf,
       std::shared_ptr<const BoundarySurfaceT<TrackingVolume>> bs,
-      bool checkmaterial=true);
+      bool checkmaterial = true);
 
   /// Register the outside glue volumes -
   /// ordering is in the TrackingVolume Frame:

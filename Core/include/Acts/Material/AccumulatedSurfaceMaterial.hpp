@@ -90,13 +90,29 @@ class AccumulatedSurfaceMaterial {
 
   /// Assign a material properites object
   ///
-  /// @param gp local position for the bin assignment
+  /// @param gp global position for the bin assignment
   /// @param mp material properties to be assigned
   ///
   /// @return the bin triple to which the material was assigned
   std::array<size_t, 3> accumulate(const Vector3D& gp,
                                    const MaterialProperties& mp,
                                    double pathCorrection = 1.);
+
+  /// Void average at a given position
+  ///
+  /// i.e. the material ray did intersect the surface, but no material
+  /// was eventually assigned
+  ///
+  /// @param lp local position for the bin assignment
+  void voidAverage(const Vector2D& lp);
+
+  /// Void average at a given position
+  ///
+  /// i.e. the material ray did intersect the surface, but no material
+  /// was eventually assigned
+  ///
+  /// @param gp global position for the bin assignment
+  void voidAverage(const Vector3D& gp);
 
   /// Average the information accumulated from one mapped track
   ///

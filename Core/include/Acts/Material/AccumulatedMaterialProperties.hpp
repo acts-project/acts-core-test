@@ -77,6 +77,11 @@ class AccumulatedMaterialProperties {
   /// @param pathCorreciton is the correction to nominal incident
   void accumulate(const MaterialProperties& amp, double pathCorrection = 1.);
 
+  /// Vaccuum assignment or empty hit assignment
+  /// - the surface was hit by the material ray, but no material was
+  ///   actually assigned to the bin
+  void voidAverage();
+
   /// Average the information accumulated for one track
   void trackAverage();
 
@@ -123,6 +128,10 @@ inline void AccumulatedMaterialProperties::accumulate(
   m_eventZ += amp.averageZ() * r * t;
 
   m_eventPathCorrection += pathCorrection * t;
+}
+
+inline void AccumulatedMaterialProperties::voidAverage() {
+  ++m_totalEvents;
 }
 
 inline void AccumulatedMaterialProperties::trackAverage() {

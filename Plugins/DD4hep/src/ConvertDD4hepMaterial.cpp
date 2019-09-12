@@ -106,7 +106,7 @@ void Acts::xml2ProtoMaterial(
   // to the extension
   for (auto& materialOpt : materialOptions) {
     // Check if the attribute exists
-    if (x_material.attr<bool>(materialOpt.c_str())) {
+    if (x_material.hasAttr(materialOpt.c_str())) {
       std::string materialTag = baseTag + std::string("_") + materialOpt;
       std::string bin0 = binOptions.first;
       actsExtension.addValue(x_material.attr<int>(bin0.c_str()), bin0,
