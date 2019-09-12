@@ -105,8 +105,10 @@ void Acts::xml2ProtoMaterial(
   // Loop over the material options, check if they exist, and add
   // to the extension
   for (auto& materialOpt : materialOptions) {
+    // explicit conversion to XmlChar
+    const dd4hep::xml::XmlChar* materialAttr(materialOpt.c_str());
     // Check if the attribute exists
-    if (x_material.hasAttr(materialOpt.c_str())) {
+    if (x_material.hasAttr(materialAttr)) {
       std::string materialTag = baseTag + std::string("_") + materialOpt;
       std::string bin0 = binOptions.first;
       actsExtension.addValue(x_material.attr<int>(bin0.c_str()), bin0,
