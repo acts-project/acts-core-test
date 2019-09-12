@@ -103,10 +103,11 @@ void Acts::xml2ProtoMaterial(
     const std::pair<std::string, std::string>& binOptions) {
   // Add the layer material flag
   actsExtension.addType(baseTag);
+
   // Loop over the material options, check if they exist, and add
   // to the extension
   for (auto& materialOpt : materialOptions) {
-    // explicit conversion to XmlChar
+    // Explicit conversion to XmlChar
     const dd4hep::xml::XmlChar* materialAttr =
         (const dd4hep::xml::XmlChar*)materialOpt.c_str();
     // Check if the attribute exists
@@ -116,6 +117,13 @@ void Acts::xml2ProtoMaterial(
       actsExtension.addValue(x_material.attr<int>(bin0.c_str()), bin0,
                              materialTag);
       std::string bin1 = binOptions.second;
+      // We need to evaluate bin1 - we have a blind token
+      if (bin1 == "*") {
+        // inner/outer are cylinder surfaces, others are disks
+        bin1 = (materialOpt == "inner" || materialOpt == "outer") ? "binZ"
+                                                                  : "binR";
+      }
+
       actsExtension.addValue(x_material.attr<int>(bin1.c_str()), bin1,
                              materialTag);
     }
