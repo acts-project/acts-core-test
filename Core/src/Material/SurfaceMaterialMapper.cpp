@@ -182,7 +182,7 @@ void Acts::SurfaceMaterialMapper::mapMaterialTrack(
   const auto& rMaterial = mTrack.second.materialInteractions;
   std::map<GeometryID, unsigned int> assignedMaterial;
   ACTS_VERBOSE("Retrieved " << rMaterial.size()
-                            << " recorded material properties to map.")
+                            << " recorded material steps to map.")
 
   // These should be mapped onto the mapping surfaces found
   ACTS_VERBOSE("Found     " << mappingSurfaces.size()
@@ -197,10 +197,9 @@ void Acts::SurfaceMaterialMapper::mapMaterialTrack(
   }
 
   // Run the mapping process, i.e. take the recorded material and map it
-  // onto the mapping surfaces
-  //
-  // The material steps and surfaces are assumed to be ordered along the
-  // mapping ray:
+  // onto the mapping surfaces:
+  // - material steps and surfaces are assumed to be ordered along the
+  // mapping ray
   auto rmIter = rMaterial.begin();
   auto sfIter = mappingSurfaces.begin();
 
@@ -222,8 +221,6 @@ void Acts::SurfaceMaterialMapper::mapMaterialTrack(
         (rmIter->position - sfIter->position).norm() >
             (rmIter->position - (sfIter + 1)->position).norm()) {
       // Switch to next assignment surface
-      // @TODO: empty hits, i.e. surface is hit but,
-      // has no recorded material assigned
       ++sfIter;
     }
     // get the current Surface ID
@@ -255,5 +252,21 @@ void Acts::SurfaceMaterialMapper::mapMaterialTrack(
   // After mapping this track, average the touched bins
   for (auto tmapBin : touchedMapBins) {
     tmapBin.first->trackAverage({tmapBin.second});
+  }
+
+  if (m_cfg.emptyBinCorrection) {
+    // Use the assignedMaterial map to account for empty hits, i.e.
+    // the material surface has been intersected by the mapping ray
+    // but no material step was assigned to this surface
+    for (auto& mSurface : mappingSurfaces) {
+      auto mgID = mSurface.surface->geoID();
+      // Count an empty hit only if the surface does not appear in the
+      // list of assigned surfaces
+      if (assignedMaterial[mgID] == 0) {
+        auto missedMaterial = mState.accumulatedMaterial.find(mgID);
+        // Count it at the right bin
+        missedMaterial->second.voidAverage(mSurface.position);
+      }
+    }
   }
 }
