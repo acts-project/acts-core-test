@@ -105,7 +105,7 @@ std::unique_ptr<const TrackingGeometry> convertDD4hepDetector(
   // hand over the collected volume builders
   Acts::TrackingGeometryBuilder::Config tgbConfig;
   tgbConfig.trackingVolumeHelper = volumeHelper;
-  tgbConfig.materialDecorator = matDecorator;
+  tgbConfig.materialDecorator = std::move(matDecorator);
   tgbConfig.trackingVolumeBuilders = std::move(volumeFactories);
   auto trackingGeometryBuilder =
       std::make_shared<const Acts::TrackingGeometryBuilder>(tgbConfig);

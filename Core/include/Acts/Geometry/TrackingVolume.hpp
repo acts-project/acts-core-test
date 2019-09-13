@@ -305,8 +305,9 @@ class TrackingVolume : public Volume {
   /// the same material description, it is provided as a shared object
   ///
   /// @param material Material description of this volume
-  void assignBoundaryMaterial(std::shared_ptr<const ISurfaceMaterial> material,
-                              BoundarySurfaceFace bsFace);
+  void assignBoundaryMaterial(
+      std::shared_ptr<const ISurfaceMaterial> surfaceMaterial,
+      BoundarySurfaceFace bsFace);
 
   /// Set the volume material description
   ///
