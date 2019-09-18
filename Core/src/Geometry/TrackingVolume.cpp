@@ -226,8 +226,8 @@ void Acts::TrackingVolume::glueTrackingVolumes(
 
 void Acts::TrackingVolume::assignBoundaryMaterial(
     std::shared_ptr<const ISurfaceMaterial> surfaceMaterial,
-    BoundarySurfaceFace bsf) {
-  auto bSurface = m_boundarySurfaces.at(bsf);
+    BoundarySurfaceFace bsFace) {
+  auto bSurface = m_boundarySurfaces.at(bsFace);
   Surface* surface = const_cast<Surface*>(&bSurface->surfaceRepresentation());
   surface->assignSurfaceMaterial(std::move(surfaceMaterial));
 }
