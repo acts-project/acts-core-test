@@ -21,7 +21,7 @@ class Layer;
 
 /// Helper method to translate DD4hep material to Acts::ISurfaceMaterial
 ///
-/// Thisis used to assign proto material to Cylinder Layers
+/// This is used to assign proto material to Cylinder Layers
 ///
 /// @param detElement the DD4hep detector element for which this maerial is
 /// assigned
