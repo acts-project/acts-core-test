@@ -23,7 +23,7 @@ class Layer;
 ///
 /// This is used to assign proto material to Cylinder Layers
 ///
-/// @param detElement the DD4hep detector element for which this maerial is
+/// @param detElement the DD4hep detector element for which this material is
 /// assigned
 /// @param loggingLevel is the output level for the conversion
 ///
@@ -36,7 +36,7 @@ void addCylinderLayerProtoMaterial(
 ///
 /// Thisis used to assign proto material to Disc Layers
 ///
-/// @param detElement the DD4hep detector element for which this maerial is
+/// @param detElement the DD4hep detector element for which this material is
 /// assigned
 /// @param loggingLevel is the output level for the conversion
 ///
@@ -57,7 +57,7 @@ void addLayerProtoMaterial(
     const std::vector<std::pair<const std::string, Acts::BinningOption> >&
         binning);
 
-/// Helper method to create proto material - to be called form the
+/// Helper method to create proto material - to be called from the
 /// addProto(...) methods
 ///
 /// @param actsExtension the ActExtension to be checked
@@ -82,7 +82,7 @@ std::shared_ptr<Acts::ProtoSurfaceMaterial> createProtoMaterial(
 /// @param baseTag the xml tag to be checked
 /// @param materialOptions the placement options (inner / representing / outer)
 /// @param binOptions the material binning options
-void xml2ProtoMaterial(const xml_comp_t& x_material,
+void xmlToProtoMaterial(const xml_comp_t& x_material,
                        ActsExtension& actsExtension, const std::string& baseTag,
                        const std::vector<std::string>& materialOptions,
                        const std::pair<std::string, std::string>& binOptions);
@@ -93,7 +93,7 @@ void xml2ProtoMaterial(const xml_comp_t& x_material,
 ///
 /// @param x_layer the cylinder layer
 /// @param actsExtension the extension that is augmented
-void xml2CylinderProtoMaterial(const xml_comp_t& x_layer,
+void xmlToCylinderProtoMaterial(const xml_comp_t& x_layer,
                                Acts::ActsExtension& actsExtension);
 
 /// Helper method that decorates an ActsExtension with proto material
@@ -102,7 +102,7 @@ void xml2CylinderProtoMaterial(const xml_comp_t& x_layer,
 ///
 /// @param x_layer the disc layer
 /// @param actsExtension the extension that is augmented
-void xml2DiscProtoMaterial(const xml_comp_t& x_layer,
+void xmlToDiscProtoMaterial(const xml_comp_t& x_layer,
                            Acts::ActsExtension& actsExtension);
 
 }  // namespace Acts

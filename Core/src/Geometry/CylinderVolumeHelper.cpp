@@ -350,7 +350,7 @@ Acts::CylinderVolumeHelper::createContainerTrackingVolume(
   }
   // Estimate the z - position
   double zPos = 0.5 * (zMin + zMax);
-  // Create the ransform from the stuff known so far
+  // Create the transform from the stuff known so far
   std::shared_ptr<const Transform3D> topVolumeTransform =
       (std::abs(zPos) > 0.1)
           ? std::make_shared<const Transform3D>(Translation3D(0., 0., zPos))

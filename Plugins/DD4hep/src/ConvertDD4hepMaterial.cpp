@@ -72,7 +72,7 @@ void Acts::addLayerProtoMaterial(
       auto psMaterial =
           createProtoMaterial(actsExtension, materialOptions[is], binning);
       // const_cast (ugly - to be changed after internal geometry stored
-      // non-conast)
+      // non-const)
       Surface* surface = const_cast<Surface*>(materialSurfaces[is]);
       surface->assignSurfaceMaterial(psMaterial);
     }
@@ -97,7 +97,7 @@ void Acts::addCylinderLayerProtoMaterial(dd4hep::DetElement detElement,
   }
 }
 
-void Acts::xml2ProtoMaterial(
+void Acts::xmlToProtoMaterial(
     const xml_comp_t& x_material, ActsExtension& actsExtension,
     const std::string& baseTag, const std::vector<std::string>& materialOptions,
     const std::pair<std::string, std::string>& binOptions) {
@@ -130,13 +130,13 @@ void Acts::xml2ProtoMaterial(
   }
 }
 
-void Acts::xml2CylinderProtoMaterial(const xml_comp_t& x_layer,
+void Acts::xmlToCylinderProtoMaterial(const xml_comp_t& x_layer,
                                      ActsExtension& actsExtension) {
   // Only continue if the layer has a material tag
   if (x_layer.hasChild(_Unicode(layer_material))) {
     xml_comp_t x_layer_material = x_layer.child(_Unicode(layer_material));
     // create the entries to the proto material
-    xml2ProtoMaterial(x_layer_material, actsExtension, "layer_material",
+    xmlToProtoMaterial(x_layer_material, actsExtension, "layer_material",
                       {"inner", "representing", "outer"},
                       std::pair<std::string, std::string>{"binPhi", "binZ"});
   }
@@ -160,12 +160,12 @@ void Acts::addDiscLayerProtoMaterial(dd4hep::DetElement detElement,
   }
 }
 
-void Acts::xml2DiscProtoMaterial(const xml_comp_t& x_layer,
+void Acts::xmlToDiscProtoMaterial(const xml_comp_t& x_layer,
                                  ActsExtension& actsExtension) {
   if (x_layer.hasChild(_Unicode(layer_material))) {
     xml_comp_t x_layer_material = x_layer.child(_Unicode(layer_material));
     // create the entries to the proto material
-    xml2ProtoMaterial(x_layer_material, actsExtension, "layer_material",
+    xmlToProtoMaterial(x_layer_material, actsExtension, "layer_material",
                       {"inner", "representing", "outer"},
                       std::pair<std::string, std::string>{"binPhi", "binR"});
   }
