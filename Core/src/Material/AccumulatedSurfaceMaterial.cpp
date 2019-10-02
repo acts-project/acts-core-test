@@ -62,7 +62,8 @@ void Acts::AccumulatedSurfaceMaterial::trackAverage(const Vector3D& gp) {
     m_accumulatedMaterial[0][0].trackAverage();
   }
   std::array<size_t, 3> bTriple = m_binUtility.binTriple(gp);
-  trackAverage({bTriple});
+  std::vector<std::array<size_t, 3>> trackBins = {bTriple};
+  trackAverage(trackBins);
 }
 
 // Average the information accumulated during one event
