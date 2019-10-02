@@ -254,6 +254,7 @@ void Acts::SurfaceMaterialMapper::mapMaterialTrack(
     tmapBin.first->trackAverage({tmapBin.second});
   }
 
+  // After mapping this track, average the untouched but intersected bins
   if (m_cfg.emptyBinCorrection) {
     // Use the assignedMaterial map to account for empty hits, i.e.
     // the material surface has been intersected by the mapping ray
@@ -264,8 +265,7 @@ void Acts::SurfaceMaterialMapper::mapMaterialTrack(
       // list of assigned surfaces
       if (assignedMaterial[mgID] == 0) {
         auto missedMaterial = mState.accumulatedMaterial.find(mgID);
-        // Count it at the right bin
-        missedMaterial->second.voidAverage(mSurface.position);
+        missedMaterial->second.trackAverage(mSurface.position);
       }
     }
   }

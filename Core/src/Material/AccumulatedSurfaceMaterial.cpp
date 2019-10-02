@@ -57,22 +57,12 @@ std::array<size_t, 3> Acts::AccumulatedSurfaceMaterial::accumulate(
 }
 
 // Void average for vacuum assignment
-void Acts::AccumulatedSurfaceMaterial::voidAverage(const Vector3D& gp) {
+void Acts::AccumulatedSurfaceMaterial::trackAverage(const Vector3D& gp) {
   if (m_binUtility.dimensions() == 0) {
-    m_accumulatedMaterial[0][0].voidAverage();
+    m_accumulatedMaterial[0][0].trackAverage();
   }
   std::array<size_t, 3> bTriple = m_binUtility.binTriple(gp);
-  m_accumulatedMaterial[bTriple[1]][bTriple[0]].voidAverage();
-}
-
-// Void average for vacuum assignment
-void Acts::AccumulatedSurfaceMaterial::voidAverage(const Vector2D& lp) {
-  if (m_binUtility.dimensions() == 0) {
-    m_accumulatedMaterial[0][0].voidAverage();
-  }
-  size_t bin0 = m_binUtility.bin(lp, 0);
-  size_t bin1 = m_binUtility.bin(lp, 1);
-  m_accumulatedMaterial[bin1][bin0].voidAverage();
+  trackAverage({bTriple});
 }
 
 // Average the information accumulated during one event

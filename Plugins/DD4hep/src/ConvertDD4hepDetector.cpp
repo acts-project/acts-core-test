@@ -209,7 +209,7 @@ std::shared_ptr<const CylinderVolumeBuilder> volumeBuilder_dd4hep(
           }
           nEndCap = true;
           ACTS_VERBOSE("      ->is negative endcap");
-          collectLayers_dd4hep(volumeDetElement, negativeLayers);          
+          collectLayers_dd4hep(volumeDetElement, negativeLayers);
           // Fill the volume material for barrel case
           if (volumeExtension->hasType("boundary_material")) {
             if (volumeExtension->hasValue("boundary_material_negative")) {
@@ -222,7 +222,7 @@ std::shared_ptr<const CylinderVolumeBuilder> volumeBuilder_dd4hep(
                   *volumeExtension, "boundary_material_positive",
                   {{"binPhi", Acts::closed}, {"binR", Acts::open}});
             }
-          }          
+          }
         } else {
           if (pEndCap) {
             throw std::logic_error(
@@ -246,7 +246,7 @@ std::shared_ptr<const CylinderVolumeBuilder> volumeBuilder_dd4hep(
                   *volumeExtension, "boundary_material_positive",
                   {{"binPhi", Acts::closed}, {"binR", Acts::open}});
             }
-          } 
+          }
         }
       } else if (volumeExtension->hasType("barrel", "detector")) {
         if (barrel) {

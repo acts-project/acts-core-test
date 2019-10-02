@@ -98,27 +98,16 @@ class AccumulatedSurfaceMaterial {
                                    const MaterialProperties& mp,
                                    double pathCorrection = 1.);
 
-  /// Void average at a given position
-  ///
-  /// i.e. the material ray did intersect the surface, but no material
-  /// was eventually assigned
-  ///
-  /// @param lp local position for the bin assignment
-  void voidAverage(const Vector2D& lp);
-
-  /// Void average at a given position
-  ///
-  /// i.e. the material ray did intersect the surface, but no material
-  /// was eventually assigned
-  ///
-  /// @param gp global position for the bin assignment
-  void voidAverage(const Vector3D& gp);
-
   /// Average the information accumulated from one mapped track
   ///
   /// @param trackBins The bins that were touched by this event
   /// If none is given, the average runs over all bins in the surface map
   void trackAverage(const std::vector<std::array<size_t, 3>>& trackBins = {});
+
+  /// Average the information accumulated from one mapped track
+  ///
+  /// @param gp global position for the bin assignment
+  void trackAverage(const Vector3D& gp);
 
   /// Total average creates SurfaceMaterial
   std::unique_ptr<const ISurfaceMaterial> totalAverage();

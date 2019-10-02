@@ -131,14 +131,14 @@ void Acts::xmlToProtoMaterial(
 }
 
 void Acts::xmlToCylinderProtoMaterial(const xml_comp_t& x_layer,
-                                     ActsExtension& actsExtension) {
+                                      ActsExtension& actsExtension) {
   // Only continue if the layer has a material tag
   if (x_layer.hasChild(_Unicode(layer_material))) {
     xml_comp_t x_layer_material = x_layer.child(_Unicode(layer_material));
     // create the entries to the proto material
     xmlToProtoMaterial(x_layer_material, actsExtension, "layer_material",
-                      {"inner", "representing", "outer"},
-                      std::pair<std::string, std::string>{"binPhi", "binZ"});
+                       {"inner", "representing", "outer"},
+                       std::pair<std::string, std::string>{"binPhi", "binZ"});
   }
 }
 
@@ -161,12 +161,12 @@ void Acts::addDiscLayerProtoMaterial(dd4hep::DetElement detElement,
 }
 
 void Acts::xmlToDiscProtoMaterial(const xml_comp_t& x_layer,
-                                 ActsExtension& actsExtension) {
+                                  ActsExtension& actsExtension) {
   if (x_layer.hasChild(_Unicode(layer_material))) {
     xml_comp_t x_layer_material = x_layer.child(_Unicode(layer_material));
     // create the entries to the proto material
     xmlToProtoMaterial(x_layer_material, actsExtension, "layer_material",
-                      {"inner", "representing", "outer"},
-                      std::pair<std::string, std::string>{"binPhi", "binR"});
+                       {"inner", "representing", "outer"},
+                       std::pair<std::string, std::string>{"binPhi", "binR"});
   }
 }

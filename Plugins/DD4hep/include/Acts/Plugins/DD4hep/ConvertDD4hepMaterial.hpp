@@ -83,9 +83,10 @@ std::shared_ptr<Acts::ProtoSurfaceMaterial> createProtoMaterial(
 /// @param materialOptions the placement options (inner / representing / outer)
 /// @param binOptions the material binning options
 void xmlToProtoMaterial(const xml_comp_t& x_material,
-                       ActsExtension& actsExtension, const std::string& baseTag,
-                       const std::vector<std::string>& materialOptions,
-                       const std::pair<std::string, std::string>& binOptions);
+                        ActsExtension& actsExtension,
+                        const std::string& baseTag,
+                        const std::vector<std::string>& materialOptions,
+                        const std::pair<std::string, std::string>& binOptions);
 
 /// Helper method that decorates an ActsExtension with proto material
 /// description,
@@ -94,7 +95,7 @@ void xmlToProtoMaterial(const xml_comp_t& x_material,
 /// @param x_layer the cylinder layer
 /// @param actsExtension the extension that is augmented
 void xmlToCylinderProtoMaterial(const xml_comp_t& x_layer,
-                               Acts::ActsExtension& actsExtension);
+                                Acts::ActsExtension& actsExtension);
 
 /// Helper method that decorates an ActsExtension with proto material
 /// description,
@@ -103,6 +104,6 @@ void xmlToCylinderProtoMaterial(const xml_comp_t& x_layer,
 /// @param x_layer the disc layer
 /// @param actsExtension the extension that is augmented
 void xmlToDiscProtoMaterial(const xml_comp_t& x_layer,
-                           Acts::ActsExtension& actsExtension);
+                            Acts::ActsExtension& actsExtension);
 
 }  // namespace Acts
