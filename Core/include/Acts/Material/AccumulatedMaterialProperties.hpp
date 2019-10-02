@@ -79,7 +79,8 @@ class AccumulatedMaterialProperties {
 
   /// Average the information accumulated for one track
   /// - in case of an empty hit this will just increase the event counter
-  void trackAverage();
+  /// @param emtpyHit indicate an empty hit
+  void trackAverage(bool emptyHit = false);
 
   /// Average the information accumulated during the entire
   /// mapping process
@@ -126,10 +127,11 @@ inline void AccumulatedMaterialProperties::accumulate(
   m_eventPathCorrection += pathCorrection * t;
 }
 
-inline void AccumulatedMaterialProperties::trackAverage() {
-  // Always count a hit even if there's no path length, as we
-  // need to deal with empty hits as well
-  ++m_totalEvents;
+inline void AccumulatedMaterialProperties::trackAverage(bool emptyHit) {
+  // Increase the total event count either for empty hit or by touched hit
+  if (emptyHit || m_eventPath > 0.) {
+    ++m_totalEvents;
+  }
 
   // Average the event quantities
   if (m_eventPath > 0. && m_eventRho > 0.) {
@@ -167,7 +169,7 @@ AccumulatedMaterialProperties::totalAverage() {
                                                        m_totalEvents);
   }
   return std::pair<MaterialProperties, unsigned int>(
-      MaterialProperties{Material(), 0.}, 0);
+      MaterialProperties{Material(), 0.}, m_totalEvents);
 }
 
 }  // end of namespace Acts

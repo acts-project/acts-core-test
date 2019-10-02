@@ -103,13 +103,16 @@ class AccumulatedSurfaceMaterial {
   /// Average the information accumulated from one mapped track
   ///
   /// @param trackBins The bins that were touched by this event
+  /// @param emptyHit indicator if this is an empty assignment
   /// If none is given, the average runs over all bins in the surface map
-  void trackAverage(const std::vector<std::array<size_t, 3>>& trackBins = {});
+  void trackAverage(const std::vector<std::array<size_t, 3>>& trackBins = {},
+                    bool emptyHit = false);
 
   /// Average the information accumulated from one mapped track
   ///
   /// @param gp global position for the bin assignment
-  void trackAverage(const Vector3D& gp);
+  /// @param emptyHit indicator if this is an empty assignment
+  void trackAverage(const Vector3D& gp, bool emptyHit = false);
 
   /// Total average creates SurfaceMaterial
   std::unique_ptr<const ISurfaceMaterial> totalAverage();

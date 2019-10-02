@@ -266,7 +266,7 @@ void Acts::SurfaceMaterialMapper::mapMaterialTrack(
       // list of assigned surfaces
       if (assignedMaterial[mgID] == 0) {
         auto missedMaterial = mState.accumulatedMaterial.find(mgID);
-        missedMaterial->second.trackAverage(mSurface.position);
+        missedMaterial->second.trackAverage(mSurface.position, true);
       }
     }
   }
