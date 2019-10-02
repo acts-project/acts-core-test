@@ -1,4 +1,4 @@
-// This file is part of the Acts project.
+Plugins/DD4hep/src/ConvertDD4hepMaterial.cpp// This file is part of the Acts project.
 //
 // Copyright (C) 2018 CERN for the benefit of the Acts project
 //
@@ -69,17 +69,8 @@ void Acts::AccumulatedSurfaceMaterial::trackAverage(const Vector3D& gp) {
 void Acts::AccumulatedSurfaceMaterial::trackAverage(
     const std::vector<std::array<size_t, 3>>& trackBins) {
   // The touched bins are known, so you can access them directly
-  if (not trackBins.empty()) {
-    for (auto bin : trackBins) {
-      m_accumulatedMaterial[bin[1]][bin[0]].trackAverage();
-    }
-  } else {
-    // Run over all bins
-    for (auto& matVec : m_accumulatedMaterial) {
-      for (auto& mat : matVec) {
-        mat.trackAverage();
-      }
-    }
+  for (auto bin : trackBins) {
+    m_accumulatedMaterial[bin[1]][bin[0]].trackAverage();
   }
 }
 
