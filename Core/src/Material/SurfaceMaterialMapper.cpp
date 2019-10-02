@@ -251,7 +251,8 @@ void Acts::SurfaceMaterialMapper::mapMaterialTrack(
 
   // After mapping this track, average the touched bins
   for (auto tmapBin : touchedMapBins) {
-    tmapBin.first->trackAverage({tmapBin.second});
+    std::vector<std::array<size_t, 3>> trackBins = {tmapBin.second};
+    tmapBin.first->trackAverage(trackBins);
   }
 
   // After mapping this track, average the untouched but intersected bins
