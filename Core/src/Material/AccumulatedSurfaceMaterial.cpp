@@ -1,4 +1,4 @@
-Plugins/DD4hep/src/ConvertDD4hepMaterial.cpp// This file is part of the Acts project.
+// This file is part of the Acts project.
 //
 // Copyright (C) 2018 CERN for the benefit of the Acts project
 //
