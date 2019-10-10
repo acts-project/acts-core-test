@@ -64,6 +64,10 @@ include_guards:
     paths:
       - build
     expire_in: 6 hours
+  cache:
+    key: "$CI_JOB_NAME-$CI_COMMIT_REF_SLUG"
+    paths:
+        -  ~/.ccache
 
 .unit_tests: &template_unit_tests
   stage: test
