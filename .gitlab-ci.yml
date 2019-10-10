@@ -57,7 +57,8 @@ include_guards:
   script:
     - mkdir build
     - cd build
-    - cmake -GNinja -DCMAKE_CXX_COMPILER="$(which ccache) $CXX" -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_FLAGS="-Werror" ${BUILD_OPTIONS} ..
+    - export CXX="$(which ccache) $CXX"
+    - cmake -GNinja -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_FLAGS="-Werror" ${BUILD_OPTIONS} ..
     - cmake --build . -- -j${ACTS_NCPUS}
     - find . -name "*.o" -delete
   artifacts:
