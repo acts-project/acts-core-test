@@ -258,7 +258,7 @@ class SingleFreeParameters {
 
     return sl;
   }
-  
+
   /// @brief Output stream operator
   ///
   /// Prints information about this object to the output stream
