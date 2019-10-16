@@ -38,6 +38,7 @@ class PlanarModuleCluster
   /// @param [in] cov is the covariance matrix
   /// @param [in] loc0 is the local position in the first coordinate
   /// @param [in] loc1 is the local position in the second coordinate
+  /// @param [in] t Timestamp of the cluster
   /// @param [in] dCells is the vector of digitization cells
   PlanarModuleCluster(std::shared_ptr<const Surface> mSurface,
                       const Identifier& identifier, ActsSymMatrixD<3> cov,
