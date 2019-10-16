@@ -80,8 +80,9 @@ BOOST_DATA_TEST_CASE(DoubleHitsSpacePointBuilder_basic, bdata::xrange(1),
   Vector2D local = {0.1, -0.1};
 
   // Build PlanarModuleCluster
-  PlanarModuleCluster* pmc = new PlanarModuleCluster(
-      pSur, {}, cov, local[0], local[1], 0., {DigitizationCell(0, 0, 1.)}, &digMod);
+  PlanarModuleCluster* pmc =
+      new PlanarModuleCluster(pSur, {}, cov, local[0], local[1], 0.,
+                              {DigitizationCell(0, 0, 1.)}, &digMod);
 
   std::cout << "Create second hit" << std::endl;
 
@@ -103,8 +104,8 @@ BOOST_DATA_TEST_CASE(DoubleHitsSpacePointBuilder_basic, bdata::xrange(1),
   auto pSur2 = Surface::makeShared<PlaneSurface>(recBounds, detElem2);
 
   PlanarModuleCluster* pmc2 =
-      new PlanarModuleCluster(pSur2, {}, cov, local[0], local[1],
-                              0., {DigitizationCell(0, 0, 1.)}, &digMod);
+      new PlanarModuleCluster(pSur2, {}, cov, local[0], local[1], 0.,
+                              {DigitizationCell(0, 0, 1.)}, &digMod);
 
   std::cout << "Store both hits" << std::endl;
 
@@ -137,8 +138,8 @@ BOOST_DATA_TEST_CASE(DoubleHitsSpacePointBuilder_basic, bdata::xrange(1),
   auto pSur3 = Surface::makeShared<PlaneSurface>(recBounds, detElem3);
 
   PlanarModuleCluster* pmc3 =
-      new PlanarModuleCluster(pSur3, {}, cov, local[0], local[1],
-                              0., {DigitizationCell(0, 0, 1.)}, &digMod);
+      new PlanarModuleCluster(pSur3, {}, cov, local[0], local[1], 0.,
+                              {DigitizationCell(0, 0, 1.)}, &digMod);
 
   std::cout << "Try to store hits" << std::endl;
 
