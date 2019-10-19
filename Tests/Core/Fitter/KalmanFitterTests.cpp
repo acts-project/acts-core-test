@@ -27,6 +27,7 @@
 #include "Acts/Fitter/GainMatrixSmoother.hpp"
 #include "Acts/Fitter/GainMatrixUpdater.hpp"
 #include "Acts/Fitter/KalmanFitter.hpp"
+#include "Acts/Fitter/detail/MinimalOutlierFinder.hpp"
 #include "Acts/MagneticField/ConstantBField.hpp"
 #include "Acts/Propagator/EigenStepper.hpp"
 #include "Acts/Propagator/Propagator.hpp"
@@ -199,28 +200,6 @@ struct MaterialScattering {
                        std::abs(gauss(generator)) * UnitConstants::MeV,
                    0.));
     }
-  }
-};
-
-struct MinimalOutlierFinder {
-  /// The outlier search criteria
-  std::map<OutlierSearchStage, double> outlierCriteria;
-
-  /// @brief Public call mimicking an outlier rejector
-  ///
-  /// @tparam chi2 The chisq from fitting
-  ///
-  /// @param surface The surface of the measurement
-  /// @param searchStage The outlier search stage
-  ///
-  /// @return The resulting
-  //  template <typename track_state_t>
-  bool operator()(double chi2, const Surface* /*surface*/,
-                  OutlierSearchStage searchStage) const {
-    if (outlierCriteria.find(searchStage) != outlierCriteria.end()) {
-      return chi2 > outlierCriteria.at(searchStage) ? true : false;
-    }
-    return false;
   }
 };
 
