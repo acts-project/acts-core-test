@@ -144,6 +144,19 @@ class GainMatrixSmoother {
                            - (*prev_ts->parameter.smoothed->covariance()))
                            * G.transpose();
       ACTS_VERBOSE("Smoothed covariance is: \n" << smoothedCov);
+     
+      // Check if the covariance matrix is positive definite
+      Eigen::LLT<CovMatrix_t> lltCov(smoothedCov);
+
+      // Replace the non positive definite matrix with the nearest symmetric positive semidefinite matrix!
+      // Reference at https://doi.org/10.1016/0024-3795(88)90223-6
+      if( lltCov.info() == Eigen::NumericalIssue) {
+        Eigen::BDCSVD<CovMatrix_t> svdCov(smoothedCov,  Eigen::ComputeFullU| Eigen::ComputeFullV);
+        CovMatrix_t S = svdCov.singularValues().asDiagonal();
+        CovMatrix_t V = svdCov.matrixV();
+        CovMatrix_t H = V * S * V.transpose(); 
+        smoothedCov = (smoothedCov + H )/2; 
+      }
 
       // clang-format on
 
