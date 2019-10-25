@@ -233,7 +233,7 @@ class StraightLineStepper {
   BoundState boundState(State& state, const Surface& surface,
                         bool reinitialize) const {
     // Transport the covariance to here
-    std::unique_ptr<Covariance> cov = std::nullopt;
+    std::optional<BoundSymMatrix> cov = std::nullopt;
     BoundMatrix jacobian = BoundMatrix::Identity();
     if (state.covTransport) {
 		
@@ -242,7 +242,7 @@ class StraightLineStepper {
 		// TODO: handle case of non-existing jacToGlobal                                   
 		jacobian = jacToLocal * state.jacobian * (*state.jacToGlobal);
 		
-      cov = std::optional<Covariance>(jacToLocal * state.cov * jacToLocal.transpose());
+      cov = std::optional<BoundSymMatrix>(jacToLocal * state.cov * jacToLocal.transpose());
     }
     // Create the bound parameters
     BoundParameters parameters(state.geoContext, cov, state.pos,
@@ -273,13 +273,13 @@ class StraightLineStepper {
   ///   - and the path length (from start - for ordering)
   CurvilinearState curvilinearState(State& state, bool reinitialize) const {
     // Transport the covariance to here
-    std::optional<Covariance> cov = std::nullopt;
+    std::optional<BoundSymMatrix> cov = std::nullopt;
     BoundMatrix jacobian = BoundMatrix::Identity();
     if (state.covTransport) {
 		covarianceTransport(state, reinitialize);
 		const FreeToBoundMatrix jacToCurv = freeToCurvilinearJacobian(state);
 		jacobian = jacToCurv * state.jacobian * (*state.jacToGlobal);
-      cov = std::optional<Covariance>(jacobian * state.cov * jacobian.transpose());
+      cov = std::optional<BoundSymMatrix>(jacToCurv * state.cov * jacToCurv.transpose());
     }
     // Create the curvilinear parameters
     CurvilinearParameters parameters(cov, state.pos, state.p * state.dir,
@@ -306,7 +306,7 @@ class StraightLineStepper {
     state.p = mom.norm();
     state.dt = pars.time();
 
-    if (pars.covariance() != nullptr) {	
+    if (pars.covariance().has_value()) {	
 		pars.referenceSurface().initJacobianToGlobal(state.geoContext, (*state.jacToGlobal),
 									   state.pos, state.dir, pars.parameters());
 		  state.cov = (*state.jacToGlobal) * (*pars.covariance()) * (*state.jacToGlobal).transpose();
