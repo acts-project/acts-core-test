@@ -46,10 +46,10 @@ template <typename bfield_t,
 class EigenStepper {
  public:
   /// Jacobian, Covariance and State defintions
-  using Jacobian = FreeMatrix;
-  using Covariance = FreeSymMatrix;
-  using BoundState = std::tuple<BoundParameters, BoundMatrix, double>;
-  using CurvilinearState = std::tuple<CurvilinearParameters, BoundMatrix, double>;
+  using Jacobian = BoundMatrix;
+  using Covariance = BoundSymMatrix;
+  using BoundState = std::tuple<BoundParameters, Jacobian, double>;
+  using CurvilinearState = std::tuple<CurvilinearParameters, Jacobian, double>;
   using BField = bfield_t;
 
   /// @brief The state object. This object extends the general container @c
@@ -67,6 +67,7 @@ class EigenStepper {
     /// @param [in] stolerance is the stepping tolerance
     ///
     /// @note the covariance matrix is copied when needed
+    template <typename parameters_t>
     explicit State(std::reference_wrapper<const GeometryContext> gctx,
                    std::reference_wrapper<const MagneticFieldContext> mctx,
                    const parameters_t& par, NavigationDirection ndir = forward,
@@ -273,14 +274,6 @@ class EigenStepper {
   Result<double> step(propagator_state_t& state) const;
 
  private:
- 
- 	/// @brief Evaluate the projection Jacobian from free to curvilinear parameters
-	///
-	/// @param [in] state State that will be projected
-	///
-	/// @return Projection Jacobian
-  FreeToBoundMatrix freeToBoundJacobian(const State& state) const;
-
   /// Magnetic field inside of the detector
   BField m_bField;
 
