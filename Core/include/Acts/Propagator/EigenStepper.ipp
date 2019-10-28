@@ -23,7 +23,7 @@ auto Acts::EigenStepper<B, C, E, A>::boundState(State& state,
 	  FreeToBoundMatrix jacToLocal = covarianceTransport(state, surface, reinitialize);
       jacobian = jacToLocal * state.jacobian * (*state.jacToGlobal);
                                              
-    covOpt = std::optional<BoundSymMatrix>(jacobian * state.cov * jacobian.transpose());
+    covOpt = std::optional<BoundSymMatrix>(jacToLocal * state.cov * jacToLocal.transpose());
   }
   // Create the bound parameters
   BoundParameters parameters(state.geoContext, std::move(covOpt), state.pos,
@@ -51,10 +51,10 @@ auto Acts::EigenStepper<B, C, E, A>::curvilinearState(State& state,
 	  covarianceTransport(state, reinitialize);
 	  const FreeToBoundMatrix jacToCurv = freeToBoundJacobian(state);
 	  jacobian = jacToCurv * state.jacobian * (*state.jacToGlobal);
-    covPtr = std::make_unique<BoundSymMatrix>(jacobian * state.cov * jacobian.transpose());
+    covOpt = std::optional<BoundSymMatrix>(jacToCurv * state.cov * jacToCurv.transpose());
   }
   // Create the curvilinear parameters
-  CurvilinearParameters parameters(std::move(state.cov), state.pos,
+  CurvilinearParameters parameters(std::move(covOpt), state.pos,
                                    state.p * state.dir, state.q,
                                    state.t0 + state.dt);
   // Create the bound state
@@ -125,8 +125,9 @@ Acts::FreeToBoundMatrix Acts::EigenStepper<B, C, E, A>::covarianceTransport(
 	  auto rframeT = surface.initJacobianToLocal(state.geoContext, jacToLocal,
                                              state.pos, state.dir);
   // calculate the form factors for the derivatives
-  const BoundRowVector sVec = surface.derivativeFactors(
-      state.geoContext, state.pos, state.dir, rframeT, state.jacTransport * (*state.jacToGlobal)); // TODO: Let's see what happens
+  //~ const BoundRowVector sVec = surface.derivativeFactors(
+      //~ state.geoContext, state.pos, state.dir, rframeT, state.jacTransport * (*state.jacToGlobal)); // TODO: Let's see what happens
+  const FreeRowVector sVec = FreeRowVector::Zero(); // TODO: Just removed this for debugging
   // the full jacobian is ([to local] jacobian) * ([transport] jacobian)
   const Jacobian jacFull = state.jacTransport - state.derivative * sVec;
   // Apply the actual covariance transport

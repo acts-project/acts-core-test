@@ -18,7 +18,6 @@
 
 #include "Acts/EventData/TrackParameters.hpp"
 #include "Acts/Propagator/Navigator.hpp"
-#include "Acts/Propagator/StraightLineStepper.hpp"
 #include "Acts/Propagator/StepperConcept.hpp"
 #include "Acts/Propagator/detail/ConstrainedStep.hpp"
 #include "Acts/Surfaces/CylinderSurface.hpp"
