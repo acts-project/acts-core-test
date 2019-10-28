@@ -58,10 +58,10 @@ class EigenStepper {
   using Corrector = corrector_t;
 
   /// Jacobian, Covariance and State defintions
-  using Jacobian = FreeMatrix;
-  using Covariance = FreeSymMatrix;
-  using BoundState = std::tuple<BoundParameters, const BoundMatrix, double>;
-  using CurvilinearState = std::tuple<CurvilinearParameters, const BoundMatrix, double>;
+  using Jacobian = BoundMatrix;
+  using Covariance = BoundSymMatrix;
+  using BoundState = std::tuple<BoundParameters, const Jacobian, double>;
+  using CurvilinearState = std::tuple<CurvilinearParameters, const Jacobian, double>;
 
   /// @brief State for track parameter propagation
   ///
@@ -80,7 +80,7 @@ class EigenStepper {
     /// @param [in] ssize is the maximum step size
     ///
     /// @note the covariance matrix is copied when needed
-    template <typename parameters_t, std::enable_if_t<std::is_same<typename parameters_t::CovMatrix_t, BoundSymMatrix>::value, int> = 0>
+    template <typename parameters_t>
     explicit State(std::reference_wrapper<const GeometryContext> gctx,
                    std::reference_wrapper<const MagneticFieldContext> mctx,
                    const parameters_t& par, NavigationDirection ndir = forward,
@@ -99,47 +99,13 @@ class EigenStepper {
       startDir = dir;
       // Init the jacobian matrix if needed
       if (par.covariance()) {
-		  // Set the covariance transport flag to true
-		  covTransport = true;
-		  // Get the covariance
-		  par.referenceSurface().initJacobianToGlobal(geoContext, *jacToGlobal,
-									   pos, dir, par.parameters());
-		  cov = (*jacToGlobal) * (*par.covariance()) * (*jacToGlobal).transpose();      
-	  }
-    }
-    
-    /// Constructor from the initial track parameters
-    ///
-    /// @param [in] gctx is the context object for the geometry
-    /// @param [in] mctx is the context object for the magnetic field
-    /// @param [in] par The track parameters at start
-    /// @param [in] ndir The navigation direciton w.r.t momentum
-    /// @param [in] ssize is the maximum step size
-    ///
-    /// @note the covariance matrix is copied when needed
-    template <typename parameters_t, std::enable_if_t<std::is_same<typename parameters_t::CovMatrix_t, FreeSymMatrix>::value, int> = 0>
-    explicit State(std::reference_wrapper<const GeometryContext> gctx,
-                   std::reference_wrapper<const MagneticFieldContext> mctx,
-                   const parameters_t& par, NavigationDirection ndir = forward,
-                   double ssize = std::numeric_limits<double>::max())
-        : pos(par.position()),
-          dir(par.momentum().normalized()),
-          p(par.momentum().norm()),
-          q(par.charge()),
-          t0(par.time()),
-          navDir(ndir),
-          stepSize(ndir * std::abs(ssize)),
-          fieldCache(mctx),
-          geoContext(gctx) {
-      // remember the start parameters
-      startPos = pos;
-      startDir = dir;
-      // Init the jacobian matrix if needed
-      if (par.covariance()) {
-		  // Set the covariance transport flag to true
-		  covTransport = true;
-		  // Get the covariance
-	      cov = Covariance(*par.covariance());
+        // Get the reference surface for navigation
+        const auto& surface = par.referenceSurface();
+        // set the covariance transport flag to true and copy
+        covTransport = true;
+        cov = BoundSymMatrix(*par.covariance());
+        surface.initJacobianToGlobal(gctx, jacToGlobal, pos, dir,
+                                     par.parameters());
       }
     }
 
@@ -173,11 +139,12 @@ class EigenStepper {
     /// The full jacobian of the transport entire transport
     Jacobian jacobian = Jacobian::Identity();
 
-    /// Pure transport jacobian part from runge kutta integration
-    Jacobian jacTransport = Jacobian::Identity();
+    /// Jacobian from local to the global frame
+    BoundToFreeMatrix jacToGlobal = BoundToFreeMatrix::Zero();
 
-	std::optional<BoundToFreeMatrix> jacToGlobal;
-	
+    /// Pure transport jacobian part from runge kutta integration
+    FreeMatrix jacTransport = FreeMatrix::Identity();
+
     /// The propagation derivative
     FreeVector derivative = FreeVector::Zero();
 
@@ -323,6 +290,8 @@ class EigenStepper {
   /// @param [in,out] state State of the stepper
   /// @param [in] reinitialize is a flag to steer whether the state should be
   /// reinitialized at the new position
+  ///
+  /// @return the full transport jacobian
   void covarianceTransport(State& state, bool reinitialize = false) const;
 
   /// Method for on-demand transport of the covariance
@@ -353,14 +322,6 @@ class EigenStepper {
   Result<double> step(propagator_state_t& state) const;
 
  private:
- 
- 	/// @brief Evaluate the projection Jacobian from free to curvilinear parameters
-	///
-	/// @param [in] state State that will be projected
-	///
-	/// @return Projection Jacobian
-  FreeToBoundMatrix freeToBoundJacobian(const State& state) const;
-
   /// Magnetic field inside of the detector
   BField m_bField;
 };

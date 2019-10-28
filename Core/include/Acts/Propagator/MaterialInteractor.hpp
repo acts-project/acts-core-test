@@ -249,14 +249,26 @@ struct MaterialInteractor {
 
             // Good in any case for positive direction
             if (state.stepping.navDir == forward) {
-              state.stepping.cov(FreeParsDim - 1, FreeParsDim - 1) +=
-                  state.stepping.navDir * sigmaQoverP * sigmaQoverP;
+				if(state.stepping.cov.rows() == FreeParsDim) // TODO: This is an intermediate solution since the steppers currently handle different dimensions
+				{
+					state.stepping.cov(FreeParsDim - 1, FreeParsDim - 1) +=
+						state.stepping.navDir * sigmaQoverP * sigmaQoverP;
+				}
+				else
+					state.stepping.cov(BoundParsDim - 1, BoundParsDim - 1) +=
+						state.stepping.navDir * sigmaQoverP * sigmaQoverP;
             } else {
               // Check that covariance entry doesn't become negative
               double sEqop = state.stepping.cov(FreeParsDim - 1, FreeParsDim - 1);
               if (sEqop > sigmaQoverP * sigmaQoverP) {
-                state.stepping.cov(FreeParsDim - 1, FreeParsDim - 1) +=
-                    state.stepping.navDir * mInteraction.sigmaQoP2;
+				  if(state.stepping.cov.rows() == FreeParsDim) // TODO: This is an intermediate solution since the steppers currently handle different dimensions
+				  {
+					state.stepping.cov(FreeParsDim - 1, FreeParsDim - 1) +=
+						state.stepping.navDir * mInteraction.sigmaQoP2;
+				  }
+				  else
+					state.stepping.cov(BoundParsDim - 1, BoundParsDim - 1) +=
+						state.stepping.navDir * mInteraction.sigmaQoP2;
               }
             }
           }

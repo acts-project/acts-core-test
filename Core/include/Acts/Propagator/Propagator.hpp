@@ -196,8 +196,8 @@ struct PropagatorOptions {
 template <typename stepper_t, typename navigator_t = detail::VoidNavigator>
 class Propagator final {
   using Jacobian = BoundMatrix;
-  using BoundState = std::tuple<BoundParameters, Jacobian, double>;
-  using CurvilinearState = std::tuple<CurvilinearParameters, Jacobian, double>;
+  using BoundState = std::tuple<BoundParameters, const Jacobian, double>;
+  using CurvilinearState = std::tuple<CurvilinearParameters, const Jacobian, double>;
 
   static_assert(StepperStateConcept<typename stepper_t::State>,
                 "Stepper does not fulfill stepper concept.");
