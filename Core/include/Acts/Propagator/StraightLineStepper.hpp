@@ -31,9 +31,9 @@ namespace Acts {
 class StraightLineStepper {
  public:
   using Jacobian = BoundMatrix;
-  using Covariance = FreeSymMatrix;
-  using BoundState = std::tuple<BoundParameters, BoundMatrix, double>;
-  using CurvilinearState = std::tuple<CurvilinearParameters, BoundMatrix, double>;
+  using Covariance = std::variant<BoundSymMatrix, FreeSymMatrix>;
+  using BoundState = std::tuple<BoundParameters, Jacobian, double>;
+  using CurvilinearState = std::tuple<CurvilinearParameters, Jacobian, double>;
   using BField = NullBField;
 
   /// Always use the same propagation state type, independently of the initial
