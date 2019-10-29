@@ -115,10 +115,7 @@ class SingleFreeParameters {
   /// @brief Default move constructor
   ///
   /// @param [in] copy The object to move from
-  SingleFreeParameters(SingleFreeParameters<ChargePolicy>&& copy) {
-    this->operator=(
-        std::forward<const SingleFreeParameters<ChargePolicy>>(copy));
-  }
+  SingleFreeParameters(SingleFreeParameters<ChargePolicy>&& copy) = default;
 
   /// @brief Heap copy constructor
   ///

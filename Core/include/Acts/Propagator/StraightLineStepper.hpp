@@ -46,8 +46,10 @@ class StraightLineStepper {
   using Corrector = VoidIntersectionCorrector;
   using Jacobian = BoundMatrix;
   using Covariance = std::variant<BoundSymMatrix, FreeSymMatrix>;
+  
   using BoundState = std::tuple<BoundParameters, const BoundMatrix, double>;
   using CurvilinearState = std::tuple<CurvilinearParameters, const BoundMatrix, double>;
+  using FreeState = std::tuple<FreeParameters, const FreeMatrix, double>;
 
   /// State for track parameter propagation
   ///
@@ -173,7 +175,7 @@ class StraightLineStepper {
   /// Return parameter types depend on the propagation mode:
   /// - when propagating to a surface we return BoundParameters
   /// - otherwise CurvilinearParameters
-  template <typename parameters_t, typename surface_t = int>
+  template <typename parameters_t, typename surface_t = int> // TODO: Would it be possible to include the free state into this descision scheme?
   using return_parameter_type = typename s<parameters_t, surface_t>::type;
 
   /// Constructor
@@ -248,6 +250,7 @@ class StraightLineStepper {
     // Reset the jacobian to identity
     if (reinitialize) {
       state.jacobian = Jacobian::Identity();
+      state.jacTransport = FreeMatrix::Identity();
     }
     /// Return the State
     return bState;
@@ -281,9 +284,50 @@ class StraightLineStepper {
     // Reset the jacobian to identity
     if (reinitialize) {
       state.jacobian = Jacobian::Identity();
+      state.jacTransport = FreeMatrix::Identity();
     }
     /// Return the State
     return curvState;
+  }
+  
+  /// Create and return a free state at the current position
+  ///
+  /// @brief This creates a free state.
+  ///
+  /// @param [in] state State that will be presented as @c FreeState
+  /// @param [in] reinitialize Boolean flag whether reinitialization is needed,
+  /// i.e. if this is an intermediate state of a larger propagation
+  ///
+  /// @return A free state:
+  ///   - the free parameters at given position
+  ///   - the stepweise jacobian towards it (from last location)
+  ///   - and the path length (from start - for ordering)
+  FreeState freeState(State& state, bool reinitialize) const
+  {
+    // Transport the covariance to here
+    std::optional<FreeSymMatrix> cov = std::nullopt;
+    if (state.covTransport) {
+		covarianceTransport(state, reinitialize);
+		cov = std::visit([](Covariance&& arg) -> FreeSymMatrix { return std::get<FreeSymMatrix>(arg);}, state.cov);
+    }
+    // Create the free parameters
+    FreeVector pars;
+    pars.template head<3>() = state.pos;
+    pars(3) = state.t0 + state.dt;
+    pars.template segment<3>(4) = state.dir;
+    pars(7) = (state.q / state.p);
+    FreeParameters parameters(cov, pars);
+    
+    // Create the bound state
+    FreeState freeState{std::move(parameters), state.jacTransport,
+                               state.pathAccumulated};
+    // Reset the jacobian to identity
+    if (reinitialize) {
+      state.jacobian = Jacobian::Identity();
+      state.jacTransport = FreeMatrix::Identity();
+    }
+    /// Return the State
+    return freeState;
   }
 
   /// Method to update a stepper state to the some parameters
@@ -344,14 +388,13 @@ class StraightLineStepper {
     const FreeToBoundMatrix jacToLocal = surfaceDerivative(state, jacToFree, surface);
     const Jacobian jacFull = jacToLocal * jacToFree;
     
-        // Apply the actual covariance transport
+    // Apply the actual covariance transport
     state.cov = BoundSymMatrix(jacFull * std::visit([](Covariance&& arg) -> BoundSymMatrix { return std::get<BoundSymMatrix>(arg);}, state.cov) * jacFull.transpose());
     
     // Reinitialize if asked to do so
     // this is useful for interruption calls
     if (reinitialize) {
       // reset the jacobian
-      state.jacTransport = FreeMatrix::Identity();
       state.derivative = FreeVector::Zero();
       reinitializeJacToGlobal(state, surface);
     }
