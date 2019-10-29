@@ -9,7 +9,6 @@
 #pragma once
 
 #include <sstream>
-
 #include "Acts/Material/MaterialProperties.hpp"
 #include "Acts/Propagator/detail/PointwiseMaterialInteraction.hpp"
 #include "Acts/Surfaces/Surface.hpp"
