@@ -11,6 +11,7 @@
 #include <cmath>
 #include <sstream>
 #include <utility>
+#include <variant>
 #include "Acts/Material/ISurfaceMaterial.hpp"
 #include "Acts/Material/Material.hpp"
 #include "Acts/Material/MaterialProperties.hpp"
@@ -246,31 +247,42 @@ struct MaterialInteractor {
                 mProperties.thickness() * eLoss.second / (lbeta * p * p);
             // Save the material interaction
             mInteraction.sigmaQoP2 = sigmaQoverP * sigmaQoverP;
-
+            
             // Good in any case for positive direction
-            if (state.stepping.navDir == forward) {
-				if(state.stepping.cov.rows() == FreeParsDim) // TODO: This is an intermediate solution since the steppers currently handle different dimensions
+            std::visit([&](typename stepper_t::Covariance& cov) 
+            {
+				using matrix = std::decay_t<decltype(cov)>;
+				if constexpr (std::is_same_v<matrix, BoundSymMatrix>)
 				{
-					state.stepping.cov(FreeParsDim - 1, FreeParsDim - 1) +=
-						state.stepping.navDir * sigmaQoverP * sigmaQoverP;
+					auto& covMat = typeid(cov) == typeid(BoundSymMatrix) ? cov : std::get<BoundSymMatrix>(cov); // TODO: This is just an indermediate solution for as long as not all steppers look the same
+					if (state.stepping.navDir == forward) {
+							cov(eQOP, eQOP) +=
+								state.stepping.navDir * sigmaQoverP * sigmaQoverP;
+					} else {
+					  // Check that covariance entry doesn't become negative
+					  double sEqop = state.stepping.cov(eQOP, eQOP);
+					  if (sEqop > sigmaQoverP * sigmaQoverP) {
+							cov(eQOP, eQOP) +=
+								state.stepping.navDir * mInteraction.sigmaQoP2;
+					  }
+					}
 				}
-				else
-					state.stepping.cov(BoundParsDim - 1, BoundParsDim - 1) +=
-						state.stepping.navDir * sigmaQoverP * sigmaQoverP;
-            } else {
-              // Check that covariance entry doesn't become negative
-              double sEqop = state.stepping.cov(FreeParsDim - 1, FreeParsDim - 1);
-              if (sEqop > sigmaQoverP * sigmaQoverP) {
-				  if(state.stepping.cov.rows() == FreeParsDim) // TODO: This is an intermediate solution since the steppers currently handle different dimensions
-				  {
-					state.stepping.cov(FreeParsDim - 1, FreeParsDim - 1) +=
-						state.stepping.navDir * mInteraction.sigmaQoP2;
-				  }
-				  else
-					state.stepping.cov(BoundParsDim - 1, BoundParsDim - 1) +=
-						state.stepping.navDir * mInteraction.sigmaQoP2;
-              }
-            }
+				else if constexpr (std::is_same_v<matrix, FreeSymMatrix>)
+				{
+					auto& covMat = std::get<FreeSymMatrix>(cov);
+					if (state.stepping.navDir == forward) {
+							cov(FreeParsDim - 1, FreeParsDim - 1) +=
+								state.stepping.navDir * sigmaQoverP * sigmaQoverP;
+					} else {
+					  // Check that covariance entry doesn't become negative
+					  double sEqop = state.stepping.cov(FreeParsDim - 1, FreeParsDim - 1);
+					  if (sEqop > sigmaQoverP * sigmaQoverP) {
+							cov(FreeParsDim - 1, FreeParsDim - 1) +=
+								state.stepping.navDir * mInteraction.sigmaQoP2;
+					  }
+					}
+				}
+            }, state.stepping.cov);
           }
         }
 
