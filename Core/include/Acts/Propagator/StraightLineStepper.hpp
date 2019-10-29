@@ -44,8 +44,8 @@ class StraightLineStepper {
   using cstep = detail::ConstrainedStep;
 
   using Corrector = VoidIntersectionCorrector;
-  using Jacobian = FreeMatrix;
-  using Covariance = FreeSymMatrix;
+  using Jacobian = BoundMatrix;
+  using Covariance = std::variant<BoundSymMatrix, FreeSymMatrix>;
   using BoundState = std::tuple<BoundParameters, const BoundMatrix, double>;
   using CurvilinearState = std::tuple<CurvilinearParameters, const BoundMatrix, double>;
 
@@ -80,10 +80,11 @@ class StraightLineStepper {
       if (par.covariance()) { // TODO: constructors might be combined but a covariance setter is then templated
 		  // Set the covariance transport flag to true
 		  covTransport = true;
-		  // Get the covariance          
+		  // Get the covariance       
+		  *jacToGlobal = BoundToFreeMatrix::Zero();
 		  par.referenceSurface().initJacobianToGlobal(gctx, *jacToGlobal,
-									   par.position(), par.momentum().normalized(), par.parameters());
-		  cov = (*jacToGlobal) * (*par.covariance()) * (*jacToGlobal).transpose();
+									   pos, dir, par.parameters());
+		  cov = *par.covariance();
       }
     }
     
@@ -117,23 +118,22 @@ class StraightLineStepper {
       }
     }
 
-    /// Jacobian from local to the global frame
-    BoundToFreeMatrix jacToGlobal = BoundToFreeMatrix::Zero(); // This could become a boost::optional
-
+    /// Jacobian from local to the global frame    
+    std::optional<BoundToFreeMatrix> jacToGlobal;
+	
     /// Pure transport jacobian part from runge kutta integration
-    Jacobian jacTransport = Jacobian::Identity();
+    FreeMatrix jacTransport = FreeMatrix::Identity();
 
     /// The full jacobian of the transport entire transport
     Jacobian jacobian = Jacobian::Identity();
-
-	std::optional<BoundToFreeMatrix> jacToGlobal;
 
     /// The propagation derivative
     FreeVector derivative = FreeVector::Zero();
 
     /// Boolean to indiciate if you need covariance transport
     bool covTransport = false;
-    Covariance cov = Covariance::Zero();
+    //~ Covariance cov = Covariance::Zero();
+    Covariance cov;
 
     /// Global particle position
     Vector3D pos = Vector3D(0., 0., 0.);
@@ -163,7 +163,7 @@ class StraightLineStepper {
     /// adaptive step size of the runge-kutta integration
     cstep stepSize = std::numeric_limits<double>::max();
 
-    // Cache the geometry context of this propagation
+    /// Cache the geometry context of this propagation
     std::reference_wrapper<const GeometryContext> geoContext;
   };
 
@@ -233,22 +233,17 @@ class StraightLineStepper {
   BoundState boundState(State& state, const Surface& surface,
                         bool reinitialize) const {
     // Transport the covariance to here
-    std::optional<BoundSymMatrix> cov = std::nullopt;
-    BoundMatrix jacobian = BoundMatrix::Identity();
     if (state.covTransport) {
 		// Initialize the transport final frame jacobian
-		const FreeToBoundMatrix jacToLocal = 	covarianceTransport(state, surface, reinitialize);
-		// TODO: handle case of non-existing jacToGlobal
-		jacobian = jacToLocal * state.jacobian * (*state.jacToGlobal);
-		
-      cov = std::optional<BoundSymMatrix>(jacToLocal * state.cov * jacToLocal.transpose());
+		covarianceTransport(state, &surface, reinitialize); // TODO: This function could steer whether the start parameters are bound or free
+
     }
     // Create the bound parameters
-    BoundParameters parameters(state.geoContext, cov, state.pos,
+    BoundParameters parameters(state.geoContext, std::visit([](Covariance&& arg) -> BoundSymMatrix { return std::get<BoundSymMatrix>(arg); }, state.cov), state.pos,
                                state.p * state.dir, state.q,
                                state.t0 + state.dt, surface.getSharedPtr());
     // Create the bound state
-    BoundState bState{std::move(parameters), jacobian,
+    BoundState bState{std::move(parameters), state.jacobian,
                       state.pathAccumulated};
     // Reset the jacobian to identity
     if (reinitialize) {
@@ -273,18 +268,15 @@ class StraightLineStepper {
   CurvilinearState curvilinearState(State& state, bool reinitialize) const {
     // Transport the covariance to here
     std::optional<BoundSymMatrix> cov = std::nullopt;
-    BoundMatrix jacobian = BoundMatrix::Identity();
     if (state.covTransport) {
 		covarianceTransport(state, reinitialize);
-		const FreeToBoundMatrix jacToCurv = freeToCurvilinearJacobian(state);
-		jacobian = jacToCurv * state.jacobian * (*state.jacToGlobal);
-      cov = std::optional<BoundSymMatrix>(jacToCurv * state.cov * jacToCurv.transpose());
+		cov = std::visit([](Covariance&& arg) -> BoundSymMatrix { return std::get<BoundSymMatrix>(arg);}, state.cov);
     }
     // Create the curvilinear parameters
     CurvilinearParameters parameters(cov, state.pos, state.p * state.dir,
                                      state.q, state.t0 + state.dt);
     // Create the bound state
-    CurvilinearState curvState{std::move(parameters), jacobian,
+    CurvilinearState curvState{std::move(parameters), state.jacobian,
                                state.pathAccumulated};
     // Reset the jacobian to identity
     if (reinitialize) {
@@ -306,9 +298,9 @@ class StraightLineStepper {
     state.dt = pars.time();
 
     if (pars.covariance().has_value()) {	
-		pars.referenceSurface().initJacobianToGlobal(state.geoContext, (*state.jacToGlobal),
-									   state.pos, state.dir, pars.parameters());
-		  state.cov = (*state.jacToGlobal) * (*pars.covariance()) * (*state.jacToGlobal).transpose(); // TODO: I guess the jacToGlobal should be picked from the pars itself
+		//~ pars.referenceSurface().initJacobianToGlobal(state.geoContext, (*state.jacToGlobal),
+									   //~ state.pos, state.dir, pars.parameters());
+		  state.cov = *pars.covariance(); // TODO: I guess the jacToGlobal should be picked from the pars itself
     }
   }
 
@@ -341,21 +333,21 @@ class StraightLineStepper {
   ///        state should be reinitialized at the new
   ///        position
   void covarianceTransport(State& state, bool reinitialize = false) const {
-    // Transport the covariance
-	ActsRowVectorD<3> normVec(state.dir);
-    const FreeRowVector sfactors =
-        normVec * state.jacTransport.template topLeftCorner<3, FreeParsDim>();
-    // The full jacobian is
-	const Jacobian jacFull  = state.jacTransport - state.derivative * sfactors;
-	
+	  BoundToFreeMatrix jacToFree = state.jacTransport * (*state.jacToGlobal);	  
+	  
+	  //~ if(toBoundParameters)
+	  //~ {
+		  surfaceDerivative(state, jacToFree);
+	  //~ }
+
+	const Jacobian jacFull = freeToCurvilinearJacobian(state) * jacToFree;
     // Apply the actual covariance transport
-    state.cov = (jacFull * state.cov * jacFull.transpose());
+    state.cov = BoundSymMatrix(jacFull * std::visit([](Covariance&& arg) -> BoundSymMatrix { return std::get<BoundSymMatrix>(arg);}, state.cov) * jacFull.transpose());
     // Reinitialize if asked to do so
     // this is useful for interruption calls
-    
     if (reinitialize) {
       // reset the jacobian
-      state.jacTransport = Jacobian::Identity(); // TODO: This would reset the jacobian before it is passed to the result object
+      state.jacTransport = FreeMatrix::Identity(); // TODO: This would reset the jacobian before it is passed to the result object
     }
     
     // Store The global and bound jacobian (duplication for the moment)
@@ -376,33 +368,50 @@ class StraightLineStepper {
   ///        position
   /// @note no check is done if the position is actually on the surface
   ///
-  FreeToBoundMatrix covarianceTransport(State& state, const Surface& surface,
+  /// @return Projection jacobian from global to bound parameters
+  void covarianceTransport(State& state, const Surface* surface,
                            bool reinitialize = false) const {
-	// Initialize the transport final frame jacobian
-	FreeToBoundMatrix jacToLocal = FreeToBoundMatrix::Zero();
-	// initalize the jacobian to local, returns the transposed ref frame
-	surface.initJacobianToLocal(state.geoContext, jacToLocal,
-                                               state.pos, state.dir);
-   auto rframeT = surface.initJacobianToLocal(state.geoContext, jacToLocal,
-				   state.pos, state.dir);
-    // calculate the form factors for the derivatives
-    const FreeRowVector sVec = surface.derivativeFactors(
-        state.geoContext, state.pos, state.dir, rframeT, state.jacTransport);
-    // the full jacobian is
-    const Jacobian jacFull = state.jacTransport - state.derivative * sVec;
+    BoundToFreeMatrix jacToFree = state.jacTransport * (*state.jacToGlobal);
+    
+    const FreeToBoundMatrix jacToLocal = surfaceDerivative(state, jacToFree, surface);
+    const Jacobian jacFull = jacToLocal * jacToFree;
+    
     // Apply the actual covariance transport
-    state.cov = (jacFull * state.cov * jacFull.transpose());
+    state.cov = BoundSymMatrix(jacFull * std::visit([](Covariance&& arg) -> BoundSymMatrix { return std::get<BoundSymMatrix>(arg);}, state.cov) * jacFull.transpose());
     // Reinitialize if asked to do so
     // this is useful for interruption calls
     if (reinitialize) {
       // reset the jacobian
       state.jacTransport = FreeMatrix::Identity();
+      // TODO: Look up if any additional reinits are required - jacToGlobal
     }
     // Store The global and bound jacobian (duplication for the moment)
     state.jacobian = jacFull * state.jacobian;
-    
-    return jacToLocal;
-  }
+   }
+   
+	void surfaceDerivative(const State& state, BoundToFreeMatrix& jacToFree) const
+	{
+			// Transport the covariance
+			const ActsRowVectorD<3> normVec(state.dir);
+			const BoundRowVector sfactors =
+				normVec * jacToFree.template topLeftCorner<3, BoundParsDim>();
+			jacToFree = jacToFree - state.derivative * sfactors;
+	}
+	
+	const FreeToBoundMatrix surfaceDerivative(const State& state, BoundToFreeMatrix& jacToFree, const Surface* surface) const
+	{
+		// Initialize the transport final frame jacobian
+		FreeToBoundMatrix jacToLocal = FreeToBoundMatrix::Zero();
+		// initalize the jacobian to local, returns the transposed ref frame
+	   auto rframeT = surface->initJacobianToLocal(state.geoContext, jacToLocal,
+					   state.pos, state.dir);
+		// calculate the form factors for the derivatives
+		const BoundRowVector sVec = surface->derivativeFactors(
+			state.geoContext, state.pos, state.dir, rframeT, jacToFree);
+		// the full jacobian is
+		jacToFree -= state.derivative * sVec;
+		return jacToLocal;
+	}
 
   /// Perform a straight line propagation step
   ///
