@@ -106,7 +106,7 @@ void runTest(const rpropagator_t& rprop, const dpropagator_t& dprop, double pT,
 
   // Action list and abort list
   using RefereceActionList =
-      ActionList<MaterialInteractor, SurfaceCollector<>, DebugOutput>;
+      ActionList<MaterialInteractor<>, SurfaceCollector<>, DebugOutput>;
   using ReferenceAbortList = AbortList<EndOfWorld>;
 
   // Options definition
@@ -123,7 +123,7 @@ void runTest(const rpropagator_t& rprop, const dpropagator_t& dprop, double pT,
   const auto& pResult = rprop.propagate(start, pOptions).value();
   auto& cSurfaces = pResult.template get<SurfaceCollector<>::result_type>();
   auto& cOutput = pResult.template get<DebugOutput::result_type>();
-  auto& cMaterial = pResult.template get<MaterialInteractor::result_type>();
+  auto& cMaterial = pResult.template get<MaterialInteractor<>::result_type>();
   const Surface& destination = pResult.endParameters->referenceSurface();
 
   if (debugMode) {
@@ -141,7 +141,7 @@ void runTest(const rpropagator_t& rprop, const dpropagator_t& dprop, double pT,
 
     // Action list for direct navigator with its initalizer
     using DirectActionList =
-        ActionList<DirectNavigator::Initializer, MaterialInteractor,
+        ActionList<DirectNavigator::Initializer, MaterialInteractor<>,
                    SurfaceCollector<>, DebugOutput>;
 
     // Direct options definition
@@ -162,7 +162,8 @@ void runTest(const rpropagator_t& rprop, const dpropagator_t& dprop, double pT,
         dprop.propagate(start, destination, dOptions).value();
     auto& ddSurfaces = ddResult.template get<SurfaceCollector<>::result_type>();
     auto& ddOutput = ddResult.template get<DebugOutput::result_type>();
-    auto& ddMaterial = ddResult.template get<MaterialInteractor::result_type>();
+    auto& ddMaterial =
+        ddResult.template get<MaterialInteractor<>::result_type>();
 
     // CHECK if you have as many surfaces collected as the default navigator
     BOOST_CHECK_EQUAL(cSurfaces.collected.size(), ddSurfaces.collected.size());

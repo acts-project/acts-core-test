@@ -245,8 +245,8 @@ BOOST_DATA_TEST_CASE(
 
   using DebugOutput = detail::DebugOutputActor;
 
-  PropagatorOptions<ActionList<MaterialInteractor<fullUpdate>, DebugOutput>>
-      options(tgContext, mfContext);
+  PropagatorOptions<ActionList<MaterialInteractor<>, DebugOutput>> options(
+      tgContext, mfContext);
   options.debug = debugMode;
   options.maxStepSize = 25_cm;
   options.pathLimit = 25_cm;
@@ -310,8 +310,8 @@ BOOST_DATA_TEST_CASE(
   // Action list and abort list
   using DebugOutput = detail::DebugOutputActor;
 
-  PropagatorOptions<ActionList<MaterialInteractor<fullUpdate>, DebugOutput>>
-      options(tgContext, mfContext);
+  PropagatorOptions<ActionList<MaterialInteractor<>, DebugOutput>> options(
+      tgContext, mfContext);
   options.maxStepSize = 25_cm;
   options.pathLimit = 1500_mm;
 

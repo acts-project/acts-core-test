@@ -112,7 +112,7 @@ void runTest(const propagator_t& prop, double pT, double phi, double theta,
   using DebugOutput = detail::DebugOutputActor;
 
   // Action list and abort list
-  using MaterialInteractor = MaterialInteractor<fullUpdate>;
+  using MaterialInteractor = MaterialInteractor<>;
   using ActionListType = ActionList<MaterialInteractor, DebugOutput>;
   using AbortListType = AbortList<>;
 

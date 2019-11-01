@@ -15,6 +15,7 @@
 #include "Acts/Utilities/Logger.hpp"
 #include "Acts/Utilities/Result.hpp"
 #include "Acts/Fitter/detail/VoidKalmanComponents.hpp"
+#include "Acts/Utilities/Logger.hpp"
 
 namespace Acts {
 
@@ -151,11 +152,13 @@ class GainMatrixSmoother {
       // Replace the non positive definite matrix with the nearest symmetric positive semidefinite matrix!
       // Reference at https://doi.org/10.1016/0024-3795(88)90223-6
       if( lltCov.info() == Eigen::NumericalIssue) {
+        ACTS_VERBOSE("Smoothed covariance is non positive definite.");
         Eigen::BDCSVD<CovMatrix_t> svdCov(smoothedCov,  Eigen::ComputeFullU| Eigen::ComputeFullV);
         CovMatrix_t S = svdCov.singularValues().asDiagonal();
         CovMatrix_t V = svdCov.matrixV();
         CovMatrix_t H = V * S * V.transpose(); 
         smoothedCov = (smoothedCov + H )/2; 
+        ACTS_VERBOSE("Smoothed covariance is replaced by the nearest symmetric positive semidefinite matrix: \n" << smoothedCov);
       }
 
       // clang-format on
@@ -178,6 +181,7 @@ class GainMatrixSmoother {
       if (!isOutlier) {
         prev_ts = &ts;
       } else {
+        ACTS_VERBOSE("This state is outlier. Prev. not updated.");
         ts.setType(TrackStateFlag::OutlierFlag, true);
       }
     }
@@ -193,8 +197,5 @@ class GainMatrixSmoother {
     assert(m_logger);
     return *m_logger;
   }
- private:
-  /// The outlier rejector
-  outlier_rejector_t m_outlierRejector;
 };
 }  // namespace Acts

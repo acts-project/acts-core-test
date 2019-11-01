@@ -49,7 +49,7 @@ struct MaterialInteraction {
 /// This is a plugin to the Propagator that
 /// performs material interaction on the currentSurface
 /// of the Propagagor state
-template <InteractionMode_t updateStage>
+template <InteractionMode_t updateStage = fullUpdate>
 struct MaterialInteractor {
   // Configuration for this MaterialInteractor
 
@@ -319,7 +319,7 @@ struct MaterialInteractor {
 };
 
 /// Using some short hands for Recorded Material
-using RecordedMaterial = MaterialInteractor<fullUpdate>::result_type;
+using RecordedMaterial = MaterialInteractor<>::result_type;
 
 /// And recorded material track
 /// - this is start:  position, start momentum
