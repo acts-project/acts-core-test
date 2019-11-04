@@ -78,17 +78,21 @@ class RiddersPropagator {
   ///
   /// @tparam parameters_t Type of the start parameters
   /// @tparam propagator_options_t Type of the propagator options
+  /// @tparam return_parameters_t Type of the return parameters
   ///
   /// @param [in] start Start parameters
   /// @param [in] options Options of the propagations
   ///
   /// @return Result of the propagation
-  template <typename parameters_t, typename propagator_options_t>
-  Result<action_list_t_result_t<
-      CurvilinearParameters, typename propagator_options_t::action_list_type>>
-  propagate(const parameters_t& start,
-            const propagator_options_t& options) const;
-
+  template <typename parameters_t, typename propagator_options_t,
+			typename return_parameters_t = CurvilinearParameters>
+  Result<
+      action_list_t_result_t<return_parameters_t,
+                             typename propagator_options_t::action_list_type>>
+  propagate(
+      const parameters_t& start,
+      const propagator_options_t& options) const;
+            
   /// @brief Propagation method targeting bound parameters
   ///
   /// @tparam parameters_t Type of the start parameters
