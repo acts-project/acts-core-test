@@ -25,6 +25,7 @@
 #include "Acts/Propagator/detail/StandardAborters.hpp"
 #include "Acts/Utilities/CalibrationContext.hpp"
 #include "Acts/Utilities/Definitions.hpp"
+#include "Acts/Utilities/FiniteStateMachine.hpp"
 #include "Acts/Utilities/Logger.hpp"
 
 namespace Acts {
@@ -65,25 +66,196 @@ struct KalmanFitterOptions {
   const Surface* referenceSurface = nullptr;
 };
 
-template <typename source_link_t, typename parameters_t>
-struct KalmanFitterResult {
-  // Fitted states that the actor has handled.
-  std::vector<TrackState<source_link_t, parameters_t>> fittedStates = {};
+struct KalmanFitterStates {
+  struct Uninitialized {
+    static constexpr std::string_view name{"Uninitialized"};
+  };
+  struct Filtering {
+    static constexpr std::string_view name{"Filtering"};
+  };
+  struct Smoothing {
+    static constexpr std::string_view name{"Smoothing"};
+  };
+  struct Finalizing {
+    static constexpr std::string_view name{"Finalizing"};
+  };
+  struct Completed {
+    static constexpr std::string_view name{"Completed"};
+  };
+};
 
-  // The optional Parameters at the provided surface
-  boost::optional<BoundParameters> fittedParameters;
+struct KalmanFitterEvents {
+  struct Step {
+    static constexpr std::string_view name{"Step"};
+  };
+};
 
-  // Counter for handled states
-  size_t processedStates = 0;
+using States = KalmanFitterStates;
+using Events = KalmanFitterEvents;
+struct FSM : FiniteStateMachine<FSM, States::Uninitialized, States::Filtering,
+                                States::Smoothing, States::Finalizing,
+                                States::Completed> {
+  template <typename propagator_state_t, typename stepper_t, typename result_t,
+            typename actor_t>
+  auto on_event(const States::Uninitialized&, const Events::Step&,
+                const Logger& logger, const actor_t& actor,
+                propagator_state_t& state, const stepper_t& stepper,
+                result_t& result) -> event_return {
+    m_logger = &logger;
 
-  // Indicator if smoothing has been done.
-  bool smoothed = false;
+    result.initialized = true;
 
-  // Indicator if initialization has been performed.
-  bool initialized = false;
+    // switch to filtering right away, and re-execute the step
+    setState(States::Filtering{});
+    return process_event(Events::Step{}, logger, actor, state, stepper, result);
+  }
 
-  // Measurement surfaces without hits
-  std::vector<const Surface*> missedActiveSurfaces = {};
+  template <typename propagator_state_t, typename stepper_t, typename result_t,
+            typename actor_t>
+  event_return on_event(const States::Filtering&, const Events::Step&,
+                        const Logger&, const actor_t& actor,
+                        propagator_state_t& state, const stepper_t& stepper,
+                        result_t& result) {
+    auto surface = state.navigation.currentSurface;
+    if (!surface) {
+      return std::nullopt;
+    }
+
+    // Try to find the surface in the measurement surfaces
+    auto sourcelink_it = actor.inputMeasurements.find(surface);
+    if (sourcelink_it != actor.inputMeasurements.end()) {
+      // Screen output message
+      ACTS_VERBOSE("Measurement surface " << surface->geoID().toString()
+                                          << " detected.");
+
+      // create track state on the vector from sourcelink
+      result.fittedStates.emplace_back(sourcelink_it->second);
+      auto& trackState = result.fittedStates.back();
+
+      // Transport & bind the state to the current surface
+      auto boundState = stepper.boundState(state.stepping, *surface, true);
+      // Fill the track state
+      trackState.parameter.predicted = std::get<0>(boundState);
+      trackState.parameter.jacobian = std::get<1>(boundState);
+      trackState.parameter.pathLength = std::get<2>(boundState);
+
+      // If the update is successful, set covariance and
+      if (actor.m_updater(state.geoContext, trackState)) {
+        // Update the stepping state
+        ACTS_VERBOSE("Filtering step successful, updated parameters are : \n"
+                     << *trackState.parameter.filtered);
+        // update stepping state using filtered parameters
+        // after kalman update
+        stepper.update(state.stepping, *trackState.parameter.filtered);
+      }
+      // We count the processed state
+      ++result.processedStates;
+    } else if (surface->associatedDetectorElement() != nullptr) {
+      // Count the missed surface
+      ACTS_VERBOSE("Detected hole on " << surface->geoID().toString());
+      result.missedActiveSurfaces.push_back(surface);
+    }
+
+    if (result.processedStates == actor.inputMeasurements.size()) {
+      return States::Smoothing{};
+    }
+    return std::nullopt;
+  }
+
+  template <typename propagator_state_t, typename stepper_t, typename result_t,
+            typename actor_t>
+  event_return on_event(const States::Smoothing&, const Events::Step&,
+                        const Logger&, const actor_t& actor,
+                        propagator_state_t& state, const stepper_t& stepper,
+                        result_t& result) {
+    // Sort the TrackStates according to the path length
+    TrackStatePathLengthSorter plSorter;
+    std::sort(result.fittedStates.begin(), result.fittedStates.end(), plSorter);
+    // Screen output for debugging
+    ACTS_VERBOSE("Apply smoothing on " << result.fittedStates.size()
+                                       << " filtered track states.");
+    // Smooth the track states and obtain the last smoothed track parameters
+    const auto& smoothedPars =
+        actor.m_smoother(state.geoContext, result.fittedStates);
+    // Update the stepping parameters - in order to progress to destination
+    if (smoothedPars) {
+      // Update the stepping state
+      ACTS_VERBOSE(
+          "Smoothing successful, updating stepping state, "
+          "set target surface.");
+      ACTS_VERBOSE(*smoothedPars);
+      stepper.update(state.stepping, smoothedPars.get());
+      // Reverse the propagation direction
+      state.stepping.stepSize =
+          detail::ConstrainedStep(-1. * state.options.maxStepSize);
+      state.options.direction = backward;
+    }
+
+    // Remember you smoothed the track states
+    result.smoothed = true;
+
+    return States::Finalizing{};
+  }
+
+  template <typename propagator_state_t, typename stepper_t, typename result_t,
+            typename actor_t>
+  event_return on_event(const States::Finalizing&, const Events::Step&,
+                        const Logger&, const actor_t& actor,
+                        propagator_state_t& state, const stepper_t& stepper,
+                        result_t& result) {
+    if (actor.targetReached(state, stepper, *actor.targetSurface)) {
+      // Transport & bind the parameter to the final surface
+      auto fittedState =
+          stepper.boundState(state.stepping, *actor.targetSurface, true);
+      // Assign the fitted parameters
+      result.fittedParameters = std::get<BoundParameters>(fittedState);
+      // Break the navigation for stopping the Propagation
+      state.navigation.navigationBreak = true;
+
+      return States::Completed{};
+    }
+    if (logger().doPrint(Logging::VERBOSE)) {
+      std::stringstream ss;
+      actor.targetSurface->toStream(state.geoContext, ss);
+      ACTS_VERBOSE("Propagating to reference surface:\n" << ss.str());
+      auto [curvParam, jac, pl] = stepper.curvilinearState(state.stepping);
+      ACTS_VERBOSE("Current position: "
+                   << stepper.position(state.stepping).transpose() << ", dir: "
+                   << stepper.direction(state.stepping).transpose());
+      ACTS_VERBOSE("Cov:\n" << state.stepping.cov);
+    }
+    return std::nullopt;
+  }
+
+  // template <typename E>
+  // void on_process(const E&) {
+  // if (m_logger != nullptr) {
+  // ACTS_VERBOSE("FSM: (" << E::name << ")")
+  //}
+  //}
+
+  template <typename S1, typename E>
+  void on_process(const S1&, const E&) {
+    // if (m_logger != nullptr) {
+    ACTS_VERBOSE("FSM: [" << S1::name << "] + (" << E::name << ")");
+    // std::cout << "FSM: [" << S1::name << "] + (" << E::name << ")" <<
+    // std::endl;
+    //}
+  }
+
+  template <typename S1, typename E, typename S2>
+  void on_process(const S1&, const E&, const S2&) {
+    // if (m_logger != nullptr) {
+    ACTS_VERBOSE("FSM: [" << S1::name << "] + (" << E::name << ") -> "
+                          << S2::name);
+    // std::cout << "FSM: [" << S1::name << "] + (" << E::name << ") -> "
+    //<< S2::name << std::endl;
+    //}
+  }
+
+  const Logger& logger() const { return *m_logger; }
+
+  const Logger* m_logger{nullptr};
 };
 
 /// @brief Kalman fitter implementation of Acts as a plugin
@@ -241,7 +413,29 @@ class KalmanFitter {
           m_calibrator(std::move(pCalibrator)) {}
 
     /// Broadcast the result_type
-    using result_type = KalmanFitterResult<source_link_t, parameters_t>;
+    // using result_type = KalmanFitterResult<source_link_t, parameters_t>;
+    // template <typename source_link_t, typename parameters_t>
+    struct result_type {
+      // Fitted states that the actor has handled.
+      std::vector<TrackState<source_link_t, parameters_t>> fittedStates = {};
+
+      // The optional Parameters at the provided surface
+      boost::optional<BoundParameters> fittedParameters;
+
+      // Counter for handled states
+      size_t processedStates = 0;
+
+      // Indicator if smoothing has been done.
+      bool smoothed = false;
+
+      // Indicator if initialization has been performed.
+      bool initialized = false;
+
+      // Measurement surfaces without hits
+      std::vector<const Surface*> missedActiveSurfaces = {};
+
+      FSM fsm{};
+    };
 
     /// The target surface
     const Surface* targetSurface = nullptr;
@@ -260,18 +454,22 @@ class KalmanFitter {
     template <typename propagator_state_t, typename stepper_t>
     void operator()(propagator_state_t& state, const stepper_t& stepper,
                     result_type& result) const {
+      result.fsm.dispatch(Events::Step{}, *m_logger, *this, state, stepper,
+                          result);
+
+      /*
       // Initialization:
       // - Only when track states are not set
       if (!result.initialized) {
         // -> Move the TrackState vector
-        // -> Feed the KalmanSequencer with the measurements to be fitted
-        initialize(state, stepper, result);
+        // -> Feed the KalmanSequencer with the measurements to be
+        fitted initialize(state, stepper, result);
         result.initialized = true;
       }
 
       // Update:
-      // - Waiting for a current surface that appears in the measurement list
-      auto surface = state.navigation.currentSurface;
+      // - Waiting for a current surface that appears in the measurement
+      list auto surface = state.navigation.currentSurface;
       if (surface and not result.smoothed) {
         // Check if the surface is in the measurement map
         // -> Get the measurement / calibrate
@@ -294,7 +492,8 @@ class KalmanFitter {
       // Post-finalization:
       // - Progress to target/reference surface and built the final track
       // parameters
-      if (result.smoothed and targetReached(state, stepper, *targetSurface)) {
+      if (result.smoothed and
+          targetReached(state, stepper, *targetSurface)) {
         // Transport & bind the parameter to the final surface
         auto fittedState =
             stepper.boundState(state.stepping, *targetSurface, true);
@@ -303,6 +502,7 @@ class KalmanFitter {
         // Break the navigation for stopping the Propagation
         state.navigation.navigationBreak = true;
       }
+      */
     }
 
     /// @brief Kalman actor operation : initialize
