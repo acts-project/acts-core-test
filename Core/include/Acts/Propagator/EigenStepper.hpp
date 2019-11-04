@@ -40,19 +40,6 @@ template <typename BField, typename corrector_t = VoidIntersectionCorrector,
           typename extensionlist_t = StepperExtensionList<DefaultExtension>,
           typename auctioneer_t = detail::VoidAuctioneer>
 class EigenStepper {
- private:
-  // This struct is a meta-function which normally maps to BoundParameters...
-  template <typename T, typename S>
-  struct s {
-    using type = BoundParameters;
-  };
-
-  // ...unless type S is int, in which case it maps to Curvilinear parameters
-  template <typename T>
-  struct s<T, int> {
-    using type = CurvilinearParameters;
-  };
-
  public:
   using cstep = detail::ConstrainedStep;
   using Corrector = corrector_t;
@@ -181,12 +168,6 @@ class EigenStepper {
       Vector3D k1, k2, k3, k4;
     } stepData;
   };
-
-  /// Return parameter types depend on the propagation mode:
-  /// - when propagating to a surface we usually return BoundParameters
-  /// - otherwise CurvilinearParameters
-  template <typename T, typename S = int>
-  using return_parameter_type = typename s<T, S>::type;
 
   /// Constructor requires knowledge of the detector's magnetic field
   EigenStepper(BField bField = BField());

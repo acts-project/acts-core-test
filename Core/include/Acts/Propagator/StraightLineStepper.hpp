@@ -27,18 +27,42 @@ namespace Acts {
 /// to be used to navigate through the tracking geometry. It can be
 /// used for simple material mapping, navigation validation
 class StraightLineStepper {
- private:
-  // This struct is a meta-function which normally maps to BoundParameters...
-  template <typename T, typename S>
-  struct s {
-    using type = BoundParameters;
-  };
+ //~ private:
+  //~ // This struct is a meta-function which normally maps to BoundParameters...
+  //~ template <typename Start, typename End, typename Surface>
+  //~ struct s {
+    //~ using type = BoundParameters;
+  //~ };
+  
+  //~ template<bool S, bool E, std::enable_if_t<S and E, int> = 0
+		  //~ >
+  //~ struct JacobianHelper
+  //~ {
+	  //~ using type = BoundMatrix;
+  //~ };
+  //~ template<>
+  //~ struct JacobianHelper<true, false>
+  //~ {
+	  //~ using type = BoundToFreeMatrix;
+  //~ };
+  //~ template<>
+  //~ struct JacobianHelper<false, true>
+  //~ {
+	  //~ using type = FreeToBoundMatrix;
+  //~ };
+  //~ template<>
+  //~ struct JacobianHelper<false, false>
+  //~ {
+	  //~ using type = FreeMatrix;
+  //~ };
 
-  // ...unless type S is int, in which case it maps to Curvilinear parameters
-  template <typename T>
-  struct s<T, int> {
-    using type = CurvilinearParameters;
-  };
+  //~ // ...unless type S is int, in which case it maps to Curvilinear parameters
+  //~ template <typename Start, typename End>
+  //~ struct s<Start, End, int> {
+	  //~ using JacobianType = typename JacobianHelper<Start::is_local_representation, End::is_local_representation>::type;
+    //~ using type = std::tuple<End, JacobianType, double>;
+    //~ using type = CurvilinearParameters;
+  //~ };
 
  public:
   using cstep = detail::ConstrainedStep;
@@ -172,11 +196,11 @@ class StraightLineStepper {
   /// track parameter type and of the target surface
   using state_type = State;
 
-  /// Return parameter types depend on the propagation mode:
-  /// - when propagating to a surface we return BoundParameters
-  /// - otherwise CurvilinearParameters
-  template <typename parameters_t, typename surface_t = int> // TODO: Would it be possible to include the free state into this descision scheme?
-  using return_parameter_type = typename s<parameters_t, surface_t>::type;
+  //~ /// Return parameter types depend on the propagation mode:
+  //~ /// - when propagating to a surface we return BoundParameters
+  //~ /// - otherwise CurvilinearParameters
+  //~ template <typename start_parameters_t, typename surface_t = int, typename end_parameters_t = start_parameters_t> // TODO: Would it be possible to include the free state into this descision scheme?
+  //~ using return_parameter_type = typename s<start_parameters_t, end_parameters_t, surface_t>::type;
 
   /// Constructor
   StraightLineStepper() = default;

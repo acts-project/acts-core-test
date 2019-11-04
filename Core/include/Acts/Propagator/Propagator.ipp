@@ -83,18 +83,18 @@ auto Acts::Propagator<S, N>::propagate_impl(propagator_state_t& state) const
 
 template <typename S, typename N>
 template <typename parameters_t, typename propagator_options_t,
+		  typename return_parameters_t,
           typename path_aborter_t>
 auto Acts::Propagator<S, N>::propagate(
     const parameters_t& start, const propagator_options_t& options) const
     -> Result<action_list_t_result_t<
-        typename S::template return_parameter_type<parameters_t>,
+        return_parameters_t,
         typename propagator_options_t::action_list_type>> {
   static_assert(ParameterConcept<parameters_t>,
                 "Parameters do not fulfill parameter concept.");
 
   // Type of track parameters produced by the propagation
-  using ReturnParameterType =
-      typename S::template return_parameter_type<parameters_t>;
+  using ReturnParameterType = return_parameters_t;
 
   // Type of the full propagation result, including output from actions
   using ResultType =
@@ -155,14 +155,13 @@ auto Acts::Propagator<S, N>::propagate(
     const parameters_t& start, const Surface& target,
     const propagator_options_t& options) const
     -> Result<action_list_t_result_t<
-        typename S::template return_parameter_type<parameters_t, Surface>,
+        BoundParameters,
         typename propagator_options_t::action_list_type>> {
   static_assert(ParameterConcept<parameters_t>,
                 "Parameters do not fulfill parameter concept.");
 
   // Type of track parameters produced at the end of the propagation
-  using return_parameter_type =
-      typename S::template return_parameter_type<parameters_t, Surface>;
+  using return_parameter_type = BoundParameters;
 
   // Type of provided options
   target_aborter_t targetAborter;
