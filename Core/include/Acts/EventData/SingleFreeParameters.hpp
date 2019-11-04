@@ -39,6 +39,9 @@ class SingleFreeParameters {
 
  public:
   /// Public typedefs
+  //~ static constexpr bool is_local_representation = false;
+  using is_local_representation = std::false_type;
+  
   /// Type of covariance matrix
   using CovMatrix_t = FreeSymMatrix;
 

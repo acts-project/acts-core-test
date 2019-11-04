@@ -21,48 +21,66 @@
 
 namespace Acts {
 
+
+  template<bool S, bool E>
+  struct JacobianHelper {
+	  using type = int;
+  };
+  
+  //~ template<typename S, typename E, std::enable_if_t<S::is_local_representation and E::is_local_representation, int>>
+  //~ template<bool S, bool E,  std::enable_if_t<S and E, int>>
+  template<>
+  struct JacobianHelper<true, true> //<std::integral_constant<S, true>::value, std::is_same<std::bool_constant<E>, std::true_type>::value>
+  {
+	  using type = BoundMatrix;
+  };
+  
+  //~ template<typename S, typename E, std::enable_if_t<S::is_local_representation and not E::is_local_representation, int>>
+  template<>
+  struct JacobianHelper<true, false>
+  {
+	  using type = BoundToFreeMatrix;
+  };
+  
+  //~ template<typename S, typename E, std::enable_if_t<not S::is_local_representation and E::is_local_representation, int>>
+template<>
+  struct JacobianHelper<false, true>  
+  {
+	  using type = FreeToBoundMatrix;
+  };
+  
+  //~ template<typename S, typename E, std::enable_if_t<not S::is_local_representation and not E::is_local_representation, int>>
+template<>
+  struct JacobianHelper<false, false>  
+  {
+	  using type = FreeMatrix;
+  };
+  
+  
 /// @brief straight line stepper based on Surface intersection
 ///
 /// The straight line stepper is a simple navigation stepper
 /// to be used to navigate through the tracking geometry. It can be
 /// used for simple material mapping, navigation validation
 class StraightLineStepper {
- //~ private:
-  //~ // This struct is a meta-function which normally maps to BoundParameters...
-  //~ template <typename Start, typename End, typename Surface>
-  //~ struct s {
-    //~ using type = BoundParameters;
-  //~ };
+ private:
+  // This struct is a meta-function which normally maps to BoundParameters...
+  template <typename Start, typename End, typename Surface>
+  struct s {
+    using type = BoundParameters;
+  };
   
-  //~ template<bool S, bool E, std::enable_if_t<S and E, int> = 0
-		  //~ >
-  //~ struct JacobianHelper
-  //~ {
-	  //~ using type = BoundMatrix;
-  //~ };
-  //~ template<>
-  //~ struct JacobianHelper<true, false>
-  //~ {
-	  //~ using type = BoundToFreeMatrix;
-  //~ };
-  //~ template<>
-  //~ struct JacobianHelper<false, true>
-  //~ {
-	  //~ using type = FreeToBoundMatrix;
-  //~ };
-  //~ template<>
-  //~ struct JacobianHelper<false, false>
-  //~ {
-	  //~ using type = FreeMatrix;
-  //~ };
 
-  //~ // ...unless type S is int, in which case it maps to Curvilinear parameters
-  //~ template <typename Start, typename End>
-  //~ struct s<Start, End, int> {
-	  //~ using JacobianType = typename JacobianHelper<Start::is_local_representation, End::is_local_representation>::type;
-    //~ using type = std::tuple<End, JacobianType, double>;
+
+
+  // ...unless type S is int, in which case it maps to Curvilinear parameters
+  template <typename Start, typename End>
+  struct s<Start, End, int> {
+	using JacobianType = typename JacobianHelper<Start::is_local_representation, End::is_local_representation>::type;
+	//~ using JacobianType = int;
+    using type = std::tuple<End, JacobianType, double>;
     //~ using type = CurvilinearParameters;
-  //~ };
+  };
 
  public:
   using cstep = detail::ConstrainedStep;
@@ -196,11 +214,11 @@ class StraightLineStepper {
   /// track parameter type and of the target surface
   using state_type = State;
 
-  //~ /// Return parameter types depend on the propagation mode:
-  //~ /// - when propagating to a surface we return BoundParameters
-  //~ /// - otherwise CurvilinearParameters
-  //~ template <typename start_parameters_t, typename surface_t = int, typename end_parameters_t = start_parameters_t> // TODO: Would it be possible to include the free state into this descision scheme?
-  //~ using return_parameter_type = typename s<start_parameters_t, end_parameters_t, surface_t>::type;
+  /// Return parameter types depend on the propagation mode:
+  /// - when propagating to a surface we return BoundParameters
+  /// - otherwise CurvilinearParameters
+  template <typename start_parameters_t, typename surface_t = int, typename end_parameters_t = start_parameters_t> // TODO: Would it be possible to include the free state into this descision scheme?
+  using return_state_type = typename s<start_parameters_t, end_parameters_t, surface_t>::type;
 
   /// Constructor
   StraightLineStepper() = default;

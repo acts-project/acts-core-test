@@ -40,6 +40,8 @@ class SingleTrackParameters {
 
  public:
   // public typedef's
+  //~ static constexpr bool is_local_representation = true;
+  using is_local_representation = std::true_type;
 
   /// vector type for stored track parameters
   using ParVector_t = BoundVector;
