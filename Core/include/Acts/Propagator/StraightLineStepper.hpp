@@ -49,7 +49,7 @@ class StraightLineStepper {
   /// @param [in,out] state is the propagation state associated with the track
   ///                 the magnetic field cell is used (and potentially updated)
   /// @param [in] pos is the field position
-  Vector3D getField(StepperState& /*state*/, const Vector3D& /*pos*/) const {
+  Vector3D getField(State& /*state*/, const Vector3D& /*pos*/) const {
     // get the field from the cell
     return Vector3D(0., 0., 0.);
   }
@@ -142,15 +142,28 @@ class StraightLineStepper {
     return state.stepSize.toString();
   }
 
-  template<typename start_parameters_t, typename end_parameters_t = start_parameters_t>
+  /// @brief Final state builder without a target surface
+  ///
+  /// @tparam start_parameters_t Type of the start parameters
+  /// @tparam end_parameters_t Type of the end parameters
+  ///
+  /// @param [in, out] state State of the propagation
+  /// @param [in] reinitialize Boolean flag whether reinitialization is needed,
+  /// i.e. if this is an intermediate state of a larger propagation
+  ///
+  /// @return std::tuple conatining the final state parameters, the jacobian & the accumulated path
+  template<bool start_local, typename end_parameters_t>
   auto 
-  buildState(StepperState& state, bool reinitialize) const
+  buildState(State& state, bool reinitialize) const
   {	  
-	  using return_type = detail::return_state_type<start_parameters_t, end_parameters_t>;
+	  // The return type
+	  using return_type = detail::return_state_type<start_local, end_parameters_t>;
+	  // If the result should be local it is curvilinear
 	  if constexpr (end_parameters_t::is_local_representation)
 	  {
 		 return covTransport.curvilinearState<return_type>(state, reinitialize);
 	  }
+	  // else it is free
 	  else
 	  {
 		   return covTransport.freeState<return_type>(state, reinitialize);
@@ -165,23 +178,13 @@ class StraightLineStepper {
   /// @param [in] state State that will be presented as @c BoundState
   /// @param [in] surface The surface to which we bind the state
   ///
-  /// @return A bound state:
-  ///   - the parameters at the surface
-  ///   - the stepwise jacobian towards it (from last bound)
-  ///   - and the path length (from start - for ordering)
-  BoundState boundState(State& state, const Surface& surface) const;
-
-  /// Create and return a curvilinear state at the current position
-  ///
-  /// @brief This creates a curvilinear state.
-  ///
-  /// @param [in] state State that will be presented as @c CurvilinearState
-  ///
-  /// @return A curvilinear state:
-  ///   - the curvilinear parameters at given position
-  ///   - the stepweise jacobian towards it (from last bound)
-  ///   - and the path length (from start - for ordering)
-  CurvilinearState curvilinearState(State& state) const;
+  /// @return std::tuple conatining the final state parameters, the jacobian & the accumulated path
+  template<bool start_local>
+  auto 
+  buildState(State& state, const Surface& surface, bool reinitialize) const {
+	  using return_type = detail::return_state_type<start_local, BoundParameters, Surface>;
+	  	  return covTransport.boundState<return_type>(state, surface, reinitialize);
+  }
 
   /// Method to update a stepper state to the some parameters
   ///
@@ -261,6 +264,7 @@ class StraightLineStepper {
   }
 
 private:
+	/// The covariance transporter engine
 	CovarianceTransport covTransport;
 };
 

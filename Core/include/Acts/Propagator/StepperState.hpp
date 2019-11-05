@@ -37,7 +37,7 @@ struct StepperState {
   /// @param [in] ndir is the navigation direction
   /// @param [in] ssize is the (absolute) maximum step size
   /// @param [in] stolerance is the stepping tolerance
-  template <typename parameters_t, std::enable_if_t<std::is_same<typename parameters_t::CovMatrix_t, BoundSymMatrix>::value, int> = 0>
+  template <typename parameters_t, std::enable_if_t<parameters_t::is_local_representation, int> = 0>
   explicit StepperState(
       std::reference_wrapper<const GeometryContext> gctx,
       std::reference_wrapper<const MagneticFieldContext> /*mctx*/,
@@ -74,7 +74,7 @@ struct StepperState {
     /// @param [in] ndir is the navigation direction
     /// @param [in] ssize is the (absolute) maximum step size
     /// @param [in] stolerance is the stepping tolerance
-    template <typename parameters_t, std::enable_if_t<std::is_same<typename parameters_t::CovMatrix_t, FreeSymMatrix>::value, int> = 0>
+    template <typename parameters_t, std::enable_if_t<not parameters_t::is_local_representation, int> = 0>
     explicit StepperState(std::reference_wrapper<const GeometryContext> gctx,
                    std::reference_wrapper<const MagneticFieldContext> /*mctx*/,
                    const parameters_t& par, NavigationDirection ndir = forward,
@@ -144,5 +144,8 @@ struct StepperState {
 
   /// Cache the geometry context of this propagation
   std::reference_wrapper<const GeometryContext> geoContext;
+  
+  /// Flag to indicate if the propagation started in local or global parameters
+  bool localStart;
 };
 }  // namespace Acts

@@ -135,17 +135,43 @@ auto Acts::Propagator<S, N>::propagate(
   if (result.ok()) {
     auto& propRes = *result;
     /// Convert into return type and fill the result object
-    auto curvState = m_stepper.buildState(state.stepping);
-    auto& curvParameters = std::get<CurvilinearParameters>(curvState);
-    // Fill the end parameters
-    propRes.endParameters = std::make_unique<const CurvilinearParameters>(
-        std::move(curvParameters));
-    // Only fill the transport jacobian when covariance transport was done
-    if (state.stepping.covTransport) {
-      auto& tJacobian = std::get<1>(curvState);
-      propRes.transportJacobian =
-          std::make_unique<const Jacobian>(std::move(tJacobian));
-    }
+    if(parameters_t::is_local_representation)
+    {
+		auto curvState = m_stepper.buildState<ReturnParameterType>(state.stepping);
+		auto& curvParameters = std::get<ReturnParameterType>(curvState);
+		// Fill the end parameters
+		propRes.endParameters = std::make_unique<ReturnParameterType>(
+			std::move(curvParameters));
+		// Only fill the transport jacobian when covariance transport was done
+		if (state.stepping.covTransport) {
+		  auto& tJacobian = std::get<Jacobian>(curvState);
+		  propRes.transportJacobian =
+			  std::make_unique<Jacobian>(std::move(tJacobian));
+		}
+	}
+	else
+	{
+		auto curvState =  m_stepper.buildState<ReturnParameterType>(state.stepping);
+		auto& curvParameters = std::get<ReturnParameterType>(curvState);
+		// Fill the end parameters
+		propRes.endParameters = std::make_unique<ReturnParameterType>(
+			std::move(curvParameters));
+		// Only fill the transport jacobian when covariance transport was done
+		if (state.stepping.covTransport) {
+			if constexpr (ReturnParameterType::is_local_representation)
+			{
+			  auto& tJacobian = std::get<Jacobian>(curvState);
+			  propRes.transportJacobian =
+				  std::make_unique<Jacobian>(std::move(tJacobian));
+			}
+			else
+			{
+				auto& tJacobian = std::get<Jacobian>(curvState);
+			  propRes.transportJacobian =
+				  std::make_unique<Jacobian>(std::move(tJacobian));
+			}
+		}
+	}
     return result;
   } else {
     return result.error();
@@ -164,7 +190,7 @@ auto Acts::Propagator<S, N>::propagate(
                 "Parameters do not fulfill parameter concept.");
 
   // Type of track parameters produced at the end of the propagation
-  using return_parameter_type = BoundParameters;
+  using ReturnParameterType = BoundParameters;
 
   // Type of provided options
   target_aborter_t targetAborter;
@@ -178,7 +204,7 @@ auto Acts::Propagator<S, N>::propagate(
 
   // Type of the full propagation result, including output from actions
   using ResultType =
-      action_list_t_result_t<return_parameter_type,
+      action_list_t_result_t<ReturnParameterType,
                              typename propagator_options_t::action_list_type>;
 
   // Initialize the internal propagator state
@@ -202,17 +228,34 @@ auto Acts::Propagator<S, N>::propagate(
   if (result.ok()) {
     auto& propRes = *result;
     // Compute the final results and mark the propagation as successful
-    auto bs = m_stepper.buildState(state.stepping, target);
-    auto& boundParameters = std::get<BoundParameters>(bs);
-    // Fill the end parameters
-    propRes.endParameters =
-        std::make_unique<const BoundParameters>(std::move(boundParameters));
-    // Only fill the transport jacobian when covariance transport was done
-    if (state.stepping.covTransport) {
-      auto& tJacobian = std::get<const Jacobian>(bs);
-      propRes.transportJacobian =
-          std::make_unique<const Jacobian>(std::move(tJacobian));
-    }
+    if(state.stepping.localStart)
+    {
+		auto bs = m_stepper.buildState(state.stepping, target);
+		auto& boundParameters = std::get<BoundParameters>(bs);
+		// Fill the end parameters
+		propRes.endParameters =
+			std::make_unique<BoundParameters>(std::move(boundParameters));
+		// Only fill the transport jacobian when covariance transport was done
+		if (state.stepping.covTransport) {
+		  auto& tJacobian = std::get<Jacobian>(bs);
+		  propRes.transportJacobian =
+			  std::make_unique<Jacobian>(std::move(tJacobian));
+		}
+	}
+	else
+	{
+		auto bs = m_stepper.buildState(state.stepping, target);
+		auto& boundParameters = std::get<BoundParameters>(bs);
+		// Fill the end parameters
+		propRes.endParameters =
+			std::make_unique<BoundParameters>(std::move(boundParameters));
+		// Only fill the transport jacobian when covariance transport was done
+		if (state.stepping.covTransport) {
+		  auto& tJacobian = std::get<Jacobian>(bs);
+		  propRes.transportJacobian =
+			  std::make_unique<Jacobian>(std::move(tJacobian));
+		}
+	}
     return result;
   } else {
     return result.error();

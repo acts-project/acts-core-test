@@ -13,19 +13,6 @@ Acts::EigenStepper<B, E, A>::EigenStepper(B bField)
     : m_bField(std::move(bField)) {}
 
 template <typename B, typename E, typename A>
-auto Acts::EigenStepper<B, E, A>::boundState(State& state,
-                                             const Surface& surface) const
-    -> BoundState {
-  return detail::boundState(state, surface);
-}
-
-template <typename B, typename E, typename A>
-auto Acts::EigenStepper<B, E, A>::curvilinearState(State& state) const
-    -> CurvilinearState {
-  return detail::curvilinearState(state);
-}
-
-template <typename B, typename E, typename A>
 void Acts::EigenStepper<B, E, A>::update(State& state,
                                          const BoundParameters& pars) const {
   const auto& mom = pars.momentum();
@@ -60,6 +47,32 @@ void Acts::EigenStepper<B, E, A>::covarianceTransport(
   detail::covarianceTransport(state, &surface);
 }
 
+  template<bool start_local, typename end_parameters_t>
+  auto 
+  Acts::EigenStepper<B, E, A>::buildState(State& state, bool reinitialize) const
+  {	  
+	  // The return type
+	  using return_type = detail::return_state_type<start_local, end_parameters_t>;
+	  // If the result should be local it is curvilinear
+	  if constexpr (end_parameters_t::is_local_representation)
+	  {
+		 return covTransport.curvilinearState<return_type>(state, reinitialize);
+	  }
+	  // else it is free
+	  else
+	  {
+		   return covTransport.freeState<return_type>(state, reinitialize);
+	  }
+  }
+
+template <typename B, typename E, typename A>
+  template<bool start_local>
+  auto 
+  Acts::EigenStepper<B, E, A>::buildState(State& state, const Surface& surface, bool reinitialize) const {
+	  using return_type = detail::return_state_type<start_local, BoundParameters, Surface>;
+	  return covTransport.boundState<return_type>(state, surface, reinitialize);
+  }
+  
 template <typename B, typename E, typename A>
 template <typename propagator_state_t>
 Acts::Result<double> Acts::EigenStepper<B, E, A>::step(
