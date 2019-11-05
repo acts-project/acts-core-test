@@ -20,42 +20,52 @@
 #include "Acts/Utilities/Result.hpp"
 
 namespace Acts {
-
-
+	
+	/// @brief This is a helper struct to deduce the dimensions of the full Jacobian. It decides based on the start and end parameters which one it will be. This leads to four different cases ...
+	///
+	/// @tparam S The boolean expression whether the start parameters are in local representation
+	/// @tparam E The boolean expression whether the end parameters are in local representation
   template<bool S, bool E>
-  struct JacobianHelper {
-	  using type = int;
-  };
+  struct JacobianHelper;
+   //~ {
+	  //~ using type = int;
+  //~ };
   
-  //~ template<typename S, typename E, std::enable_if_t<S::is_local_representation and E::is_local_representation, int>>
-  //~ template<bool S, bool E,  std::enable_if_t<S and E, int>>
+  /// @brief Case: 
+  /// - start parameters are in local representation
+  /// - end parameters are in local representation
   template<>
-  struct JacobianHelper<true, true> //<std::integral_constant<S, true>::value, std::is_same<std::bool_constant<E>, std::true_type>::value>
+  struct JacobianHelper<true, true>
   {
 	  using type = BoundMatrix;
   };
   
-  //~ template<typename S, typename E, std::enable_if_t<S::is_local_representation and not E::is_local_representation, int>>
+  /// @brief Case: 
+  /// - start parameters are in local representation
+  /// - end parameters are in global representation  
   template<>
   struct JacobianHelper<true, false>
   {
 	  using type = BoundToFreeMatrix;
   };
-  
-  //~ template<typename S, typename E, std::enable_if_t<not S::is_local_representation and E::is_local_representation, int>>
+ 
+   /// @brief Case: 
+  /// - start parameters are in global representation
+  /// - end parameters are in local representation 
 template<>
   struct JacobianHelper<false, true>  
   {
 	  using type = FreeToBoundMatrix;
   };
   
-  //~ template<typename S, typename E, std::enable_if_t<not S::is_local_representation and not E::is_local_representation, int>>
+  /// @brief Case: 
+  /// - start parameters are in global representation
+  /// - end parameters are in global representation
 template<>
   struct JacobianHelper<false, false>  
   {
 	  using type = FreeMatrix;
   };
-  
   
 /// @brief straight line stepper based on Surface intersection
 ///
@@ -64,22 +74,23 @@ template<>
 /// used for simple material mapping, navigation validation
 class StraightLineStepper {
  private:
-  // This struct is a meta-function which normally maps to BoundParameters...
+ // TODO: There should be a deduction of the charge policy
+  // This struct is a meta-function deduces the return state if it ends on a surface...
   template <typename Start, typename End, typename Surface>
   struct s {
-    using type = BoundParameters;
+	  // The dimensions of the jacobian
+	  using JacobianType = typename JacobianHelper<Start::is_local_representation, true>::type;
+	// The returning state
+	using type = std::tuple<BoundParameters, JacobianType, double>;
   };
-  
 
-
-
-  // ...unless type S is int, in which case it maps to Curvilinear parameters
+  // ...and for the case that it does not.
   template <typename Start, typename End>
   struct s<Start, End, int> {
+	  	  // The dimensions of the jacobian
 	using JacobianType = typename JacobianHelper<Start::is_local_representation, End::is_local_representation>::type;
-	//~ using JacobianType = int;
+		// The returning state
     using type = std::tuple<End, JacobianType, double>;
-    //~ using type = CurvilinearParameters;
   };
 
  public:
@@ -89,6 +100,7 @@ class StraightLineStepper {
   using Jacobian = BoundMatrix;
   using Covariance = std::variant<BoundSymMatrix, FreeSymMatrix>;
   
+  // TODO: Remove these states
   using BoundState = std::tuple<BoundParameters, const BoundMatrix, double>;
   using CurvilinearState = std::tuple<CurvilinearParameters, const BoundMatrix, double>;
   using FreeState = std::tuple<FreeParameters, std::variant<const FreeMatrix, const BoundToFreeMatrix>, double>;
@@ -214,10 +226,10 @@ class StraightLineStepper {
   /// track parameter type and of the target surface
   using state_type = State;
 
-  /// Return parameter types depend on the propagation mode:
-  /// - when propagating to a surface we return BoundParameters
-  /// - otherwise CurvilinearParameters
-  template <typename start_parameters_t, typename surface_t = int, typename end_parameters_t = start_parameters_t> // TODO: Would it be possible to include the free state into this descision scheme?
+  //~ /// Return parameter types depend on the propagation mode:
+  //~ /// - when propagating to a surface we return BoundParameters
+  //~ /// - otherwise CurvilinearParameters
+  template <typename start_parameters_t, typename surface_t = int, typename end_parameters_t = start_parameters_t>
   using return_state_type = typename s<start_parameters_t, end_parameters_t, surface_t>::type;
 
   /// Constructor
@@ -259,6 +271,21 @@ class StraightLineStepper {
                                 direction(state), true);
   }
 
+  template<typename start_parameters_t, typename end_parameters_t>
+  auto 
+  buildState(State& state, bool reinitialize) const
+  {
+	  return_state_type<start_parameters_t, end_parameters_t> result;
+	  
+	  //~ if constexpr (parameters_t::is_local_representation)
+	  //~ {
+		  //~ return freeState(state, reinitialize);
+	  //~ }
+	  //~ else
+		//~ return curvilinearState(state, reinitialize);
+	return result;
+  }
+
   /// Create and return the bound state at the current position
   ///
   /// @brief It does not check if the transported state is at the surface, this
@@ -279,7 +306,7 @@ class StraightLineStepper {
     std::optional<BoundSymMatrix> cov = std::nullopt;
     if (state.covTransport) {
 		// Initialize the transport final frame jacobian
-		covarianceTransport(state, true, &surface); // TODO: This function could steer whether the start parameters are bound or free
+		covarianceTransport(state, true, &surface);
 		cov = std::visit([](Covariance&& arg) -> BoundSymMatrix { return std::get<BoundSymMatrix>(arg); }, state.cov);
     }
     // Create the bound parameters
