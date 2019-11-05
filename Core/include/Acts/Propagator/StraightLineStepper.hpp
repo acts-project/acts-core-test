@@ -18,92 +18,22 @@
 #include "Acts/Utilities/Definitions.hpp"
 #include "Acts/Utilities/Intersection.hpp"
 #include "Acts/Utilities/Result.hpp"
+#include "Acts/Propagator/detail/StepperReturnState.hpp"
 
 namespace Acts {
-	
-	/// @brief This is a helper struct to deduce the dimensions of the full Jacobian. It decides based on the start and end parameters which one it will be. This leads to four different cases ...
-	///
-	/// @tparam S The boolean expression whether the start parameters are in local representation
-	/// @tparam E The boolean expression whether the end parameters are in local representation
-  template<bool S, bool E>
-  struct JacobianHelper;
-   //~ {
-	  //~ using type = int;
-  //~ };
-  
-  /// @brief Case: 
-  /// - start parameters are in local representation
-  /// - end parameters are in local representation
-  template<>
-  struct JacobianHelper<true, true>
-  {
-	  using type = BoundMatrix;
-  };
-  
-  /// @brief Case: 
-  /// - start parameters are in local representation
-  /// - end parameters are in global representation  
-  template<>
-  struct JacobianHelper<true, false>
-  {
-	  using type = BoundToFreeMatrix;
-  };
- 
-   /// @brief Case: 
-  /// - start parameters are in global representation
-  /// - end parameters are in local representation 
-template<>
-  struct JacobianHelper<false, true>  
-  {
-	  using type = FreeToBoundMatrix;
-  };
-  
-  /// @brief Case: 
-  /// - start parameters are in global representation
-  /// - end parameters are in global representation
-template<>
-  struct JacobianHelper<false, false>  
-  {
-	  using type = FreeMatrix;
-  };
-  
+
 /// @brief straight line stepper based on Surface intersection
 ///
 /// The straight line stepper is a simple navigation stepper
 /// to be used to navigate through the tracking geometry. It can be
 /// used for simple material mapping, navigation validation
 class StraightLineStepper {
- private:
- // TODO: There should be a deduction of the charge policy
-  // This struct is a meta-function deduces the return state if it ends on a surface...
-  template <typename Start, typename End, typename Surface>
-  struct s {
-	  // The dimensions of the jacobian
-	  using JacobianType = typename JacobianHelper<Start::is_local_representation, true>::type;
-	// The returning state
-	using type = std::tuple<BoundParameters, JacobianType, double>;
-  };
-
-  // ...and for the case that it does not.
-  template <typename Start, typename End>
-  struct s<Start, End, int> {
-	  	  // The dimensions of the jacobian
-	using JacobianType = typename JacobianHelper<Start::is_local_representation, End::is_local_representation>::type;
-		// The returning state
-    using type = std::tuple<End, JacobianType, double>;
-  };
-
  public:
   using cstep = detail::ConstrainedStep;
 
   using Corrector = VoidIntersectionCorrector;
   using Jacobian = BoundMatrix;
   using Covariance = std::variant<BoundSymMatrix, FreeSymMatrix>;
-  
-  // TODO: Remove these states
-  using BoundState = std::tuple<BoundParameters, const BoundMatrix, double>;
-  using CurvilinearState = std::tuple<CurvilinearParameters, const BoundMatrix, double>;
-  using FreeState = std::tuple<FreeParameters, std::variant<const FreeMatrix, const BoundToFreeMatrix>, double>;
 
   /// State for track parameter propagation
   ///
@@ -226,12 +156,6 @@ class StraightLineStepper {
   /// track parameter type and of the target surface
   using state_type = State;
 
-  //~ /// Return parameter types depend on the propagation mode:
-  //~ /// - when propagating to a surface we return BoundParameters
-  //~ /// - otherwise CurvilinearParameters
-  template <typename start_parameters_t, typename surface_t = int, typename end_parameters_t = start_parameters_t>
-  using return_state_type = typename s<start_parameters_t, end_parameters_t, surface_t>::type;
-
   /// Constructor
   StraightLineStepper() = default;
 
@@ -271,19 +195,19 @@ class StraightLineStepper {
                                 direction(state), true);
   }
 
-  template<typename start_parameters_t, typename end_parameters_t>
+  template<typename start_parameters_t, typename end_parameters_t = start_parameters_t>
   auto 
   buildState(State& state, bool reinitialize) const
-  {
-	  return_state_type<start_parameters_t, end_parameters_t> result;
-	  
-	  //~ if constexpr (parameters_t::is_local_representation)
-	  //~ {
-		  //~ return freeState(state, reinitialize);
-	  //~ }
-	  //~ else
-		//~ return curvilinearState(state, reinitialize);
-	return result;
+  {	  
+	  using return_type = detail::return_state_type<start_parameters_t, end_parameters_t>;
+	  if constexpr (end_parameters_t::is_local_representation)
+	  {
+		 return curvilinearState<return_type>(state, reinitialize);
+	  }
+	  else
+	  {
+		   return freeState<return_type>(state, reinitialize);
+	  }
   }
 
   /// Create and return the bound state at the current position
@@ -300,8 +224,11 @@ class StraightLineStepper {
   ///   - the parameters at the surface
   ///   - the stepwise jacobian towards it (from last bound)
   ///   - and the path length (from start - for ordering)
-  BoundState boundState(State& state, const Surface& surface,
-                        bool reinitialize) const {
+  template<typename start_parameters_t, typename end_parameters_t = start_parameters_t>
+  auto 
+  buildState(State& state, const Surface& surface, bool reinitialize) const {
+	  using return_type = detail::return_state_type<start_parameters_t, end_parameters_t, Surface>;
+	  
     // Transport the covariance to here
     std::optional<BoundSymMatrix> cov = std::nullopt;
     if (state.covTransport) {
@@ -314,8 +241,8 @@ class StraightLineStepper {
                                state.p * state.dir, state.q,
                                state.t0 + state.dt, surface.getSharedPtr());
     // Create the bound state
-    BoundState bState{std::move(parameters), state.jacobian,
-                      state.pathAccumulated};
+    return_type result = std::make_tuple(std::move(parameters), state.jacobian,
+                      state.pathAccumulated);
     // Reinitialize if asked to do so
     // this is useful for interruption calls
     if (reinitialize) {
@@ -325,8 +252,7 @@ class StraightLineStepper {
       state.derivative = FreeVector::Zero();
       reinitializeJacToGlobal(state, &surface);
     }
-    /// Return the State
-    return bState;
+    return result;
   }
 
   /// Create and return a curvilinear state at the current position
@@ -341,7 +267,8 @@ class StraightLineStepper {
   ///   - the curvilinear parameters at given position
   ///   - the stepweise jacobian towards it (from last bound)
   ///   - and the path length (from start - for ordering)
-  CurvilinearState curvilinearState(State& state, bool reinitialize) const {
+  template <typename result_t>
+  result_t curvilinearState(State& state, bool reinitialize) const {
     // Transport the covariance to here
     std::optional<BoundSymMatrix> cov = std::nullopt;
     if (state.covTransport) {
@@ -352,8 +279,8 @@ class StraightLineStepper {
     CurvilinearParameters parameters(cov, state.pos, state.p * state.dir,
                                      state.q, state.t0 + state.dt);
     // Create the bound state
-    CurvilinearState curvState{std::move(parameters), state.jacobian,
-                               state.pathAccumulated};
+    result_t result = std::make_tuple(std::move(parameters), state.jacobian,
+                               state.pathAccumulated);
     // Reinitialize if asked to do so
     // this is useful for interruption calls
     if (reinitialize) { // TODO: this block could probably be moved into the function
@@ -363,8 +290,7 @@ class StraightLineStepper {
       state.derivative = FreeVector::Zero();
       reinitializeJacToGlobal(state);
     }
-    /// Return the State
-    return curvState;
+    return result;
   }
   
   /// Create and return a free state at the current position
@@ -379,7 +305,8 @@ class StraightLineStepper {
   ///   - the free parameters at given position
   ///   - the stepweise jacobian towards it (from last location)
   ///   - and the path length (from start - for ordering)
-  FreeState freeState(State& state, bool reinitialize) const
+  template <typename result_t>
+  result_t freeState(State& state, bool reinitialize) const
   {
     // Transport the covariance to here
     std::optional<FreeSymMatrix> cov = std::nullopt;
@@ -396,8 +323,8 @@ class StraightLineStepper {
     FreeParameters parameters(cov, pars);
     
     // Create the bound state
-    FreeState freeState{std::move(parameters), state.jacTransport,
-                               state.pathAccumulated};
+    result_t result = std::make_tuple(std::move(parameters), state.jacTransport,
+                               state.pathAccumulated);
     // Reinitialize if asked to do so
     // this is useful for interruption calls    
     if (reinitialize) {
@@ -406,8 +333,7 @@ class StraightLineStepper {
       state.jacTransport = FreeMatrix::Identity();
       state.derivative = FreeVector::Zero();
     }
-    /// Return the State
-    return freeState;
+    return result;
   }
 
   /// Method to update a stepper state to the some parameters
@@ -623,7 +549,7 @@ private:
      {
 		using VectorHelpers::phi;
 		using VectorHelpers::theta;
-
+		
 		 // Reset the jacobian
 		state.jacToGlobal = BoundToFreeMatrix::Zero();
 		
@@ -631,34 +557,31 @@ private:
 		// If treating curvilinear parameters
 		if(surface == nullptr)
 		{
-			if(state.jacToGlobal.has_value())
-			{
-				auto& jac = *state.jacToGlobal;
-				// TODO: This was calculated before - can it be reused?
-				// Optimized trigonometry on the propagation direction
-				const double x = state.dir(0);  // == cos(phi) * sin(theta)
-				const double y = state.dir(1);  // == sin(phi) * sin(theta)
-				const double z = state.dir(2);  // == cos(theta)
-				// can be turned into cosine/sine
-				const double cosTheta = z;
-				const double sinTheta = sqrt(x * x + y * y);
-				const double invSinTheta = 1. / sinTheta;
-				const double cosPhi = x * invSinTheta;
-				const double sinPhi = y * invSinTheta;
+			auto& jac = *state.jacToGlobal;
+			// TODO: This was calculated before - can it be reused?
+			// Optimized trigonometry on the propagation direction
+			const double x = state.dir(0);  // == cos(phi) * sin(theta)
+			const double y = state.dir(1);  // == sin(phi) * sin(theta)
+			const double z = state.dir(2);  // == cos(theta)
+			// can be turned into cosine/sine
+			const double cosTheta = z;
+			const double sinTheta = sqrt(x * x + y * y);
+			const double invSinTheta = 1. / sinTheta;
+			const double cosPhi = x * invSinTheta;
+			const double sinPhi = y * invSinTheta;
 
-			  jac(0, eLOC_0) = -sinPhi;
-			  jac(0, eLOC_1) = -cosPhi * cosTheta;
-			  jac(1, eLOC_0) = cosPhi;
-			  jac(1, eLOC_1) = -sinPhi * cosTheta;
-			  jac(2, eLOC_1) = sinTheta;
-			  jac(3, eT) = 1;
-			  jac(4, ePHI) = -sinTheta * sinPhi;
-			  jac(4, eTHETA) = cosTheta * cosPhi;
-			  jac(5, ePHI) = sinTheta * cosPhi;
-			  jac(5, eTHETA) = cosTheta * sinPhi;
-			  jac(6, eTHETA) = -sinTheta;
-			  jac(7, eQOP) = 1;
-			}
+		  jac(0, eLOC_0) = -sinPhi;
+		  jac(0, eLOC_1) = -cosPhi * cosTheta;
+		  jac(1, eLOC_0) = cosPhi;
+		  jac(1, eLOC_1) = -sinPhi * cosTheta;
+		  jac(2, eLOC_1) = sinTheta;
+		  jac(3, eT) = 1;
+		  jac(4, ePHI) = -sinTheta * sinPhi;
+		  jac(4, eTHETA) = cosTheta * cosPhi;
+		  jac(5, ePHI) = sinTheta * cosPhi;
+		  jac(5, eTHETA) = cosTheta * sinPhi;
+		  jac(6, eTHETA) = -sinTheta;
+		  jac(7, eQOP) = 1;
 		}
 		// If treating bound parameters
 		else
