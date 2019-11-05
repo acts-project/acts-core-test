@@ -91,7 +91,9 @@ auto Acts::Propagator<S, N>::propagate(
         CurvilinearParameters,
         typename propagator_options_t::action_list_type>> {
   static_assert(ParameterConcept<parameters_t>,
-                "Parameters do not fulfill parameter concept.");
+                "Start parameters do not fulfill parameter concept.");
+  static_assert(ParameterConcept<return_parameters_t>,
+                "Return parameters do not fulfill parameter concept.");
 
   // Type of track parameters produced by the propagation
   using ReturnParameterType = return_parameters_t;
