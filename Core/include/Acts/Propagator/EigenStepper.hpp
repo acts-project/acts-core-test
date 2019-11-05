@@ -21,9 +21,12 @@
 
 #include "Acts/Propagator/EigenStepperError.hpp"
 #include "Acts/Utilities/Result.hpp"
+#include "Acts/Propagator/detail/StepperReturnState.hpp"
+#include "Acts/Propagator/CovarianceTransport.hpp"
+#include "Acts/Propagator/StepperState.hpp"
 
 namespace Acts {
-
+	
 /// @brief Runge-Kutta-Nystroem stepper based on Eigen implementation
 /// for the following ODE:
 ///
@@ -41,118 +44,43 @@ template <typename BField, typename corrector_t = VoidIntersectionCorrector,
           typename auctioneer_t = detail::VoidAuctioneer>
 class EigenStepper {
  public:
-  using cstep = detail::ConstrainedStep;
   using Corrector = corrector_t;
 
-  /// Jacobian, Covariance and State defintions
+  /// Jacobian an Covariance
   using Jacobian = BoundMatrix;
-  using Covariance = BoundSymMatrix;
-  using BoundState = std::tuple<BoundParameters, const Jacobian, double>;
-  using CurvilinearState = std::tuple<CurvilinearParameters, const Jacobian, double>;
+  using Covariance = std::variant<BoundSymMatrix, FreeSymMatrix>;
 
-  /// @brief State for track parameter propagation
-  ///
-  /// It contains the stepping information and is provided thread local
-  /// by the propagator
-  struct State {
-    /// Default constructor - deleted
-    State() = delete;
-
-    /// Constructor from the initial track parameters
-    ///
-    /// @param [in] gctx is the context object for the geometry
-    /// @param [in] mctx is the context object for the magnetic field
-    /// @param [in] par The track parameters at start
-    /// @param [in] ndir The navigation direciton w.r.t momentum
-    /// @param [in] ssize is the maximum step size
-    ///
-    /// @note the covariance matrix is copied when needed
+	/// @brief The state object. This object extends the general container @c StepperState by some parameters for RKN4
+   struct State : public StepperState
+  {
+	  /// Default constructor
+	  State() = delete;
+      
+      /// @brief Constructor
+      ///
+      /// @tparam parameters_t
     template <typename parameters_t>
-    explicit State(std::reference_wrapper<const GeometryContext> gctx,
+	explicit State(std::reference_wrapper<const GeometryContext> gctx,
                    std::reference_wrapper<const MagneticFieldContext> mctx,
                    const parameters_t& par, NavigationDirection ndir = forward,
-                   double ssize = std::numeric_limits<double>::max())
-        : pos(par.position()),
-          dir(par.momentum().normalized()),
-          p(par.momentum().norm()),
-          q(par.charge()),
-          t0(par.time()),
-          navDir(ndir),
-          stepSize(ndir * std::abs(ssize)),
-          fieldCache(mctx),
-          geoContext(gctx) {
-      // remember the start parameters
-      startPos = pos;
+                   double ssize = std::numeric_limits<double>::max()) 
+                   : StepperState(gctx, mctx, par, ndir, ssize), fieldCache(mctx)
+	{
+	  startPos = pos;
       startDir = dir;
-      // Init the jacobian matrix if needed
-      if (par.covariance()) {
-        // Get the reference surface for navigation
-        const auto& surface = par.referenceSurface();
-        // set the covariance transport flag to true and copy
-        covTransport = true;
-        cov = BoundSymMatrix(*par.covariance());
-        surface.initJacobianToGlobal(gctx, jacToGlobal, pos, dir,
-                                     par.parameters());
-      }
-    }
-
-    /// Global start particle position
+	}
+	
+	 /// Global start particle position
     Vector3D startPos = Vector3D(0., 0., 0.);
 
     /// Momentum start direction (normalized)
     Vector3D startDir = Vector3D(1., 0., 0.);
 
-    /// Global particle position
-    Vector3D pos = Vector3D(0., 0., 0.);
-
-    /// Momentum direction (normalized)
-    Vector3D dir = Vector3D(1., 0., 0.);
-
-    /// Momentum
-    double p = 0.;
-
-    /// The charge
-    double q = 1.;
-
-    /// @note The time is split into a starting and a propagated time to avoid
-    /// machine precision related errors Starting time
-    const double t0;
-    /// Propagated time
-    double dt = 0.;
-
-    /// Navigation direction, this is needed for searching
-    NavigationDirection navDir;
-
-    /// The full jacobian of the transport entire transport
-    Jacobian jacobian = Jacobian::Identity();
-
-    /// Jacobian from local to the global frame
-    BoundToFreeMatrix jacToGlobal = BoundToFreeMatrix::Zero();
-
-    /// Pure transport jacobian part from runge kutta integration
-    FreeMatrix jacTransport = FreeMatrix::Identity();
-
-    /// The propagation derivative
-    FreeVector derivative = FreeVector::Zero();
-
-    /// Covariance matrix (and indicator)
-    //// associated with the initial error on track parameters
-    bool covTransport = false;
-    Covariance cov = Covariance::Zero();
-
-    /// accummulated path length state
-    double pathAccumulated = 0.;
-
-    /// adaptive step size of the runge-kutta integration
-    cstep stepSize{std::numeric_limits<double>::max()};
 
     /// This caches the current magnetic field cell and stays
     /// (and interpolates) within it as long as this is valid.
     /// See step() code for details.
     typename BField::Cache fieldCache;
-
-    /// The geometry context
-    std::reference_wrapper<const GeometryContext> geoContext;
 
     /// List of algorithmic extensions
     extensionlist_t extension;
@@ -167,8 +95,9 @@ class EigenStepper {
       /// k_i of the RKN4 algorithm
       Vector3D k1, k2, k3, k4;
     } stepData;
+    
   };
-
+        
   /// Constructor requires knowledge of the detector's magnetic field
   EigenStepper(BField bField = BField());
 
@@ -209,40 +138,34 @@ class EigenStepper {
                                 direction(state), true);
   }
 
+  /// @brief Final state builder without a target surface
+  ///
+  /// @tparam start_parameters_t Type of the start parameters
+  /// @tparam end_parameters_t Type of the end parameters
+  ///
+  /// @param [in, out] state State of the propagation
+  /// @param [in] reinitialize Boolean flag whether reinitialization is needed,
+  /// i.e. if this is an intermediate state of a larger propagation
+  ///
+  /// @return std::tuple conatining the final state parameters, the jacobian & the accumulated path
+  template<bool start_local, typename end_parameters_t>
+  auto 
+  buildState(State& state, bool reinitialize) const;
+
   /// Create and return the bound state at the current position
   ///
-  /// @brief This transports (if necessary) the covariance
-  /// to the surface and creates a bound state. It does not check
-  /// if the transported state is at the surface, this needs to
-  /// be guaranteed by the propagator
+  /// @brief It does not check if the transported state is at the surface, this
+  /// needs to be guaranteed by the propagator
   ///
   /// @param [in] state State that will be presented as @c BoundState
   /// @param [in] surface The surface to which we bind the state
   /// @param [in] reinitialize Boolean flag whether reinitialization is needed,
   /// i.e. if this is an intermediate state of a larger propagation
   ///
-  /// @return A bound state:
-  ///   - the parameters at the surface
-  ///   - the stepwise jacobian towards it (from last bound)
-  ///   - and the path length (from start - for ordering)
-  BoundState boundState(State& state, const Surface& surface,
-                        bool reinitialize = true) const;
-
-  /// Create and return a curvilinear state at the current position
-  ///
-  /// @brief This transports (if necessary) the covariance
-  /// to the current position and creates a curvilinear state.
-  ///
-  /// @param [in] state State that will be presented as @c CurvilinearState
-  /// @param [in] reinitialize Boolean flag whether reinitialization is needed
-  /// i.e. if this is an intermediate state of a larger propagation
-  ///
-  /// @return A curvilinear state:
-  ///   - the curvilinear parameters at given position
-  ///   - the stepweise jacobian towards it (from last bound)
-  ///   - and the path length (from start - for ordering)
-  CurvilinearState curvilinearState(State& state,
-                                    bool reinitialize = true) const;
+  /// @return std::tuple conatining the final state parameters, the jacobian & the accumulated path
+  template<bool start_local>
+  auto 
+  buildState(State& state, const Surface& surface, bool reinitialize) const;
 
   /// Method to update a stepper state to the some parameters
   ///
@@ -264,31 +187,6 @@ class EigenStepper {
     return corrector_t(state.startPos, state.startDir, state.pathAccumulated);
   }
 
-  /// Method for on-demand transport of the covariance
-  /// to a new curvilinear frame at current  position,
-  /// or direction of the state
-  ///
-  /// @param [in,out] state State of the stepper
-  /// @param [in] reinitialize is a flag to steer whether the state should be
-  /// reinitialized at the new position
-  ///
-  /// @return the full transport jacobian
-  void covarianceTransport(State& state, bool reinitialize = false) const;
-
-  /// Method for on-demand transport of the covariance
-  /// to a new curvilinear frame at current position,
-  /// or direction of the state
-  ///
-  /// @tparam surface_t the Surface type
-  ///
-  /// @param [in,out] state State of the stepper
-  /// @param [in] surface is the surface to which the covariance is forwarded to
-  /// @param [in] reinitialize is a flag to steer whether the state should be
-  /// reinitialized at the new position
-  /// @note no check is done if the position is actually on the surface
-  void covarianceTransport(State& state, const Surface& surface,
-                           bool reinitialize = true) const;
-
   /// Perform a Runge-Kutta track parameter propagation step
   ///
   /// @param [in,out] state is the propagation state associated with the track
@@ -305,6 +203,8 @@ class EigenStepper {
  private:
   /// Magnetic field inside of the detector
   BField m_bField;
+  	/// The covariance transporter engine
+  CovarianceTransport covTransport;
 };
 }  // namespace Acts
 

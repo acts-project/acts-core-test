@@ -37,7 +37,7 @@ namespace Acts {
     /// @param [in] par The track parameters at start
     /// @param [in] ndir is the navigation direction
     /// @param [in] ssize is the (absolute) maximum step size
-    template <typename parameters_t, std::enable_if_t<std::is_same<typename parameters_t::CovMatrix_t, BoundSymMatrix>::value, int> = 0>
+    template <typename parameters_t, std::enable_if_t<parameters_t::is_local_representation, int> = 0>
     explicit StepperState(std::reference_wrapper<const GeometryContext> gctx,
                    std::reference_wrapper<const MagneticFieldContext> /*mctx*/,
                    const parameters_t& par, NavigationDirection ndir = forward,
@@ -49,7 +49,8 @@ namespace Acts {
           t0(par.time()),
           navDir(ndir),
           stepSize(ndir * std::abs(ssize)),
-          geoContext(gctx) {
+          geoContext(gctx),
+          localStart(true) {
       if (par.covariance()) { // TODO: constructors might be combined but a covariance setter is then templated
 		  // Set the covariance transport flag to true
 		  covTransport = true;
@@ -70,7 +71,7 @@ namespace Acts {
     /// @param [in] par The track parameters at start
     /// @param [in] ndir is the navigation direction
     /// @param [in] ssize is the (absolute) maximum step size
-    template <typename parameters_t, std::enable_if_t<std::is_same<typename parameters_t::CovMatrix_t, FreeSymMatrix>::value, int> = 0>
+    template <typename parameters_t, std::enable_if_t<not parameters_t::is_local_representation, int> = 0>
     explicit StepperState(std::reference_wrapper<const GeometryContext> gctx,
                    std::reference_wrapper<const MagneticFieldContext> /*mctx*/,
                    const parameters_t& par, NavigationDirection ndir = forward,
@@ -82,7 +83,8 @@ namespace Acts {
           t0(par.time()),
           navDir(ndir),
           stepSize(ndir * std::abs(ssize)),
-          geoContext(gctx) {
+          geoContext(gctx),
+          localStart(false) {
       if (par.covariance()) {
 		  // Set the covariance transport flag to true
 		  covTransport = true;
@@ -90,7 +92,7 @@ namespace Acts {
           cov = *par.covariance();
       }
     }
-
+    	
     /// Jacobian from local to the global frame    
     std::optional<BoundToFreeMatrix> jacToGlobal;
 	
@@ -137,5 +139,8 @@ namespace Acts {
 
     /// Cache the geometry context of this propagation
     std::reference_wrapper<const GeometryContext> geoContext;
+    
+    /// Flag to indicate if the propagation started in local or global parameters
+    bool localStart;
   };
 }  // namespace Acts
