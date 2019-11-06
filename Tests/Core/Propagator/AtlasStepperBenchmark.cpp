@@ -97,12 +97,12 @@ int main(int argc, char* argv[]) {
 
   double totalPathLength = 0;
   for (unsigned int i = 0; i < toys; ++i) {
-    //~ auto r = propagator.propagate(pars, options).value();
-    //~ ACTS_DEBUG("reached position (" << r.endParameters->position().x() << ", "
-                                    //~ << r.endParameters->position().y() << ", "
-                                    //~ << r.endParameters->position().z()
-                                    //~ << ") in " << r.steps << " steps");
-    //~ totalPathLength += r.pathLength;
+    auto r = propagator.propagate(pars, options).value();
+    ACTS_DEBUG("reached position (" << r.endParameters->position().x() << ", "
+                                    << r.endParameters->position().y() << ", "
+                                    << r.endParameters->position().z()
+                                    << ") in " << r.steps << " steps");
+    totalPathLength += r.pathLength;
   }
 
   ACTS_INFO("average path length = " << totalPathLength / toys / 1_mm << "mm");
