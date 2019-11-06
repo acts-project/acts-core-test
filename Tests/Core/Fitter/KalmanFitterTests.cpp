@@ -256,8 +256,9 @@ BOOST_AUTO_TEST_CASE(kalman_fitter_zero_field) {
   detRes[2] = pixelVolumeRes;
   detRes[3] = stripVolumeRes;
 
-  std::map<OutlierSearchStage, double> olCriteria = {
-      {OutlierSearchStage::Filtering, 7}, {OutlierSearchStage::Smoothing, 5}};
+  std::map<OutlierSearchStage, double> measSigCut = {
+      {OutlierSearchStage::Filtering, 0.01},
+      {OutlierSearchStage::Smoothing, 0.05}};
 
   // Set options for propagator
   PropagatorOptions<MeasurementActions, MeasurementAborters> mOptions(
@@ -327,7 +328,7 @@ BOOST_AUTO_TEST_CASE(kalman_fitter_zero_field) {
 
   KalmanFitterOptions kfWithOutlierOptions(tgContext, mfContext, calContext,
                                            rSurface,
-                                           MinimalOutlierFinder{olCriteria});
+                                           MinimalOutlierFinder{measSigCut});
 
   // Fit the track
   auto fitRes = kFitter.fit(sourcelinks, rStart, kfOptions);

@@ -17,7 +17,7 @@ namespace Acts {
 enum class OutlierSearchStage { Filtering = 0, Smoothing = 1 };
 
 using OutlierFinder =
-    std::function<bool(double, const Surface*, OutlierSearchStage)>;
+    std::function<bool(const Surface*, double, size_t, OutlierSearchStage)>;
 
 /// @brief void Measurement calibrator and converter
 struct VoidKalmanComponents {
@@ -119,14 +119,14 @@ struct VoidKalmanSmoother {
 struct VoidOutlierFinder {
   /// @brief Public call mimicking an outlier rejector
   ///
-  /// @tparam chi2 The chisq from fitting
-  ///
   /// @param surface The surface of the measurement (in case the outlier
   /// criteria is detector-specific)
+  /// @param chi2 The chisq from fitting
+  /// @param ndf The measurement dimension
   /// @param searchStage The outlier search stage
   ///
   /// @return The resulting
-  bool operator()(double /*chi2*/, const Surface* /*surface*/,
+  bool operator()(const Surface* /*surface*/, double /*chi2*/, size_t /*ndf*/,
                   OutlierSearchStage /*searchStage*/) const {
     return false;
   }

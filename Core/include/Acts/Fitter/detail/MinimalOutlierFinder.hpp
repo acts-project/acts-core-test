@@ -8,27 +8,33 @@
 
 #pragma once
 
+#include <boost/math/distributions/chi_squared.hpp>
 #include "Acts/EventData/TrackState.hpp"
 
 namespace Acts {
 
 struct MinimalOutlierFinder {
-  /// The outlier search criteria
-  std::map<OutlierSearchStage, double> outlierCriteria;
+  /// The measurement significance criteria
+  std::map<OutlierSearchStage, double> measurementSignificance;
 
-  /// @brief Public call mimicking an outlier rejector
-  ///
-  /// @tparam chi2 The chisq from fitting
+  /// @brief Public call mimicking an outlier searcher
   ///
   /// @param surface The surface of the measurement
+  /// @param chi2 The chisq from fitting
+  /// @param ndf The measurement dimension
   /// @param searchStage The outlier search stage
   ///
   /// @return The resulting
-  //  template <typename track_state_t>
-  bool operator()(double chi2, const Surface* /*surface*/,
+  bool operator()(const Surface* /*surface*/, double chi2, size_t ndf,
                   OutlierSearchStage searchStage) const {
-    if (outlierCriteria.find(searchStage) != outlierCriteria.end()) {
-      return chi2 > outlierCriteria.at(searchStage) ? true : false;
+    if (measurementSignificance.find(searchStage) !=
+        measurementSignificance.end()) {
+      // The chisq distribution
+      boost::math::chi_squared chiDist(ndf);
+      // The p-Value
+      double pValue = 1 - boost::math::cdf(chiDist, chi2);
+      // If pValue is NOT significant enough => outlier
+      return pValue > measurementSignificance.at(searchStage) ? false : true;
     }
     return false;
   }

@@ -329,8 +329,9 @@ class KalmanFitter {
         } else {
           // Check if the measurement is outlier
           bool isOutlier = false;
-          if (outlierFinder) {
-            isOutlier = outlierFinder(trackState.parameter.chi2, surface,
+          if (outlierFinder && trackState.measurement.calibrated) {
+            isOutlier = outlierFinder(surface, trackState.parameter.chi2,
+                                      *trackState.size(),
                                       OutlierSearchStage::Filtering);
           }
 

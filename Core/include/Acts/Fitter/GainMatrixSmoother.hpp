@@ -173,8 +173,8 @@ class GainMatrixSmoother {
       // Check if the measurement is an outlier
       bool isOutlier = false;
       if (outlierFinder) {
-        isOutlier = outlierFinder(ts.parameter.chi2, &ts.referenceSurface(),
-                                  OutlierSearchStage::Smoothing);
+        isOutlier = outlierFinder(&ts.referenceSurface(), ts.parameter.chi2,
+                                  *ts.size(), OutlierSearchStage::Smoothing);
       }
 
       // Point prev state to current state if current state is NOT an outlier
