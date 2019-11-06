@@ -23,7 +23,6 @@ namespace Acts {
 /// @tparam jacobian_t Type of the Jacobian
 template <typename parameters_t>
 class GainMatrixSmoother {
-
  public:
   /// @brief Gain Matrix smoother implementation
   ///

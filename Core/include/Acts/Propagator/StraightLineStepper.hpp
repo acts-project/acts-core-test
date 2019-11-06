@@ -97,12 +97,12 @@ class StraightLineStepper {
     /// The full jacobian of the transport since the last reinitialize call
     Jacobian jacobianStepWise = Jacobian::Identity();
 
-	/// The full jacobian since the first step
-	Jacobian jacobian = Jacobian::Identity();
+    /// The full jacobian since the first step
+    Jacobian jacobian = Jacobian::Identity();
 
     /// The propagation derivative
     FreeVector derivative = FreeVector::Zero();
-    
+
     /// Boolean to indiciate if you need covariance transport
     bool covTransport = false;
     Covariance cov = Covariance::Zero();
@@ -219,7 +219,8 @@ class StraightLineStepper {
                                state.p * state.dir, state.q,
                                state.t0 + state.dt, surface.getSharedPtr());
     // Create the bound state
-    BoundState bState{std::move(parameters), state.jacobianStepWise, state.pathAccumulated};
+    BoundState bState{std::move(parameters), state.jacobianStepWise,
+                      state.pathAccumulated};
     // Reset the jacobian to identity
     if (reinitialize) {
       state.jacobianStepWise = Jacobian::Identity();
@@ -251,7 +252,8 @@ class StraightLineStepper {
     CurvilinearParameters parameters(cov, state.pos, state.p * state.dir,
                                      state.q, state.t0 + state.dt);
     // Create the bound state
-    CurvilinearState curvState{std::move(parameters), state.jacobianStepWise, state.pathAccumulated};
+    CurvilinearState curvState{std::move(parameters), state.jacobianStepWise,
+                               state.pathAccumulated};
     // Reset the jacobian to identity
     if (reinitialize) {
       state.jacobianStepWise = Jacobian::Identity();

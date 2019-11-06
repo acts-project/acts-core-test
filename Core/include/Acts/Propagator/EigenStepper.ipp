@@ -158,8 +158,8 @@ void Acts::EigenStepper<B, C, E, A>::covarianceTransport(
   }
   // Store The global and bound jacobian (duplication for the moment)
   state.jacobianStepWise = jacFull * state.jacobianStepWise;
-    // Update the total jacobian
-    state.jacobian = jacFull * state.jacobian;
+  // Update the total jacobian
+  state.jacobian = jacFull * state.jacobian;
 }
 
 template <typename B, typename C, typename E, typename A>
@@ -201,8 +201,8 @@ void Acts::EigenStepper<B, C, E, A>::covarianceTransport(
   }
   // Store The global and bound jacobian (duplication for the moment)
   state.jacobianStepWise = jacFull * state.jacobianStepWise;
-    // Update the total jacobian
-    state.jacobian = jacFull * state.jacobian;
+  // Update the total jacobian
+  state.jacobian = jacFull * state.jacobian;
 }
 
 template <typename B, typename C, typename E, typename A>
