@@ -299,12 +299,11 @@ class KalmanFitter {
         TrackStateType& trackState = result.fittedStates.back();
 
         // Transport & bind the state to the current surface
-        std::tuple<BoundParameters,
-                   typename TrackStateType::Parameters::CovMatrix_t, double>
+        std::pair<BoundParameters, double>
             boundState = stepper.boundState(state.stepping, *surface, true);
         // Fill the track state
-        trackState.parameter.predicted = std::get<0>(boundState);
-        trackState.parameter.pathLength = std::get<1>(boundState);
+        trackState.parameter.predicted = boundState.first;
+        trackState.parameter.pathLength = boundState.second;
         trackState.parameter.jacobian = state.stepping.jacobian;
 
         // If the update is successful, set covariance and
