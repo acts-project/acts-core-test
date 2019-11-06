@@ -60,8 +60,8 @@ class EigenStepper {
   /// Jacobian, Covariance and State defintions
   using Jacobian = BoundMatrix;
   using Covariance = BoundSymMatrix;
-  using BoundState = std::tuple<BoundParameters, Jacobian, double>;
-  using CurvilinearState = std::tuple<CurvilinearParameters, Jacobian, double>;
+  using BoundState = std::tuple<BoundParameters, double>;
+  using CurvilinearState = std::tuple<CurvilinearParameters, double>;
 
   /// @brief State for track parameter propagation
   ///
@@ -137,10 +137,10 @@ class EigenStepper {
     NavigationDirection navDir;
 
     /// The full jacobian of the transport since the last reinitialize call
-    Jacobian jacobian = Jacobian::Identity();
+    Jacobian jacobianStepWise = Jacobian::Identity();
 
 	/// The full jacobian since the first step
-	Jacobian jacFull = Jacobian::Identity();
+	Jacobian jacobian = Jacobian::Identity();
 
     /// Jacobian from local to the global frame
     BoundToFreeMatrix jacToGlobal = BoundToFreeMatrix::Zero();

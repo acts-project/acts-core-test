@@ -46,8 +46,8 @@ class StraightLineStepper {
   using Corrector = VoidIntersectionCorrector;
   using Jacobian = BoundMatrix;
   using Covariance = BoundSymMatrix;
-  using BoundState = std::tuple<BoundParameters, Jacobian, double>;
-  using CurvilinearState = std::tuple<CurvilinearParameters, Jacobian, double>;
+  using BoundState = std::tuple<BoundParameters, double>;
+  using CurvilinearState = std::tuple<CurvilinearParameters, double>;
 
   /// State for track parameter propagation
   ///
@@ -95,10 +95,10 @@ class StraightLineStepper {
     FreeMatrix jacTransport = FreeMatrix::Identity();
 
     /// The full jacobian of the transport since the last reinitialize call
-    Jacobian jacobian = Jacobian::Identity();
+    Jacobian jacobianStepWise = Jacobian::Identity();
 
 	/// The full jacobian since the first step
-	Jacobian jacFull = Jacobian::Identity();
+	Jacobian jacobian = Jacobian::Identity();
 
     /// The propagation derivative
     FreeVector derivative = FreeVector::Zero();
@@ -219,11 +219,10 @@ class StraightLineStepper {
                                state.p * state.dir, state.q,
                                state.t0 + state.dt, surface.getSharedPtr());
     // Create the bound state
-    BoundState bState{std::move(parameters), state.jacobian,
-                      state.pathAccumulated};
+    BoundState bState{std::move(parameters), state.pathAccumulated};
     // Reset the jacobian to identity
     if (reinitialize) {
-      state.jacobian = Jacobian::Identity();
+      state.jacobianStepWise = Jacobian::Identity();
     }
     /// Return the State
     return bState;
@@ -252,11 +251,10 @@ class StraightLineStepper {
     CurvilinearParameters parameters(cov, state.pos, state.p * state.dir,
                                      state.q, state.t0 + state.dt);
     // Create the bound state
-    CurvilinearState curvState{std::move(parameters), state.jacobian,
-                               state.pathAccumulated};
+    CurvilinearState curvState{std::move(parameters), state.pathAccumulated};
     // Reset the jacobian to identity
     if (reinitialize) {
-      state.jacobian = Jacobian::Identity();
+      state.jacobianStepWise = Jacobian::Identity();
     }
     /// Return the State
     return curvState;
@@ -376,9 +374,9 @@ class StraightLineStepper {
       state.jacToGlobal(7, eQOP) = 1;
     }
     // Store The global and bound jacobian (duplication for the moment)
-    state.jacobian = jacFull * state.jacobian;
+    state.jacobianStepWise = jacFull * state.jacobianStepWise;
     // Update the total jacobian
-    state.jacFull = jacFull * state.jacFull;
+    state.jacobian = jacFull * state.jacobian;
   }
 
   /// Method for on-demand transport of the covariance
@@ -432,9 +430,9 @@ class StraightLineStepper {
                                    state.pos, state.dir, pars);
     }
     // Store The global and bound jacobian (duplication for the moment)
+    state.jacobianStepWise = jacFull * state.jacobianStepWise;
+    // Update the total jacobian
     state.jacobian = jacFull * state.jacobian;
-        // Update the total jacobian
-    state.jacFull = jacFull * state.jacFull;
   }
 
   /// Perform a straight line propagation step

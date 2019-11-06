@@ -43,9 +43,6 @@ struct PropagatorResult : private detail::Extendable<result_list...> {
   /// Final track parameters - initialized to null pointer
   std::unique_ptr<const parameters_t> endParameters = nullptr;
 
-  /// Full transport jacobian
-  std::unique_ptr<const BoundMatrix> transportJacobian = nullptr;
-
   /// Number of propagation steps that were carried out
   unsigned int steps = 0;
 

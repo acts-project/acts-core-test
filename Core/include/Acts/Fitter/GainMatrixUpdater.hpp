@@ -31,7 +31,6 @@ namespace Acts {
 template <typename parameters_t,
           typename calibrator_t = VoidMeasurementCalibrator>
 class GainMatrixUpdater {
-  using jacobian_t = typename parameters_t::CovMatrix_t;
 
  public:
   /// Explicit constructor

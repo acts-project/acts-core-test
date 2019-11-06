@@ -382,8 +382,7 @@ class AtlasStepper {
                                charge(state), state.t0 + state.pVector[3],
                                surface.getSharedPtr());
 
-    return BoundState(std::move(parameters), state.jacobian,
-                      state.pathAccumulated);
+    return BoundState(std::move(parameters), state.pathAccumulated);
   }
 
   /// Create and return a curvilinear state at the current position
@@ -414,8 +413,7 @@ class AtlasStepper {
     CurvilinearParameters parameters(std::move(covOpt), gp, mom, charge(state),
                                      state.t0 + state.pVector[3]);
 
-    return CurvilinearState(std::move(parameters), state.jacobian,
-                            state.pathAccumulated);
+    return CurvilinearState(std::move(parameters), state.pathAccumulated);
   }
 
   /// The state update method

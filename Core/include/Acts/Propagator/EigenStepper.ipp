@@ -26,11 +26,10 @@ auto Acts::EigenStepper<B, C, E, A>::boundState(State& state,
                              state.p * state.dir, state.q, state.t0 + state.dt,
                              surface.getSharedPtr());
   // Create the bound state
-  BoundState bState{std::move(parameters), state.jacobian,
-                    state.pathAccumulated};
+  BoundState bState{std::move(parameters), state.pathAccumulated};
   // Reset the jacobian to identity
   if (reinitialize) {
-    state.jacobian = Jacobian::Identity();
+    state.jacobianStepWise = Jacobian::Identity();
   }
   /// Return the State
   return bState;
@@ -51,11 +50,10 @@ auto Acts::EigenStepper<B, C, E, A>::curvilinearState(State& state,
                                    state.p * state.dir, state.q,
                                    state.t0 + state.dt);
   // Create the bound state
-  CurvilinearState curvState{std::move(parameters), state.jacobian,
-                             state.pathAccumulated};
+  CurvilinearState curvState{std::move(parameters), state.pathAccumulated};
   // Reset the jacobian to identity
   if (reinitialize) {
-    state.jacobian = Jacobian::Identity();
+    state.jacobianStepWise = Jacobian::Identity();
   }
   /// Return the State
   return curvState;
@@ -157,9 +155,9 @@ void Acts::EigenStepper<B, C, E, A>::covarianceTransport(
     state.jacToGlobal(7, eQOP) = 1.;
   }
   // Store The global and bound jacobian (duplication for the moment)
-  state.jacobian = jacFull * state.jacobian;
+  state.jacobianStepWise = jacFull * state.jacobianStepWise;
     // Update the total jacobian
-    state.jacFull = jacFull * state.jacFull;
+    state.jacobian = jacFull * state.jacobian;
 }
 
 template <typename B, typename C, typename E, typename A>
@@ -200,9 +198,9 @@ void Acts::EigenStepper<B, C, E, A>::covarianceTransport(
                                  state.dir, pars);
   }
   // Store The global and bound jacobian (duplication for the moment)
-  state.jacobian = jacFull * state.jacobian;
+  state.jacobianStepWise = jacFull * state.jacobianStepWise;
     // Update the total jacobian
-    state.jacFull = jacFull * state.jacFull;
+    state.jacobian = jacFull * state.jacobian;
 }
 
 template <typename B, typename C, typename E, typename A>

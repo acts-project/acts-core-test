@@ -138,12 +138,6 @@ auto Acts::Propagator<S, N>::propagate(
     // Fill the end parameters
     propRes.endParameters = std::make_unique<const CurvilinearParameters>(
         std::move(curvParameters));
-    // Only fill the transport jacobian when covariance transport was done
-    if (state.stepping.covTransport) {
-      auto& tJacobian = std::get<Jacobian>(curvState);
-      propRes.transportJacobian =
-          std::make_unique<const Jacobian>(std::move(tJacobian));
-    }
     return result;
   } else {
     return result.error();
@@ -206,12 +200,6 @@ auto Acts::Propagator<S, N>::propagate(
     // Fill the end parameters
     propRes.endParameters =
         std::make_unique<const BoundParameters>(std::move(boundParameters));
-    // Only fill the transport jacobian when covariance transport was done
-    if (state.stepping.covTransport) {
-      auto& tJacobian = std::get<Jacobian>(bs);
-      propRes.transportJacobian =
-          std::make_unique<const Jacobian>(std::move(tJacobian));
-    }
     return result;
   } else {
     return result.error();
