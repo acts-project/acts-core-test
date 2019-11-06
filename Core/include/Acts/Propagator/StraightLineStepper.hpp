@@ -46,8 +46,8 @@ class StraightLineStepper {
   using Corrector = VoidIntersectionCorrector;
   using Jacobian = BoundMatrix;
   using Covariance = BoundSymMatrix;
-  using BoundState = std::pair<BoundParameters, double>;
-  using CurvilinearState = std::pair<CurvilinearParameters, double>;
+  using BoundState = std::tuple<BoundParameters, Jacobian, double>;
+  using CurvilinearState = std::tuple<CurvilinearParameters, Jacobian, double>;
 
   /// State for track parameter propagation
   ///
@@ -219,7 +219,7 @@ class StraightLineStepper {
                                state.p * state.dir, state.q,
                                state.t0 + state.dt, surface.getSharedPtr());
     // Create the bound state
-    BoundState bState{std::move(parameters), state.pathAccumulated};
+    BoundState bState{std::move(parameters), state.jacobianStepWise, state.pathAccumulated};
     // Reset the jacobian to identity
     if (reinitialize) {
       state.jacobianStepWise = Jacobian::Identity();
@@ -251,7 +251,7 @@ class StraightLineStepper {
     CurvilinearParameters parameters(cov, state.pos, state.p * state.dir,
                                      state.q, state.t0 + state.dt);
     // Create the bound state
-    CurvilinearState curvState{std::move(parameters), state.pathAccumulated};
+    CurvilinearState curvState{std::move(parameters), state.jacobianStepWise, state.pathAccumulated};
     // Reset the jacobian to identity
     if (reinitialize) {
       state.jacobianStepWise = Jacobian::Identity();

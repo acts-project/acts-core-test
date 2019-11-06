@@ -41,8 +41,8 @@ class AtlasStepper {
 
   using Jacobian = BoundMatrix;
   using Covariance = BoundSymMatrix;
-  using BoundState = std::pair<BoundParameters, double>;
-  using CurvilinearState = std::pair<CurvilinearParameters, double>;
+  using BoundState = std::tuple<BoundParameters, Jacobian, double>;
+  using CurvilinearState = std::tuple<CurvilinearParameters, Jacobian, double>;
 
   using Corrector = VoidIntersectionCorrector;
 
@@ -382,7 +382,8 @@ class AtlasStepper {
                                charge(state), state.t0 + state.pVector[3],
                                surface.getSharedPtr());
 
-    return BoundState(std::move(parameters), state.pathAccumulated);
+    return BoundState(std::move(parameters), state.jacobian,
+                      state.pathAccumulated);
   }
 
   /// Create and return a curvilinear state at the current position
@@ -413,7 +414,8 @@ class AtlasStepper {
     CurvilinearParameters parameters(std::move(covOpt), gp, mom, charge(state),
                                      state.t0 + state.pVector[3]);
 
-    return CurvilinearState(std::move(parameters), state.pathAccumulated);
+    return CurvilinearState(std::move(parameters), state.jacobian,
+                            state.pathAccumulated);
   }
 
   /// The state update method

@@ -60,8 +60,8 @@ class EigenStepper {
   /// Jacobian, Covariance and State defintions
   using Jacobian = BoundMatrix;
   using Covariance = BoundSymMatrix;
-  using BoundState = std::pair<BoundParameters, double>;
-  using CurvilinearState = std::pair<CurvilinearParameters, double>;
+  using BoundState = std::tuple<BoundParameters, Jacobian, double>;
+  using CurvilinearState = std::tuple<CurvilinearParameters, Jacobian, double>;
 
   /// @brief State for track parameter propagation
   ///

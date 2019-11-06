@@ -26,7 +26,8 @@ auto Acts::EigenStepper<B, C, E, A>::boundState(State& state,
                              state.p * state.dir, state.q, state.t0 + state.dt,
                              surface.getSharedPtr());
   // Create the bound state
-  BoundState bState{std::move(parameters), state.pathAccumulated};
+  BoundState bState{std::move(parameters), state.jacobianStepWise,
+                    state.pathAccumulated};
   // Reset the jacobian to identity
   if (reinitialize) {
     state.jacobianStepWise = Jacobian::Identity();
@@ -50,7 +51,8 @@ auto Acts::EigenStepper<B, C, E, A>::curvilinearState(State& state,
                                    state.p * state.dir, state.q,
                                    state.t0 + state.dt);
   // Create the bound state
-  CurvilinearState curvState{std::move(parameters), state.pathAccumulated};
+  CurvilinearState curvState{std::move(parameters), state.jacobianStepWise,
+                             state.pathAccumulated};
   // Reset the jacobian to identity
   if (reinitialize) {
     state.jacobianStepWise = Jacobian::Identity();
