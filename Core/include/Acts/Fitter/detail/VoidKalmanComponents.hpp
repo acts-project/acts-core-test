@@ -115,9 +115,9 @@ struct VoidKalmanSmoother {
   }
 };
 
-/// @brief void outlier rejector
+/// @brief void outlier finder
 struct VoidOutlierFinder {
-  /// @brief Public call mimicking an outlier rejector
+  /// @brief Public call mimicking an outlier finder
   ///
   /// @param surface The surface of the measurement (in case the outlier
   /// criteria is detector-specific)

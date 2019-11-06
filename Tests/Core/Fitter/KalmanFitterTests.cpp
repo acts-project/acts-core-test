@@ -424,8 +424,10 @@ BOOST_AUTO_TEST_CASE(kalman_fitter_zero_field) {
       SourceLink{&outliers[3]}, sourcelinks[4], sourcelinks[5]};
 
   // Make sure it works with one outlier
-  auto fittedWithOneOutlierTrack =
+  fitRes =
       kFitter.fit(measurementsWithOneOutlier, rStart, kfWithOutlierOptions);
+  BOOST_CHECK(fitRes.ok());
+  auto& fittedWithOneOutlierTrack = *fitRes;
   auto fittedWithOneOutlierParameters =
       fittedWithOneOutlierTrack.fittedParameters.get();
 
@@ -443,8 +445,10 @@ BOOST_AUTO_TEST_CASE(kalman_fitter_zero_field) {
       SourceLink{&outliers[3]}, sourcelinks[4],           sourcelinks[5]};
 
   // Make sure it works with two outliers
-  auto fittedWithTwoOutlierTrack =
+  fitRes =
       kFitter.fit(measurementsWithTwoOutlier, rStart, kfWithOutlierOptions);
+  BOOST_CHECK(fitRes.ok());
+  auto& fittedWithTwoOutlierTrack = *fitRes;
   auto fittedWithTwoOutlierParameters =
       fittedWithTwoOutlierTrack.fittedParameters.get();
 

@@ -18,12 +18,10 @@
 #include "Acts/Fitter/KalmanFitterError.hpp"
 #include "Acts/Fitter/detail/VoidKalmanComponents.hpp"
 #include "Acts/Geometry/GeometryContext.hpp"
-#include "Acts/Geometry/GeometryID.hpp"
 #include "Acts/MagneticField/MagneticFieldContext.hpp"
 #include "Acts/Propagator/AbortList.hpp"
 #include "Acts/Propagator/ActionList.hpp"
 #include "Acts/Propagator/MaterialInteractor.hpp"
-#include "Acts/Propagator/Navigator.hpp"
 #include "Acts/Propagator/Propagator.hpp"
 #include "Acts/Propagator/detail/ConstrainedStep.hpp"
 #include "Acts/Propagator/detail/StandardAborters.hpp"
@@ -392,7 +390,8 @@ class KalmanFitter {
       ACTS_VERBOSE("Apply smoothing on " << result.fittedStates.size()
                                          << " filtered track states.");
       // Smooth the track states and obtain the last smoothed track parameters
-      auto smoothRes = m_smoother(state.geoContext, result.fittedStates, outlierFinder);
+      auto smoothRes =
+          m_smoother(state.geoContext, result.fittedStates, outlierFinder);
       if (!smoothRes.ok()) {
         ACTS_ERROR("Smoothing step failed: " << smoothRes.error());
         return smoothRes.error();
@@ -512,7 +511,8 @@ class KalmanFitter {
     using KalmanAborter = Aborter<source_link_t, parameters_t>;
     using KalmanActor = Actor<source_link_t, parameters_t>;
     using KalmanResult = typename KalmanActor::result_type;
-    using Actors = ActionList<KalmanActor>;
+    using Actors = ActionList<MaterialInteractor<preUpdate>, KalmanActor,
+                              MaterialInteractor<postUpdate>>;
     using Aborters = AbortList<KalmanAborter>;
 
     // Create relevant options for the propagation options
@@ -524,6 +524,7 @@ class KalmanFitter {
     kalmanActor.m_logger = m_logger.get();
     kalmanActor.inputMeasurements = std::move(inputMeasurements);
     kalmanActor.targetSurface = kfOptions.referenceSurface;
+    kalmanActor.outlierFinder = kfOptions.outlierMeasurementFinder;
 
     // Run the fitter
     auto result = m_propagator.template propagate(sParameters, kalmanOptions);

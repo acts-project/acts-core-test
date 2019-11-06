@@ -12,10 +12,9 @@
 #include <memory>
 #include "Acts/EventData/TrackParameters.hpp"
 #include "Acts/Fitter/KalmanFitterError.hpp"
-#include "Acts/Utilities/Logger.hpp"
-#include "Acts/Utilities/Result.hpp"
 #include "Acts/Fitter/detail/VoidKalmanComponents.hpp"
 #include "Acts/Utilities/Logger.hpp"
+#include "Acts/Utilities/Result.hpp"
 
 namespace Acts {
 
@@ -23,7 +22,6 @@ namespace Acts {
 ///
 /// @tparam parameters_t Type of the track parameters
 /// @tparam jacobian_t Type of the Jacobian
-/// @tparam outlier_rejector_t Type of the outlier rejector (can be void)
 template <typename parameters_t>
 class GainMatrixSmoother {
   using jacobian_t = typename parameters_t::CovMatrix_t;
@@ -40,8 +38,9 @@ class GainMatrixSmoother {
       : m_logger(std::move(logger)) {}
 
   template <typename track_states_t>
-  Result<parameters_t> operator()(const GeometryContext& gctx,
-                                  track_states_t& filteredStates, const OutlierFinder outlierFinder = nullptr) const {
+  Result<parameters_t> operator()(
+      const GeometryContext& gctx, track_states_t& filteredStates,
+      const OutlierFinder outlierFinder = nullptr) const {
     ACTS_VERBOSE("Invoked GainMatrixSmoother");
     using namespace boost::adaptors;
 
@@ -67,7 +66,7 @@ class GainMatrixSmoother {
         });
 
     if (lastFiltered == filteredStates.rend()) {
-      return boost::optional<parameters_t>(boost::none);
+      return KalmanFitterError::SmoothFailed;
     }
 
     prev_ts = &(*lastFiltered);
@@ -146,19 +145,33 @@ class GainMatrixSmoother {
                            * G.transpose();
       ACTS_VERBOSE("Smoothed covariance is: \n" << smoothedCov);
      
-      // Check if the covariance matrix is positive definite
-      Eigen::LLT<CovMatrix_t> lltCov(smoothedCov);
-
-      // Replace the non positive definite matrix with the nearest symmetric positive semidefinite matrix!
-      // Reference at https://doi.org/10.1016/0024-3795(88)90223-6
-      if( lltCov.info() == Eigen::NumericalIssue) {
-        ACTS_VERBOSE("Smoothed covariance is non positive definite.");
-        Eigen::BDCSVD<CovMatrix_t> svdCov(smoothedCov,  Eigen::ComputeFullU| Eigen::ComputeFullV);
-        CovMatrix_t S = svdCov.singularValues().asDiagonal();
-        CovMatrix_t V = svdCov.matrixV();
-        CovMatrix_t H = V * S * V.transpose(); 
-        smoothedCov = (smoothedCov + H )/2; 
-        ACTS_VERBOSE("Smoothed covariance is replaced by the nearest symmetric positive semidefinite matrix: \n" << smoothedCov);
+      // Check if the covariance matrix is positive definite.
+      // If it's not positive definite, replace it with the nearest symmetric positive semidefinite matrix.
+      bool isPosDef = false;
+      size_t nIter=0;
+      while(true){
+        Eigen::LLT<CovMatrix_t> lltCov(smoothedCov);
+        if( lltCov.info() != Eigen::NumericalIssue) {
+          isPosDef=true;
+          break;
+        } else {
+          // Only one trial for the corrected is allowed.
+	  if(nIter>0) {
+ 	    break;
+          } 
+          ACTS_VERBOSE("Smoothed covariance is non positive definite.");
+	  ACTS_VERBOSE("The "<< nIter + 1 << " iteration to replace it by the nearest symmetric positive semidefinite matrix.");
+          Eigen::BDCSVD<CovMatrix_t> svdCov(smoothedCov,  Eigen::ComputeFullU| Eigen::ComputeFullV);
+          CovMatrix_t S = svdCov.singularValues().asDiagonal();
+          CovMatrix_t V = svdCov.matrixV();
+          CovMatrix_t H = V * S * V.transpose(); 
+          smoothedCov = (smoothedCov + H )/2; 
+          ACTS_VERBOSE("Corrected smoothed covariance is: \n" << smoothedCov);
+          nIter++;
+        } 
+      }
+      if(not isPosDef){
+        return  KalmanFitterError::SmoothFailed;
       }
 
       // clang-format on
@@ -176,9 +189,8 @@ class GainMatrixSmoother {
         isOutlier = outlierFinder(&ts.referenceSurface(), ts.parameter.chi2,
                                   *ts.size(), OutlierSearchStage::Smoothing);
       }
-
       // Point prev state to current state if current state is NOT an outlier
-      if (!isOutlier) {
+      if (not isOutlier) {
         prev_ts = &ts;
       } else {
         ACTS_VERBOSE("This state is outlier. Prev. not updated.");
