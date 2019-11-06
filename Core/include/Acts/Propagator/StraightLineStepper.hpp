@@ -94,12 +94,15 @@ class StraightLineStepper {
     /// Pure transport jacobian part from runge kutta integration
     FreeMatrix jacTransport = FreeMatrix::Identity();
 
-    /// The full jacobian of the transport entire transport
+    /// The full jacobian of the transport since the last reinitialize call
     Jacobian jacobian = Jacobian::Identity();
+
+	/// The full jacobian since the first step
+	Jacobian jacFull = Jacobian::Identity();
 
     /// The propagation derivative
     FreeVector derivative = FreeVector::Zero();
-
+    
     /// Boolean to indiciate if you need covariance transport
     bool covTransport = false;
     Covariance cov = Covariance::Zero();
@@ -374,6 +377,8 @@ class StraightLineStepper {
     }
     // Store The global and bound jacobian (duplication for the moment)
     state.jacobian = jacFull * state.jacobian;
+    // Update the total jacobian
+    state.jacFull = jacFull * state.jacFull;
   }
 
   /// Method for on-demand transport of the covariance
@@ -428,6 +433,8 @@ class StraightLineStepper {
     }
     // Store The global and bound jacobian (duplication for the moment)
     state.jacobian = jacFull * state.jacobian;
+        // Update the total jacobian
+    state.jacFull = jacFull * state.jacFull;
   }
 
   /// Perform a straight line propagation step
