@@ -228,7 +228,7 @@ auto Acts::Propagator<S, N>::propagate(
     // Compute the final results and mark the propagation as successful
     if(state.stepping.localStart)
     {
-		auto bs = m_stepper.buildState<true>(state.stepping, target, true);
+		auto bs = m_stepper.template buildState<true>(state.stepping, target, true);
 		auto& boundParameters = std::get<BoundParameters>(bs);
 		// Fill the end parameters
 		propRes.endParameters =
@@ -242,7 +242,7 @@ auto Acts::Propagator<S, N>::propagate(
 	}
 	else
 	{
-		auto bs = m_stepper.buildState<false>(state.stepping, target, true);
+		auto bs = m_stepper.template buildState<false>(state.stepping, target, true);
 		auto& boundParameters = std::get<BoundParameters>(bs);
 		// Fill the end parameters
 		propRes.endParameters =

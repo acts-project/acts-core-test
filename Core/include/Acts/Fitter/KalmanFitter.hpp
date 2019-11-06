@@ -255,7 +255,7 @@ class KalmanFitter {
         ACTS_VERBOSE("Completing");
         // Transport & bind the parameter to the final surface
         auto fittedState =
-            stepper.buildState(state.stepping, *targetSurface, true); // TODO: This will not hold in general
+            stepper.template buildState<true>(state.stepping, *targetSurface, true); // TODO: This will not hold in general
         // Assign the fitted parameters
         result.fittedParameters = std::get<BoundParameters>(fittedState);
         // Break the navigation for stopping the Propagation
@@ -301,7 +301,7 @@ class KalmanFitter {
         // Transport & bind the state to the current surface
         std::tuple<BoundParameters,
                    typename TrackStateType::Parameters::CovMatrix_t, double>
-            boundState = stepper.buildState(state.stepping, *surface, true);
+            boundState = stepper.template buildState<true>(state.stepping, *surface, true);
         // Fill the track state
         trackState.parameter.predicted = std::get<0>(boundState);
         trackState.parameter.jacobian = std::get<1>(boundState);
