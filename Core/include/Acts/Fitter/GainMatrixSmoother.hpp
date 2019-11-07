@@ -11,6 +11,7 @@
 #include <boost/range/adaptors.hpp>
 #include <memory>
 #include "Acts/EventData/TrackParameters.hpp"
+#include "Acts/EventData/detail/covariance_helper.hpp"
 #include "Acts/Fitter/KalmanFitterError.hpp"
 #include "Acts/Fitter/detail/VoidKalmanComponents.hpp"
 #include "Acts/Utilities/Logger.hpp"
@@ -75,16 +76,13 @@ class GainMatrixSmoother {
     // Smoothing gain matrix
     gain_matrix_t G;
 
+    size_t dist = std::distance(filteredStates.rbegin(), lastFiltered);
     // Loop and smooth the remaining states
-    for (track_state_t& ts :
-         filteredStates |
-             sliced(0,
-                    filteredStates.size() -
-                        std::distance(filteredStates.rbegin(), lastFiltered) -
-                        1) |
-             reversed) {
-      // Skip smoothing if the track state is not filtered && not an outlier
-      if (!(ts.parameter.filtered && !ts.isType(TrackStateFlag::OutlierFlag))) {
+    for (track_state_t& ts : filteredStates |
+                                 sliced(0, filteredStates.size() - dist - 1) |
+                                 reversed) {
+      // Skip smoothing for the state if it's not filtered or an outlier
+      if (!ts.parameter.filtered or ts.isType(TrackStateFlag::OutlierFlag)) {
         continue;
       }
 
@@ -145,32 +143,10 @@ class GainMatrixSmoother {
                            * G.transpose();
       ACTS_VERBOSE("Smoothed covariance is: \n" << smoothedCov);
      
-      // Check if the covariance matrix is positive definite.
-      // If it's not positive definite, replace it with the nearest symmetric positive semidefinite matrix.
-      bool isPosDef = false;
-      size_t nIter=0;
-      while(true){
-        Eigen::LLT<CovMatrix_t> lltCov(smoothedCov);
-        if( lltCov.info() != Eigen::NumericalIssue) {
-          isPosDef=true;
-          break;
-        } else {
-          // Only one trial for the corrected is allowed.
-	  if(nIter>0) {
- 	    break;
-          } 
-          ACTS_VERBOSE("Smoothed covariance is non positive definite.");
-	  ACTS_VERBOSE("The "<< nIter + 1 << " iteration to replace it by the nearest symmetric positive semidefinite matrix.");
-          Eigen::BDCSVD<CovMatrix_t> svdCov(smoothedCov,  Eigen::ComputeFullU| Eigen::ComputeFullV);
-          CovMatrix_t S = svdCov.singularValues().asDiagonal();
-          CovMatrix_t V = svdCov.matrixV();
-          CovMatrix_t H = V * S * V.transpose(); 
-          smoothedCov = (smoothedCov + H )/2; 
-          ACTS_VERBOSE("Corrected smoothed covariance is: \n" << smoothedCov);
-          nIter++;
-        } 
-      }
-      if(not isPosDef){
+      // Check if the covariance matrix is semi-positive definite.
+      // If not, attempt to replace it with the nearest semi-positive def matrix.
+      if(not detail::covariance_helper<CovMatrix_t>::validate(smoothedCov)){
+        ACTS_DEBUG("Non semi-positive smoothed covariance found. Smoothing will be stopped.");
         return  KalmanFitterError::SmoothFailed;
       }
 
@@ -181,20 +157,80 @@ class GainMatrixSmoother {
           parameters_t(gctx, smoothedCov, smoothedPars,
                        ts.referenceSurface().getSharedPtr());
 
-      // Update the chi2 using smoothed track parameters and covariance @todo
+      // Update the chi2 using smoothed track parameters and covariance
+      bool isChi2Updated = false;
+      if (ts.measurement.calibrated) {
+        isChi2Updated = std::visit(
+            [&](const auto& calibrated) {
+              // type of measurement
+              using meas_t =
+                  typename std::remove_const<typename std::remove_reference<
+                      decltype(calibrated)>::type>::type;
+              // measurement covariance matrix
+              using meas_cov_t = typename meas_t::CovMatrix_t;
+              // measurement (local) parameter vector
+              using meas_par_t = typename meas_t::ParVector_t;
+              // type of projection
+              using projection_t = typename meas_t::Projection_t;
 
-      // Check if the measurement is an outlier
+              ACTS_VERBOSE("Measurement dimension: " << meas_t::size());
+              ACTS_VERBOSE("Calibrated measurement: "
+                           << calibrated.parameters().transpose());
+              ACTS_VERBOSE("Calibrated measurement covariance:\n"
+                           << calibrated.covariance());
+
+              // Take the projector (measurement mapping function)
+              const projection_t& H = calibrated.projector();
+              ACTS_VERBOSE("Measurement projector H:\n" << H);
+
+              // The residual from smoothed parameter
+              meas_par_t residual = calibrated.residual(*ts.parameter.smoothed);
+              ACTS_VERBOSE("Residual w.r.t. smoothed parameter: "
+                           << residual.transpose());
+
+              // The residual covariance inverse
+              meas_cov_t resCovInv =
+                  (calibrated.covariance() - H * smoothedCov * H.transpose())
+                      .inverse();
+              ACTS_VERBOSE("Residual covariance invserse: " << resCovInv);
+
+              // Check if the covariance matrix is semi-positive definite.
+              // If not, attempt to replace it with the nearest semi-positive
+              // def matrix.
+              if (not detail::covariance_helper<meas_cov_t>::validate(
+                      resCovInv)) {
+                ACTS_DEBUG(
+                    "Residual covariance inverse is not semi-positive. Chi2 is "
+                    "not updated.");
+                return false;
+              }
+
+              // Overwrite the chi2
+              ts.parameter.chi2 =
+                  (residual.transpose() * resCovInv * residual).value();
+              ACTS_VERBOSE("Chi2 after smoothing: " << ts.parameter.chi2);
+              return true;
+            },
+            *ts.measurement.calibrated);
+      }
+
+      // If the chi2 is updated successfully with smoothed parameter,
+      // proceed to check if the measurement is an outlier
       bool isOutlier = false;
-      if (outlierFinder) {
+      if (isChi2Updated && outlierFinder) {
         isOutlier = outlierFinder(&ts.referenceSurface(), ts.parameter.chi2,
                                   *ts.size(), OutlierSearchStage::Smoothing);
       }
+
       // Point prev state to current state if current state is NOT an outlier
       if (not isOutlier) {
         prev_ts = &ts;
       } else {
-        ACTS_VERBOSE("This state is outlier. Prev. not updated.");
+        ACTS_VERBOSE(
+            "The state is found to be outlier during smoothing. Prev. state "
+            "not updated.");
         ts.setType(TrackStateFlag::OutlierFlag, true);
+        continue;
       }
     }
     // The result is the pointer to the last smoothed state - for the cache

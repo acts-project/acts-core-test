@@ -16,6 +16,9 @@ struct MinimalOutlierFinder {
   /// The measurement significance criteria
   std::map<OutlierSearchStage, double> measurementSignificance;
 
+  /// The chi2 round-off precision
+  double chi2Resolution = 10e-5;
+
   /// @brief Public call mimicking an outlier searcher
   ///
   /// @param surface The surface of the measurement
@@ -24,8 +27,11 @@ struct MinimalOutlierFinder {
   /// @param searchStage The outlier search stage
   ///
   /// @return The resulting
-  bool operator()(const Surface* /*surface*/, double chi2, size_t ndf,
+  bool operator()(const Surface* /*unused*/, double chi2, size_t ndf,
                   OutlierSearchStage searchStage) const {
+    if (abs(chi2) < chi2Resolution) {
+      return false;
+    }
     if (measurementSignificance.find(searchStage) !=
         measurementSignificance.end()) {
       // The chisq distribution

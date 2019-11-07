@@ -332,7 +332,6 @@ class KalmanFitter {
                                       *trackState.size(),
                                       OutlierSearchStage::Filtering);
           }
-
           // Update the stepping state only if it's NOT an outlier
           if (isOutlier) {
             ACTS_VERBOSE("Measurement on "
@@ -406,13 +405,13 @@ class KalmanFitter {
       state.stepping.stepSize =
           detail::ConstrainedStep(-1. * state.options.maxStepSize);
       state.options.direction = backward;
-      // record outliers
+      // Record outlier measurements
       for (const auto& fst : result.fittedStates) {
         if (fst.isType(TrackStateFlag::OutlierFlag)) {
           result.outliers.push_back(*fst.measurement.uncalibrated);
         }
       }
-      // reset hole flag for states NOT between first and last measurement
+      // Reset hole flag for states NOT between first and last measurement
       auto firstMeasurement =
           std::find_if(result.fittedStates.begin(), result.fittedStates.end(),
                        [](const auto& fst) {

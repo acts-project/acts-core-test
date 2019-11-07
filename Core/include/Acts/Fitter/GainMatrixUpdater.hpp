@@ -151,7 +151,8 @@ class GainMatrixUpdater {
           // R is the covariance matrix of the filtered residual
           meas_par_t residual = calibrated.residual(filtered);
 
-          ACTS_VERBOSE("Residual: " << residual.transpose());
+          ACTS_VERBOSE(
+              "Residual w.r.t. filtered parameter: " << residual.transpose());
 
           trackState.parameter.chi2 =
               (residual.transpose() *
@@ -160,7 +161,7 @@ class GainMatrixUpdater {
                residual)
                   .value();
 
-          ACTS_VERBOSE("Chi2: " << trackState.parameter.chi2);
+          ACTS_VERBOSE("Chi2 after filtering: " << trackState.parameter.chi2);
 
           trackState.parameter.filtered = std::move(filtered);
 

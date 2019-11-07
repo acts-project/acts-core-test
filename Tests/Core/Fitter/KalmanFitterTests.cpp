@@ -432,7 +432,7 @@ BOOST_AUTO_TEST_CASE(kalman_fitter_zero_field) {
       fittedWithOneOutlierTrack.fittedParameters.get();
 
   // Count the number of outliers
-  BOOST_CHECK_EQUAL(fittedWithOneOutlierTrack.outliers.size(), 1);
+  BOOST_CHECK_EQUAL(fittedWithOneOutlierTrack.outliers.size(), 1u);
 
   // The parameters should be different
   BOOST_CHECK(!Acts::Test::checkCloseRel(
@@ -453,7 +453,7 @@ BOOST_AUTO_TEST_CASE(kalman_fitter_zero_field) {
       fittedWithTwoOutlierTrack.fittedParameters.get();
 
   // Count the number of outliers
-  BOOST_CHECK_EQUAL(fittedWithTwoOutlierTrack.outliers.size(), 2);
+  BOOST_CHECK_EQUAL(fittedWithTwoOutlierTrack.outliers.size(), 2u);
 
   // The parameters should be different
   BOOST_CHECK(!Acts::Test::checkCloseRel(
