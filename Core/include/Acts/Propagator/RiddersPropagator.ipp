@@ -7,14 +7,12 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 template <typename propagator_t>
-template <typename parameters_t,
-          typename propagator_options_t>
+template <typename parameters_t, typename propagator_options_t>
 auto Acts::RiddersPropagator<propagator_t>::propagate(
-    const parameters_t& start,
-    const propagator_options_t& options) const
-    -> Result<
-        action_list_t_result_t<CurvilinearParameters,
-                               typename propagator_options_t::action_list_type>> {
+    const parameters_t& start, const propagator_options_t& options) const
+    -> Result<action_list_t_result_t<
+        CurvilinearParameters,
+        typename propagator_options_t::action_list_type>> {
   // Launch nominal propagation and collect results
   auto nominalResult = m_propagator.propagate(start, options).value();
   const BoundVector& nominalParameters =
@@ -50,14 +48,12 @@ auto Acts::RiddersPropagator<propagator_t>::propagate(
 }
 
 template <typename propagator_t>
-template <typename parameters_t,
-          typename propagator_options_t>
+template <typename parameters_t, typename propagator_options_t>
 auto Acts::RiddersPropagator<propagator_t>::propagate(
     const parameters_t& start, const Surface& target,
     const propagator_options_t& options) const
     -> Result<action_list_t_result_t<
-        BoundParameters,
-        typename propagator_options_t::action_list_type>> {
+        BoundParameters, typename propagator_options_t::action_list_type>> {
   // Launch nominal propagation and collect results
   auto nominalResult = m_propagator.propagate(start, target, options).value();
   const BoundVector& nominalParameters =

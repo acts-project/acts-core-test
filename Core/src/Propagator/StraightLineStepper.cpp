@@ -11,41 +11,48 @@
 
 namespace Acts {
 
-  std::tuple<BoundParameters, BoundMatrix, double> StraightLineStepper::boundState(StepperState& state, const Surface& surface,
-                        bool reinitialize) const {
-   return CovarianceEngine::boundState(state, surface, reinitialize);
-  }
+std::tuple<BoundParameters, BoundMatrix, double>
+StraightLineStepper::boundState(StepperState& state, const Surface& surface,
+                                bool reinitialize) const {
+  return CovarianceEngine::boundState(state, surface, reinitialize);
+}
 
-  std::tuple<CurvilinearParameters, BoundMatrix, double> StraightLineStepper::curvilinearState(StepperState& state, bool reinitialize) const {
-    return CovarianceEngine::curvilinearState(state, reinitialize);
-  }
+std::tuple<CurvilinearParameters, BoundMatrix, double>
+StraightLineStepper::curvilinearState(StepperState& state,
+                                      bool reinitialize) const {
+  return CovarianceEngine::curvilinearState(state, reinitialize);
+}
 
-  void StraightLineStepper::update(StepperState& state, const BoundParameters& pars) const {
-    const auto& mom = pars.momentum();
-    state.pos = pars.position();
-    state.dir = mom.normalized();
-    state.p = mom.norm();
-    state.dt = pars.time();
+void StraightLineStepper::update(StepperState& state,
+                                 const BoundParameters& pars) const {
+  const auto& mom = pars.momentum();
+  state.pos = pars.position();
+  state.dir = mom.normalized();
+  state.p = mom.norm();
+  state.dt = pars.time();
 
-    if (pars.covariance()) {
-      state.cov = (*(pars.covariance()));
-    }
+  if (pars.covariance()) {
+    state.cov = (*(pars.covariance()));
   }
+}
 
-  void StraightLineStepper::update(StepperState& state, const Vector3D& uposition,
-              const Vector3D& udirection, double up, double time) const {
-    state.pos = uposition;
-    state.dir = udirection;
-    state.p = up;
-    state.dt = time;
-  }
+void StraightLineStepper::update(StepperState& state, const Vector3D& uposition,
+                                 const Vector3D& udirection, double up,
+                                 double time) const {
+  state.pos = uposition;
+  state.dir = udirection;
+  state.p = up;
+  state.dt = time;
+}
 
-  void StraightLineStepper::covarianceTransport(StepperState& state, bool reinitialize) const {
-    CovarianceEngine::covarianceTransport(state, reinitialize);
-  }
+void StraightLineStepper::covarianceTransport(StepperState& state,
+                                              bool reinitialize) const {
+  CovarianceEngine::covarianceTransport(state, reinitialize);
+}
 
-  void StraightLineStepper::covarianceTransport(StepperState& state, const Surface& surface,
-                           bool reinitialize) const {
-    CovarianceEngine::covarianceTransport(state, reinitialize, &surface);
-  }
+void StraightLineStepper::covarianceTransport(StepperState& state,
+                                              const Surface& surface,
+                                              bool reinitialize) const {
+  CovarianceEngine::covarianceTransport(state, reinitialize, &surface);
+}
 }  // namespace Acts

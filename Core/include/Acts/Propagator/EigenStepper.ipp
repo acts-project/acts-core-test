@@ -60,7 +60,7 @@ void Acts::EigenStepper<B, C, E, A>::covarianceTransport(
 template <typename B, typename C, typename E, typename A>
 void Acts::EigenStepper<B, C, E, A>::covarianceTransport(
     State& state, const Surface& surface, bool reinitialize) const {
-    CovarianceEngine::covarianceTransport(state, reinitialize, &surface);
+  CovarianceEngine::covarianceTransport(state, reinitialize, &surface);
 }
 
 template <typename B, typename C, typename E, typename A>

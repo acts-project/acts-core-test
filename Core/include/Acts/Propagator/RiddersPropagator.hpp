@@ -87,11 +87,9 @@ class RiddersPropagator {
   /// @return Result of the propagation
   template <typename parameters_t, typename propagator_options_t>
   Result<action_list_t_result_t<
-      CurvilinearParameters,
-      typename propagator_options_t::action_list_type>>
-  propagate(
-      const parameters_t& start,
-      const propagator_options_t& options) const;
+      CurvilinearParameters, typename propagator_options_t::action_list_type>>
+  propagate(const parameters_t& start,
+            const propagator_options_t& options) const;
 
   /// @brief Propagation method targeting bound parameters
   ///
@@ -107,13 +105,11 @@ class RiddersPropagator {
   /// @return Result of the propagation
   /// @note If the target surface is a disc, the resulting covariance may be
   /// inconsistent. In this case a zero matrix is returned.
-  template <typename parameters_t,
-            typename propagator_options_t>
-  Result<action_list_t_result_t<BoundParameters,
-      typename propagator_options_t::action_list_type>>
-  propagate(
-      const parameters_t& start, const Surface& target,
-      const propagator_options_t& options) const;
+  template <typename parameters_t, typename propagator_options_t>
+  Result<action_list_t_result_t<
+      BoundParameters, typename propagator_options_t::action_list_type>>
+  propagate(const parameters_t& start, const Surface& target,
+            const propagator_options_t& options) const;
 
  private:
   /// @brief This function tests whether the variations on a disc as target

@@ -156,8 +156,7 @@ auto Acts::Propagator<S, N>::propagate(
     const parameters_t& start, const Surface& target,
     const propagator_options_t& options) const
     -> Result<action_list_t_result_t<
-        BoundParameters,
-        typename propagator_options_t::action_list_type>> {
+        BoundParameters, typename propagator_options_t::action_list_type>> {
   static_assert(ParameterConcept<parameters_t>,
                 "Parameters do not fulfill parameter concept.");
 

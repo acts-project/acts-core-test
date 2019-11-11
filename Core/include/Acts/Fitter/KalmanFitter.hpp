@@ -304,7 +304,7 @@ class KalmanFitter {
             boundState = stepper.boundState(state.stepping, *surface, true);
         // Fill the track state
         trackState.parameter.predicted = std::get<0>(boundState);
-        trackState.parameter.jacobian = state.stepping.jacobian;
+        trackState.parameter.jacobian = std::get<1>(boundState);
         trackState.parameter.pathLength = std::get<2>(boundState);
 
         // If the update is successful, set covariance and

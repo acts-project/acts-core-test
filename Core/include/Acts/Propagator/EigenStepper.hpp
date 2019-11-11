@@ -14,13 +14,13 @@
 #include "Acts/EventData/TrackParameters.hpp"
 #include "Acts/Propagator/DefaultExtension.hpp"
 #include "Acts/Propagator/DenseEnvironmentExtension.hpp"
+#include "Acts/Propagator/EigenStepperError.hpp"
 #include "Acts/Propagator/StepperExtensionList.hpp"
+#include "Acts/Propagator/StepperState.hpp"
 #include "Acts/Propagator/detail/Auctioneer.hpp"
 #include "Acts/Utilities/Intersection.hpp"
-#include "Acts/Utilities/Units.hpp"
-#include "Acts/Propagator/StepperState.hpp"
-#include "Acts/Propagator/EigenStepperError.hpp"
 #include "Acts/Utilities/Result.hpp"
+#include "Acts/Utilities/Units.hpp"
 
 namespace Acts {
 
@@ -50,27 +50,26 @@ class EigenStepper {
   using BoundState = std::tuple<BoundParameters, Jacobian, double>;
   using CurvilinearState = std::tuple<CurvilinearParameters, Jacobian, double>;
 
-  	/// @brief The state object. This object extends the general container @c StepperState by some parameters for RKN4
-   struct State : public StepperState
-  {
-	  /// Default constructor
-	  State() = delete;
-      
-      /// @brief Constructor
-      ///
-      /// @tparam parameters_t
+  /// @brief The state object. This object extends the general container @c
+  /// StepperState by some parameters for RKN4
+  struct State : public StepperState {
+    /// Default constructor
+    State() = delete;
+
+    /// @brief Constructor
+    ///
+    /// @tparam parameters_t
     template <typename parameters_t>
-	explicit State(std::reference_wrapper<const GeometryContext> gctx,
+    explicit State(std::reference_wrapper<const GeometryContext> gctx,
                    std::reference_wrapper<const MagneticFieldContext> mctx,
                    const parameters_t& par, NavigationDirection ndir = forward,
-                   double ssize = std::numeric_limits<double>::max()) 
-                   : StepperState(gctx, mctx, par, ndir, ssize), fieldCache(mctx)
-	{
-	  startPos = pos;
+                   double ssize = std::numeric_limits<double>::max())
+        : StepperState(gctx, mctx, par, ndir, ssize), fieldCache(mctx) {
+      startPos = pos;
       startDir = dir;
-	}
-	
-	 /// Global start particle position
+    }
+
+    /// Global start particle position
     Vector3D startPos = Vector3D(0., 0., 0.);
 
     /// Momentum start direction (normalized)
@@ -94,7 +93,6 @@ class EigenStepper {
       /// k_i of the RKN4 algorithm
       Vector3D k1, k2, k3, k4;
     } stepData;
-    
   };
 
   /// Constructor requires knowledge of the detector's magnetic field
