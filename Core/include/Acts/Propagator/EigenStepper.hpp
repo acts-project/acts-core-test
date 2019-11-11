@@ -18,7 +18,7 @@
 #include "Acts/Propagator/detail/Auctioneer.hpp"
 #include "Acts/Utilities/Intersection.hpp"
 #include "Acts/Utilities/Units.hpp"
-
+#include "Acts/Propagator/StepperState.hpp"
 #include "Acts/Propagator/EigenStepperError.hpp"
 #include "Acts/Utilities/Result.hpp"
 
@@ -40,19 +40,6 @@ template <typename BField, typename corrector_t = VoidIntersectionCorrector,
           typename extensionlist_t = StepperExtensionList<DefaultExtension>,
           typename auctioneer_t = detail::VoidAuctioneer>
 class EigenStepper {
- private:
-  // This struct is a meta-function which normally maps to BoundParameters...
-  template <typename T, typename S>
-  struct s {
-    using type = BoundParameters;
-  };
-
-  // ...unless type S is int, in which case it maps to Curvilinear parameters
-  template <typename T>
-  struct s<T, int> {
-    using type = CurvilinearParameters;
-  };
-
  public:
   using cstep = detail::ConstrainedStep;
   using Corrector = corrector_t;
@@ -63,112 +50,36 @@ class EigenStepper {
   using BoundState = std::tuple<BoundParameters, Jacobian, double>;
   using CurvilinearState = std::tuple<CurvilinearParameters, Jacobian, double>;
 
-  /// @brief State for track parameter propagation
-  ///
-  /// It contains the stepping information and is provided thread local
-  /// by the propagator
-  struct State {
-    /// Default constructor - deleted
-    State() = delete;
-
-    /// Constructor from the initial track parameters
-    ///
-    /// @param [in] gctx is the context object for the geometry
-    /// @param [in] mctx is the context object for the magnetic field
-    /// @param [in] par The track parameters at start
-    /// @param [in] ndir The navigation direciton w.r.t momentum
-    /// @param [in] ssize is the maximum step size
-    ///
-    /// @note the covariance matrix is copied when needed
+  	/// @brief The state object. This object extends the general container @c StepperState by some parameters for RKN4
+   struct State : public StepperState
+  {
+	  /// Default constructor
+	  State() = delete;
+      
+      /// @brief Constructor
+      ///
+      /// @tparam parameters_t
     template <typename parameters_t>
-    explicit State(std::reference_wrapper<const GeometryContext> gctx,
+	explicit State(std::reference_wrapper<const GeometryContext> gctx,
                    std::reference_wrapper<const MagneticFieldContext> mctx,
                    const parameters_t& par, NavigationDirection ndir = forward,
-                   double ssize = std::numeric_limits<double>::max())
-        : pos(par.position()),
-          dir(par.momentum().normalized()),
-          p(par.momentum().norm()),
-          q(par.charge()),
-          t0(par.time()),
-          navDir(ndir),
-          stepSize(ndir * std::abs(ssize)),
-          fieldCache(mctx),
-          geoContext(gctx) {
-      // remember the start parameters
-      startPos = pos;
+                   double ssize = std::numeric_limits<double>::max()) 
+                   : StepperState(gctx, mctx, par, ndir, ssize), fieldCache(mctx)
+	{
+	  startPos = pos;
       startDir = dir;
-      // Init the jacobian matrix if needed
-      if (par.covariance()) {
-        // Get the reference surface for navigation
-        const auto& surface = par.referenceSurface();
-        // set the covariance transport flag to true and copy
-        covTransport = true;
-        cov = BoundSymMatrix(*par.covariance());
-        surface.initJacobianToGlobal(gctx, jacToGlobal, pos, dir,
-                                     par.parameters());
-      }
-    }
-
-    /// Global start particle position
+	}
+	
+	 /// Global start particle position
     Vector3D startPos = Vector3D(0., 0., 0.);
 
     /// Momentum start direction (normalized)
     Vector3D startDir = Vector3D(1., 0., 0.);
 
-    /// Global particle position
-    Vector3D pos = Vector3D(0., 0., 0.);
-
-    /// Momentum direction (normalized)
-    Vector3D dir = Vector3D(1., 0., 0.);
-
-    /// Momentum
-    double p = 0.;
-
-    /// The charge
-    double q = 1.;
-
-    /// @note The time is split into a starting and a propagated time to avoid
-    /// machine precision related errors Starting time
-    const double t0;
-    /// Propagated time
-    double dt = 0.;
-
-    /// Navigation direction, this is needed for searching
-    NavigationDirection navDir;
-
-    /// The full jacobian of the transport since the last reinitialize call
-    Jacobian jacobianStepWise = Jacobian::Identity();
-
-    /// The full jacobian since the first step
-    Jacobian jacobian = Jacobian::Identity();
-
-    /// Jacobian from local to the global frame
-    BoundToFreeMatrix jacToGlobal = BoundToFreeMatrix::Zero();
-
-    /// Pure transport jacobian part from runge kutta integration
-    FreeMatrix jacTransport = FreeMatrix::Identity();
-
-    /// The propagation derivative
-    FreeVector derivative = FreeVector::Zero();
-
-    /// Covariance matrix (and indicator)
-    //// associated with the initial error on track parameters
-    bool covTransport = false;
-    Covariance cov = Covariance::Zero();
-
-    /// accummulated path length state
-    double pathAccumulated = 0.;
-
-    /// adaptive step size of the runge-kutta integration
-    cstep stepSize{std::numeric_limits<double>::max()};
-
     /// This caches the current magnetic field cell and stays
     /// (and interpolates) within it as long as this is valid.
     /// See step() code for details.
     typename BField::Cache fieldCache;
-
-    /// The geometry context
-    std::reference_wrapper<const GeometryContext> geoContext;
 
     /// List of algorithmic extensions
     extensionlist_t extension;
@@ -183,13 +94,8 @@ class EigenStepper {
       /// k_i of the RKN4 algorithm
       Vector3D k1, k2, k3, k4;
     } stepData;
+    
   };
-
-  /// Return parameter types depend on the propagation mode:
-  /// - when propagating to a surface we usually return BoundParameters
-  /// - otherwise CurvilinearParameters
-  template <typename T, typename S = int>
-  using return_parameter_type = typename s<T, S>::type;
 
   /// Constructor requires knowledge of the detector's magnetic field
   EigenStepper(BField bField = BField());

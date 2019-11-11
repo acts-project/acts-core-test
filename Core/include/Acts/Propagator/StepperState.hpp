@@ -66,7 +66,10 @@ namespace Acts {
     /// Pure transport jacobian part from runge kutta integration
     FreeMatrix jacTransport = FreeMatrix::Identity();
 
-    /// The full jacobian of the transport entire transport
+    /// The full jacobian of the transport since the last reinitialize call
+    Jacobian jacobianStepWise = Jacobian::Identity();
+
+    /// The full jacobian since the first step
     Jacobian jacobian = Jacobian::Identity();
 
     /// The propagation derivative
