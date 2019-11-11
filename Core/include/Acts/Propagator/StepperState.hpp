@@ -14,6 +14,7 @@
 #include "Acts/Geometry/GeometryContext.hpp"
 #include "Acts/Propagator/detail/ConstrainedStep.hpp"
 #include "Acts/Utilities/Definitions.hpp"
+#include "Acts/MagneticField/MagneticFieldContext.hpp"
 
 namespace Acts {
 

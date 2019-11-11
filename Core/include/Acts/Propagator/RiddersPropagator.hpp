@@ -85,10 +85,10 @@ class RiddersPropagator {
   /// @param [in] options Options of the propagations
   ///
   /// @return Result of the propagation
-  template <typename parameters_t>
-  Result<
-      action_list_t_result_t<CurvilinearParameters,
-                             typename propagator_options_t::action_list_type>>
+  template <typename parameters_t, typename propagator_options_t>
+  Result<action_list_t_result_t<
+      CurvilinearParameters,
+      typename propagator_options_t::action_list_type>>
   propagate(
       const parameters_t& start,
       const propagator_options_t& options) const;
@@ -108,7 +108,7 @@ class RiddersPropagator {
   /// @note If the target surface is a disc, the resulting covariance may be
   /// inconsistent. In this case a zero matrix is returned.
   template <typename parameters_t,
-            template propagator_options_t>
+            typename propagator_options_t>
   Result<action_list_t_result_t<BoundParameters,
       typename propagator_options_t::action_list_type>>
   propagate(
