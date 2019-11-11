@@ -64,12 +64,12 @@ struct CovarianceTransport {
     // Create the bound state
     using jacobian = typename std::tuple_element<1, result_t>::type;
     jacobian jac;
-    result_t result = std::make_tuple(std::move(parameters), jac,
+    result_t result = std::make_tuple(std::move(parameters), state.jacobianStepWise,
                       state.pathAccumulated);
     // Reinitialize if asked to do so
     // this is useful for interruption calls
     if (reinitialize) {
-      state.jacobian = Jacobian::Identity();
+      state.jacobianStepWise = Jacobian::Identity();
       state.jacTransport = FreeMatrix::Identity();
       // reset the jacobian
       state.derivative = FreeVector::Zero();
@@ -106,12 +106,12 @@ struct CovarianceTransport {
     // Create the bound state
     using jacobian = typename std::tuple_element<1, result_t>::type;
     jacobian jac;
-    result_t result = std::make_tuple(std::move(parameters), jac,
+    result_t result = std::make_tuple(std::move(parameters), state.jacobianStepWise,
                                state.pathAccumulated);
     // Reinitialize if asked to do so
     // this is useful for interruption calls
     if (reinitialize) { // TODO: this block could probably be moved into the function
-      state.jacobian = Jacobian::Identity();
+      state.jacobianStepWise = Jacobian::Identity();
       state.jacTransport = FreeMatrix::Identity();
       // reset the jacobian
       state.derivative = FreeVector::Zero();

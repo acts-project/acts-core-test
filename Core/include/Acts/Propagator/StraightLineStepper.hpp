@@ -49,7 +49,7 @@ class StraightLineStepper {
   /// @param [in,out] state is the propagation state associated with the track
   ///                 the magnetic field cell is used (and potentially updated)
   /// @param [in] pos is the field position
-  Vector3D getField(State& /*state*/, const Vector3D& /*pos*/) const {
+  Vector3D getField(State& /*state*/, const Vector3D& /*pos*/) const{
     // get the field from the cell
     return Vector3D(0., 0., 0.);
   }
@@ -95,6 +95,7 @@ class StraightLineStepper {
   ///   - the stepwise jacobian towards it (from last bound)
   ///   - and the path length (from start - for ordering)
   BoundState boundState(State& state, const Surface& surface,
+<<<<<<< HEAD
                         bool reinitialize) const {
     // Transport the covariance to here
     std::optional<Covariance> cov = std::nullopt;
@@ -116,6 +117,9 @@ class StraightLineStepper {
     /// Return the State
     return bState;
   }
+=======
+                        bool reinitialize) const;
+>>>>>>> Built SLS cpp
 
   /// Create and return a curvilinear state at the current position
   ///
@@ -129,6 +133,7 @@ class StraightLineStepper {
   ///   - the curvilinear parameters at given position
   ///   - the stepweise jacobian towards it (from last bound)
   ///   - and the path length (from start - for ordering)
+<<<<<<< HEAD
   CurvilinearState curvilinearState(State& state, bool reinitialize) const {
     // Transport the covariance to here
     std::optional<Covariance> cov = std::nullopt;
@@ -149,22 +154,15 @@ class StraightLineStepper {
     /// Return the State
     return curvState;
   }
+=======
+  CurvilinearState curvilinearState(State& state, bool reinitialize) const;
+>>>>>>> Built SLS cpp
 
   /// Method to update a stepper state to the some parameters
   ///
   /// @param [in,out] state State object that will be updated
   /// @param [in] pars Parameters that will be written into @p state
-  void update(State& state, const BoundParameters& pars) const {
-    const auto& mom = pars.momentum();
-    state.pos = pars.position();
-    state.dir = mom.normalized();
-    state.p = mom.norm();
-    state.dt = pars.time();
-
-    if (pars.covariance()) {
-      state.cov = (*(pars.covariance()));
-    }
-  }
+  void update(State& state, const BoundParameters& pars) const;
 
   /// Method to update momentum, direction and p
   ///
@@ -174,12 +172,7 @@ class StraightLineStepper {
   /// @param [in] up the updated momentum value
   /// @param [in] time the updated time value
   void update(State& state, const Vector3D& uposition,
-              const Vector3D& udirection, double up, double time) const {
-    state.pos = uposition;
-    state.dir = udirection;
-    state.p = up;
-    state.dt = time;
-  }
+              const Vector3D& udirection, double up, double time) const;
 
   /// Return a corrector
   VoidIntersectionCorrector corrector(State& /*state*/) const {
@@ -194,6 +187,7 @@ class StraightLineStepper {
   /// @param [in] reinitialize is a flag to steer whether the
   ///        state should be reinitialized at the new
   ///        position
+<<<<<<< HEAD
   void covarianceTransport(State& state, bool reinitialize = false) const {
     // Optimized trigonometry on the propagation direction
     const double x = state.dir(0);  // == cos(phi) * sin(theta)
@@ -268,6 +262,9 @@ class StraightLineStepper {
     // Update the total jacobian
     state.jacobian = jacFull * state.jacobian;
   }
+=======
+  void covarianceTransport(State& state, bool reinitialize = false) const;
+>>>>>>> Built SLS cpp
 
   /// Method for on-demand transport of the covariance
   /// to a new curvilinear frame at current  position,
@@ -284,6 +281,7 @@ class StraightLineStepper {
   /// @note no check is done if the position is actually on the surface
   ///
   void covarianceTransport(State& state, const Surface& surface,
+<<<<<<< HEAD
                            bool reinitialize = false) const {
     using VectorHelpers::phi;
     using VectorHelpers::theta;
@@ -324,6 +322,9 @@ class StraightLineStepper {
     // Update the total jacobian
     state.jacobian = jacFull * state.jacobian;
   }
+=======
+                           bool reinitialize = false) const;
+>>>>>>> Built SLS cpp
 
   /// Perform a straight line propagation step
   ///
