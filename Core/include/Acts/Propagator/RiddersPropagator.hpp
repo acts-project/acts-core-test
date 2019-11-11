@@ -85,16 +85,13 @@ class RiddersPropagator {
   /// @param [in] options Options of the propagations
   ///
   /// @return Result of the propagation
-  template <typename parameters_t, typename action_list_t,
-            typename aborter_list_t,
-            template <typename, typename> class propagator_options_t>
+  template <typename parameters_t>
   Result<
-      action_list_t_result_t<typename propagator_t::Stepper::
-                                 template return_parameter_type<parameters_t>,
-                             action_list_t>>
+      action_list_t_result_t<CurvilinearParameters,
+                             typename propagator_options_t::action_list_type>>
   propagate(
       const parameters_t& start,
-      const propagator_options_t<action_list_t, aborter_list_t>& options) const;
+      const propagator_options_t& options) const;
 
   /// @brief Propagation method targeting bound parameters
   ///
@@ -110,16 +107,13 @@ class RiddersPropagator {
   /// @return Result of the propagation
   /// @note If the target surface is a disc, the resulting covariance may be
   /// inconsistent. In this case a zero matrix is returned.
-  template <typename parameters_t, typename surface_t, typename action_list_t,
-            typename aborter_list_t,
-            template <typename, typename> class propagator_options_t>
-  Result<action_list_t_result_t<
-      typename propagator_t::Stepper::template return_parameter_type<
-          parameters_t, surface_t>,
-      action_list_t>>
+  template <typename parameters_t,
+            template propagator_options_t>
+  Result<action_list_t_result_t<BoundParameters,
+      typename propagator_options_t::action_list_type>>
   propagate(
-      const parameters_t& start, const surface_t& target,
-      const propagator_options_t<action_list_t, aborter_list_t>& options) const;
+      const parameters_t& start, const Surface& target,
+      const propagator_options_t& options) const;
 
  private:
   /// @brief This function tests whether the variations on a disc as target
