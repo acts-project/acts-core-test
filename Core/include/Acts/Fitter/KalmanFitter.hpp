@@ -52,12 +52,12 @@ struct KalmanFitterOptions {
                       std::reference_wrapper<const MagneticFieldContext> mctx,
                       std::reference_wrapper<const CalibrationContext> cctx,
                       const Surface* rSurface = nullptr,
-                      const OutlierFinder olFinder = nullptr)
+                      const OutlierFinder& olFinder = nullptr)
       : geoContext(gctx),
         magFieldContext(mctx),
         calibrationContext(cctx),
         referenceSurface(rSurface),
-        outlierMeasurementFinder(std::move(olFinder)) {}
+        outlierMeasurementFinder(olFinder) {}
 
   /// Context object for the geometry
   std::reference_wrapper<const GeometryContext> geoContext;
@@ -254,18 +254,9 @@ class KalmanFitter {
       }
 
       // Finalization:
-      // - Smooth trigger
-      bool smoothTriggered = false;
-      if constexpr (isDirectNavigator) {
-        // -- DirectNavigator: All provided surfaces have been processed
-        smoothTriggered = state.navigation.targetReached and
-                          result.processedStates > 0 and not result.smoothed;
-      } else {
-        // -- StandardNavigator: When all track states have been handled
-        smoothTriggered = result.processedStates == inputMeasurements.size() and
-                          not result.smoothed;
-      }
-      if (smoothTriggered) {
+      // When the navigation is breaked
+      if (state.navigation.navigationBreak and result.processedStates > 0 and
+          not result.smoothed) {
         // -> Sort the track states (as now the path length is set)
         // -> Call the smoothing
         // -> Set a stop condition when all track states have been handled
@@ -352,7 +343,7 @@ class KalmanFitter {
           // Update the stepping state only if it's NOT an outlier
           if (isOutlier) {
             ACTS_VERBOSE("Measurement on "
-                         << surface->geoID().toString()
+                         << surface->geoID()
                          << " is an outlier, parameters are not updated.");
             trackState.setType(TrackStateFlag::OutlierFlag, true);
           } else {

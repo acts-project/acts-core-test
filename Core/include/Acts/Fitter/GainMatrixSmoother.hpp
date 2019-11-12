@@ -41,7 +41,7 @@ class GainMatrixSmoother {
   template <typename track_states_t>
   Result<parameters_t> operator()(
       const GeometryContext& gctx, track_states_t& filteredStates,
-      const OutlierFinder outlierFinder = nullptr) const {
+      const OutlierFinder& outlierFinder = nullptr) const {
     ACTS_VERBOSE("Invoked GainMatrixSmoother");
     using namespace boost::adaptors;
 

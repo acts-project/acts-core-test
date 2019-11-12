@@ -141,19 +141,26 @@ class DirectNavigator {
     // Navigator status always resets the current surface
     state.navigation.currentSurface = nullptr;
     // Check if we are on surface
-    if (state.navigation.nextSurfaceIter != state.navigation.endSurfaceIter &&
-        stepper.surfaceReached(state.stepping,
-                               *state.navigation.nextSurfaceIter)) {
-      // Set the current surface
-      state.navigation.currentSurface = *state.navigation.nextSurfaceIter;
-      debugLog(state, [&] {
-        std::stringstream dstream;
-        dstream << "Current surface set to  "
-                << state.navigation.currentSurface->geoID();
-        return dstream.str();
-      });
-      // Move the sequence to the next surface
-      ++state.navigation.nextSurfaceIter;
+    if (state.navigation.nextSurfaceIter != state.navigation.endSurfaceIter) {
+      if (stepper.surfaceReached(state.stepping,
+                                 *state.navigation.nextSurfaceIter)) {
+        // Set the current surface
+        state.navigation.currentSurface = *state.navigation.nextSurfaceIter;
+        debugLog(state, [&] {
+          std::stringstream dstream;
+          dstream << "Current surface set to  ";
+          dstream << state.navigation.currentSurface->geoID();
+          return dstream.str();
+        });
+        // Move the sequence to the next surface
+        ++state.navigation.nextSurfaceIter;
+      } else if ((*state.navigation.nextSurfaceIter)
+                     ->isOnSurface(state.geoContext,
+                                   stepper.position(state.stepping),
+                                   stepper.direction(state.stepping), false)) {
+        // Move the sequence to the next surface
+        ++state.navigation.nextSurfaceIter;
+      }
     }
     // Return to the propagator
     return;
