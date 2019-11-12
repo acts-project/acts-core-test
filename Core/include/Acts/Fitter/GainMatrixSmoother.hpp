@@ -146,8 +146,8 @@ class GainMatrixSmoother {
       // Check if the covariance matrix is semi-positive definite.
       // If not, attempt to replace it with the nearest semi-positive def matrix.
       if(not detail::covariance_helper<CovMatrix_t>::validate(smoothedCov)){
-        ACTS_DEBUG("Non semi-positive smoothed covariance found. Smoothing will be stopped.");
-        return  KalmanFitterError::SmoothFailed;
+        ACTS_DEBUG("Non semi-positive smoothed covariance found. Smoothing failed for this state.");
+        continue;
       }
 
       // clang-format on
