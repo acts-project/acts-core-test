@@ -173,35 +173,11 @@ struct MaterialInteractor {
         // Apply the multiple scattering
         // - only when you do covariance transport
         if (multipleScattering && state.stepping.covTransport) {
-          // Thickness in X0 from without path correction
-          double tInX0 = mProperties.thicknessInX0();
-          // Retrieve the scattering contribution
-          double sigmaScat = scattering(p, lbeta, tInX0);
-          double sinTheta =
-              std::sin(VectorHelpers::theta(stepper.direction(state.stepping)));
-          double sigmaDeltaPhiSq =
-              sigmaScat * sigmaScat / (sinTheta * sinTheta);
-          double sigmaDeltaThetaSq = sigmaScat * sigmaScat;
-          // Record the material interaction
-          mInteraction.sigmaPhi2 = sigmaDeltaPhiSq;
-          mInteraction.sigmaTheta2 = sigmaDeltaThetaSq;
-          // Good in any case for positive direction
-          if (state.stepping.navDir == forward) {
-            // Just add the multiple scattering component
-            state.stepping.cov(ePHI, ePHI) +=
-                state.stepping.navDir * sigmaDeltaPhiSq;
-            state.stepping.cov(eTHETA, eTHETA) +=
-                state.stepping.navDir * sigmaDeltaThetaSq;
-          } else {
-            // We check if the covariance stays positive
-            double sEphi = state.stepping.cov(ePHI, ePHI);
-            double sEtheta = state.stepping.cov(eTHETA, eTHETA);
-            if (sEphi > sigmaDeltaPhiSq && sEtheta > sigmaDeltaThetaSq) {
-              // Noise removal is not applied if covariance would fall below 0
-              state.stepping.cov(ePHI, ePHI) -= sigmaDeltaPhiSq;
-              state.stepping.cov(eTHETA, eTHETA) -= sigmaDeltaThetaSq;
-            }
-          }
+			std::pair<double, double> sigmaAngles = evaluateMultipleScattering(state, stepper, mProperties.thicknessInX0(), p, lbeta);
+			
+		  // Record the material interaction
+		  mInteraction.sigmaPhi2 = sigmaAngles.first;
+		  mInteraction.sigmaTheta2 = sigmaAngles.second;
         }
 
         // Apply the Energy loss
@@ -284,6 +260,37 @@ struct MaterialInteractor {
   void operator()(propagator_state_t& /*state*/) const {}
 
  private:
+ 
+  template <typename propagator_state_t, typename stepper_t>
+  std::pair<double, double> evaluateMultipleScattering(propagator_state_t& state, const stepper_t& stepper, double tInX0, double p, double lbeta) const
+  {
+	  // Retrieve the scattering contribution
+	  double sigmaScat = scattering(p, lbeta, tInX0);
+	  double sinTheta =
+		  std::sin(VectorHelpers::theta(stepper.direction(state.stepping)));
+	  double sigmaDeltaPhiSq =
+		  sigmaScat * sigmaScat / (sinTheta * sinTheta);
+	  double sigmaDeltaThetaSq = sigmaScat * sigmaScat;
+	  // Good in any case for positive direction
+	  if (state.stepping.navDir == forward) {
+		// Just add the multiple scattering component
+		state.stepping.cov(ePHI, ePHI) +=
+			state.stepping.navDir * sigmaDeltaPhiSq;
+		state.stepping.cov(eTHETA, eTHETA) +=
+			state.stepping.navDir * sigmaDeltaThetaSq;
+	  } else {
+		// We check if the covariance stays positive
+		double sEphi = state.stepping.cov(ePHI, ePHI);
+		double sEtheta = state.stepping.cov(eTHETA, eTHETA);
+		if (sEphi > sigmaDeltaPhiSq && sEtheta > sigmaDeltaThetaSq) {
+		  // Noise removal is not applied if covariance would fall below 0
+		  state.stepping.cov(ePHI, ePHI) -= sigmaDeltaPhiSq;
+		  state.stepping.cov(eTHETA, eTHETA) -= sigmaDeltaThetaSq;
+		}
+	  }
+	  return std::make_pair(sigmaDeltaPhiSq, sigmaDeltaThetaSq);
+  }
+ 
   /// The private propagation debug logging
   ///
   /// It needs to be fed by a lambda function that returns a string,
