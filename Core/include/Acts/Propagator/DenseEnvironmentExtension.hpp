@@ -46,10 +46,6 @@ struct DenseEnvironmentExtension {
   /// Energy at each sub-step
   std::array<double, 4> energy;
 
-  /// Energy loss calculator
-  static const detail::IonisationLoss ionisationLoss;
-  static const detail::RadiationLoss radiationLoss;
-
   /// @brief Default constructor
   DenseEnvironmentExtension() = default;
 
@@ -360,13 +356,13 @@ struct DenseEnvironmentExtension {
     // Calculate energy loss by
     // a) ionisation
     double ionisationEnergyLoss =
-        ionisationLoss
-            .dEds(mass, momentum / energy_, energy_ / mass, *(material), 1.,
+        detail::IonisationLoss
+            ::dEds(mass, momentum / energy_, energy_ / mass, *(material), 1.,
                   meanEnergyLoss)
             .first;
     // b) radiation
     double radiationEnergyLoss =
-        radiationLoss.dEds(energy_, mass, *(material), pdg, 1.);
+        detail::RadiationLoss::dEds(energy_, mass, *(material), pdg, 1.);
 
     // Rescaling for mode evaluation.
     // C.f. ATL-SOFT-PUB-2008-003 section 3. The mode evaluation for the energy
@@ -397,10 +393,10 @@ struct DenseEnvironmentExtension {
 
     // Bethe-Bloch
     const double betheBlochDerivative =
-        ionisationLoss.dqop(energy_, qop[0], mass, *(material), true);
+        detail::IonisationLoss::dqop(energy_, qop[0], mass, *(material), true);
     // Bethe-Heitler (+ pair production & photonuclear interaction for muons)
     const double radiationDerivative =
-        radiationLoss.dqop(mass, *(material), qop[0], energy_, pdg);
+        detail::RadiationLoss::dqop(mass, *(material), qop[0], energy_, pdg);
 
     // Return the total derivative
     if (meanEnergyLoss) {
