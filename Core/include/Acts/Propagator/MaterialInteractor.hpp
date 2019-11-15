@@ -182,60 +182,64 @@ struct MaterialInteractor {
 
         // Apply the Energy loss
         if (energyLoss) {
-          // Get the material
-          const Material& mat = mProperties.material();
-          // Calculate gamma
-          const double lgamma = E / m;
-          // Energy loss and straggling - per unit length
-          std::pair<double, double> eLoss =
-              ionisationloss.dEds(m, lbeta, lgamma, mat, 1_mm);
-          // Apply the energy loss
-          const double dEdl = state.stepping.navDir * eLoss.first;
-          const double dE = mProperties.thickness() * dEdl;
-          // Screen output
-          debugLog(state, [&] {
-            std::stringstream dstream;
-            dstream << "Energy loss calculated to " << dE / 1_GeV << " GeV";
-            return dstream.str();
-          });
-          // Check for energy conservation, and only apply momentum change
-          // when kinematically allowed
-          if (E + dE > m) {
-            // Calcuate the new momentum
-            const double newP = std::sqrt((E + dE) * (E + dE) - m * m);
-            // Record the deltaP
-            mInteraction.deltaP = p - newP;
-            // Update the state/momentum
-            stepper.update(
-                state.stepping, stepper.position(state.stepping),
-                stepper.direction(state.stepping),
-                std::copysign(newP, stepper.momentum(state.stepping)),
-                stepper.time(state.stepping));
-          }
-          // Transfer this into energy loss straggling and apply to
-          // covariance:
-          // do that even if you had not applied energy loss due to
-          // the kineamtic limit to catch the cases of deltE < MOP/MPV
-          if (state.stepping.covTransport) {
-            // Calculate the straggling
-            const double sigmaQoverP =
-                mProperties.thickness() * eLoss.second / (lbeta * p * p);
-            // Save the material interaction
-            mInteraction.sigmaQoP2 = sigmaQoverP * sigmaQoverP;
+			std::pair<double, double> sigmaQoP = evaluateEnergyLoss(state, stepper, mProperties, E, p, m, lbeta);
+			mInteraction.deltaP = sigmaQoP.first;
+			mInteraction.sigmaQoP2 = sigmaQoP.second;
+			
+          //~ // Get the material
+          //~ const Material& mat = mProperties.material();
+          //~ // Calculate gamma
+          //~ const double lgamma = E / m;
+          //~ // Energy loss and straggling - per unit length
+          //~ std::pair<double, double> eLoss =
+              //~ ionisationloss.dEds(m, lbeta, lgamma, mat, 1_mm);
+          //~ // Apply the energy loss
+          //~ const double dEdl = state.stepping.navDir * eLoss.first;
+          //~ const double dE = mProperties.thickness() * dEdl;
+          //~ // Screen output
+          //~ debugLog(state, [&] {
+            //~ std::stringstream dstream;
+            //~ dstream << "Energy loss calculated to " << dE / 1_GeV << " GeV";
+            //~ return dstream.str();
+          //~ });
+          //~ // Check for energy conservation, and only apply momentum change
+          //~ // when kinematically allowed
+          //~ if (E + dE > m) {
+            //~ // Calcuate the new momentum
+            //~ const double newP = std::sqrt((E + dE) * (E + dE) - m * m);
+            //~ // Record the deltaP
+            //~ mInteraction.deltaP = p - newP;
+            //~ // Update the state/momentum
+            //~ stepper.update(
+                //~ state.stepping, stepper.position(state.stepping),
+                //~ stepper.direction(state.stepping),
+                //~ std::copysign(newP, stepper.momentum(state.stepping)),
+                //~ stepper.time(state.stepping));
+          //~ }
+          //~ // Transfer this into energy loss straggling and apply to
+          //~ // covariance:
+          //~ // do that even if you had not applied energy loss due to
+          //~ // the kineamtic limit to catch the cases of deltE < MOP/MPV
+          //~ if (state.stepping.covTransport) {
+            //~ // Calculate the straggling
+            //~ const double sigmaQoverP =
+                //~ mProperties.thickness() * eLoss.second / (lbeta * p * p);
+            //~ // Save the material interaction
+            //~ mInteraction.sigmaQoP2 = sigmaQoverP * sigmaQoverP;
 
-            // Good in any case for positive direction
-            if (state.stepping.navDir == forward) {
-              state.stepping.cov(eQOP, eQOP) +=
-                  state.stepping.navDir * sigmaQoverP * sigmaQoverP;
-            } else {
-              // Check that covariance entry doesn't become negative
-              double sEqop = state.stepping.cov(eQOP, eQOP);
-              if (sEqop > sigmaQoverP * sigmaQoverP) {
-                state.stepping.cov(eQOP, eQOP) +=
-                    state.stepping.navDir * mInteraction.sigmaQoP2;
-              }
-            }
-          }
+            //~ // Good in any case for positive direction
+            //~ if (state.stepping.navDir == forward) {
+              //~ state.stepping.cov(eQOP, eQOP) +=
+                  //~ state.stepping.navDir * sigmaQoverP * sigmaQoverP;
+            //~ } else {
+              //~ // Check that covariance entry doesn't become negative
+              //~ double sEqop = state.stepping.cov(eQOP, eQOP);
+              //~ if (sEqop > sigmaQoverP * sigmaQoverP) {
+                //~ state.stepping.cov(eQOP, eQOP) +=
+                    //~ state.stepping.navDir * mInteraction.sigmaQoP2;
+              //~ }
+            //~ }
+          //~ }
         }
 
         // This doesn't cost anything - do it regardless
@@ -265,12 +269,12 @@ struct MaterialInteractor {
   std::pair<double, double> evaluateMultipleScattering(propagator_state_t& state, const stepper_t& stepper, double tInX0, double p, double lbeta) const
   {
 	  // Retrieve the scattering contribution
-	  double sigmaScat = scattering(p, lbeta, tInX0);
-	  double sinTheta =
+	  const double sigmaScat = scattering(p, lbeta, tInX0);
+	  const double sinTheta =
 		  std::sin(VectorHelpers::theta(stepper.direction(state.stepping)));
-	  double sigmaDeltaPhiSq =
+	  const double sigmaDeltaPhiSq =
 		  sigmaScat * sigmaScat / (sinTheta * sinTheta);
-	  double sigmaDeltaThetaSq = sigmaScat * sigmaScat;
+	  const double sigmaDeltaThetaSq = sigmaScat * sigmaScat;
 	  // Good in any case for positive direction
 	  if (state.stepping.navDir == forward) {
 		// Just add the multiple scattering component
@@ -280,8 +284,8 @@ struct MaterialInteractor {
 			state.stepping.navDir * sigmaDeltaThetaSq;
 	  } else {
 		// We check if the covariance stays positive
-		double sEphi = state.stepping.cov(ePHI, ePHI);
-		double sEtheta = state.stepping.cov(eTHETA, eTHETA);
+		const double sEphi = state.stepping.cov(ePHI, ePHI);
+		const double sEtheta = state.stepping.cov(eTHETA, eTHETA);
 		if (sEphi > sigmaDeltaPhiSq && sEtheta > sigmaDeltaThetaSq) {
 		  // Noise removal is not applied if covariance would fall below 0
 		  state.stepping.cov(ePHI, ePHI) -= sigmaDeltaPhiSq;
@@ -291,6 +295,67 @@ struct MaterialInteractor {
 	  return std::make_pair(sigmaDeltaPhiSq, sigmaDeltaThetaSq);
   }
  
+   template <typename propagator_state_t, typename stepper_t>
+  std::pair<double, double> evaluateEnergyLoss(propagator_state_t& state, const stepper_t& stepper, const MaterialProperties& mProperties, double E, double p, double m, double lbeta) const
+  {
+	 using namespace Acts::UnitLiterals;
+	 
+     // Get the material
+	  const Material& mat = mProperties.material();
+	  // Calculate gamma
+	  const double lgamma = E / m;
+	  // Energy loss and straggling - per unit length
+	  std::pair<double, double> eLoss =
+		  ionisationloss.dEds(m, lbeta, lgamma, mat, 1_mm);
+	  // Apply the energy loss
+	  const double dEdl = state.stepping.navDir * eLoss.first;
+	  const double dE = mProperties.thickness() * dEdl;
+	  // Screen output
+	  debugLog(state, [&] {
+		std::stringstream dstream;
+		dstream << "Energy loss calculated to " << dE / 1_GeV << " GeV";
+		return dstream.str();
+	  });
+	  std::pair<double, double> result;
+	  // Check for energy conservation, and only apply momentum change
+	  // when kinematically allowed
+	  if (E + dE > m) {
+		// Calcuate the new momentum
+		const double newP = std::sqrt((E + dE) * (E + dE) - m * m);
+		// Record the deltaP
+result.first = p - newP;
+		// Update the state/momentum
+		stepper.update(
+			state.stepping, stepper.position(state.stepping),
+			stepper.direction(state.stepping),
+			std::copysign(newP, stepper.momentum(state.stepping)),
+			stepper.time(state.stepping));
+	  }
+	  // Transfer this into energy loss straggling and apply to
+	  // covariance:
+	  // do that even if you had not applied energy loss due to
+	  // the kineamtic limit to catch the cases of deltE < MOP/MPV
+	  if (state.stepping.covTransport) {
+		// Calculate the straggling
+		const double sigmaQoverP =
+			mProperties.thickness() * eLoss.second / (lbeta * p * p);
+		// Save the material interaction
+result.second = sigmaQoverP * sigmaQoverP;
+		// Good in any case for positive direction
+		if (state.stepping.navDir == forward) {
+		  state.stepping.cov(eQOP, eQOP) +=
+			  state.stepping.navDir * sigmaQoverP * sigmaQoverP;
+		} else {
+		  // Check that covariance entry doesn't become negative
+		  double sEqop = state.stepping.cov(eQOP, eQOP);
+		  if (sEqop > sigmaQoverP * sigmaQoverP) {
+			state.stepping.cov(eQOP, eQOP) +=
+				state.stepping.navDir * result.second;
+		  }
+		}
+	  }
+	  return result;
+  }
   /// The private propagation debug logging
   ///
   /// It needs to be fed by a lambda function that returns a string,
