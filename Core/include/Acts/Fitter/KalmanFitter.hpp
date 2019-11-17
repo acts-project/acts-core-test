@@ -196,10 +196,12 @@ class KalmanFitter {
 
     /// Explicit constructor with updater and calibrator
     Actor(updater_t pUpdater = updater_t(), smoother_t pSmoother = smoother_t(),
-          calibrator_t pCalibrator = calibrator_t())
+          calibrator_t pCalibrator = calibrator_t(),
+          MaterialInteractor pInteractor = MaterialInteractor())
         : m_updater(std::move(pUpdater)),
           m_smoother(std::move(pSmoother)),
-          m_calibrator(std::move(pCalibrator)) {}
+          m_calibrator(std::move(pCalibrator)),
+          m_interactor(std::move(pInteractor)) {}
 
     /// Broadcast the result_type
     using result_type = KalmanFitterResult<source_link_t, parameters_t>;
@@ -306,13 +308,31 @@ class KalmanFitter {
     template <typename propagator_state_t, typename stepper_t>
     Result<void> filter(const Surface* surface, propagator_state_t& state,
                         const stepper_t& stepper, result_type& result) const {
-      // Transport & bind the state to the current surface
-      std::tuple<BoundParameters,
-                 typename TrackStateType::Parameters::CovMatrix_t, double>
-          boundState = stepper.boundState(state.stepping, *surface, true);
+      // Let's set the pre/full/post update stage
+      MaterialUpdateStage mStage = fullUpdate;
+      // We are at the start surface
+      if (state.navigation.startSurface == state.navigation.currentSurface) {
+        mStage = postUpdate;
+        // Or is it the target surface ?
+      } else if (state.navigation.targetSurface ==
+                 state.navigation.currentSurface) {
+        mStage = preUpdate;
+      }
       // Try to find the surface in the measurement surfaces
       auto sourcelink_it = inputMeasurements.find(surface);
       if (sourcelink_it != inputMeasurements.end()) {
+        MaterialInteraction mInteraction;
+        if (mStage != postUpdate) {
+          // Material effects pre-udpate
+          mInteraction = m_interactor.materialInteraction(
+              state, stepper, MaterialUpdateStage::preUpdate, false);
+        }
+
+        // Transport & bind the state to the current surface
+        std::tuple<BoundParameters,
+                   typename TrackStateType::Parameters::CovMatrix_t, double>
+            boundState = stepper.boundState(state.stepping, *surface, true);
+
         // Screen output message
         ACTS_VERBOSE("Measurement surface " << surface->geoID()
                                             << " detected.");
@@ -355,26 +375,128 @@ class KalmanFitter {
             stepper.update(state.stepping, *trackState.parameter.filtered);
           }
         }
+        if (mStage != preUpdate) {
+          // Material effects post-udpate
+          mInteraction = m_interactor.materialInteraction(
+              state, stepper, MaterialUpdateStage::postUpdate, false);
+        }
         // We count the processed state
         ++result.processedStates;
-      } else if (surface->associatedDetectorElement() != nullptr) {
-        // Count the missed surface
-        ACTS_VERBOSE("Detected hole on " << surface->geoID());
-        result.missedActiveSurfaces.push_back(surface);
+      } else {
+        // if there is no measurement on this surface
+        if (surface->associatedDetectorElement() != nullptr) {
+          // Create a hole state if it's active detector element
+          holeStateCreator(surface, state, stepper, mStage, result);
 
-        // Create track state from predicted parameter
-        result.fittedStates.emplace_back(std::get<0>(boundState));
-        TrackStateType& trackState = result.fittedStates.back();
-
-        // Fill the track state and set the hole type Flag
-        trackState.parameter.jacobian = std::get<1>(boundState);
-        trackState.parameter.pathLength = std::get<2>(boundState);
-        trackState.setType(TrackStateFlag::HoleFlag);
+          // Count the missed surface
+          ACTS_VERBOSE("Detected hole on " << surface->geoID());
+          result.missedActiveSurfaces.push_back(surface);
+        } else {
+          // Create a material state if it's in-active material
+          materialStateCreator(surface, state, stepper, mStage, result);
+        }
       }
-
       return Result<void>::success();
     }
 
+    /// @brief Kalman actor operation : material interaction
+    ///
+    /// @tparam propagator_state_t is the type of Propagagor state
+    /// @tparam stepper_t Type of the stepper
+    ///
+    /// @param surface The surface where the material interaction happens
+    /// @param state The mutable propagator state object
+    /// @param stepper The stepper in use
+    /// @param result The mutable result state object
+    template <typename propagator_state_t, typename stepper_t>
+    Result<void> materialStateCreator(const Surface* surface,
+                                      propagator_state_t& state,
+                                      const stepper_t& stepper,
+                                      const MaterialUpdateStage& mStage,
+                                      result_type& result) const {
+      // Transport & bind the state to the current surface
+      std::tuple<BoundParameters,
+                 typename TrackStateType::Parameters::CovMatrix_t, double>
+          boundState = stepper.boundState(state.stepping, *surface, true);
+
+      // Create state for material between sensitive detector elements from
+      // predicted parameter
+      result.fittedStates.emplace_back(std::get<0>(boundState));
+      TrackStateType& trackState = result.fittedStates.back();
+
+      // Fill the track state and set the material type Flag
+      trackState.parameter.jacobian = std::get<1>(boundState);
+      trackState.parameter.pathLength = std::get<2>(boundState);
+      trackState.setType(TrackStateFlag::MaterialFlag);
+
+      // Predicted parameter and covariance
+      parameters_t predicted = *trackState.parameter.predicted;
+      auto predicted_parameter = predicted.parameters();
+      auto predicted_covariance = *predicted.covariance();
+
+      // Create the material interaction class, in case we record afterwards
+      MaterialInteraction mInteraction;
+      mInteraction =
+          m_interactor.materialInteraction(state, stepper, mStage, true);
+
+      // Get the update for parameter and covariance
+      BoundParameters::ParVector_t deltaParamVec;
+      deltaParamVec << 0, 0, 0, 0, mInteraction.deltaQoP, 0.;
+
+      Acts::BoundSymMatrix deltaParamCov;
+      deltaParamCov.setZero();
+      deltaParamCov.diagonal() << 0, 0, mInteraction.deltaPhiCov,
+          mInteraction.deltaThetaCov, mInteraction.deltaQoP2Cov, 0;
+
+      // The 'filtered' parameter and covariance
+      auto filtered_parameters = predicted_parameter + deltaParamVec;
+      auto filtered_covariance = predicted_covariance + deltaParamCov;
+
+      parameters_t filtered(state.geoContext, std::move(filtered_covariance),
+                            std::move(filtered_parameters),
+                            predicted.referenceSurface().getSharedPtr());
+
+      // Set the filtered parameter
+      trackState.parameter.filtered = std::move(filtered);
+      return Result<void>::success();
+    }
+
+    /// @brief Kalman actor operation : create track state for hole
+    ///
+    /// @tparam propagator_state_t is the type of Propagagor state
+    /// @tparam stepper_t Type of the stepper
+    ///
+    /// @param surface The surface where the material interaction happens
+    /// @param state The mutable propagator state object
+    /// @param stepper The stepper in use
+    /// @param result The mutable result state object
+    template <typename propagator_state_t, typename stepper_t>
+    Result<void> holeStateCreator(const Surface* surface,
+                                  propagator_state_t& state,
+                                  const stepper_t& stepper,
+                                  const MaterialUpdateStage& mStage,
+                                  result_type& result) const {
+      // Material effects full-udpate
+      MaterialInteraction mInteraction;
+      mInteraction =
+          m_interactor.materialInteraction(state, stepper, mStage, false);
+
+      // Transport & bind the state to the current surface
+      std::tuple<BoundParameters,
+                 typename TrackStateType::Parameters::CovMatrix_t, double>
+          boundState = stepper.boundState(state.stepping, *surface, true);
+
+      // Create track state from predicted parameter
+      result.fittedStates.emplace_back(std::get<0>(boundState));
+      TrackStateType& trackState = result.fittedStates.back();
+
+      // Fill the track state and set the hole type Flag
+      trackState.parameter.jacobian = std::get<1>(boundState);
+      trackState.parameter.pathLength = std::get<2>(boundState);
+      trackState.setType(TrackStateFlag::HoleFlag);
+
+      return Result<void>::success();
+    }
     /// @brief Kalman actor operation : finalize
     ///
     /// @tparam propagator_state_t is the type of Propagagor state
@@ -458,6 +580,9 @@ class KalmanFitter {
     /// The Measuremetn calibrator
     calibrator_t m_calibrator;
 
+    /// The material interactor
+    MaterialInteractor m_interactor;
+
     /// The Surface beeing
     detail::SurfaceReached targetReached;
   };
@@ -520,12 +645,9 @@ class KalmanFitter {
     using KalmanActor = Actor<source_link_t, parameters_t>;
     using KalmanResult = typename KalmanActor::result_type;
 
-    using StandardNavigatorActors =
-        ActionList<MaterialInteractor<preUpdate>, KalmanActor,
-                   MaterialInteractor<postUpdate>>;
+    using StandardNavigatorActors = ActionList<KalmanActor>;
     using DirectNavigatorActors =
-        ActionList<DirectNavigator::Initializer, MaterialInteractor<preUpdate>,
-                   KalmanActor, MaterialInteractor<postUpdate>>;
+        ActionList<DirectNavigator::Initializer, KalmanActor>;
     using Actors = std::conditional_t<isDirectNavigator, DirectNavigatorActors,
                                       StandardNavigatorActors>;
 
@@ -568,6 +690,6 @@ class KalmanFitter {
     // Return the converted Track
     return m_outputConverter(std::move(kalmanResult));
   }
-};
+};  // namespace Acts
 
 }  // namespace Acts

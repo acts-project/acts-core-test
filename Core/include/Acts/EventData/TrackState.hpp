@@ -25,7 +25,8 @@ enum TrackStateFlag {
   ParameterFlag = 1,
   OutlierFlag = 2,
   HoleFlag = 3,
-  NumTrackStateFlags = 4
+  MaterialFlag = 4,
+  NumTrackStateFlags = 5
 };
 
 class Surface;
