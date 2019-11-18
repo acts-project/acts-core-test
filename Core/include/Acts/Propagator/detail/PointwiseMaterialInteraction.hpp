@@ -71,7 +71,7 @@ struct PointwiseMaterialInteraction {
   {
 	  // Retrieve the scattering contribution
 	  bool isElectron = state.options.absPdgCode == 11;
-	  const double sigmaScat = detail::HighlandScattering::sigmaAngle(p, lbeta, tInX0, isElectron);
+	  const double sigmaScat = scattering(p, lbeta, tInX0, isElectron);
 	  const double sinTheta =
 		  std::sin(VectorHelpers::theta(stepper.direction(state.stepping)));
 	  const double sigmaDeltaPhiSq =
@@ -154,7 +154,7 @@ struct PointwiseMaterialInteraction {
 	  const double lgamma = E / m;
 	  // Energy loss and straggling - per unit length
 	  std::pair<double, double> eLoss =
-		  detail::IonisationLoss::dEds(m, lbeta, lgamma, mat, 1_mm);
+		  ionisationloss.dEds(m, lbeta, lgamma, mat, 1_mm);
 	  // Apply the energy loss
 	  const double dEdl = state.stepping.navDir * eLoss.first;
 	  const double dE = mProperties.thickness() * dEdl;
@@ -216,6 +216,12 @@ struct PointwiseMaterialInteraction {
         }
         return {sigmaAngles.first, sigmaAngles.second, sigmaQoP.first, sigmaQoP.second};
   }
+  
+  private:
+	/// The scattering formula struct
+  detail::HighlandScattering scattering;
+  /// The energy loss formula struct
+  detail::IonisationLoss ionisationloss;
 };
 }
 }  // end of namespace Acts

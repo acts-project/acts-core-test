@@ -30,7 +30,7 @@ namespace detail {
 /// Sigma is calculated using the Landau width (FHWM) times the conversion
 /// factor 1. / (2. * &radic(2. * log2))
 ///
-namespace IonisationLoss {
+struct IonisationLoss {
   /// @brief call operator for the Ionisation class
   ///
   /// @tparam material_t Type of the material class
@@ -46,7 +46,7 @@ namespace IonisationLoss {
   template <typename material_t>
   std::pair<double, double> dEds(double m, double lbeta, double lgamma,
                                  const material_t& mat, double path = 1.,
-                                 bool mean = true) {
+                                 bool mean = true) const {
     // the return value
     double dE = 0.;
 
@@ -120,7 +120,7 @@ namespace IonisationLoss {
   /// @return The evaluated derivative
   template <typename material_t>
   double dqop(const double energy, const double qOverP, const double mass,
-              const material_t& material, const bool mean = true) {
+              const material_t& material, const bool mean = true) const {
     // Fast exit if material is invalid
     if (material.Z() == 0 || material.zOverAtimesRho() == 0) {
       return 0.;
@@ -191,7 +191,7 @@ namespace IonisationLoss {
     }
     return betheBlochDerivative;
   }
-}
+};
 
 /// @brief Multiple scattering as function of dInX0
 ///
@@ -199,14 +199,14 @@ namespace IonisationLoss {
 /// the space angle which has to be transformed into actual
 /// scattering components for the azimuthal and polar angles,
 /// respectively (for reconstruction).
-namespace HighlandScattering {
+struct HighlandScattering {
   /// @brief call operator for the HighlandScattering formula
   ///
   /// @param p is the momentum
   /// @param lbeta is the Lorentz beta parameter
   /// @param dInX0 is the passed thickness expressed in units of X0
-  double sigmaAngle(double p, double lbeta, double dInX0,
-                    bool electron) {
+  double operator()(double p, double lbeta, double dInX0,
+                    bool electron = false) const {
     if (dInX0 == 0. || p == 0. || lbeta == 0.) {
       return 0.;
     }
@@ -232,13 +232,13 @@ namespace HighlandScattering {
     sigma2 *= factor;
     return std::sqrt(sigma2);
   }
-}
+};
 
 /// @brief Structure for the energy loss of particles due to radiation in
 /// dense material. It combines the effect of bremsstrahlung with direct e+e-
 /// pair production and photonuclear interaction. The last two effects are
 /// just included for muons.
-namespace RadiationLoss {
+struct RadiationLoss {
   /// @brief Main call operator for the energy loss. The following equations
   /// are provided by ATL-SOFT-PUB-2008-003.
   ///
@@ -251,7 +251,7 @@ namespace RadiationLoss {
   /// @return Radiation energy loss
   template <typename material_t>
   double dEds(double E, double m, const material_t& mat, int pdg,
-              double path) {
+              double path = 1.) const {
     using namespace Acts::UnitLiterals;
 
     // Easy exit
@@ -289,7 +289,7 @@ namespace RadiationLoss {
   /// @return The evaluated derivative
   template <typename material_t>
   double dqop(const double mass, const material_t& material, const double qop,
-              const double energy, const int pdg) {
+              const double energy, const int pdg) const {
     using namespace Acts::UnitLiterals;
 
     // Fast exit if material is invalid
@@ -311,6 +311,6 @@ namespace RadiationLoss {
     return constants::me * constants::me * invqop3X0 / (mass * mass * energy) +
            muonExpansion;
   }
-}
+};
 }  // namespace detail
 }  // namespace Acts
