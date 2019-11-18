@@ -87,15 +87,13 @@ struct PointwiseMaterialInteraction {
 
     // Apply the Energy loss
     if (energyLoss) {
-      sigmaQoP =
-          evaluateEnergyLoss(state, mProperties, E, p, m, lbeta);
+      sigmaQoP = evaluateEnergyLoss(state, mProperties, E, p, m, lbeta);
     }
     return {sigmaAngles.first, sigmaAngles.second, sigmaQoP.first,
             sigmaQoP.second};
   }
 
  private:
- 
   /// @brief This function evaluates the multiple scattering
   ///
   /// @tparam propagator_state_t Type of the propagator state
@@ -156,9 +154,8 @@ struct PointwiseMaterialInteraction {
   /// contribution due to the energy loss
   template <typename propagator_state_t>
   std::pair<double, double> evaluateEnergyLoss(
-      const propagator_state_t& state,
-      const MaterialProperties& mProperties, double E, double p, double m,
-      double lbeta) const {
+      const propagator_state_t& state, const MaterialProperties& mProperties,
+      double E, double p, double m, double lbeta) const {
     using namespace Acts::UnitLiterals;
 
     // Get the material
@@ -179,17 +176,16 @@ struct PointwiseMaterialInteraction {
       const double newP = std::sqrt((E + dE) * (E + dE) - m * m);
       // Record the deltaP
       result.first = p - newP;
+    } else {
+      result.first = 0.;
     }
-    else
-    {
-		result.first = 0.;
-	}
     // Transfer this into energy loss straggling and apply to
     // covariance:
     // do that even if you had not applied energy loss due to
     // the kineamtic limit to catch the cases of deltE < MOP/MPV
     if (state.stepping.covTransport) {
-      result.second = evaluateEnergyLossForCovariance(mProperties.thickness(), eLoss.second, p, lbeta);
+      result.second = evaluateEnergyLossForCovariance(mProperties.thickness(),
+                                                      eLoss.second, p, lbeta);
     }
     return result;
   }
