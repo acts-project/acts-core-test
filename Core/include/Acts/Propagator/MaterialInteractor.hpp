@@ -103,7 +103,8 @@ struct MaterialInteractor {
     // check for material
     if (state.navigation.currentSurface &&
         state.navigation.currentSurface->surfaceMaterial()) {
-      MaterialProperties mProperties = interaction.evaluateMaterialProperties(state, stepper);
+      MaterialProperties mProperties =
+          interaction.evaluateMaterialProperties(state, stepper);
       // Material properties (non-zero) have been found for this configuration
       if (mProperties) {
         // more debugging output to the screen
@@ -126,8 +127,10 @@ struct MaterialInteractor {
         // Scale the material properties
         mProperties *= pCorrection;
 
-		// Perform the material interactions and collect Var[phi], Var[theta], DeltaP, Var[QoP]
-		std::array<double, 4> sigma = interaction.evaluateMaterialInteraction(state, stepper, mProperties, multipleScattering, energyLoss);
+        // Perform the material interactions and collect Var[phi], Var[theta],
+        // DeltaP, Var[QoP]
+        std::array<double, 4> sigma = interaction.evaluateMaterialInteraction(
+            state, stepper, mProperties, multipleScattering, energyLoss);
 
         // This doesn't cost anything - do it regardless
         result.materialInX0 += mProperties.thicknessInX0();
@@ -135,15 +138,15 @@ struct MaterialInteractor {
 
         // Record the material interaction if configured to do so
         if (recordInteractions) {
-        // Create the material interaction class, in case we record afterwards
-        MaterialInteraction mInteraction;
-        mInteraction.surface = state.navigation.currentSurface;
-        // Record the material interaction
-		  mInteraction.sigmaPhi2 = sigma[0];
-		  mInteraction.sigmaTheta2 = sigma[1];
-			mInteraction.deltaP = sigma[2];
-			mInteraction.sigmaQoP2 = sigma[3];
-			
+          // Create the material interaction class, in case we record afterwards
+          MaterialInteraction mInteraction;
+          mInteraction.surface = state.navigation.currentSurface;
+          // Record the material interaction
+          mInteraction.sigmaPhi2 = sigma[0];
+          mInteraction.sigmaTheta2 = sigma[1];
+          mInteraction.deltaP = sigma[2];
+          mInteraction.sigmaQoP2 = sigma[3];
+
           mInteraction.position = stepper.position(state.stepping);
           mInteraction.direction = stepper.direction(state.stepping);
           mInteraction.materialProperties = mProperties;
@@ -160,7 +163,6 @@ struct MaterialInteractor {
   void operator()(propagator_state_t& /*state*/) const {}
 
  private:
-  
   /// The private propagation debug logging
   ///
   /// It needs to be fed by a lambda function that returns a string,
