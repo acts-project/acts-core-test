@@ -20,7 +20,11 @@
 
 namespace Acts {
 namespace detail {
- 
+struct PointwiseMaterialInteraction {
+	
+	/// Default constructor
+	PointwiseMaterialInteraction() = default;
+	
  /// @brief This function evaluates the material properties
  /// 
  /// @tparam propagator_state_t Type of the propagator state
@@ -30,7 +34,7 @@ namespace detail {
  ///
  /// @return Material properties for the interaction
  template <typename propagator_state_t, typename stepper_t>
- MaterialProperties evaluateMaterialProperties(propagator_state_t& state, const stepper_t& stepper)
+ MaterialProperties evaluateMaterialProperties(propagator_state_t& state, const stepper_t& stepper) const
  {
 	  // Let's set the pre/full/post update stage
 	  MaterialUpdateStage mStage = fullUpdate;
@@ -63,7 +67,7 @@ namespace detail {
  ///
  /// @return Pair containing the modification of the variance in phi and theta due to multiple scattering
   template <typename propagator_state_t, typename stepper_t>
-  std::pair<double, double> evaluateMultipleScattering(propagator_state_t& state, const stepper_t& stepper, double tInX0, double p, double lbeta)
+  std::pair<double, double> evaluateMultipleScattering(propagator_state_t& state, const stepper_t& stepper, double tInX0, double p, double lbeta) const
   {
 	  // Retrieve the scattering contribution
 	  bool isElectron = state.options.absPdgCode == 11;
@@ -104,7 +108,7 @@ namespace detail {
  ///
  /// @return Contribution of the energy loss to the covariance matrix
   template <typename propagator_state_t>
-  double evaluateEnergyLossForCovariance(propagator_state_t& state, double thickness, double eLoss, double p, double lbeta)
+  double evaluateEnergyLossForCovariance(propagator_state_t& state, double thickness, double eLoss, double p, double lbeta) const
   {
 	// Calculate the straggling
 	const double sigmaQoverP =
@@ -140,7 +144,7 @@ namespace detail {
  ///
  /// @return Pair containing the momentum change and the covariance contribution due to the energy loss
    template <typename propagator_state_t, typename stepper_t>
-  std::pair<double, double> evaluateEnergyLoss(propagator_state_t& state, const stepper_t& stepper, const MaterialProperties& mProperties, double E, double p, double m, double lbeta)
+  std::pair<double, double> evaluateEnergyLoss(propagator_state_t& state, const stepper_t& stepper, const MaterialProperties& mProperties, double E, double p, double m, double lbeta) const
   {
 	 using namespace Acts::UnitLiterals;
 	 
@@ -189,7 +193,7 @@ namespace detail {
  ///
  /// @return Array containing the changes to the variance of phi, theta, the momentum and the variance of QoP
   template <typename propagator_state_t, typename stepper_t>
-  std::array<double, 4> evaluateMaterialInteraction(propagator_state_t& state, const stepper_t& stepper, const MaterialProperties& mProperties, bool multipleScattering = true, bool energyLoss = true)
+  std::array<double, 4> evaluateMaterialInteraction(propagator_state_t& state, const stepper_t& stepper, const MaterialProperties& mProperties, bool multipleScattering = true, bool energyLoss = true) const
   {
           // The momentum at current position
         const double p = stepper.momentum(state.stepping);
@@ -212,5 +216,6 @@ namespace detail {
         }
         return {sigmaAngles.first, sigmaAngles.second, sigmaQoP.first, sigmaQoP.second};
   }
+};
 }
 }  // end of namespace Acts
