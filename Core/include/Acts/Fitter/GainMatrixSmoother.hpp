@@ -14,6 +14,7 @@
 #include "Acts/Fitter/KalmanFitterError.hpp"
 #include "Acts/Utilities/Logger.hpp"
 #include "Acts/Utilities/Result.hpp"
+#include "Acts/Fitter/detail/VoidKalmanComponents.hpp"
 
 namespace Acts {
 
@@ -21,6 +22,7 @@ namespace Acts {
 ///
 /// @tparam parameters_t Type of the track parameters
 /// @tparam jacobian_t Type of the Jacobian
+/// @tparam outlier_rejector_t Type of the outlier rejector (can be void)
 template <typename parameters_t>
 class GainMatrixSmoother {
   using jacobian_t = typename parameters_t::CovMatrix_t;
@@ -38,7 +40,7 @@ class GainMatrixSmoother {
 
   template <typename track_states_t>
   Result<parameters_t> operator()(const GeometryContext& gctx,
-                                  track_states_t& filteredStates) const {
+                                  track_states_t& filteredStates, const OutlierFinder outlierFinder = nullptr) const {
     ACTS_VERBOSE("Invoked GainMatrixSmoother");
     using namespace boost::adaptors;
 
@@ -51,10 +53,23 @@ class GainMatrixSmoother {
     ParVector_t smoothedPars;
     CovMatrix_t smoothedCov;
 
-    // For the last state: smoothed is filtered - also: switch to next
+    // Find the smoothing starting state: smoothed is filtered - also: switch to
+    // next
     ACTS_VERBOSE("Getting previous track state");
-    auto* prev_ts = &filteredStates.back();
-    assert(prev_ts->parameter.filtered);
+    track_state_t* prev_ts = nullptr;
+    typename track_states_t::reverse_iterator lastFiltered = std::find_if(
+        filteredStates.rbegin(), filteredStates.rend(), [](const auto& fst) {
+          if (fst.parameter.filtered &&
+              !fst.isType(TrackStateFlag::OutlierFlag))
+            return true;
+          return false;
+        });
+
+    if (lastFiltered == filteredStates.rend()) {
+      return boost::optional<parameters_t>(boost::none);
+    }
+
+    prev_ts = &(*lastFiltered);
     prev_ts->parameter.smoothed = *prev_ts->parameter.filtered;
 
     // Smoothing gain matrix
@@ -62,7 +77,17 @@ class GainMatrixSmoother {
 
     // Loop and smooth the remaining states
     for (track_state_t& ts :
-         filteredStates | sliced(0, filteredStates.size() - 1) | reversed) {
+         filteredStates |
+             sliced(0,
+                    filteredStates.size() -
+                        std::distance(filteredStates.rbegin(), lastFiltered) -
+                        1) |
+             reversed) {
+      // Skip smoothing if the track state is not filtered && not an outlier
+      if (!(ts.parameter.filtered && !ts.isType(TrackStateFlag::OutlierFlag))) {
+        continue;
+      }
+
       // The current state
       assert(ts.parameter.filtered);
       assert(ts.parameter.predicted);
@@ -127,8 +152,21 @@ class GainMatrixSmoother {
           parameters_t(gctx, smoothedCov, smoothedPars,
                        ts.referenceSurface().getSharedPtr());
 
-      // Point prev state to current state
-      prev_ts = &ts;
+      // Update the chi2 using smoothed track parameters and covariance @todo
+
+      // Check if the measurement is an outlier
+      bool isOutlier = false;
+      if (outlierFinder) {
+        isOutlier = outlierFinder(ts.parameter.chi2, &ts.referenceSurface(),
+                                  OutlierSearchStage::Smoothing);
+      }
+
+      // Point prev state to current state if current state is NOT an outlier
+      if (!isOutlier) {
+        prev_ts = &ts;
+      } else {
+        ts.setType(TrackStateFlag::OutlierFlag, true);
+      }
     }
     // The result is the pointer to the last smoothed state - for the cache
     return *prev_ts->parameter.smoothed;
@@ -142,5 +180,8 @@ class GainMatrixSmoother {
     assert(m_logger);
     return *m_logger;
   }
+ private:
+  /// The outlier rejector
+  outlier_rejector_t m_outlierRejector;
 };
 }  // namespace Acts

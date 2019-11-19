@@ -18,6 +18,7 @@
 #include "Acts/Fitter/KalmanFitterError.hpp"
 #include "Acts/Fitter/detail/VoidKalmanComponents.hpp"
 #include "Acts/Geometry/GeometryContext.hpp"
+#include "Acts/Geometry/GeometryID.hpp"
 #include "Acts/MagneticField/MagneticFieldContext.hpp"
 #include "Acts/Propagator/AbortList.hpp"
 #include "Acts/Propagator/ActionList.hpp"
@@ -32,7 +33,6 @@
 #include "Acts/Utilities/Result.hpp"
 
 namespace Acts {
-
 /// @brief Options struct how the Fitter is called
 ///
 /// It contains the context of the fitter call and the optional
@@ -52,11 +52,13 @@ struct KalmanFitterOptions {
   KalmanFitterOptions(std::reference_wrapper<const GeometryContext> gctx,
                       std::reference_wrapper<const MagneticFieldContext> mctx,
                       std::reference_wrapper<const CalibrationContext> cctx,
-                      const Surface* rSurface = nullptr)
+                      const Surface* rSurface = nullptr,
+                      OutlierFinder olFinder = nullptr)
       : geoContext(gctx),
         magFieldContext(mctx),
         calibrationContext(cctx),
-        referenceSurface(rSurface) {}
+        referenceSurface(rSurface),
+        outlierMeasurementFinder(olFinder) {}
 
   /// Context object for the geometry
   std::reference_wrapper<const GeometryContext> geoContext;
@@ -67,6 +69,9 @@ struct KalmanFitterOptions {
 
   /// The reference Surface
   const Surface* referenceSurface = nullptr;
+
+  /// The outlier finder
+  OutlierFinder outlierMeasurementFinder = nullptr;
 };
 
 template <typename source_link_t, typename parameters_t>
@@ -88,6 +93,9 @@ struct KalmanFitterResult {
 
   // Measurement surfaces without hits
   std::vector<const Surface*> missedActiveSurfaces = {};
+
+  // Measurements that are tagged as outliers
+  std::vector<source_link_t> outliers = {};
 
   Result<void> result{Result<void>::success()};
 };
@@ -196,6 +204,9 @@ class KalmanFitter {
     /// Allows retrieving measurements for a surface
     std::map<const Surface*, source_link_t> inputMeasurements;
 
+    /// The outlier finder
+    OutlierFinder outlierFinder = nullptr;
+
     /// @brief Kalman actor operation
     ///
     /// @tparam propagator_state_t is the type of Propagagor state
@@ -289,6 +300,10 @@ class KalmanFitter {
     template <typename propagator_state_t, typename stepper_t>
     Result<void> filter(const Surface* surface, propagator_state_t& state,
                         const stepper_t& stepper, result_type& result) const {
+      // Transport & bind the state to the current surface
+      std::tuple<BoundParameters,
+                 typename TrackStateType::Parameters::CovMatrix_t, double>
+          boundState = stepper.boundState(state.stepping, *surface, true);
       // Try to find the surface in the measurement surfaces
       auto sourcelink_it = inputMeasurements.find(surface);
       if (sourcelink_it != inputMeasurements.end()) {
@@ -300,14 +315,11 @@ class KalmanFitter {
         result.fittedStates.emplace_back(sourcelink_it->second);
         TrackStateType& trackState = result.fittedStates.back();
 
-        // Transport & bind the state to the current surface
-        std::tuple<BoundParameters,
-                   typename TrackStateType::Parameters::CovMatrix_t, double>
-            boundState = stepper.boundState(state.stepping, *surface, true);
         // Fill the track state
         trackState.parameter.predicted = std::get<0>(boundState);
         trackState.parameter.jacobian = std::get<1>(boundState);
         trackState.parameter.pathLength = std::get<2>(boundState);
+        trackState.setType(TrackStateFlag::ParameterFlag);
 
         // If the update is successful, set covariance and
         auto updateRes = m_updater(state.geoContext, trackState);
@@ -315,12 +327,27 @@ class KalmanFitter {
           ACTS_ERROR("Update step failed: " << updateRes.error());
           return updateRes.error();
         } else {
-          // Update the stepping state
-          ACTS_VERBOSE("Filtering step successful, updated parameters are : \n"
-                       << *trackState.parameter.filtered);
-          // update stepping state using filtered parameters
-          // after kalman update
-          stepper.update(state.stepping, *trackState.parameter.filtered);
+          // Check if the measurement is outlier
+          bool isOutlier = false;
+          if (outlierFinder) {
+            isOutlier = outlierFinder(trackState.parameter.chi2, surface,
+                                      OutlierSearchStage::Filtering);
+          }
+
+          // Update the stepping state only if it's NOT an outlier
+          if (isOutlier) {
+            ACTS_VERBOSE("Measurement on "
+                         << surface->geoID().toString()
+                         << " is an outlier, parameters are not updated.");
+            trackState.setType(TrackStateFlag::OutlierFlag, true);
+          } else {
+            ACTS_VERBOSE(
+                "Filtering step successful, updated parameters are : \n"
+                << *trackState.parameter.filtered);
+            // update stepping state using filtered parameters
+            // after kalman update
+            stepper.update(state.stepping, *trackState.parameter.filtered);
+          }
         }
         // We count the processed state
         ++result.processedStates;
@@ -328,6 +355,15 @@ class KalmanFitter {
         // Count the missed surface
         ACTS_VERBOSE("Detected hole on " << surface->geoID());
         result.missedActiveSurfaces.push_back(surface);
+
+        // Create track state from predicted parameter
+        result.fittedStates.emplace_back(std::get<0>(boundState));
+        TrackStateType& trackState = result.fittedStates.back();
+
+        // Fill the track state and set the hole type Flag
+        trackState.parameter.jacobian = std::get<1>(boundState);
+        trackState.parameter.pathLength = std::get<2>(boundState);
+        trackState.setType(TrackStateFlag::HoleFlag);
       }
 
       return Result<void>::success();
@@ -355,7 +391,7 @@ class KalmanFitter {
       ACTS_VERBOSE("Apply smoothing on " << result.fittedStates.size()
                                          << " filtered track states.");
       // Smooth the track states and obtain the last smoothed track parameters
-      auto smoothRes = m_smoother(state.geoContext, result.fittedStates);
+      auto smoothRes = m_smoother(state.geoContext, result.fittedStates, outlierFinder);
       if (!smoothRes.ok()) {
         ACTS_ERROR("Smoothing step failed: " << smoothRes.error());
         return smoothRes.error();
@@ -370,7 +406,33 @@ class KalmanFitter {
       state.stepping.stepSize =
           detail::ConstrainedStep(-1. * state.options.maxStepSize);
       state.options.direction = backward;
-
+      // record outliers
+      for (const auto& fst : result.fittedStates) {
+        if (fst.isType(TrackStateFlag::OutlierFlag)) {
+          result.outliers.push_back(*fst.measurement.uncalibrated);
+        }
+      }
+      // reset hole flag for states NOT between first and last measurement
+      auto firstMeasurement =
+          std::find_if(result.fittedStates.begin(), result.fittedStates.end(),
+                       [](const auto& fst) {
+                         if (fst.isType(TrackStateFlag::MeasurementFlag))
+                           return true;
+                         return false;
+                       });
+      for (; firstMeasurement-- != result.fittedStates.begin();) {
+        (*firstMeasurement).setType(TrackStateFlag::HoleFlag, false);
+      }
+      auto lastMeasurement =
+          std::find_if(result.fittedStates.rbegin(), result.fittedStates.rend(),
+                       [](const auto& fst) {
+                         if (fst.isType(TrackStateFlag::MeasurementFlag))
+                           return true;
+                         return false;
+                       });
+      for (; lastMeasurement-- != result.fittedStates.rbegin();) {
+        (*lastMeasurement).setType(TrackStateFlag::HoleFlag, false);
+      }
       return Result<void>::success();
     }
 

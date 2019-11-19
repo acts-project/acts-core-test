@@ -13,6 +13,11 @@
 #include "Acts/Utilities/TypeTraits.hpp"
 
 namespace Acts {
+/// Enum which determines the stage of outlier search
+enum class OutlierSearchStage { Filtering = 0, Smoothing = 1 };
+
+using OutlierFinder =
+    std::function<bool(double, const Surface*, OutlierSearchStage)>;
 
 /// @brief void Measurement calibrator and converter
 struct VoidKalmanComponents {
@@ -107,6 +112,23 @@ struct VoidKalmanSmoother {
   template <typename parameters_t, typename track_states_t>
   const parameters_t* operator()(track_states_t& /*states*/) const {
     return nullptr;
+  }
+};
+
+/// @brief void outlier rejector
+struct VoidOutlierFinder {
+  /// @brief Public call mimicking an outlier rejector
+  ///
+  /// @tparam chi2 The chisq from fitting
+  ///
+  /// @param surface The surface of the measurement (in case the outlier
+  /// criteria is detector-specific)
+  /// @param searchStage The outlier search stage
+  ///
+  /// @return The resulting
+  bool operator()(double /*chi2*/, const Surface* /*surface*/,
+                  OutlierSearchStage /*searchStage*/) const {
+    return false;
   }
 };
 

@@ -16,6 +16,7 @@
 #include "Acts/Material/MaterialProperties.hpp"
 #include "Acts/Propagator/detail/InteractionFormulas.hpp"
 #include "Acts/Surfaces/Surface.hpp"
+#include "Acts/Utilities/Definitions.hpp"
 #include "Acts/Utilities/Helpers.hpp"
 
 namespace Acts {
@@ -48,7 +49,7 @@ struct MaterialInteraction {
 /// This is a plugin to the Propagator that
 /// performs material interaction on the currentSurface
 /// of the Propagagor state
-template <int InteractorMode_t>
+template <InteractionMode_t updateStage>
 struct MaterialInteractor {
   // Configuration for this MaterialInteractor
 
@@ -113,9 +114,12 @@ struct MaterialInteractor {
     if (state.navigation.currentSurface &&
         state.navigation.currentSurface->surfaceMaterial()) {
       // Let's set the pre/full/post update stage
-      MaterialUpdateStage mStage = fullUpdate;
+      MaterialUpdateStage mStage = updateStage;
       // We are at the start surface
       if (state.navigation.startSurface == state.navigation.currentSurface) {
+        if (updateStage == preUpdate) {
+          return;
+        }
         debugLog(state, [&] {
           return std::string("Update on start surface: post-update mode.");
         });
@@ -123,26 +127,18 @@ struct MaterialInteractor {
         // Or is it the target surface ?
       } else if (state.navigation.targetSurface ==
                  state.navigation.currentSurface) {
+        if (updateStage == postUpdate) {
+          return;
+        }
         debugLog(state, [&] {
           return std::string("Update on target surface: pre-update mode");
         });
         mStage = preUpdate;
       } else {
-        if (InteractorMode_t == postInteraction) {
-          mStage = postUpdate;
-          debugLog(state, [&] {
-            return std::string("Update while pass through: post-update mode.");
-          });
-        } else if (InteractorMode_t == preInteraction) {
-          mStage = preUpdate;
-          debugLog(state, [&] {
-            return std::string("Update while pass through: pre-update mode.");
-          });
-        } else if (InteractorMode_t == fullInteraction) {
-          debugLog(state, [&] {
-            return std::string("Update while pass through: full mode.");
-          });
-        }
+        debugLog(state, [&] {
+          return std::string(
+              "Update while pass through according to interaction mode");
+        });
       }
 
       // Get the surface material & properties from them and continue if you
@@ -323,7 +319,7 @@ struct MaterialInteractor {
 };
 
 /// Using some short hands for Recorded Material
-using RecordedMaterial = MaterialInteractor<fullInteraction>::result_type;
+using RecordedMaterial = MaterialInteractor<fullUpdate>::result_type;
 
 /// And recorded material track
 /// - this is start:  position, start momentum

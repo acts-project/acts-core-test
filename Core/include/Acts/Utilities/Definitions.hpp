@@ -54,18 +54,7 @@ enum MaterialUpdateStage : int {
   fullUpdate = 0,
   postUpdate = 1
 };
-
-///  This is a steering enum to tell which material interaction mode:
-/// - preInteraction  : interact with first split part of a material
-/// - fullInteraction : interact with full part of a material
-/// - postInteraction : interact with second split part of a material
-enum MaterialInteractionMode : int {
-  preInteraction = -1,
-  fullInteraction = 0,
-  postInteraction = 1
-};
-
-using InteractionMode_t = MaterialInteractionMode;
+using InteractionMode_t = MaterialUpdateStage;
 
 // Eigen definitions
 template <typename T, unsigned int rows, unsigned int cols>
