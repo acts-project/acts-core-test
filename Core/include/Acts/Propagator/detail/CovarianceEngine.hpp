@@ -18,7 +18,7 @@
 #include "Acts/Utilities/Definitions.hpp"
 
 namespace Acts {
-
+	
 /// @brief These functions perform the transport of a covariance matrix using
 /// given Jacobians. The required data is provided by a @p StepperState object
 /// with some additional data. Since this is a purely algebraic problem the
