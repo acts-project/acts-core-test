@@ -150,7 +150,7 @@ struct PointwiseMaterialInteraction {
       }
     }
   }
-  
+
  private:
   /// @brief This function evaluates the multiple scattering
   ///

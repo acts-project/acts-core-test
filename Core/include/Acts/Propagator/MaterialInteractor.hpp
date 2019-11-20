@@ -170,7 +170,6 @@ struct MaterialInteractor {
   void operator()(propagator_state_t& /*state*/) const {}
 
  private:
-
   /// The private propagation debug logging
   ///
   /// It needs to be fed by a lambda function that returns a string,
