@@ -93,6 +93,64 @@ struct PointwiseMaterialInteraction {
             sigmaQoP.second};
   }
 
+  /// @brief This function applies the changes to the state due to multiple
+  /// scattering
+  ///
+  /// @tparam propagator_state_t is the type of Propagagor state
+  ///
+  /// @param [in, out] state is the mutable propagator state object
+  /// @param [in] sigmaPhi2 The variance in phi by multiple scattering
+  /// @param [in] sigmaTheta2 The variance in theta by multiple scattering
+  template <typename propagator_state_t>
+  void applyMS(propagator_state_t& state, double sigmaPhi2,
+               double sigmaTheta2) const {
+    if (state.stepping.navDir == forward) {
+      // Just add the multiple scattering component
+      state.stepping.cov(ePHI, ePHI) += state.stepping.navDir * sigmaPhi2;
+      state.stepping.cov(eTHETA, eTHETA) += state.stepping.navDir * sigmaTheta2;
+    } else {
+      // We check if the covariance stays positive
+      const double sEphi = state.stepping.cov(ePHI, ePHI);
+      const double sEtheta = state.stepping.cov(eTHETA, eTHETA);
+      if (sEphi > sigmaPhi2 && sEtheta > sigmaTheta2) {
+        // Noise removal is not applied if covariance would fall below 0
+        state.stepping.cov(ePHI, ePHI) -= sigmaPhi2;
+        state.stepping.cov(eTHETA, eTHETA) -= sigmaTheta2;
+      }
+    }
+  }
+
+  /// @brief This function applies the changes to the state due to energy loss
+  ///
+  /// @tparam propagator_state_t is the type of Propagagor state
+  /// @tparam stepper_t Type of the stepper of the propagation
+  ///
+  /// @param [in, out] state is the mutable propagator state object
+  /// @param [in] stepper The stepper in use
+  /// @param [in] deltaP The momentum change
+  /// @param [in] sigmaQoP2 The variance in QoP by energy loss
+  template <typename propagator_state_t, typename stepper_t>
+  void applyEnergyLoss(propagator_state_t& state, const stepper_t& stepper,
+                       double deltaP, double sigmaQoP2) const {
+    // Update the state/momentum
+    stepper.update(state.stepping, stepper.position(state.stepping),
+                   stepper.direction(state.stepping),
+                   std::copysign(stepper.momentum(state.stepping) - deltaP,
+                                 stepper.momentum(state.stepping)),
+                   stepper.time(state.stepping));
+
+    // Good in any case for positive direction
+    if (state.stepping.navDir == forward) {
+      state.stepping.cov(eQOP, eQOP) += state.stepping.navDir * sigmaQoP2;
+    } else {
+      // Check that covariance entry doesn't become negative
+      const double sEqop = state.stepping.cov(eQOP, eQOP);
+      if (sEqop > sigmaQoP2) {
+        state.stepping.cov(eQOP, eQOP) += state.stepping.navDir * sigmaQoP2;
+      }
+    }
+  }
+  
  private:
   /// @brief This function evaluates the multiple scattering
   ///
