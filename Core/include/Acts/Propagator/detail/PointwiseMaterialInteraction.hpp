@@ -34,9 +34,7 @@ struct PointwiseMaterialInteraction {
   /// @return Material properties for the interaction
   template <typename propagator_state_t, typename stepper_t>
   MaterialProperties evaluateMaterialProperties(
-      const propagator_state_t& state, const stepper_t& stepper) const {
-    // Let's set the pre/full/post update stage
-    MaterialUpdateStage mStage = fullUpdate;
+      const propagator_state_t& state, const stepper_t& stepper, MaterialUpdateStage mStage = fullUpdate) const {
     // We are at the start surface
     if (state.navigation.startSurface == state.navigation.currentSurface) {
       mStage = postUpdate;
