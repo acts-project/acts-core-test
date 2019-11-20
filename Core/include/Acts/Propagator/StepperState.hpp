@@ -102,7 +102,6 @@ struct StepperState {
 
   /// adaptive step size of the runge-kutta integration
   ConstrainedStep stepSize = std::numeric_limits<double>::max();
-
   /// Previous step size for overstep estimation (ignored for SL stepper)
   double previousStepSize = 0.;
 
