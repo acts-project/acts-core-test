@@ -199,6 +199,8 @@ class Navigator {
     /// Navigation state: the target surface
     const Surface* targetSurface = nullptr;
 
+    /// Indicator for initial target call
+    bool initialTarget = true;
     /// Indicator for start layer treatment
     bool startLayerResolved = false;
     /// Indicator if the target is reached
@@ -381,8 +383,17 @@ class Navigator {
       initializeTarget(state, stepper);
     }
 
-    // TODO - if there's no currentSurface set, then the target was estimated in
-    // the status() call already !!!
+    // If no currentSurface is set, the target was estimated in status()
+    if (state.navigation.currentSurface == nullptr and
+        not state.navigation.initialTarget) {
+      state.navigation.initialTarget = false;
+      debugLog(state, [&] {
+        std::stringstream dstream;
+        dstream << "Target still valid from navigator::status call.";
+        return dstream.str();
+      });
+      return;
+    }
 
     // Try targeting the surfaces - then layers - then boundaries
     if (state.navigation.navigationStage <= Stage::surfaceTarget and
@@ -1260,6 +1271,7 @@ class Navigator {
                 << " | ";
         dstream << std::setw(state.options.debugMsgWidth) << line << '\n';
         state.options.debugString += dstream.str();
+        std::cout << dstream.str();
       }
     }
   }

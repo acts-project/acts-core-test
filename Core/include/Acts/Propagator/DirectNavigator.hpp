@@ -158,9 +158,12 @@ class DirectNavigator {
                     << (*state.navigation.nextSurfaceIter)->geoID();
             return dstream.str();
           });
-          stepper.releaseStepSize(state.stepping);
+          surfaceStatus = stepper.updateSurfaceStatus(
+              state.stepping, **state.navigation.nextSurfaceIter, false);
         }
-      } else if (surfaceStatus == Intersection::Status::reachable) {
+      }
+
+      if (surfaceStatus == Intersection::Status::reachable) {
         debugLog(state, [&] {
           std::stringstream dstream;
           dstream << "Next surface reachable at distance  "
@@ -185,6 +188,19 @@ class DirectNavigator {
 
     // Navigator target always resets the current surface
     state.navigation.currentSurface = nullptr;
+
+    // If no currentSurface is set, the target was estimated in status()
+    if (state.navigation.currentSurface == nullptr and
+        state.navigation.nextSurfaceIter !=
+            state.navigation.surfaceSequence.begin()) {
+      debugLog(state, [&] {
+        std::stringstream dstream;
+        dstream << "Target still valid from navigator::status call.";
+        return dstream.str();
+      });
+      return;
+    }
+
     // Output the position in the sequence
     debugLog(state, [&] {
       std::stringstream dstream;
