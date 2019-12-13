@@ -16,6 +16,13 @@
 #include "Acts/Geometry/GeometryContext.hpp"
 #include "Acts/Utilities/Definitions.hpp"
 
+namespace std {
+template <>
+struct is_constructible<std::reference_wrapper<const std::any>,
+                        const std::reference_wrapper<const std::any>&>
+    : public true_type {};
+}  // namespace std
+
 namespace Acts {
 
 // @class ObjectSorterT

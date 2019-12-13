@@ -28,6 +28,17 @@
 #include "Acts/Utilities/Result.hpp"
 #include "Acts/Utilities/Units.hpp"
 
+namespace std {
+template <>
+struct is_constructible<std::reference_wrapper<const std::any>,
+                        const std::reference_wrapper<const std::any>&>
+    : public true_type {};
+template <>
+struct is_constructible<std::reference_wrapper<const std::any>,
+                        std::reference_wrapper<const std::any>&>
+    : public true_type {};
+}  // namespace std
+
 namespace Acts {
 
 /// @brief Simple class holding result of propagation call
