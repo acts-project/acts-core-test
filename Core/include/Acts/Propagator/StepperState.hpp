@@ -106,7 +106,7 @@ struct StepperState {
   FreeMatrix jacTransport = FreeMatrix::Identity();
 
   /// The full jacobian since the first step
-  Jacobian jacobian = Jacobian::Identity();
+  std::variant<BoundMatrix, FreeToBoundMatrix, FreeMatrix, BoundToFreeMatrix> jacobian = Jacobian::Identity(); // TODO: Can typedef the variant
 
   /// The propagation derivative
   FreeVector derivative = FreeVector::Zero();
@@ -146,8 +146,5 @@ struct StepperState {
 
   /// Cache the geometry context of this propagation
   std::reference_wrapper<const GeometryContext> geoContext;
-  
-  /// Flag to indicate if the propagation started in local or global parameters
-  bool localStart;
 };
 }  // namespace Acts

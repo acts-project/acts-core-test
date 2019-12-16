@@ -10,7 +10,7 @@
 
 #include <cmath>
 #include <functional>
-
+#include <variant>
 #include "Acts/EventData/TrackParameters.hpp"
 #include "Acts/Geometry/GeometryContext.hpp"
 #include "Acts/Propagator/StepperState.hpp"
@@ -26,6 +26,9 @@ namespace Acts {
 /// As a consequence the methods can be located in a seperate file.
 namespace detail {
 
+using JacobianToBoundPars = std::variant<BoundMatrix, FreeToBoundMatrix>;
+using JacobianToFreePars = std::variant<FreeMatrix, BoundToFreeMatrix>;
+
 /// Create and return the bound state at the current position
 ///
 /// @brief It does not check if the transported state is at the surface, this
@@ -39,7 +42,7 @@ namespace detail {
 ///   - the parameters at the surface
 ///   - the stepwise jacobian towards it (from last bound)
 ///   - and the path length (from start - for ordering)
-std::tuple<BoundParameters, BoundMatrix, double> boundState(
+std::tuple<BoundParameters, JacobianToBoundPars, double> boundState(
     StepperState& state, const Surface& surface);
 
 /// Create and return a curvilinear state at the current position
@@ -53,19 +56,38 @@ std::tuple<BoundParameters, BoundMatrix, double> boundState(
 ///   - the curvilinear parameters at given position
 ///   - the stepweise jacobian towards it (from last bound)
 ///   - and the path length (from start - for ordering)
-std::tuple<CurvilinearParameters, BoundMatrix, double> curvilinearState(
+std::tuple<CurvilinearParameters, JacobianToBoundPars, double> curvilinearState(
     StepperState& state);
 
-/// @brief Method for on-demand transport of the covariance to a new frame at
-/// current position in parameter space
+  /// Create and return a free state at the current position
+  ///
+  /// @brief This creates a free state.
+  ///
+    /// @tparam result_t Defines the return type
+  /// @param [in] state State that will be presented as @c FreeState
+  /// @param [in] reinitialize Boolean flag whether reinitialization is needed,
+  /// i.e. if this is an intermediate state of a larger propagation
+  ///
+  /// @return A free state:
+  ///   - the free parameters at given position
+  ///   - the stepweise jacobian towards it (from last location)
+  ///   - and the path length (from start - for ordering)
+  std::tuple<FreeParameters, JacobianToFreePars, double>
+freeState(StepperState& state, bool reinitialize);
+
+/// @brief Method for on-demand transport of the covariance to a new frame at current position in parameter space. It treats different scenarios:
+/// - from local to local
+/// - from local to global
+/// - from global to local
+/// - from global to global
 ///
 /// @param [in,out] state The stepper state
+/// @param [in] toLocal Boolean flag whether the result is in local parameters
 /// @param [in] surface is the surface to which the covariance is
 ///        forwarded to
 /// @note No check is done if the position is actually on the surface
 ///
 /// @return Projection jacobian from global to bound parameters
-void covarianceTransport(StepperState& state,
-                         const Surface* surface = nullptr);
+void covarianceTransport(StepperState& state, bool toLocal = true, const Surface* surface = nullptr);
 }  // namespace detail
 }  // namespace Acts

@@ -21,7 +21,6 @@
 #include "Acts/Utilities/Intersection.hpp"
 #include "Acts/Utilities/Result.hpp"
 #include "Acts/Propagator/detail/StepperReturnState.hpp"
-#include "Acts/Propagator/CovarianceTransport.hpp"
 #include "Acts/Propagator/StepperState.hpp"
 
 namespace Acts {
@@ -262,10 +261,6 @@ class StraightLineStepper {
     // return h
     return h;
   }
-
-private:
-	/// The covariance transporter engine
-	CovarianceTransport covTransport;
 };
 
 }  // namespace Acts
