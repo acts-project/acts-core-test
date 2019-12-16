@@ -52,7 +52,8 @@ struct StepperState {
         navDir(ndir),
         stepSize(ndir * std::abs(ssize)),
         tolerance(stolerance),
-        geoContext(gctx) {
+        geoContext(gctx),
+        localStart(true) {
     if (par.covariance()) {
       // Set the covariance transport flag to true
       covTransport = true;
@@ -88,7 +89,8 @@ struct StepperState {
         navDir(ndir),
         stepSize(ndir * std::abs(ssize)),
         tolerance(stolerance),
-        geoContext(gctx) {
+        geoContext(gctx),
+        localStart(false) {
       if (par.covariance()) {
 		  // Set the covariance transport flag to true
 		  covTransport = true;
