@@ -11,6 +11,7 @@
 #include <sstream>
 #include "Acts/Material/MaterialProperties.hpp"
 #include "Acts/Propagator/detail/PointwiseMaterialInteraction.hpp"
+#include "Acts/EventData/TrackParameters.hpp"
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Utilities/Units.hpp"
 

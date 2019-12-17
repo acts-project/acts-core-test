@@ -26,15 +26,13 @@ namespace Acts {
 /// As a consequence the methods can be located in a seperate file.
 namespace detail {
 
-using JacobianToBoundPars = std::variant<BoundMatrix, FreeToBoundMatrix>;
-using JacobianToFreePars = std::variant<FreeMatrix, BoundToFreeMatrix>;
+using Jacobian = std::variant<BoundMatrix, FreeToBoundMatrix, BoundToFreeMatrix, FreeMatrix>;
 
 /// Create and return the bound state at the current position
 ///
 /// @brief It does not check if the transported state is at the surface, this
 /// needs to be guaranteed by the propagator
 ///
-/// @tparam result_t Defines the return type
 /// @param [in] state State that will be presented as @c BoundState
 /// @param [in] surface The surface to which we bind the state
 ///
@@ -42,21 +40,20 @@ using JacobianToFreePars = std::variant<FreeMatrix, BoundToFreeMatrix>;
 ///   - the parameters at the surface
 ///   - the stepwise jacobian towards it (from last bound)
 ///   - and the path length (from start - for ordering)
-std::tuple<BoundParameters, JacobianToBoundPars, double> boundState(
+std::tuple<BoundParameters, Jacobian, double> boundState(
     StepperState& state, const Surface& surface);
 
 /// Create and return a curvilinear state at the current position
 ///
 /// @brief This creates a curvilinear state.
 ///
-/// @tparam result_t Defines the return type
 /// @param [in] state State that will be presented as @c CurvilinearState
 ///
 /// @return A curvilinear state:
 ///   - the curvilinear parameters at given position
 ///   - the stepweise jacobian towards it (from last bound)
 ///   - and the path length (from start - for ordering)
-std::tuple<CurvilinearParameters, JacobianToBoundPars, double> curvilinearState(
+std::tuple<CurvilinearParameters, Jacobian, double> curvilinearState(
     StepperState& state);
 
   /// Create and return a free state at the current position
@@ -72,7 +69,7 @@ std::tuple<CurvilinearParameters, JacobianToBoundPars, double> curvilinearState(
   ///   - the free parameters at given position
   ///   - the stepweise jacobian towards it (from last location)
   ///   - and the path length (from start - for ordering)
-  std::tuple<FreeParameters, JacobianToFreePars, double>
+  std::tuple<FreeParameters, Jacobian, double>
 freeState(StepperState& state, bool reinitialize);
 
 /// @brief Method for on-demand transport of the covariance to a new frame at current position in parameter space. It treats different scenarios:

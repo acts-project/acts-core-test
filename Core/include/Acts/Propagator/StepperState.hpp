@@ -10,7 +10,7 @@
 
 #include <cmath>
 #include <functional>
-
+#include <variant>
 #include "Acts/Geometry/GeometryContext.hpp"
 #include "Acts/MagneticField/MagneticFieldContext.hpp"
 #include "Acts/Propagator/ConstrainedStep.hpp"
@@ -21,7 +21,7 @@ namespace Acts {
 /// State for track parameter propagation
 ///
 struct StepperState {
-  using Jacobian = BoundMatrix;
+  using Jacobian = std::variant<BoundMatrix, FreeToBoundMatrix, BoundToFreeMatrix, FreeMatrix>;
   using Covariance = std::variant<BoundSymMatrix, FreeSymMatrix>;
 
   /// Delete the default constructor
@@ -52,8 +52,7 @@ struct StepperState {
         navDir(ndir),
         stepSize(ndir * std::abs(ssize)),
         tolerance(stolerance),
-        geoContext(gctx),
-        localStart(true) {
+        geoContext(gctx){
     if (par.covariance()) {
       // Set the covariance transport flag to true
       covTransport = true;
@@ -62,6 +61,7 @@ struct StepperState {
       par.referenceSurface().initJacobianToGlobal(gctx, *jacToGlobal, pos, dir,
                                                   par.parameters());
       cov = *par.covariance();
+      jacobian.emplace<0>(BoundMatrix::Identity());
     }
   }    
   
@@ -89,13 +89,13 @@ struct StepperState {
         navDir(ndir),
         stepSize(ndir * std::abs(ssize)),
         tolerance(stolerance),
-        geoContext(gctx),
-        localStart(false) {
+        geoContext(gctx){
       if (par.covariance()) {
 		  // Set the covariance transport flag to true
 		  covTransport = true;
 		  // Get the covariance
           cov = *par.covariance();
+          jacobian.emplace<3>(FreeMatrix::Identity());
       }
     }
 
@@ -106,7 +106,7 @@ struct StepperState {
   FreeMatrix jacTransport = FreeMatrix::Identity();
 
   /// The full jacobian since the first step
-  std::variant<BoundMatrix, FreeToBoundMatrix, FreeMatrix, BoundToFreeMatrix> jacobian = Jacobian::Identity(); // TODO: Can typedef the variant
+  Jacobian jacobian;
 
   /// The propagation derivative
   FreeVector derivative = FreeVector::Zero();
