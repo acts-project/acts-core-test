@@ -208,6 +208,7 @@ CurvilinearState curvilinearState(StepperState& state) {
   // Create the bound state
   CurvilinearState result = std::make_tuple(
       std::move(parameters), state.jacobian, state.pathAccumulated);
+
   return result;
 }
 
@@ -219,7 +220,7 @@ void covarianceTransport(StepperState& state, const Surface* surface) {
 
   // Apply the actual covariance transport
   state.cov = jacFull * state.cov * jacFull.transpose();
-  
+
   // Reinitialize
   reinitializeJacobians(state, surface);
 
