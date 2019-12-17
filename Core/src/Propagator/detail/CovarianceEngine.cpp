@@ -169,7 +169,6 @@ void reinitializeJacToGlobal(StepperState& state,
 /// @param [in] surface Representing surface of the stepper state
 void reinitializeJacobians(StepperState& state,
                            const Surface* surface = nullptr) {
-  state.jacobian = Jacobian::Identity();
   state.jacTransport = FreeMatrix::Identity();
   state.derivative = FreeVector::Zero();
   reinitializeJacToGlobal(state, surface);
@@ -193,11 +192,6 @@ BoundState boundState(StepperState& state, const Surface& surface) {
   // Create the bound state
   BoundState result = std::make_tuple(std::move(parameters), state.jacobian,
                                       state.pathAccumulated);
-  // Reinitialize if asked to do so
-  // this is useful for interruption calls
-  if (reinitialize) {
-    reinitializeJacobians(state, &surface);
-  }
   return result;
 }
 
@@ -214,11 +208,6 @@ CurvilinearState curvilinearState(StepperState& state) {
   // Create the bound state
   CurvilinearState result = std::make_tuple(
       std::move(parameters), state.jacobian, state.pathAccumulated);
-  // Reinitialize if asked to do so
-  // this is useful for interruption calls
-  if (reinitialize) {
-    reinitializeJacobians(state);
-  }
   return result;
 }
 
@@ -236,7 +225,7 @@ void covarianceTransport(StepperState& state,
  reinitializeJacobians(state, surface);
 
   // Store The global and bound jacobian (duplication for the moment)
-  state.jacobian = jacFull * state.jacobian;
+  state.jacobian = jacFull;
 }
 }  // namespace detail
 }  // namespace Acts
