@@ -220,7 +220,7 @@ void covarianceTransport(StepperState& state, const Surface* surface) {
 
   // Apply the actual covariance transport
   state.cov = jacFull * state.cov * jacFull.transpose();
-
+  
   // Reinitialize
   reinitializeJacobians(state, surface);
 
