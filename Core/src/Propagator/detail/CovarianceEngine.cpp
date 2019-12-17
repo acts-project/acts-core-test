@@ -169,7 +169,6 @@ void reinitializeJacToGlobal(StepperState& state,
 /// @param [in] surface Representing surface of the stepper state
 void reinitializeJacobians(StepperState& state,
                            const Surface* surface = nullptr) {
-  state.jacobian = Jacobian::Identity();
   state.jacTransport = FreeMatrix::Identity();
   state.derivative = FreeVector::Zero();
   reinitializeJacToGlobal(state, surface);
