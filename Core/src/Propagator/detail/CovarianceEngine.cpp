@@ -192,6 +192,7 @@ BoundState boundState(StepperState& state, const Surface& surface) {
   // Create the bound state
   BoundState result = std::make_tuple(std::move(parameters), state.jacobian,
                                       state.pathAccumulated);
+
   return result;
 }
 
