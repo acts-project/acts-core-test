@@ -271,7 +271,6 @@ void covarianceTransport(StepperState& state, const Surface& surface) {
 }
 
 void covarianceTransport(StepperState& state, bool toLocal) {
-
   if(state.jacToGlobal.has_value())
   {
 	  state.jacToGlobal = state.jacTransport * (*state.jacToGlobal);
@@ -299,7 +298,7 @@ void covarianceTransport(StepperState& state, bool toLocal) {
 		state.cov = FreeSymMatrix(std::get<FreeMatrix>(state.jacobian) * std::get<FreeSymMatrix>(state.cov) * std::get<FreeMatrix>(state.jacobian).transpose());
 	  }
   }
-  
+
     state.jacTransport = FreeMatrix::Identity();
 	state.derivative = FreeVector::Zero();
 	if(toLocal)

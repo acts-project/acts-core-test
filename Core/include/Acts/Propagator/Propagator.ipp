@@ -146,7 +146,7 @@ auto Acts::Propagator<S, N>::propagate(
 			std::move(finalParameters));
 		// Only fill the transport jacobian when covariance transport was done
 		if (state.stepping.covTransport) {
-			  *propRes.transportJacobian = std::get<1>(finalState);
+			  propRes.transportJacobian = std::get<1>(finalState);
 		}
 	}
 	else
@@ -158,7 +158,7 @@ auto Acts::Propagator<S, N>::propagate(
 			std::move(finalParameters));
 		// Only fill the transport jacobian when covariance transport was done
 		if (state.stepping.covTransport) {
-			  *propRes.transportJacobian = std::get<1>(finalState);
+			  propRes.transportJacobian = std::get<1>(finalState);
 		}
 	}
     return result;
@@ -224,7 +224,7 @@ auto Acts::Propagator<S, N>::propagate(
 		std::make_unique<BoundParameters>(std::move(boundParameters));
 	// Only fill the transport jacobian when covariance transport was done
 	if (state.stepping.covTransport) {
-	  *propRes.transportJacobian = std::get<1>(bs);
+	  propRes.transportJacobian = std::get<1>(bs);
 	}
     return result;
   } else {

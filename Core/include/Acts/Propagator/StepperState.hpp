@@ -57,7 +57,7 @@ struct StepperState {
       // Set the covariance transport flag to true
       covTransport = true;
       // Get the covariance
-      *jacToGlobal = BoundToFreeMatrix::Zero();
+      jacToGlobal = BoundToFreeMatrix::Zero();
       par.referenceSurface().initJacobianToGlobal(gctx, *jacToGlobal, pos, dir,
                                                   par.parameters());
       cov = *par.covariance();
