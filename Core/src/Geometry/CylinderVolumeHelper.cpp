@@ -938,7 +938,7 @@ Acts::CylinderVolumeHelper::createCylinderLayer(double z, double r,
                  << binsPhi << " / " << binsZ << " bins in phi / Z. ");
   }
   // @todo create the SurfaceMaterial
-  // bounds for cylinderical surface
+  // bounds for cylindrical surface
   CylinderBounds* cylinderBounds = new CylinderBounds(r, halflengthZ);
   // create the cylinder
   return CylinderLayer::create(
