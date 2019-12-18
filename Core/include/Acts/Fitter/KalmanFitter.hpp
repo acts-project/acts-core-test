@@ -355,7 +355,7 @@ class KalmanFitter {
           targetReached(state, stepper, *targetSurface)) {
         ACTS_VERBOSE("Completing");
         // Transport & bind the parameter to the final surface
-        auto fittedState = stepper.buildState(state.stepping, *targetSurface);
+        auto fittedState = stepper.boundState(state.stepping, *targetSurface);
         // Assign the fitted parameters
         result.fittedParameters = std::get<BoundParameters>(fittedState);
         // Break the navigation for stopping the Propagation
@@ -478,7 +478,7 @@ class KalmanFitter {
 
         // Transport & bind the state to the current surface
         auto [boundParams, jacobian, pathLength] =
-            stepper.buildState(state.stepping, *surface);
+            stepper.boundState(state.stepping, *surface);
 
         // add a full TrackState entry multi trajectory
         // (this allocates storage for all components, we will set them later)

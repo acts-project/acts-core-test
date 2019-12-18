@@ -144,27 +144,24 @@ class StraightLineStepper {
 
   /// @brief Final state builder without a target surface
   ///
-  /// @tparam end_parameters_t Type of the end parameters
-  ///
   /// @param [in, out] state State of the propagation
-  /// @param [in] reinitialize Boolean flag whether reinitialization is needed,
-  /// i.e. if this is an intermediate state of a larger propagation
   ///
   /// @return std::tuple conatining the final state parameters, the jacobian & the accumulated path
-  template<typename end_parameters_t>
   auto 
-  buildState(State& state, bool reinitialize) const
+  curvilinearState(State& state) const
   {	  
-	  // If the result should be local it is curvilinear
-	  if constexpr (end_parameters_t::is_local_representation)
-	  {
-		 return detail::curvilinearState(state, reinitialize);
-	  }
-	  // else it is free
-	  else
-	  {
-		   return detail::freeState(state, reinitialize);
-	  }
+	return detail::curvilinearState(state);
+  }
+
+  /// @brief Final state builder without a target surface
+  ///
+  /// @param [in, out] state State of the propagation
+  ///
+  /// @return std::tuple conatining the final state parameters, the jacobian & the accumulated path
+  auto 
+  freeState(State& state) const
+  {	  
+	return detail::freeState(state);
   }
 
   /// Create and return the bound state at the current position
@@ -177,8 +174,8 @@ class StraightLineStepper {
   ///
   /// @return std::tuple conatining the final state parameters, the jacobian & the accumulated path
   auto 
-  buildState(State& state, const Surface& surface, bool reinitialize) const {
-	  return detail::boundState(state, surface, reinitialize);
+  boundState(State& state, const Surface& surface) const {
+	return detail::boundState(state, surface);
   }
 
   /// Method to update a stepper state to the some parameters

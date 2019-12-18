@@ -30,10 +30,11 @@ using namespace Acts::UnitLiterals;
 template <typename bfield_t>
 class AtlasStepper {
  public:
-  using Jacobian = BoundMatrix;
-  using Covariance = BoundSymMatrix;
-  using BoundState = std::tuple<BoundParameters, const Jacobian, double>;
-  using CurvilinearState = std::tuple<CurvilinearParameters, const Jacobian, double>;
+  using Jacobian = std::variant<BoundMatrix, FreeToBoundMatrix, BoundToFreeMatrix, FreeMatrix>;
+  using Covariance = std::variant<BoundSymMatrix, FreeSymMatrix>;
+  using BoundState = std::tuple<BoundParameters, Jacobian, double>;
+  using CurvilinearState = std::tuple<CurvilinearParameters, Jacobian, double>;
+  using FreeState = std::tuple<FreeParameters, Jacobian, double>;
 
   using BField = bfield_t;
 
@@ -396,81 +397,6 @@ class AtlasStepper {
     return state.stepSize.toString();
   }
 
-  /// @brief Final state builder without a target surface
-  ///
-  /// @tparam start_parameters_t Type of the start parameters
-  /// @tparam end_parameters_t Type of the end parameters
-  ///
-  /// @param [in, out] state State of the propagation
-  /// @param [in] reinitialize Boolean flag whether reinitialization is needed,
-  /// i.e. if this is an intermediate state of a larger propagation
-  ///
-  /// @return std::tuple conatining the final state parameters, the jacobian & the accumulated path
-  template<bool start_local, typename end_parameters_t>
-  auto 
-  buildState(State& state, bool reinitialize) const
-  {	 
-	using return_type = detail::return_state_type<start_local, end_parameters_t>;
-	if constexpr (start_local && end_parameters_t::is_local_representation)
-	{
-		return_type result = curvilinearState(state, reinitialize);
-		return result;
-	}
-	// TODO: Needs implementation
-	if constexpr (end_parameters_t::is_local_representation)
-	{
-		Vector3D dummy;
-		CurvilinearParameters eParams(std::nullopt, dummy, dummy, 1., 0.);
-		using jacobian = typename std::tuple_element<1, return_type>::type;
-		jacobian jac;
-		return_type result = std::make_tuple(std::move(eParams), jac,
-								   state.pathAccumulated);
-								   
-		 return result;
-	 }
-	 else
-	 {
-		 FreeVector dummy;
-		 FreeParameters eParams(std::nullopt, dummy);
-		 using jacobian = typename std::tuple_element<1, return_type>::type;
-		 jacobian jac;
-		 return_type result = std::make_tuple(std::move(eParams), jac, state.pathAccumulated);
-		 return result;
-	 }
-  }
-  
-  /// Create and return the bound state at the current position
-  ///
-  /// @brief It does not check if the transported state is at the surface, this
-  /// needs to be guaranteed by the propagator
-  ///
-  /// @param [in] state State that will be presented as @c BoundState
-  /// @param [in] surface The surface to which we bind the state
-  /// @param [in] reinitialize Boolean flag whether reinitialization is needed,
-  /// i.e. if this is an intermediate state of a larger propagation
-  ///
-  /// @return std::tuple conatining the final state parameters, the jacobian & the accumulated path
-  template<bool start_local>
-  auto 
-  buildState(State& state, const Surface& surface, bool reinitialize) const { 
-	  using return_type = detail::return_state_type<start_local, BoundParameters, Surface>;
-	  if constexpr(start_local)
-	  {
-	  return boundState(state, surface, reinitialize);
-  }
-  // TODO: Needs implementation
-  else
-  {
-    BoundParameters eParams(state.geoContext, std::nullopt, BoundVector(), surface.getSharedPtr());
-	using jacobian = typename std::tuple_element<1, return_type>::type;
-    jacobian jac;
-    return_type result = std::make_tuple(std::move(eParams), jac,
-                               state.pathAccumulated);
-                               
-	 return result;
- }
-  }
-
   /// Create and return the bound state at the current position
   ///
   ///
@@ -534,6 +460,31 @@ class AtlasStepper {
                                      state.t0 + state.pVector[3]);
 
     return CurvilinearState(std::move(parameters), state.jacobian,
+                            state.pathAccumulated);
+  }
+
+  FreeState freeState(State& state) const {
+	// the convert method invalidates the state (in case it's reused)
+    state.state_ready = false;
+    //
+    Acts::Vector3D gp(state.pVector[0], state.pVector[1], state.pVector[2]);
+    Acts::Vector3D mom(state.pVector[4], state.pVector[5], state.pVector[6]);
+    mom /= std::abs(state.pVector[7]);
+
+    std::optional<Covariance> covOpt = std::nullopt;
+    if (state.covTransport) {
+      covarianceTransport(state);
+      covOpt = state.cov;
+    }
+
+    FreeVector pars;
+    pars.template head<3>() = state.pos;
+    pars(3) = state.t0 + state.dt;
+    pars.template segment<3>(4) = state.dir;
+    pars(7) = (state.q / state.p);
+    FreeParameters parameters(covOpt, pars);
+
+    return FreeState(std::move(parameters), state.jacobian,
                             state.pathAccumulated);
   }
 

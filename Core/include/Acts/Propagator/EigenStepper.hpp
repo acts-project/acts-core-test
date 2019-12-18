@@ -25,7 +25,7 @@
 #include "Acts/Utilities/Intersection.hpp"
 #include "Acts/Utilities/Result.hpp"
 #include "Acts/Utilities/Units.hpp"
-
+#include "Acts/Propagator/detail/CovarianceEngine.hpp"
 
 namespace Acts {
 
@@ -206,14 +206,25 @@ class EigenStepper {
 
   /// @brief Final state builder without a target surface
   ///
-  /// @tparam end_parameters_t Type of the end parameters
+  /// @param [in, out] state State of the propagation
+  ///
+  /// @return std::tuple conatining the final state parameters, the jacobian & the accumulated path
+  auto 
+  curvilinearState(State& state) const
+  {	  
+	return detail::curvilinearState(state);
+  }
+
+  /// @brief Final state builder without a target surface
   ///
   /// @param [in, out] state State of the propagation
   ///
   /// @return std::tuple conatining the final state parameters, the jacobian & the accumulated path
-  template<typename end_parameters_t>
   auto 
-  buildState(State& state) const;
+  freeState(State& state) const
+  {	  
+	return detail::freeState(state);
+  }
 
   /// Create and return the bound state at the current position
   ///
@@ -225,7 +236,9 @@ class EigenStepper {
   ///
   /// @return std::tuple conatining the final state parameters, the jacobian & the accumulated path
   auto 
-  buildState(State& state, const Surface& surface) const;
+  boundState(State& state, const Surface& surface) const {
+	return detail::boundState(state, surface);
+  }
 
   /// Method to update a stepper state to the some parameters
   ///
