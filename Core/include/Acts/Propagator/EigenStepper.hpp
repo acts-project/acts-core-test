@@ -20,7 +20,6 @@
 #include "Acts/Propagator/StepperState.hpp"
 #include "Acts/Propagator/detail/Auctioneer.hpp"
 #include "Acts/Propagator/detail/SteppingHelper.hpp"
-#include "Acts/Propagator/detail/StepperReturnState.hpp"
 #include "Acts/Propagator/StepperState.hpp"
 #include "Acts/Utilities/Intersection.hpp"
 #include "Acts/Utilities/Result.hpp"

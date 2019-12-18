@@ -85,6 +85,8 @@ freeState(StepperState& state);
 /// @note No check is done if the position is actually on the surface
 ///
 /// @return Projection jacobian from global to bound parameters
-void covarianceTransport(StepperState& state, bool toLocal = true, const Surface* surface = nullptr);
+void covarianceTransport(StepperState& state, const Surface& surface);
+void covarianceTransport(StepperState& state, bool toLocal = true);
+
 }  // namespace detail
 }  // namespace Acts

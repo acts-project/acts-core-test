@@ -204,7 +204,7 @@ BoundState boundState(StepperState& state, const Surface& surface) {
   std::optional<BoundSymMatrix> cov = std::nullopt;
   if (state.covTransport) {
     // Initialize the transport final frame jacobian
-    covarianceTransport(state, true, &surface);
+    covarianceTransport(state, surface);
     cov = std::get<BoundSymMatrix>(state.cov);
   }
   // Create the bound parameters
@@ -220,7 +220,7 @@ CurvilinearState curvilinearState(StepperState& state) {
   // Transport the covariance to here
   std::optional<BoundSymMatrix> cov = std::nullopt;
   if (state.covTransport) {
-    covarianceTransport(state);
+    covarianceTransport(state, true);
     cov = std::get<BoundSymMatrix>(state.cov);
   }
   // Create the curvilinear parameters
@@ -236,7 +236,7 @@ FreeState freeState(StepperState& state)
     // Transport the covariance to here
     std::optional<FreeSymMatrix> cov = std::nullopt;
     if (state.covTransport) {
-		covarianceTransport(state);
+		covarianceTransport(state, false);
 		cov = std::get<FreeSymMatrix>(state.cov);
     }
     // Create the free parameters
@@ -245,61 +245,67 @@ FreeState freeState(StepperState& state)
     pars(3) = state.t0 + state.dt;
     pars.template segment<3>(4) = state.dir;
     pars(7) = (state.q / state.p);
-    FreeParameters parameters(cov, pars);
+    FreeParameters parameters(std::move(cov), pars);
     
     return std::make_tuple(std::move(parameters), state.jacobian,
                                state.pathAccumulated);
   }
     
-void covarianceTransport(StepperState& state, bool toLocal,
-                         const Surface* surface) {
+void covarianceTransport(StepperState& state, const Surface& surface) {
 
-	// TODO: This assumes that each call of the function is performed with reinitialize = true - the dimensions might change along
-    // Test if we started on a surface
-	if(state.jacToGlobal.has_value())
-	{
-		state.jacToGlobal = state.jacTransport * (*state.jacToGlobal);
-		
-		// Test if we went to a surface
-		if(toLocal)
-		{
-			const FreeToBoundMatrix jacToLocal = surfaceDerivative(state, surface);
-			const BoundMatrix jacFull = jacToLocal * (*state.jacToGlobal);
-			
-			// Apply the actual covariance transport
-			state.cov = BoundSymMatrix(jacFull * std::get<BoundSymMatrix>(state.cov) * jacFull.transpose());
-						
-			// Store The global and bound jacobian (duplication for the moment)
-			state.jacobian = jacFull;
-		}
-		else
-		{
-			state.cov = FreeSymMatrix((*state.jacToGlobal) * std::get<BoundSymMatrix>(state.cov) * (*state.jacToGlobal).transpose());
-			state.jacobian = *state.jacToGlobal;
-		}
-	}
-	else
-	{
-		if(toLocal)
-		{
-			const FreeToBoundMatrix jacToLocal = surfaceDerivative(state, surface);
-			
-			// Apply the actual covariance transport
-			state.cov = BoundSymMatrix(jacToLocal * std::get<FreeSymMatrix>(state.cov) * jacToLocal.transpose());
-			state.jacobian = jacToLocal;
-		}
-		else
-		{
-			// Apply the actual covariance transport
-			state.cov = FreeSymMatrix(state.jacTransport * std::get<FreeSymMatrix>(state.cov) * state.jacTransport.transpose());
-			state.jacobian = state.jacTransport;
-		}
-	}
+  if(state.jacToGlobal.has_value())
+  {
+	  state.jacToGlobal = state.jacTransport * (*state.jacToGlobal);
+	  state.jacobian = BoundMatrix(surfaceDerivative(state, &surface) * (*state.jacToGlobal));
+	  state.cov = BoundSymMatrix(std::get<BoundMatrix>(state.jacobian) * std::get<BoundSymMatrix>(state.cov) * std::get<BoundMatrix>(state.jacobian).transpose());
+  }
+  else
+  {
+	  state.jacobian = FreeToBoundMatrix(surfaceDerivative(state, &surface) * state.jacTransport);
+	  state.cov = BoundSymMatrix(std::get<FreeToBoundMatrix>(state.jacobian) * std::get<FreeSymMatrix>(state.cov) * std::get<FreeToBoundMatrix>(state.jacobian).transpose());
+  }
 
     state.jacTransport = FreeMatrix::Identity();
 	state.derivative = FreeVector::Zero();
+	reinitializeJacToGlobal(state, &surface);
+}
+
+void covarianceTransport(StepperState& state, bool toLocal) {
+
+  if(state.jacToGlobal.has_value())
+  {
+	  state.jacToGlobal = state.jacTransport * (*state.jacToGlobal);
+	  if(toLocal)
+	  {
+		state.jacobian = BoundMatrix(surfaceDerivative(state) * (*state.jacToGlobal));
+		state.cov = BoundSymMatrix(std::get<BoundMatrix>(state.jacobian) * std::get<BoundSymMatrix>(state.cov) * std::get<BoundMatrix>(state.jacobian).transpose());
+	  }
+	  else
+	  {
+		state.jacobian = BoundToFreeMatrix(*state.jacToGlobal);
+		state.cov = FreeSymMatrix(std::get<BoundToFreeMatrix>(state.jacobian) * std::get<BoundSymMatrix>(state.cov) * std::get<BoundToFreeMatrix>(state.jacobian).transpose());
+	  }
+  }
+  else
+  {
+	  if(toLocal)
+	  {
+		state.jacobian = FreeToBoundMatrix(surfaceDerivative(state) * state.jacTransport);
+		state.cov = BoundSymMatrix(std::get<FreeToBoundMatrix>(state.jacobian) * std::get<FreeSymMatrix>(state.cov) * std::get<FreeToBoundMatrix>(state.jacobian).transpose());
+	  }
+	  else
+	  {
+		state.jacobian = FreeMatrix(state.jacTransport);
+		state.cov = FreeSymMatrix(std::get<FreeMatrix>(state.jacobian) * std::get<FreeSymMatrix>(state.cov) * std::get<FreeMatrix>(state.jacobian).transpose());
+	  }
+  }
+  
+    state.jacTransport = FreeMatrix::Identity();
+	state.derivative = FreeVector::Zero();
 	if(toLocal)
-		reinitializeJacToGlobal(state, surface);
+		reinitializeJacToGlobal(state);
+	else
+		state.jacToGlobal = std::nullopt;
 }
 	
 }  // namespace detail

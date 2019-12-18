@@ -21,7 +21,6 @@
 #include "Acts/Utilities/Definitions.hpp"
 #include "Acts/Utilities/Intersection.hpp"
 #include "Acts/Utilities/Result.hpp"
-#include "Acts/Propagator/detail/StepperReturnState.hpp"
 #include "Acts/Propagator/StepperState.hpp"
 
 namespace Acts {
