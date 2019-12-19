@@ -252,7 +252,6 @@ FreeState freeState(StepperState& state)
   }
     
 void covarianceTransport(StepperState& state, const Surface& surface) {
-
   if(state.jacToGlobal.has_value())
   {
 	  state.jacToGlobal = state.jacTransport * (*state.jacToGlobal);
