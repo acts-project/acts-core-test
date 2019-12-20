@@ -44,6 +44,62 @@ auto rand3 = bdata::random(
 auto threeRandom = (rand1 ^ rand2 ^ rand2);
 }  // namespace ds
 
+// The constant field test
+/// test forward propagation in constant magnetic field
+BOOST_DATA_TEST_CASE(
+    constant_bfieldforward_propagation_,
+    bdata::random((bdata::seed = 0,
+                   bdata::distribution =
+                       std::uniform_real_distribution<>(0.4_GeV, 10_GeV))) ^
+        bdata::random((bdata::seed = 1,
+                       bdata::distribution =
+                           std::uniform_real_distribution<>(-M_PI, M_PI))) ^
+        bdata::random((bdata::seed = 2,
+                       bdata::distribution =
+                           std::uniform_real_distribution<>(0.1, M_PI - 0.1))) ^
+        bdata::random(
+            (bdata::seed = 3,
+             bdata::distribution = std::uniform_int_distribution<>(0, 1))) ^
+        bdata::random(
+            (bdata::seed = 4,
+             bdata::distribution = std::uniform_int_distribution<>(0, 100))) ^
+        bdata::xrange(ntests),
+    pT, phi, theta, charge, time, index) {
+  if (index < skip) {
+    return;
+  }
+
+  // define start parameters
+  double x = 0;
+  double y = 0;
+  double z = 0;
+  double px = pT * cos(phi);
+  double py = pT * sin(phi);
+  double pz = pT / tan(theta);
+  double q = -1 + 2 * charge;
+  Vector3D pos(x, y, z);
+  Vector3D mom(px, py, pz);
+  CurvilinearParameters startC(std::nullopt, pos, mom, q, time);
+  
+  Vector3D dir = mom.normalized();
+  FreeVector pars;
+  pars << x, y, z, time, dir.x(), dir.y(), dir.z(), charge / mom.norm();
+  FreeParameters startF(std::nullopt, pars);
+  
+  // constant field propagation atlas stepper
+  auto aposition = constant_field_propagation<CurvilinearParameters>(apropagator, startC, pT, phi, theta, Bz);
+  // constant field propagation eigen stepper
+  auto epositionCC = constant_field_propagation<CurvilinearParameters>(epropagator, startC, pT, phi, theta, Bz);
+  auto epositionFC = constant_field_propagation<FreeParameters>(epropagator, startC, pT, phi, theta, Bz);
+  auto epositionCF = constant_field_propagation<CurvilinearParameters>(epropagator, startF, pT, phi, theta, Bz);
+  auto epositionFF = constant_field_propagation<FreeParameters>(epropagator, startF, pT, phi, theta, Bz);
+  // check consistency
+  CHECK_CLOSE_REL(epositionCC, aposition, 1e-6);
+  CHECK_CLOSE_REL(epositionCC, epositionFC, 1e-6);
+  CHECK_CLOSE_REL(epositionCC, epositionCF, 1e-6);
+  CHECK_CLOSE_REL(epositionCC, epositionFF, 1e-6);
+}
+
 /// test consistency of forward-backward propagation
 BOOST_DATA_TEST_CASE(forward_backward_propagation_,
                      ds::trackParameters* ds::propagationLimit, pT, phi, theta,
@@ -51,14 +107,59 @@ BOOST_DATA_TEST_CASE(forward_backward_propagation_,
   std::cout << "Running (first patch) tests : " << itest << std::endl;
   ++itest;
 
+  // define start parameters
+  double x = 0;
+  double y = 0;
+  double z = 0;
+  double px = pT * cos(phi);
+  double py = pT * sin(phi);
+  double pz = pT / tan(theta);
+  double q = charge;
+  double time = 0.;
+  Vector3D pos(x, y, z);
+  Vector3D mom(px, py, pz);
+  CurvilinearParameters startC(std::nullopt, pos, mom, q, time);
+  
+  Vector3D dir = mom.normalized();
+  FreeVector pars;
+  pars << x, y, z, time, dir.x(), dir.y(), dir.z(), charge / mom.norm();
+  FreeParameters startF(std::nullopt, pars);
+  
   // foward backward check atlas stepper
-  foward_backward(apropagator, pT, phi, theta, charge, plimit, 1_um, 1_eV,
-                  debug);
+  foward_backward<CurvilinearParameters, CurvilinearParameters>(apropagator, plimit, startC, 1_um, 1_eV, debug);
   // foward backward check eigen stepper
-  foward_backward(epropagator, pT, phi, theta, charge, plimit, 1_um, 1_eV,
+  foward_backward<CurvilinearParameters, CurvilinearParameters>(epropagator, plimit, startC, 1_um, 1_eV,
+                  debug);
+  foward_backward<FreeParameters, CurvilinearParameters>(epropagator, plimit, startC, 1_um, 1_eV,
+                  debug);
+  foward_backward<CurvilinearParameters, FreeParameters>(epropagator, plimit, startC, 1_um, 1_eV,
+                  debug);  
+  foward_backward<FreeParameters, FreeParameters>(epropagator, plimit, startC, 1_um, 1_eV,
+                  debug);
+  foward_backward<CurvilinearParameters, CurvilinearParameters>(epropagator, plimit, startF, 1_um, 1_eV,
+                  debug);
+  foward_backward<FreeParameters, CurvilinearParameters>(epropagator, plimit, startF, 1_um, 1_eV,
+                  debug);
+  foward_backward<CurvilinearParameters, FreeParameters>(epropagator, plimit, startF, 1_um, 1_eV,
+                  debug);  
+  foward_backward<FreeParameters, FreeParameters>(epropagator, plimit, startF, 1_um, 1_eV,
                   debug);
   // foward backward check straight line stepper
-  foward_backward(spropagator, pT, phi, theta, charge, plimit, 1_um, 1_eV,
+  foward_backward<CurvilinearParameters, CurvilinearParameters>(spropagator, plimit, startC, 1_um, 1_eV,
+                  debug);
+  foward_backward<FreeParameters, CurvilinearParameters>(spropagator, plimit, startC, 1_um, 1_eV,
+                  debug);
+  foward_backward<CurvilinearParameters, FreeParameters>(spropagator, plimit, startC, 1_um, 1_eV,
+                  debug);
+  foward_backward<FreeParameters, FreeParameters>(spropagator, plimit, startC, 1_um, 1_eV,
+                  debug);
+  foward_backward<CurvilinearParameters, CurvilinearParameters>(spropagator, plimit, startF, 1_um, 1_eV,
+                  debug);
+  foward_backward<FreeParameters, CurvilinearParameters>(spropagator, plimit, startF, 1_um, 1_eV,
+                  debug);
+  foward_backward<CurvilinearParameters, FreeParameters>(spropagator, plimit, startF, 1_um, 1_eV,
+                  debug);
+  foward_backward<FreeParameters, FreeParameters>(spropagator, plimit, startF, 1_um, 1_eV,
                   debug);
 }
 
