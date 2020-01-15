@@ -27,7 +27,7 @@ option(ACTS_BUILD_DIGITIZATION_PLUGIN "Build Digitization plugin" OFF)
 option(ACTS_BUILD_IDENTIFICATION_PLUGIN "Build Identification plugin" OFF)
 option(ACTS_BUILD_JSON_PLUGIN "Build Json plugin" OFF)
 option(ACTS_BUILD_TGEO_PLUGIN "Build TGeo plugin" OFF)
-option(ACTS_USE_EXTERNAL_NLOHMANN_JSON "Use external nlohmann::json" OFF)
+option(ACTS_USE_BUNDLED_NLOHMANN_JSON "Use bundled nlohmann::json library" OFF)
 
 # all other compile-time parameters must be defined here for clear visibility
 # and to avoid forgotten options somewhere deep in the hierarchy
@@ -63,14 +63,14 @@ if(ACTS_BUILD_DD4HEP_PLUGIN)
 endif()
 if(ACTS_BUILD_JSON_PLUGIN)
   # both variants provide the nlohmann_json::nlohmann_json target
-  if(ACTS_USE_EXTERNAL_NLOHMANN_JSON)
-    find_package(nlohmann_json 3.2.0 REQUIRED)
-  else()
+  if(ACTS_USE_BUNDLED_NLOHMANN_JSON)
     # we are only using the library and do not care about its unit tests
     set(JSON_BuildTests OFF CACHE INTERNAL "")
     # json types are part of the public interface and thus must be installed
     set(JSON_Install ON CACHE INTERNAL "")
     add_subdirectory(thirdparty/nlohmann_json)
+  else()
+    find_package(nlohmann_json 3.2.0 REQUIRED)
   endif()
 endif()
 if(ACTS_BUILD_TGEO_PLUGIN)
