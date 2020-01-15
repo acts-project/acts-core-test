@@ -48,7 +48,7 @@ include_guards:
   image: python:alpine3.6
   before_script: []
   script:
-    - CI/check_include_guards.py . --fail-global
+    - CI/check_include_guards.py --fail-global Core Legacy Plugins Tests
 
 # job templates w/ default settings
 #

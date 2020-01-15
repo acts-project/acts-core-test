@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
+
 from __future__ import print_function
 
 import argparse
+import glob
 import os
-from glob import glob
-from concurrent.futures import ProcessPoolExecutor
 import re
 import sys
-
 
 def line_fmt(line):
     return "{: >4d} ".format(line)
@@ -60,40 +59,33 @@ def check_include_guards(file):
             errbuf += code_print(m.group(0), lineno)
             errbuf += "\n"*2
 
-
-
-
     return valid_local, valid_global, errbuf
 
 def main():
     p = argparse.ArgumentParser()
-
-    input_help = """
-Input files: either file path, dir path (will glob for headers) or custom glob pattern
-    """
-    p.add_argument("input", help=input_help.strip())
+    p.add_argument("input", nargs="+", help="Input files: either file path,"
+        " dir path (will glob for headers) or custom glob pattern")
     p.add_argument("--fail-local", "-l", action="store_true", help="Fail on local include guards")
     p.add_argument("--fail-global", "-g", action="store_true", help="Fail on global include guards")
     p.add_argument("--quiet-local", "-ql", action="store_true")
     p.add_argument("--quiet-global", "-qg", action="store_true")
-                   
     args = p.parse_args()
 
     headers = []
-
-    if os.path.isfile(args.input):
-        headers = [args.input]
-    elif os.path.isdir(args.input):
-        patterns = ["**/*.hpp", "**/*.h"]
-        headers = sum([glob(os.path.join(args.input, p), recursive=True) for p in patterns], [])
-    else:
-        headers = glob(args.input, recursive=True)
+    for input in args.input:
+        if os.path.isfile(input):
+            headers += [input,]
+        elif os.path.isdir(input):
+            headers += glob.glob(os.path.join(input, "**/*.h"), recursive=True)
+            headers += glob.glob(os.path.join(input, "**/*.hpp"), recursive=True)
+        else:
+            headers += glob.glob(input, recursive=True)
 
     valid = True
     nlocal = 0
     nglobal = 0
 
-    for h in headers: 
+    for h in headers:
         valid_local, valid_global, errbuf = check_include_guards(h)
 
         if not valid_local:
@@ -127,4 +119,3 @@ Input files: either file path, dir path (will glob for headers) or custom glob p
 
 if "__main__" == __name__:
     main()
-
