@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
+
+from __future__ import print_function
+
 import argparse
+import datetime
+import difflib
+import glob
 import os
+import re
 import sys
 from subprocess import check_output
-import re
-import difflib
-from datetime import datetime
-from fnmatch import fnmatch
-
-EXCLUDE = ["./Plugins/Json/include/Acts/Plugins/Json/lib/*"]
-
 
 class bcolors:
     HEADER = "\033[95m"
@@ -21,9 +21,7 @@ class bcolors:
     BOLD = "\033[1m"
     UNDERLINE = "\033[4m"
 
-
 CROSS_SYMBOL = u"\u2717"
-
 
 def err(string):
     if sys.stdout.isatty():
@@ -31,14 +29,12 @@ def err(string):
     else:
         return string
 
-
 class CommitInfo:
     date = None
     year = None
     author = None
     subject = None
     body = None
-
 
 def check_git_dates(src):
     output = (
@@ -77,10 +73,9 @@ def check_git_dates(src):
 
     return addcommit, modcommit
 
-
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("input")
+    p.add_argument("input", nargs="+", help="Input directories or files")
     p.add_argument(
         "--fix", action="store_true", help="Attempt to fix any license issues found."
     )
@@ -94,39 +89,18 @@ def main():
         action="store_true",
         help="Fail if year in license statement is not valid.",
     )
-    p.add_argument("--exclude", "-e", action="append", default=EXCLUDE)
-
     args = p.parse_args()
-    print(args.exclude)
 
-    if os.path.isdir(args.input):
-        srcs = (
-            str(
-                check_output(
-                    [
-                        "find",
-                        args.input,
-                        "-iname",
-                        "*.cpp",
-                        "-or",
-                        "-iname",
-                        "*.hpp",
-                        "-or",
-                        "-iname",
-                        "*.ipp",
-                    ]
-                ),
-                "utf-8",
-            )
-            .strip()
-            .split("\n")
-        )
-        srcs = filter(lambda p: not p.startswith("./build"), srcs)
-    else:
-        srcs = [args.input]
+    srcs = []
+    for input in args.input:
+        if os.path.isdir(input):
+            srcs += glob.glob(os.path.join(input, "**/*.cpp"), recursive=True)
+            srcs += glob.glob(os.path.join(input, "**/*.hpp"), recursive=True)
+            srcs += glob.glob(os.path.join(input, "**/*.ipp"), recursive=True)
+        else:
+            srcs = [input]
 
-    year = int(datetime.now().strftime("%Y"))
-
+    year = int(datetime.datetime.now().strftime("%Y"))
     raw = """// This file is part of the Acts project.
 //
 // Copyright (C) {year} CERN for the benefit of the Acts project
@@ -191,9 +165,6 @@ def main():
     nsrcs = len(srcs)
     step = int(nsrcs / 20)
     for i, src in enumerate(srcs):
-
-        if any([fnmatch(src, e) for e in args.exclude]):
-            continue
 
         if nsrcs > 1 and i % step == 0:
             string = "{}/{} -> {:.2f}%".format(i, nsrcs, i / float(nsrcs) * 100.0)
@@ -406,7 +377,6 @@ def main():
         print("License problems found. You can try running again with --fix")
 
     sys.exit(exit)
-
 
 if "__main__" == __name__:
     main()
