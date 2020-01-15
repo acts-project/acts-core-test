@@ -14,14 +14,13 @@ if [ $# -ne 1 ]; then
     exit 1
 fi
 
-clang-format --version
+echo clang-format --version
 
-cd $1
-find . \( -iname '*.cpp' -or -iname '*.hpp' -or -iname '*.ipp' \) \
-       -and -not -path "./*build*/*" \
-       -and -not -path "./Plugins/Json/include/Acts/Plugins/Json/lib/*" \
+find $1 \
+    \( -iname '*.cpp' -or -iname '*.hpp' -or -iname '*.ipp' \) \
+    -and -not -path "*build*" \
+    -and -not -path "*thirdparty*" \
   | xargs clang-format -i -style=file
-
 
 if ! [ -z $CI ]; then
   mkdir changed
@@ -29,9 +28,7 @@ if ! [ -z $CI ]; then
     cp --parents $f changed
   done
 fi
-    
-echo "clang-format done"
-    
+
 set +e
 git diff --exit-code --stat
 result=$?
@@ -40,7 +37,6 @@ if [ "$result" -eq "128" ]; then
     echo "Format was successfully applied"
     echo "Could not create summary of affected files"
     echo "Are you in a submodule?"
-
 fi
 
 exit $result
