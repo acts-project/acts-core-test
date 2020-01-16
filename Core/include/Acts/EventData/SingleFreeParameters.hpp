@@ -160,7 +160,7 @@ class SingleFreeParameters {
   ///
   /// @sa ParameterSet::getCovariance
   const std::optional<CovMatrix_t>& covariance() const { return m_covariance; }
-
+  
   /// @brief Sets a covariance matrix
   ///
   /// @param [in] cov Covariance that will be set
