@@ -85,7 +85,7 @@ struct StepperState {
         dir(par.momentum().normalized()),
         p(par.momentum().norm()),
         q(par.charge()),
-        t0(par.time()),
+        t(par.time()),
         navDir(ndir),
         stepSize(ndir * std::abs(ssize)),
         tolerance(stolerance),
