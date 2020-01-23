@@ -8,11 +8,11 @@
 
 #pragma once
 #include <type_traits>
+#include "Acts/EventData/ChargePolicy.hpp"
+#include "Acts/EventData/ParameterSet.hpp"
 #include "Acts/EventData/detail/coordinate_transformations.hpp"
 #include "Acts/Geometry/GeometryContext.hpp"
 #include "Acts/Utilities/Definitions.hpp"
-#include "Acts/EventData/ChargePolicy.hpp"
-#include "Acts/EventData/ParameterSet.hpp"
 
 namespace Acts {
 

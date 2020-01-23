@@ -45,7 +45,7 @@ void Acts::EigenStepper<B, E, A>::covarianceTransport(
     State& state, const Surface& surface) const {
   detail::covarianceTransport(state, surface);
 }
-  
+
 template <typename B, typename E, typename A>
 template <typename propagator_state_t>
 Acts::Result<double> Acts::EigenStepper<B, E, A>::step(

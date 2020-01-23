@@ -40,7 +40,7 @@ class SingleFreeParameters {
  public:
   /// Public typedefs
   static constexpr bool is_local_representation = false;
-  
+
   /// Type of covariance matrix
   using CovMatrix_t = FreeSymMatrix;
 
@@ -150,7 +150,7 @@ class SingleFreeParameters {
                                   ParValue_t uncertainty() const {
     return std::sqrt(m_covariance->coeff(par, par));
   }
-  
+
   /// @brief Access covariance matrix of track parameters
   ///
   /// @note The ownership of the covariance matrix is @b not transferred with

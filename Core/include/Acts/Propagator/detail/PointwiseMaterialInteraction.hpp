@@ -125,12 +125,9 @@ struct PointwiseMaterialInteraction {
     // update track parameters and covariance
     stepper.update(state.stepping, pos, dir, nextP, time);
     BoundSymMatrix& cov = std::get<BoundSymMatrix>(state.stepping.cov);
-    cov(ePHI, ePHI) =
-        updateVariance(cov(ePHI, ePHI), variancePhi);
-    cov(eTHETA, eTHETA) =
-        updateVariance(cov(eTHETA, eTHETA), varianceTheta);
-    cov(eQOP, eQOP) =
-        updateVariance(cov(eQOP, eQOP), varianceQoverP);
+    cov(ePHI, ePHI) = updateVariance(cov(ePHI, ePHI), variancePhi);
+    cov(eTHETA, eTHETA) = updateVariance(cov(eTHETA, eTHETA), varianceTheta);
+    cov(eQOP, eQOP) = updateVariance(cov(eQOP, eQOP), varianceQoverP);
   }
 
  private:

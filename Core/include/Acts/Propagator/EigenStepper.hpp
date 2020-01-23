@@ -19,12 +19,11 @@
 #include "Acts/Propagator/StepperExtensionList.hpp"
 #include "Acts/Propagator/StepperState.hpp"
 #include "Acts/Propagator/detail/Auctioneer.hpp"
+#include "Acts/Propagator/detail/CovarianceEngine.hpp"
 #include "Acts/Propagator/detail/SteppingHelper.hpp"
-#include "Acts/Propagator/StepperState.hpp"
 #include "Acts/Utilities/Intersection.hpp"
 #include "Acts/Utilities/Result.hpp"
 #include "Acts/Utilities/Units.hpp"
-#include "Acts/Propagator/detail/CovarianceEngine.hpp"
 
 namespace Acts {
 
@@ -55,10 +54,9 @@ class EigenStepper {
   /// @brief The state object. This object extends the general container @c
   /// StepperState by some parameters for RKN4
   struct State : public StepperState {
-	
-	/// Default constructor
-	State() = delete;
-    
+    /// Default constructor
+    State() = delete;
+
     /// Constructor from the initial track parameters
     ///
     /// @tparam parameters_t the Type of the track parameters
@@ -72,7 +70,7 @@ class EigenStepper {
     ///
     /// @note the covariance matrix is copied when needed
     template <typename parameters_t>
-	explicit State(std::reference_wrapper<const GeometryContext> gctx,
+    explicit State(std::reference_wrapper<const GeometryContext> gctx,
                    std::reference_wrapper<const MagneticFieldContext> mctx,
                    const parameters_t& par, NavigationDirection ndir = forward,
                    double ssize = std::numeric_limits<double>::max(),
@@ -98,9 +96,8 @@ class EigenStepper {
       /// k_i of the RKN4 algorithm
       Vector3D k1, k2, k3, k4;
     } stepData;
-    
   };
-        
+
   /// Constructor requires knowledge of the detector's magnetic field
   EigenStepper(BField bField = BField());
 
@@ -207,23 +204,19 @@ class EigenStepper {
   ///
   /// @param [in, out] state State of the propagation
   ///
-  /// @return std::tuple conatining the final state parameters, the jacobian & the accumulated path
-  auto 
-  curvilinearState(State& state) const
-  {	  
-	return detail::curvilinearState(state);
+  /// @return std::tuple conatining the final state parameters, the jacobian &
+  /// the accumulated path
+  auto curvilinearState(State& state) const {
+    return detail::curvilinearState(state);
   }
 
   /// @brief Final state builder without a target surface
   ///
   /// @param [in, out] state State of the propagation
   ///
-  /// @return std::tuple conatining the final state parameters, the jacobian & the accumulated path
-  auto 
-  freeState(State& state) const
-  {	  
-	return detail::freeState(state);
-  }
+  /// @return std::tuple conatining the final state parameters, the jacobian &
+  /// the accumulated path
+  auto freeState(State& state) const { return detail::freeState(state); }
 
   /// Create and return the bound state at the current position
   ///
@@ -233,10 +226,10 @@ class EigenStepper {
   /// @param [in] state State that will be presented as @c BoundState
   /// @param [in] surface The surface to which we bind the state
   ///
-  /// @return std::tuple conatining the final state parameters, the jacobian & the accumulated path
-  auto 
-  boundState(State& state, const Surface& surface) const {
-	return detail::boundState(state, surface);
+  /// @return std::tuple conatining the final state parameters, the jacobian &
+  /// the accumulated path
+  auto boundState(State& state, const Surface& surface) const {
+    return detail::boundState(state, surface);
   }
 
   /// Method to update a stepper state to the some parameters
@@ -258,7 +251,8 @@ class EigenStepper {
   /// to a new curvilinear frame at current  position,
   /// or direction of the state
   ///
-  /// @tparam end_parameters_t The target parameter type for dimension derivation
+  /// @tparam end_parameters_t The target parameter type for dimension
+  /// derivation
   ///
   /// @param [in,out] state State of the stepper
   template <typename end_parameters_t = CurvilinearParameters>

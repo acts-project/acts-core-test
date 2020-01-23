@@ -21,7 +21,8 @@ namespace Acts {
 /// State for track parameter propagation
 ///
 struct StepperState {
-  using Jacobian = std::variant<BoundMatrix, FreeToBoundMatrix, BoundToFreeMatrix, FreeMatrix>;
+  using Jacobian = std::variant<BoundMatrix, FreeToBoundMatrix,
+                                BoundToFreeMatrix, FreeMatrix>;
   using Covariance = std::variant<BoundSymMatrix, FreeSymMatrix>;
 
   /// Delete the default constructor
@@ -37,7 +38,8 @@ struct StepperState {
   /// @param [in] ndir is the navigation direction
   /// @param [in] ssize is the (absolute) maximum step size
   /// @param [in] stolerance is the stepping tolerance
-  template <typename parameters_t, std::enable_if_t<parameters_t::is_local_representation, int> = 0>
+  template <typename parameters_t,
+            std::enable_if_t<parameters_t::is_local_representation, int> = 0>
   explicit StepperState(
       std::reference_wrapper<const GeometryContext> gctx,
       std::reference_wrapper<const MagneticFieldContext> /*mctx*/,
@@ -52,7 +54,7 @@ struct StepperState {
         navDir(ndir),
         stepSize(ndir * std::abs(ssize)),
         tolerance(stolerance),
-        geoContext(gctx){
+        geoContext(gctx) {
     if (par.covariance()) {
       // Set the covariance transport flag to true
       covTransport = true;
@@ -63,24 +65,27 @@ struct StepperState {
       cov = *par.covariance();
       jacobian.emplace<0>(BoundMatrix::Identity());
     }
-  }    
-  
-    /// Constructor from the initial track parameters
-    ///
-    /// @tparam parameters_t the Type of the track parameters
-    ///
-    /// @param [in] gctx is the context object for the geometery
-    /// @param [in] mctx is the context object for the magnetic field
-    /// @param [in] par The track parameters at start
-    /// @param [in] ndir is the navigation direction
-    /// @param [in] ssize is the (absolute) maximum step size
-    /// @param [in] stolerance is the stepping tolerance
-    template <typename parameters_t, std::enable_if_t<not parameters_t::is_local_representation, int> = 0>
-    explicit StepperState(std::reference_wrapper<const GeometryContext> gctx,
-                   std::reference_wrapper<const MagneticFieldContext> /*mctx*/,
-                   const parameters_t& par, NavigationDirection ndir = forward,
-                   double ssize = std::numeric_limits<double>::max(),
-                   double stolerance = s_onSurfaceTolerance)
+  }
+
+  /// Constructor from the initial track parameters
+  ///
+  /// @tparam parameters_t the Type of the track parameters
+  ///
+  /// @param [in] gctx is the context object for the geometery
+  /// @param [in] mctx is the context object for the magnetic field
+  /// @param [in] par The track parameters at start
+  /// @param [in] ndir is the navigation direction
+  /// @param [in] ssize is the (absolute) maximum step size
+  /// @param [in] stolerance is the stepping tolerance
+  template <
+      typename parameters_t,
+      std::enable_if_t<not parameters_t::is_local_representation, int> = 0>
+  explicit StepperState(
+      std::reference_wrapper<const GeometryContext> gctx,
+      std::reference_wrapper<const MagneticFieldContext> /*mctx*/,
+      const parameters_t& par, NavigationDirection ndir = forward,
+      double ssize = std::numeric_limits<double>::max(),
+      double stolerance = s_onSurfaceTolerance)
       : pos(par.position()),
         dir(par.momentum().normalized()),
         p(par.momentum().norm()),
@@ -89,15 +94,15 @@ struct StepperState {
         navDir(ndir),
         stepSize(ndir * std::abs(ssize)),
         tolerance(stolerance),
-        geoContext(gctx){
-      if (par.covariance()) {
-		  // Set the covariance transport flag to true
-		  covTransport = true;
-		  // Get the covariance
-          cov = *par.covariance();
-          jacobian.emplace<3>(FreeMatrix::Identity());
-      }
+        geoContext(gctx) {
+    if (par.covariance()) {
+      // Set the covariance transport flag to true
+      covTransport = true;
+      // Get the covariance
+      cov = *par.covariance();
+      jacobian.emplace<3>(FreeMatrix::Identity());
     }
+  }
 
   /// Jacobian from local to the global frame
   std::optional<BoundToFreeMatrix> jacToGlobal;
@@ -114,7 +119,7 @@ struct StepperState {
   /// Boolean to indiciate if you need covariance transport
   bool covTransport = false;
   Covariance cov;
-    
+
   /// Global particle position
   Vector3D pos = Vector3D(0., 0., 0.);
 

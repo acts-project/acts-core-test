@@ -9,9 +9,9 @@
 #pragma once
 
 #include <sstream>
+#include "Acts/EventData/TrackParameters.hpp"
 #include "Acts/Material/MaterialProperties.hpp"
 #include "Acts/Propagator/detail/PointwiseMaterialInteraction.hpp"
-#include "Acts/EventData/TrackParameters.hpp"
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Utilities/Units.hpp"
 
@@ -100,7 +100,7 @@ struct MaterialInteractor {
 
     // Prepare relevant input particle properties
     detail::PointwiseMaterialInteraction d(surface, state, stepper);
-    
+
     // Determine the effective traversed material and its properties
     // Material exists but it's not real, i.e. vacuum; there is nothing to do
     if (not d.evaluateMaterialProperties(state)) {

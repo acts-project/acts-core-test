@@ -29,7 +29,8 @@ using namespace Acts::UnitLiterals;
 template <typename bfield_t>
 class AtlasStepper {
  public:
-  using Jacobian = std::variant<BoundMatrix, FreeToBoundMatrix, BoundToFreeMatrix, FreeMatrix>;
+  using Jacobian = std::variant<BoundMatrix, FreeToBoundMatrix,
+                                BoundToFreeMatrix, FreeMatrix>;
   using Covariance = std::variant<BoundSymMatrix, FreeSymMatrix>;
   using BoundState = std::tuple<BoundParameters, Jacobian, double>;
   using CurvilinearState = std::tuple<CurvilinearParameters, Jacobian, double>;
@@ -52,7 +53,8 @@ class AtlasStepper {
     /// @param [in] ndir The navigation direction w.r.t. parameters
     /// @param [in] ssize the steps size limitation
     /// @param [in] stolerance is the stepping tolerance
-    template <typename Parameters, std::enable_if_t<Parameters::is_local_representation, int> = 0>
+    template <typename Parameters,
+              std::enable_if_t<Parameters::is_local_representation, int> = 0>
     State(std::reference_wrapper<const GeometryContext> gctx,
           std::reference_wrapper<const MagneticFieldContext> mctx,
           const Parameters& pars, NavigationDirection ndir = forward,
@@ -231,11 +233,9 @@ class AtlasStepper {
           pVector[26] = Bz2 * Vp[0];
           pVector[34] = Bz3 * Vp[0];  // dZ/
         }
+      } else {
+        cov.emplace<0>(BoundSymMatrix::Zero());
       }
-      else
-      {
-		  cov.emplace<0>(BoundSymMatrix::Zero());
-	  }
       // now declare the state as ready
       state_ready = true;
       // Remember that the start was in bound parameters
@@ -252,7 +252,9 @@ class AtlasStepper {
     /// @param [in] ndir The navigation direction w.r.t. parameters
     /// @param [in] ssize the steps size limitation
     /// @param [in] stolerance is the stepping tolerance
-    template <typename Parameters, std::enable_if_t<not Parameters::is_local_representation, int> = 0>
+    template <
+        typename Parameters,
+        std::enable_if_t<not Parameters::is_local_representation, int> = 0>
     State(std::reference_wrapper<const GeometryContext> gctx,
           std::reference_wrapper<const MagneticFieldContext> mctx,
           const Parameters& pars, NavigationDirection ndir = forward,
@@ -350,7 +352,7 @@ class AtlasStepper {
         gpVector[29] = 0.;
         gpVector[37] = 0.;
         gpVector[45] = 0.;
-        gpVector[53] = 1.; 
+        gpVector[53] = 1.;
         gpVector[61] = 0.;
         gpVector[69] = 0.;  // dAy/
 
@@ -376,17 +378,15 @@ class AtlasStepper {
         gpVector[73] = 0.;
         gpVector[74] = 0.;
         gpVector[75] = 0.;
+      } else {
+        cov.emplace<1>(FreeSymMatrix::Zero());
       }
-      else
-      {
-		  cov.emplace<1>(FreeSymMatrix::Zero());
-	  }
       // now declare the state as ready
       state_ready = true;
       // Remember that the start was in free parameters
       localStart = false;
     }
-    
+
     // optimisation that init is not called twice
     bool state_ready = false;
     // configuration
@@ -416,19 +416,21 @@ class AtlasStepper {
     std::array<double, 76> gpVector;
 
     /// Storage pattern of pVector
-    ///                   /dX     /dY     /dZ     /dT     /dAx   /dAy    /dAz    /dCM
-    /// X  ->P[0]  dX /   P[ 8]   P[16]   P[24]   P[32]   P[40]  P[48]   P[56]   P[64]
-    /// Y  ->P[1]  dY /   P[ 9]   P[17]   P[25]   P[33]   P[41]  P[49]   P[57]   P[65]
-    /// Z  ->P[2]  dZ /   P[10]   P[18]   P[26]   P[34]   P[42]  P[50]   P[58]   P[66]
-    /// T  ->P[3]  dT/	  P[11]   P[19]   P[27]   P[35]   P[43]  P[51]   P[59]   P[67]
-    /// Ax ->P[4]  dAx/   P[12]   P[20]   P[28]   P[36]   P[44]  P[52]   P[60]   P[68]
-    /// Ay ->P[5]  dAy/   P[13]   P[21]   P[29]   P[37]   P[45]  P[53]   P[61]   P[69]
-    /// Az ->P[6]  dAz/   P[14]   P[22]   P[30]   P[38]   P[46]  P[54]   P[62]   P[70]
-    /// CM ->P[7]  dCM/   P[15]   P[23]   P[31]   P[39]   P[47]  P[55]   P[63]   P[71]
-    /// Cache: P[72] - P[75]
-    
+    ///                   /dX     /dY     /dZ     /dT     /dAx   /dAy    /dAz
+    ///                   /dCM
+    /// X  ->P[0]  dX /   P[ 8]   P[16]   P[24]   P[32]   P[40]  P[48]   P[56]
+    /// P[64] Y  ->P[1]  dY /   P[ 9]   P[17]   P[25]   P[33]   P[41]  P[49]
+    /// P[57]   P[65] Z  ->P[2]  dZ /   P[10]   P[18]   P[26]   P[34]   P[42]
+    /// P[50]   P[58]   P[66] T  ->P[3]  dT/	  P[11]   P[19]   P[27]   P[35]
+    /// P[43]  P[51]   P[59]   P[67] Ax ->P[4]  dAx/   P[12]   P[20]   P[28]
+    /// P[36]   P[44]  P[52]   P[60]   P[68] Ay ->P[5]  dAy/   P[13]   P[21]
+    /// P[29]   P[37]   P[45]  P[53]   P[61]   P[69] Az ->P[6]  dAz/   P[14]
+    /// P[22]   P[30]   P[38]   P[46]  P[54]   P[62]   P[70] CM ->P[7]  dCM/
+    /// P[15]   P[23]   P[31]   P[39]   P[47]  P[55]   P[63]   P[71] Cache:
+    /// P[72] - P[75]
+
     bool localStart;
-    
+
     // result
     const Covariance* covariance;
     Covariance cov;
@@ -592,7 +594,8 @@ class AtlasStepper {
                                charge(state), state.t0 + state.pVector[3],
                                surface.getSharedPtr());
 
-    return BoundState(std::move(parameters), BoundMatrix(state.jacobian), // TODO: jacobian dimensions
+    return BoundState(std::move(parameters),
+                      BoundMatrix(state.jacobian),  // TODO: jacobian dimensions
                       state.pathAccumulated);
   }
 
@@ -622,12 +625,14 @@ class AtlasStepper {
     CurvilinearParameters parameters(std::move(covOpt), gp, mom, charge(state),
                                      state.t0 + state.pVector[3]);
 
-    return CurvilinearState(std::move(parameters), BoundMatrix(state.jacobian), // TODO: jacobian dimensions
-                            state.pathAccumulated);
+    return CurvilinearState(
+        std::move(parameters),
+        BoundMatrix(state.jacobian),  // TODO: jacobian dimensions
+        state.pathAccumulated);
   }
 
   FreeState freeState(State& state) const {
-	// the convert method invalidates the state (in case it's reused)
+    // the convert method invalidates the state (in case it's reused)
     state.state_ready = false;
     //
     Acts::Vector3D gp(state.pVector[0], state.pVector[1], state.pVector[2]);
@@ -647,8 +652,10 @@ class AtlasStepper {
     pars(7) = (state.q / state.p);
     FreeParameters parameters(std::move(covOpt), pars);
 
-    return FreeState(std::move(parameters), BoundMatrix(state.jacobian), // TODO: The jacobian needs to be fixed
-                            state.pathAccumulated);
+    return FreeState(
+        std::move(parameters),
+        BoundMatrix(state.jacobian),  // TODO: The jacobian needs to be fixed
+        state.pathAccumulated);
   }
 
   /// The state update method
@@ -660,165 +667,165 @@ class AtlasStepper {
     if (state.state_ready) {
       return;
     }
-	
-	const ActsVectorD<3> pos = pars.position();
-	const auto Vp = pars.parameters();
 
-	double Sf, Cf, Ce, Se;
-	Sf = sin(Vp(2));
-	Cf = cos(Vp(2));
-	Se = sin(Vp(3));
-	Ce = cos(Vp(3));
+    const ActsVectorD<3> pos = pars.position();
+    const auto Vp = pars.parameters();
 
-	state.pVector[0] = pos(0);
-	state.pVector[1] = pos(1);
-	state.pVector[2] = pos(2);
-	state.pVector[3] = pars.time();
-	state.pVector[4] = Cf * Se;
-	state.pVector[5] = Sf * Se;
-	state.pVector[6] = Ce;
-	state.pVector[7] = Vp[4];
+    double Sf, Cf, Ce, Se;
+    Sf = sin(Vp(2));
+    Cf = cos(Vp(2));
+    Se = sin(Vp(3));
+    Ce = cos(Vp(3));
 
-	// @todo: remove magic numbers - is that the charge ?
-	if (std::abs(state.pVector[7]) < .000000000000001) {
-	  state.pVector[7] < 0. ? state.pVector[7] = -.000000000000001
-							: state.pVector[7] = .000000000000001;
-	}
+    state.pVector[0] = pos(0);
+    state.pVector[1] = pos(1);
+    state.pVector[2] = pos(2);
+    state.pVector[3] = pars.time();
+    state.pVector[4] = Cf * Se;
+    state.pVector[5] = Sf * Se;
+    state.pVector[6] = Ce;
+    state.pVector[7] = Vp[4];
 
-	// prepare the jacobian if we have a covariance
-	if (pars.covariance()) {
-	  // copy the covariance matrix
-	  state.covariance = new Covariance(*pars.covariance());
-	  state.covTransport = true;
-	  state.useJacobian = true;
-	  const auto transform = pars.referenceFrame(state.geoContext);
+    // @todo: remove magic numbers - is that the charge ?
+    if (std::abs(state.pVector[7]) < .000000000000001) {
+      state.pVector[7] < 0. ? state.pVector[7] = -.000000000000001
+                            : state.pVector[7] = .000000000000001;
+    }
 
-	  state.pVector[8] = transform(0, eLOC_0);
-	  state.pVector[16] = transform(0, eLOC_1);
-	  state.pVector[24] = 0.;
-	  state.pVector[32] = 0.;
-	  state.pVector[40] = 0.;
-	  state.pVector[48] = 0.;  // dX /
+    // prepare the jacobian if we have a covariance
+    if (pars.covariance()) {
+      // copy the covariance matrix
+      state.covariance = new Covariance(*pars.covariance());
+      state.covTransport = true;
+      state.useJacobian = true;
+      const auto transform = pars.referenceFrame(state.geoContext);
 
-	  state.pVector[9] = transform(1, eLOC_0);
-	  state.pVector[17] = transform(1, eLOC_1);
-	  state.pVector[25] = 0.;
-	  state.pVector[33] = 0.;
-	  state.pVector[41] = 0.;
-	  state.pVector[49] = 0.;  // dY /
+      state.pVector[8] = transform(0, eLOC_0);
+      state.pVector[16] = transform(0, eLOC_1);
+      state.pVector[24] = 0.;
+      state.pVector[32] = 0.;
+      state.pVector[40] = 0.;
+      state.pVector[48] = 0.;  // dX /
 
-	  state.pVector[10] = transform(2, eLOC_0);
-	  state.pVector[18] = transform(2, eLOC_1);
-	  state.pVector[26] = 0.;
-	  state.pVector[34] = 0.;
-	  state.pVector[42] = 0.;
-	  state.pVector[50] = 0.;  // dZ /
+      state.pVector[9] = transform(1, eLOC_0);
+      state.pVector[17] = transform(1, eLOC_1);
+      state.pVector[25] = 0.;
+      state.pVector[33] = 0.;
+      state.pVector[41] = 0.;
+      state.pVector[49] = 0.;  // dY /
 
-	  state.pVector[11] = 0.;
-	  state.pVector[19] = 0.;
-	  state.pVector[27] = 0.;
-	  state.pVector[35] = 0.;
-	  state.pVector[43] = 0.;
-	  state.pVector[51] = 1.;  // dT/
+      state.pVector[10] = transform(2, eLOC_0);
+      state.pVector[18] = transform(2, eLOC_1);
+      state.pVector[26] = 0.;
+      state.pVector[34] = 0.;
+      state.pVector[42] = 0.;
+      state.pVector[50] = 0.;  // dZ /
 
-	  state.pVector[12] = 0.;
-	  state.pVector[20] = 0.;
-	  state.pVector[28] = -Sf * Se;  // - sin(phi) * cos(theta)
-	  state.pVector[36] = Cf * Ce;   // cos(phi) * cos(theta)
-	  state.pVector[44] = 0.;
-	  state.pVector[52] = 0.;  // dAx/
+      state.pVector[11] = 0.;
+      state.pVector[19] = 0.;
+      state.pVector[27] = 0.;
+      state.pVector[35] = 0.;
+      state.pVector[43] = 0.;
+      state.pVector[51] = 1.;  // dT/
 
-	  state.pVector[13] = 0.;
-	  state.pVector[21] = 0.;
-	  state.pVector[29] = Cf * Se;  // cos(phi) * sin(theta)
-	  state.pVector[37] = Sf * Ce;  // sin(phi) * cos(theta)
-	  state.pVector[45] = 0.;
-	  state.pVector[53] = 0.;  // dAy/
+      state.pVector[12] = 0.;
+      state.pVector[20] = 0.;
+      state.pVector[28] = -Sf * Se;  // - sin(phi) * cos(theta)
+      state.pVector[36] = Cf * Ce;   // cos(phi) * cos(theta)
+      state.pVector[44] = 0.;
+      state.pVector[52] = 0.;  // dAx/
 
-	  state.pVector[14] = 0.;
-	  state.pVector[22] = 0.;
-	  state.pVector[30] = 0.;
-	  state.pVector[38] = -Se;  // - sin(theta)
-	  state.pVector[46] = 0.;
-	  state.pVector[54] = 0.;  // dAz/
+      state.pVector[13] = 0.;
+      state.pVector[21] = 0.;
+      state.pVector[29] = Cf * Se;  // cos(phi) * sin(theta)
+      state.pVector[37] = Sf * Ce;  // sin(phi) * cos(theta)
+      state.pVector[45] = 0.;
+      state.pVector[53] = 0.;  // dAy/
 
-	  state.pVector[15] = 0.;
-	  state.pVector[23] = 0.;
-	  state.pVector[31] = 0.;
-	  state.pVector[39] = 0.;
-	  state.pVector[47] = 1.;
-	  state.pVector[55] = 0.;  // dCM/
+      state.pVector[14] = 0.;
+      state.pVector[22] = 0.;
+      state.pVector[30] = 0.;
+      state.pVector[38] = -Se;  // - sin(theta)
+      state.pVector[46] = 0.;
+      state.pVector[54] = 0.;  // dAz/
 
-	  state.pVector[56] = 0.;
-	  state.pVector[57] = 0.;
-	  state.pVector[58] = 0.;
-	  state.pVector[59] = 0.;
+      state.pVector[15] = 0.;
+      state.pVector[23] = 0.;
+      state.pVector[31] = 0.;
+      state.pVector[39] = 0.;
+      state.pVector[47] = 1.;
+      state.pVector[55] = 0.;  // dCM/
 
-	  // special treatment for surface types
-	  const auto& surface = pars.referenceSurface();
-	  // the disc needs polar coordinate adaptations
-	  if (surface.type() == Surface::Disc) {
-		double lCf = cos(Vp[1]);
-		double lSf = sin(Vp[1]);
-		double Ax[3] = {transform(0, 0), transform(1, 0), transform(2, 0)};
-		double Ay[3] = {transform(0, 1), transform(1, 1), transform(2, 1)};
-		double d0 = lCf * Ax[0] + lSf * Ay[0];
-		double d1 = lCf * Ax[1] + lSf * Ay[1];
-		double d2 = lCf * Ax[2] + lSf * Ay[2];
-		state.pVector[8] = d0;
-		state.pVector[9] = d1;
-		state.pVector[10] = d2;
-		state.pVector[16] = Vp[0] * (lCf * Ay[0] - lSf * Ax[0]);
-		state.pVector[17] = Vp[0] * (lCf * Ay[1] - lSf * Ax[1]);
-		state.pVector[18] = Vp[0] * (lCf * Ay[2] - lSf * Ax[2]);
-	  }
-	  // the line needs components that relate direction change
-	  // with global frame change
-	  if (surface.type() == Surface::Perigee ||
-		  surface.type() == Surface::Straw) {
-		// sticking to the nomenclature of the original RkPropagator
-		// - axis pointing along the drift/transverse direction
-		double B[3] = {transform(0, 0), transform(1, 0), transform(2, 0)};
-		// - axis along the straw
-		double A[3] = {transform(0, 1), transform(1, 1), transform(2, 1)};
-		// - normal vector of the reference frame
-		double C[3] = {transform(0, 2), transform(1, 2), transform(2, 2)};
+      state.pVector[56] = 0.;
+      state.pVector[57] = 0.;
+      state.pVector[58] = 0.;
+      state.pVector[59] = 0.;
 
-		// projection of direction onto normal vector of reference frame
-		double PC = state.pVector[4] * C[0] + state.pVector[5] * C[1] +
-					state.pVector[6] * C[2];
-		double Bn = 1. / PC;
+      // special treatment for surface types
+      const auto& surface = pars.referenceSurface();
+      // the disc needs polar coordinate adaptations
+      if (surface.type() == Surface::Disc) {
+        double lCf = cos(Vp[1]);
+        double lSf = sin(Vp[1]);
+        double Ax[3] = {transform(0, 0), transform(1, 0), transform(2, 0)};
+        double Ay[3] = {transform(0, 1), transform(1, 1), transform(2, 1)};
+        double d0 = lCf * Ax[0] + lSf * Ay[0];
+        double d1 = lCf * Ax[1] + lSf * Ay[1];
+        double d2 = lCf * Ax[2] + lSf * Ay[2];
+        state.pVector[8] = d0;
+        state.pVector[9] = d1;
+        state.pVector[10] = d2;
+        state.pVector[16] = Vp[0] * (lCf * Ay[0] - lSf * Ax[0]);
+        state.pVector[17] = Vp[0] * (lCf * Ay[1] - lSf * Ax[1]);
+        state.pVector[18] = Vp[0] * (lCf * Ay[2] - lSf * Ax[2]);
+      }
+      // the line needs components that relate direction change
+      // with global frame change
+      if (surface.type() == Surface::Perigee ||
+          surface.type() == Surface::Straw) {
+        // sticking to the nomenclature of the original RkPropagator
+        // - axis pointing along the drift/transverse direction
+        double B[3] = {transform(0, 0), transform(1, 0), transform(2, 0)};
+        // - axis along the straw
+        double A[3] = {transform(0, 1), transform(1, 1), transform(2, 1)};
+        // - normal vector of the reference frame
+        double C[3] = {transform(0, 2), transform(1, 2), transform(2, 2)};
 
-		double Bx2 = -A[2] * state.pVector[29];
-		double Bx3 = A[1] * state.pVector[38] - A[2] * state.pVector[37];
+        // projection of direction onto normal vector of reference frame
+        double PC = state.pVector[4] * C[0] + state.pVector[5] * C[1] +
+                    state.pVector[6] * C[2];
+        double Bn = 1. / PC;
 
-		double By2 = A[2] * state.pVector[28];
-		double By3 = A[2] * state.pVector[36] - A[0] * state.pVector[38];
+        double Bx2 = -A[2] * state.pVector[29];
+        double Bx3 = A[1] * state.pVector[38] - A[2] * state.pVector[37];
 
-		double Bz2 = A[0] * state.pVector[29] - A[1] * state.pVector[28];
-		double Bz3 = A[0] * state.pVector[37] - A[1] * state.pVector[36];
+        double By2 = A[2] * state.pVector[28];
+        double By3 = A[2] * state.pVector[36] - A[0] * state.pVector[38];
 
-		double B2 = B[0] * Bx2 + B[1] * By2 + B[2] * Bz2;
-		double B3 = B[0] * Bx3 + B[1] * By3 + B[2] * Bz3;
+        double Bz2 = A[0] * state.pVector[29] - A[1] * state.pVector[28];
+        double Bz3 = A[0] * state.pVector[37] - A[1] * state.pVector[36];
 
-		Bx2 = (Bx2 - B[0] * B2) * Bn;
-		Bx3 = (Bx3 - B[0] * B3) * Bn;
-		By2 = (By2 - B[1] * B2) * Bn;
-		By3 = (By3 - B[1] * B3) * Bn;
-		Bz2 = (Bz2 - B[2] * B2) * Bn;
-		Bz3 = (Bz3 - B[2] * B3) * Bn;
+        double B2 = B[0] * Bx2 + B[1] * By2 + B[2] * Bz2;
+        double B3 = B[0] * Bx3 + B[1] * By3 + B[2] * Bz3;
 
-		//  /dPhi      |     /dThe       |
-		state.pVector[24] = Bx2 * Vp[0];
-		state.pVector[32] = Bx3 * Vp[0];  // dX/
-		state.pVector[25] = By2 * Vp[0];
-		state.pVector[33] = By3 * Vp[0];  // dY/
-		state.pVector[26] = Bz2 * Vp[0];
-		state.pVector[34] = Bz3 * Vp[0];  // dZ/
-	  }
-	}
-	// Remember that this was a local start
-	state.localStart = true;
+        Bx2 = (Bx2 - B[0] * B2) * Bn;
+        Bx3 = (Bx3 - B[0] * B3) * Bn;
+        By2 = (By2 - B[1] * B2) * Bn;
+        By3 = (By3 - B[1] * B3) * Bn;
+        Bz2 = (Bz2 - B[2] * B2) * Bn;
+        Bz3 = (Bz3 - B[2] * B3) * Bn;
+
+        //  /dPhi      |     /dThe       |
+        state.pVector[24] = Bx2 * Vp[0];
+        state.pVector[32] = Bx3 * Vp[0];  // dX/
+        state.pVector[25] = By2 * Vp[0];
+        state.pVector[33] = By3 * Vp[0];  // dY/
+        state.pVector[26] = Bz2 * Vp[0];
+        state.pVector[34] = Bz3 * Vp[0];  // dZ/
+      }
+    }
+    // Remember that this was a local start
+    state.localStart = true;
     // now declare the state as ready
     state.state_ready = true;
   }
@@ -831,28 +838,25 @@ class AtlasStepper {
   void update(State& state, const Vector3D& uposition,
               const Vector3D& udirection, double up, double time) const {
     // update the vector
-    if(state.localStart)
-    {
-		state.pVector[0] = uposition[0];
-		state.pVector[1] = uposition[1];
-		state.pVector[2] = uposition[2];
-		state.pVector[3] = time;
-		state.pVector[4] = udirection[0];
-		state.pVector[5] = udirection[1];
-		state.pVector[6] = udirection[2];
-		state.pVector[7] = charge(state) / up;
-	}
-	else
-	{
-		state.gpVector[0] = uposition[0];
-		state.gpVector[1] = uposition[1];
-		state.gpVector[2] = uposition[2];
-		state.gpVector[3] = time;
-		state.gpVector[4] = udirection[0];
-		state.gpVector[5] = udirection[1];
-		state.gpVector[6] = udirection[2];
-		state.gpVector[7] = charge(state) / up;
-	}
+    if (state.localStart) {
+      state.pVector[0] = uposition[0];
+      state.pVector[1] = uposition[1];
+      state.pVector[2] = uposition[2];
+      state.pVector[3] = time;
+      state.pVector[4] = udirection[0];
+      state.pVector[5] = udirection[1];
+      state.pVector[6] = udirection[2];
+      state.pVector[7] = charge(state) / up;
+    } else {
+      state.gpVector[0] = uposition[0];
+      state.gpVector[1] = uposition[1];
+      state.gpVector[2] = uposition[2];
+      state.gpVector[3] = time;
+      state.gpVector[4] = udirection[0];
+      state.gpVector[5] = udirection[1];
+      state.gpVector[6] = udirection[2];
+      state.gpVector[7] = charge(state) / up;
+    }
   }
 
   /// Method for on-demand transport of the covariance
@@ -862,7 +866,7 @@ class AtlasStepper {
   /// @param [in,out] state State of the stepper
   ///
   /// @return the full transport jacobian
-  void covarianceTransport(State& state) const { // TODO
+  void covarianceTransport(State& state) const {  // TODO
     double P[60];
     for (unsigned int i = 0; i < 60; ++i) {
       P[i] = state.pVector[i];
@@ -1004,7 +1008,8 @@ class AtlasStepper {
     Eigen::Map<
         Eigen::Matrix<double, BoundParsDim, BoundParsDim, Eigen::RowMajor>>
         J(state.jacobian);
-    state.cov = BoundSymMatrix(J * std::get<BoundSymMatrix>(*state.covariance) * J.transpose());
+    state.cov = BoundSymMatrix(J * std::get<BoundSymMatrix>(*state.covariance) *
+                               J.transpose());
   }
 
   /// Method for on-demand transport of the covariance
@@ -1013,7 +1018,8 @@ class AtlasStepper {
   ///
   /// @param [in,out] state State of the stepper
   /// @param [in] surface is the surface to which the covariance is forwarded to
-  void covarianceTransport(State& state, const Surface& surface) const { // TODO
+  void covarianceTransport(State& state,
+                           const Surface& surface) const {  // TODO
     Acts::Vector3D gp(state.pVector[0], state.pVector[1], state.pVector[2]);
     Acts::Vector3D mom(state.pVector[4], state.pVector[5], state.pVector[6]);
     mom /= std::abs(state.pVector[7]);
@@ -1262,7 +1268,8 @@ class AtlasStepper {
     Eigen::Map<
         Eigen::Matrix<double, BoundParsDim, BoundParsDim, Eigen::RowMajor>>
         J(state.jacobian);
-    state.cov = BoundSymMatrix(J * std::get<BoundSymMatrix>(*state.covariance) * J.transpose());
+    state.cov = BoundSymMatrix(J * std::get<BoundSymMatrix>(*state.covariance) *
+                               J.transpose());
   }
 
   /// Perform the actual step on the state
@@ -1274,26 +1281,22 @@ class AtlasStepper {
     double h = state.stepping.stepSize;
     bool Jac = state.stepping.useJacobian;
 
-	double* R;
-	double* A;
-	double* sA;
-	double Pi;
-	if(state.stepping.localStart)
-	{
-	    R = &(state.stepping.pVector[0]);  // Coordinates
-		A = &(state.stepping.pVector[4]);  // Directions
-		sA = &(state.stepping.pVector[56]);
-		Pi = 0.5 * state.stepping.pVector[7]; // Invert mometum/2.
-	}
-	else
-	{
-		R = &(state.stepping.gpVector[0]);  // Coordinates
-		A = &(state.stepping.gpVector[4]);  // Directions
-		sA = &(state.stepping.gpVector[72]);
-		Pi = 0.5 * state.stepping.gpVector[7]; // Invert mometum/2.
-
-	}
-// TODO: continue from here
+    double* R;
+    double* A;
+    double* sA;
+    double Pi;
+    if (state.stepping.localStart) {
+      R = &(state.stepping.pVector[0]);  // Coordinates
+      A = &(state.stepping.pVector[4]);  // Directions
+      sA = &(state.stepping.pVector[56]);
+      Pi = 0.5 * state.stepping.pVector[7];  // Invert mometum/2.
+    } else {
+      R = &(state.stepping.gpVector[0]);  // Coordinates
+      A = &(state.stepping.gpVector[4]);  // Directions
+      sA = &(state.stepping.gpVector[72]);
+      Pi = 0.5 * state.stepping.gpVector[7];  // Invert mometum/2.
+    }
+    // TODO: continue from here
     //    double dltm = 0.0002 * .03;
     Vector3D f0, f;
 
