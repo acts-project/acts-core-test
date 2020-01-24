@@ -165,7 +165,7 @@ class SingleFreeParameters {
   ///
   /// @param [in] cov Covariance that will be set
   void covariance(const CovMatrix_t& cov) { m_covariance = cov; }
-  
+
   /// @brief access position in global coordinate system
   ///
   /// @return 3D vector with global position
