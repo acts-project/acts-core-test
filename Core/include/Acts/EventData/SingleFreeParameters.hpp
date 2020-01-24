@@ -161,6 +161,11 @@ class SingleFreeParameters {
   /// @sa ParameterSet::getCovariance
   const std::optional<CovMatrix_t>& covariance() const { return m_covariance; }
 
+  /// @brief Sets a covariance matrix
+  ///
+  /// @param [in] cov Covariance that will be set
+  void covariance(const CovMatrix_t& cov) { m_covariance = cov; }
+  
   /// @brief access position in global coordinate system
   ///
   /// @return 3D vector with global position

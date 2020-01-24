@@ -11,7 +11,6 @@
 namespace Acts {
 namespace {
 /// Some type defs
-using Jacobian = BoundMatrix;
 using Covariance = std::variant<BoundSymMatrix, FreeSymMatrix>;
 using BoundState = std::tuple<BoundParameters, detail::Jacobian, double>;
 using CurvilinearState =
