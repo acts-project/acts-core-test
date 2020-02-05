@@ -59,7 +59,8 @@ version_number:
       - $CI_COMMIT_REF_NAME == "^release/.*$"
 
   script:
-    grep "9.9.9" version_number # make sure the version number in master is 9.9.9
+    - cat version_number
+    - grep "9.9.9" version_number # make sure the version number anywhere but on release branches is 9.9.9
 
 # job templates w/ default settings
 #
