@@ -1,13 +1,13 @@
 // This file is part of the Acts project.
 //
-// Copyright (C) 2016-2018 CERN for the benefit of the Acts project
+// Copyright (C) 2016-2019 CERN for the benefit of the Acts project
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 ///////////////////////////////////////////////////////////////////
-// SurfaceArrayCreator.h, Acts project
+// SurfaceArrayCreator.hpp, Acts project
 ///////////////////////////////////////////////////////////////////
 
 #pragma once
@@ -112,7 +112,7 @@ class SurfaceArrayCreator {
   std::unique_ptr<SurfaceArray> surfaceArrayOnCylinder(
       const GeometryContext& gctx,
       const std::vector<std::shared_ptr<const Surface>>& surfaces,
-      const std::pair<double,double>& phizTolerance) const;
+      const std::pair<double, double>& phizTolerance) const;
 
   /// SurfaceArrayCreator interface method - Disc
   ///
@@ -127,7 +127,7 @@ class SurfaceArrayCreator {
   std::unique_ptr<SurfaceArray> surfaceArrayOnDisc(
       const GeometryContext& gctx,
       const std::vector<std::shared_ptr<const Surface>>& surfaces,
-      const std::pair<double,double>& rphiTolerance) const;
+      const std::pair<double, double>& rphiTolerance) const;
 
   /// SurfaceArrayCreator interface method
   ///
@@ -304,6 +304,9 @@ class SurfaceArrayCreator {
   /// configuration object
   Config m_cfg;
 
+  /// logging instance
+  std::unique_ptr<const Logger> m_logger;
+
   /// Private access to logger
   const Logger& logger() const { return *m_logger; }
 
@@ -430,9 +433,6 @@ class SurfaceArrayCreator {
 
     return ptr;
   }
-
-  /// logging instance
-  std::unique_ptr<const Logger> m_logger;
 
   /// Private helper method to complete the binning
   ///

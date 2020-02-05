@@ -24,6 +24,7 @@ target_sources_local(
     PassiveLayerBuilder.cpp
     PlaneLayer.cpp
     ProtoLayer.cpp
+    SurfaceArrayHelper.cpp
     SurfaceArrayCreator.cpp
     TrackingGeometry.cpp
     TrackingGeometryBuilder.cpp
