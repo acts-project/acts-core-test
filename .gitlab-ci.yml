@@ -50,6 +50,16 @@ include_guards:
   script:
     - CI/check_include_guards.py . --fail-global --exclude "*thirdparty/*"
 
+version_number:
+  stage: check
+  image: alpine:3.6
+  before_script: []
+  only:
+    - master
+    - merge_requests
+  script:
+    grep "9.9.9" version_number # make sure the version number in master is 9.9.9
+
 # job templates w/ default settings
 #
 # the build directory is always `build`. To select a specific build version
