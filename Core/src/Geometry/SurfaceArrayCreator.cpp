@@ -31,7 +31,7 @@ std::unique_ptr<Acts::SurfaceArray>
 Acts::SurfaceArrayCreator::surfaceArrayOnCylinder(
     const Acts::GeometryContext& gctx,
     const std::vector<std::shared_ptr<const Surface>>& surfaces,
-    const std::pair<double,double>& phizTolerance) const {
+    const std::pair<double, double>& phizTolerance) const {
   return nullptr;
 }
 
@@ -39,7 +39,7 @@ std::unique_ptr<Acts::SurfaceArray>
 Acts::SurfaceArrayCreator::surfaceArrayOnDisc(
     const Acts::GeometryContext& gctx,
     const std::vector<std::shared_ptr<const Surface>>& surfaces,
-    const std::pair<double,double>& rphiTolerance) const {
+    const std::pair<double, double>& rphiTolerance) const {
   return nullptr;
 }
 
