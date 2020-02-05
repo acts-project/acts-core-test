@@ -29,12 +29,28 @@ using Acts::VectorHelpers::phi;
 
 std::unique_ptr<Acts::SurfaceArray>
 Acts::SurfaceArrayCreator::surfaceArrayOnCylinder(
+    const Acts::GeometryContext& gctx,
+    const std::vector<std::shared_ptr<const Surface>>& surfaces,
+    const std::pair<double,double>& phizTolerance) const {
+  return nullptr;
+}
+
+std::unique_ptr<Acts::SurfaceArray>
+Acts::SurfaceArrayCreator::surfaceArrayOnDisc(
+    const Acts::GeometryContext& gctx,
+    const std::vector<std::shared_ptr<const Surface>>& surfaces,
+    const std::pair<double,double>& rphiTolerance) const {
+  return nullptr;
+}
+
+std::unique_ptr<Acts::SurfaceArray>
+Acts::SurfaceArrayCreator::surfaceArrayOnCylinder(
     const GeometryContext& gctx,
     std::vector<std::shared_ptr<const Surface>> surfaces, size_t binsPhi,
     size_t binsZ, std::optional<ProtoLayer> protoLayerOpt,
     const std::shared_ptr<const Transform3D>& transformOpt) const {
   std::vector<const Surface*> surfacesRaw = unpack_shared_vector(surfaces);
-  // check if we have proto layer, else build it
+  // Check if we have proto layer, else build it
   ProtoLayer protoLayer =
       protoLayerOpt ? *protoLayerOpt : ProtoLayer(gctx, surfacesRaw);
 
@@ -54,7 +70,7 @@ Acts::SurfaceArrayCreator::surfaceArrayOnCylinder(
   double R = protoLayer.maxR - protoLayer.minR;
 
   Transform3D itransform = transform.inverse();
-  // transform lambda captures the transform matrix
+  // Transform lambda captures the transform matrix
   auto globalToLocal = [transform](const Vector3D& pos) {
     Vector3D loc = transform * pos;
     return Vector2D(phi(loc), loc.z());

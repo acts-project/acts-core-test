@@ -99,6 +99,36 @@ class SurfaceArrayCreator {
   /// Destructor
   virtual ~SurfaceArrayCreator() = default;
 
+  /// SurfaceArrayCreator interface method - Cylinders
+  ///
+  /// - create a surface array on a cylindrical layer, let the creator try
+  /// to estimate the optimal binning and create the surface array
+  ///
+  /// @param gctx The GeometryContext object
+  /// @param detectorElements The detector elements for the surface array
+  /// @param phizTolerance tolerance in phi/z to declare same bins
+  ///
+  /// @return A new SurfaceArray object
+  std::unique_ptr<SurfaceArray> surfaceArrayOnCylinder(
+      const GeometryContext& gctx,
+      const std::vector<std::shared_ptr<const Surface>>& surfaces,
+      const std::pair<double,double>& phizTolerance) const;
+
+  /// SurfaceArrayCreator interface method - Disc
+  ///
+  /// - create a surface array on a cylindrical layer, let the creator try
+  /// to estimate the optimal binning and create the surface array
+  ///
+  /// @param gctx The GeometryContext object
+  /// @param detectorElements The detector elements for the surface array
+  /// @param rphiTolerance tolerance in phi/z to declare same bins
+  ///
+  /// @return A new SurfaceArray object
+  std::unique_ptr<SurfaceArray> surfaceArrayOnDisc(
+      const GeometryContext& gctx,
+      const std::vector<std::shared_ptr<const Surface>>& surfaces,
+      const std::pair<double,double>& rphiTolerance) const;
+
   /// SurfaceArrayCreator interface method
   ///
   /// - create an array in a cylinder, binned in phi, z when extremas and
