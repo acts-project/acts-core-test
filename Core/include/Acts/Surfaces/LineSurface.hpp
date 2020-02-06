@@ -1,20 +1,17 @@
 // This file is part of the Acts project.
 //
-// Copyright (C) 2016-2018 CERN for the benefit of the Acts project
+// Copyright (C) 2016-2020 CERN for the benefit of the Acts project
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
-/////////////////////////////////////////////////////////////////
-// LineSurface.h, Acts project
-///////////////////////////////////////////////////////////////////
 
 #pragma once
 #include "Acts/Geometry/GeometryContext.hpp"
 #include "Acts/Geometry/GeometryStatics.hpp"
 #include "Acts/Surfaces/InfiniteBounds.hpp"
 #include "Acts/Surfaces/LineBounds.hpp"
+#include "Acts/Surfaces/PolyhedronRepresentation.hpp"
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Utilities/Definitions.hpp"
 
@@ -256,6 +253,18 @@ class LineSurface : public Surface {
 
   /// This method returns the bounds of the Surface by reference */
   const SurfaceBounds& bounds() const final;
+
+  /// Return a PolyhedronRepresentation for the surfaces
+  ///
+  /// @param gctx The current geometry context object, e.g. alignment
+  /// @param lseg Number of segments along curved lines
+  ///
+  /// @note that the face will have to vertices only, and hence
+  /// represent a line if there are no bounds to be drawn
+  ///
+  /// @return A list of vertices and a face/facett description of it
+  PolyhedronRepresentation polyhedronRepresentation(const GeometryContext& gctx,
+                                                    size_t lseg) const final;
 
   /// Return properly formatted class name for screen output */
   std::string name() const override;

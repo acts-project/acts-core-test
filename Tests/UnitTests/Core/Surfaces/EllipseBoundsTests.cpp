@@ -83,7 +83,7 @@ BOOST_AUTO_TEST_CASE(EllipseBoundsProperties) {
   //
   /// Test vertices
   std::vector<Vector2D> expectedVertices{{15, 0}, {0, 20}, {-15, 0}, {0, -20}};
-  const auto& actualVertices = ellipseBoundsObject.vertices();
+  const auto& actualVertices = ellipseBoundsObject.vertices(4);
   BOOST_CHECK_EQUAL_COLLECTIONS(actualVertices.cbegin(), actualVertices.cend(),
                                 expectedVertices.cbegin(),
                                 expectedVertices.cend());

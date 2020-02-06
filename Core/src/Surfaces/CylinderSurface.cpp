@@ -1,18 +1,12 @@
 // This file is part of the Acts project.
 //
-// Copyright (C) 2016-2018 CERN for the benefit of the Acts project
+// Copyright (C) 2016-2020 CERN for the benefit of the Acts project
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-///////////////////////////////////////////////////////////////////
-// CylinderSurface.cpp, Acts project
-///////////////////////////////////////////////////////////////////
-
 #include "Acts/Surfaces/CylinderSurface.hpp"
-#include "Acts/Surfaces/PolyhedronRepresentation.hpp"
-
 #include <cassert>
 #include <cmath>
 #include <iomanip>
@@ -190,34 +184,36 @@ const Acts::CylinderBounds& Acts::CylinderSurface::bounds() const {
 }
 
 Acts::PolyhedronRepresentation Acts::CylinderSurface::polyhedronRepresentation(
-    const GeometryContext& gctx, size_t l0div, size_t /*unused*/) const {
+    const GeometryContext& gctx, size_t lseg) const {
   std::vector<Vector3D> vertices;
   std::vector<std::vector<size_t>> faces;
 
-  if (l0div <= 1) {
+  if (lseg <= 1) {
     throw std::domain_error(
         "Polyhedron repr of cylinder with 1 div is undefined");
   }
 
-  double phistep = 2 * M_PI / l0div;
+  unsigned int segs = M_PI / bounds().halfPhiSector() * lseg;
+
+  double phistep = 2 * bounds().halfPhiSector() / segs;
   double hlZ = bounds().halflengthZ();
   double r = bounds().r();
 
-  Vector3D left(r, 0, -hlZ);
-  Vector3D right(r, 0, hlZ);
-
   const Transform3D& sfTransform = transform(gctx);
 
-  for (size_t i = 0; i < l0div; i++) {
-    Transform3D rot(AngleAxis3D(i * phistep, Vector3D::UnitZ()));
-    vertices.push_back(sfTransform * rot * left);
-    vertices.push_back(sfTransform * rot * right);
+  for (size_t iseg = 0; iseg < segs; ++iseg) {
+    double phi =
+        bounds().averagePhi() - bounds().halfPhiSector() + iseg * phistep;
+    double cphi = std::cos(phi);
+    double sphi = std::sin(phi);
+    vertices.push_back(sfTransform * Vector3D(r * cphi, r * sphi, -hlZ));
+    vertices.push_back(sfTransform * Vector3D(r * cphi, r * sphi, hlZ));
   }
 
   for (size_t v = 0; v < vertices.size() - 2; v = v + 2) {
     faces.push_back({v, v + 1, v + 3, v + 2});
   }
-  if (l0div > 2) {
+  if (bounds().coversFullAzimuth()) {
     faces.push_back({vertices.size() - 2, vertices.size() - 1, 1, 0});
   }
 

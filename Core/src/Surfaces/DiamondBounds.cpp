@@ -1,14 +1,10 @@
 // This file is part of the Acts project.
 //
-// Copyright (C) 2016-2018 CERN for the benefit of the Acts project
+// Copyright (C) 2016-2020 CERN for the benefit of the Acts project
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
-///////////////////////////////////////////////////////////////////
-// DiamondBounds.cpp, Acts project
-///////////////////////////////////////////////////////////////////
 
 #include "Acts/Surfaces/DiamondBounds.hpp"
 #include "Acts/Utilities/ThrowAssert.hpp"
@@ -59,7 +55,8 @@ double Acts::DiamondBounds::distanceToBoundary(
   return BoundaryCheck(true).distance(lposition, vertices());
 }
 
-std::vector<Acts::Vector2D> Acts::DiamondBounds::vertices() const {
+std::vector<Acts::Vector2D> Acts::DiamondBounds::vertices(
+    unsigned int /*lseg*/) const {
   // vertices starting from lower right in clock-wise order
   return {{x1(), -y1()}, {x2(), 0},  {x3(), y2()},
           {-x3(), y2()}, {-x2(), 0}, {-x1(), -y1()}};

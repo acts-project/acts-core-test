@@ -100,6 +100,15 @@ class SurfaceStub : public Surface {
   /// Simply return true to check a method can be called on a constructed object
   bool constructedOk() const { return true; }
 
+  /// Return a PolyhedronRepresentation for the surfaces
+  PolyhedronRepresentation polyhedronRepresentation(
+      const GeometryContext& /*gctx*/, size_t /*lseg */) const final {
+    std::vector<Vector3D> vertices;
+    std::vector<std::vector<size_t>> faces;
+
+    return PolyhedronRepresentation(vertices, faces);
+  }
+
  private:
   /// the bounds of this surface
   std::shared_ptr<const PlanarBounds> m_bounds;

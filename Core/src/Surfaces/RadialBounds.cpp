@@ -1,14 +1,10 @@
 // This file is part of the Acts project.
 //
-// Copyright (C) 2016-2018 CERN for the benefit of the Acts project
+// Copyright (C) 2016-2020 CERN for the benefit of the Acts project
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
-///////////////////////////////////////////////////////////////////
-// RadialBounds.cpp, Acts project
-///////////////////////////////////////////////////////////////////
 
 #include "Acts/Surfaces/RadialBounds.hpp"
 #include "Acts/Utilities/detail/periodic.hpp"
@@ -26,8 +22,6 @@ Acts::RadialBounds::RadialBounds(double minrad, double maxrad, double avephi,
       m_rMax(std::max(minrad, maxrad)),
       m_avgPhi(detail::radian_sym(avephi)),
       m_halfPhi(std::abs(hphisec)) {}
-
-Acts::RadialBounds::~RadialBounds() = default;
 
 Acts::RadialBounds* Acts::RadialBounds::clone() const {
   return new RadialBounds(*this);
@@ -65,6 +59,26 @@ double Acts::RadialBounds::distanceToBoundary(
   return BoundaryCheck(true).distance(shifted(lposition),
                                       Vector2D(rMin(), -halfPhiSector()),
                                       Vector2D(rMax(), halfPhiSector()));
+}
+
+std::vector<Acts::Vector2D> Acts::RadialBounds::vertices(
+    unsigned int lseg) const {
+  // list of vertices counter-clockwise starting at smallest phi w.r.t center
+  std::vector<Acts::Vector2D> rvertices;
+  unsigned int segs = M_PI / m_halfPhi * lseg;
+  double phiStep = 2 * m_halfPhi / segs;
+  rvertices.reserve(2 * segs);
+  // lower bow from phi_max -> phi_min
+  for (unsigned int iseg = 0; iseg < segs; ++iseg) {
+    double cphi = m_avgPhi + m_halfPhi - iseg * phiStep;
+    rvertices.push_back({m_rMin * std::cos(cphi), m_rMin * std::sin(cphi)});
+  }
+  // uppwer bow from phi_min -> phi_max
+  for (unsigned int iseg = 0; iseg < segs; ++iseg) {
+    double cphi = m_avgPhi - m_halfPhi + iseg * phiStep;
+    rvertices.push_back({m_rMax * std::cos(cphi), m_rMax * std::sin(cphi)});
+  }
+  return rvertices;
 }
 
 // ostream operator overload

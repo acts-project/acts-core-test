@@ -1,14 +1,10 @@
 // This file is part of the Acts project.
 //
-// Copyright (C) 2016-2018 CERN for the benefit of the Acts project
+// Copyright (C) 2016-2020 CERN for the benefit of the Acts project
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
-///////////////////////////////////////////////////////////////////
-// EllipseBounds.h, Acts project
-///////////////////////////////////////////////////////////////////
 
 #pragma once
 #include <cmath>
@@ -80,8 +76,16 @@ class EllipseBounds : public PlanarBounds {
   /// @return is a signed distance parameter
   double distanceToBoundary(const Vector2D& lposition) const final;
 
-  /// Return the vertices - or, the points of the extremas
-  std::vector<Vector2D> vertices() const final;
+  /// Return the vertices
+  ///
+  /// @param lseg the number of segments used to approximate
+  /// and eventually curved line, here it refers to the full 2PI Ellipse
+  ///
+  /// @note the number of segements to may be altered by also providing
+  /// the extremas in all direction
+  ///
+  /// @return vector for vertices in 2D
+  std::vector<Vector2D> vertices(unsigned int lseg) const final;
 
   // Bounding box representation
   const RectangleBounds& boundingBox() const final;

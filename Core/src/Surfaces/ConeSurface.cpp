@@ -1,14 +1,10 @@
 // This file is part of the Acts project.
 //
-// Copyright (C) 2016-2018 CERN for the benefit of the Acts project
+// Copyright (C) 2016-2020 CERN for the benefit of the Acts project
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
-///////////////////////////////////////////////////////////////////
-// ConeSurface.cpp, Acts project
-///////////////////////////////////////////////////////////////////
 
 #include "Acts/Surfaces/ConeSurface.hpp"
 
@@ -195,4 +191,12 @@ const Acts::Vector3D Acts::ConeSurface::normal(
 const Acts::ConeBounds& Acts::ConeSurface::bounds() const {
   // is safe because no constructor w/o bounds exists
   return (*m_bounds.get());
+}
+
+Acts::PolyhedronRepresentation Acts::ConeSurface::polyhedronRepresentation(
+    const GeometryContext& gctx, size_t lseg) const {
+  std::vector<Vector3D> vertices;
+  std::vector<std::vector<size_t>> faces;
+
+  return PolyhedronRepresentation(vertices, faces);
 }
