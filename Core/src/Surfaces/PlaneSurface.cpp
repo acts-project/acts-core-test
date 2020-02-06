@@ -1,14 +1,11 @@
 // This file is part of the Acts project.
 //
-// Copyright (C) 2016-2018 CERN for the benefit of the Acts project
+// Copyright (C) 2016-2020 CERN for the benefit of the Acts project
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
-///////////////////////////////////////////////////////////////////
-// PlaneSurface.cpp, Acts project
-///////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////
 
 #include "Acts/Surfaces/PlaneSurface.hpp"
 
@@ -117,4 +114,22 @@ const Acts::SurfaceBounds& Acts::PlaneSurface::bounds() const {
     return (*m_bounds.get());
   }
   return s_noBounds;
+}
+
+Acts::PolyhedronRepresentation Acts::PlaneSurface::polyhedronRepresentation(
+    const GeometryContext& gctx, size_t lseg) const {
+  // Prepare vertices and faces
+  std::vector<Vector3D> vertices;
+  std::vector<std::vector<size_t>> faces;
+  // If you have bounds you can create a polyhedron representation
+  if (m_bounds) {
+    auto vertices2D = m_bounds->vertices(lseg);
+    vertices.reserve(vertices2D.size());
+    std::vector<size_t> face;
+    for (const auto& v2D : vertices2D) {
+      vertices.push_back(transform(gctx) * Vector3D(v2D.x(), v2D.y(), 0.));
+      face.push_back(face.size());
+    }
+  }
+  return PolyhedronRepresentation(vertices, faces);
 }

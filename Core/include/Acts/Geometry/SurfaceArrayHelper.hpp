@@ -46,6 +46,11 @@ struct SurfacePatch {
 
   /// Surfaces needed for the array
   SurfaceVector surfaces;
+
+  /// <operator for sorting
+  bool operator<(const SurfacePatch& other) const {
+    return (splitValue < other.splitValue);
+  }
 };
 
 using SortedSurfaceVector = std::vector<SurfacePatch>;

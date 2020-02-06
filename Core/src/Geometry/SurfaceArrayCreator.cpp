@@ -29,22 +29,6 @@ using Acts::VectorHelpers::phi;
 
 std::unique_ptr<Acts::SurfaceArray>
 Acts::SurfaceArrayCreator::surfaceArrayOnCylinder(
-    const Acts::GeometryContext& gctx,
-    const std::vector<std::shared_ptr<const Surface>>& surfaces,
-    const std::pair<double, double>& phizTolerance) const {
-  return nullptr;
-}
-
-std::unique_ptr<Acts::SurfaceArray>
-Acts::SurfaceArrayCreator::surfaceArrayOnDisc(
-    const Acts::GeometryContext& gctx,
-    const std::vector<std::shared_ptr<const Surface>>& surfaces,
-    const std::pair<double, double>& rphiTolerance) const {
-  return nullptr;
-}
-
-std::unique_ptr<Acts::SurfaceArray>
-Acts::SurfaceArrayCreator::surfaceArrayOnCylinder(
     const GeometryContext& gctx,
     std::vector<std::shared_ptr<const Surface>> surfaces, size_t binsPhi,
     size_t binsZ, std::optional<ProtoLayer> protoLayerOpt,
@@ -487,6 +471,9 @@ Acts::SurfaceArrayCreator::createVariableAxis(
       previous = phi(surface->binningPosition(gctx, binPhi));
     }
 
+    // segments
+    unsigned int segments = 72;
+
     // get the bounds of the last surfaces
     const Acts::Surface* backSurface = keys.back();
     const Acts::PlanarBounds* backBounds =
@@ -497,7 +484,7 @@ Acts::SurfaceArrayCreator::createVariableAxis(
           "other bounds yet! ");
     // get the global vertices
     std::vector<Acts::Vector3D> backVertices =
-        makeGlobalVertices(gctx, *backSurface, backBounds->vertices());
+        makeGlobalVertices(gctx, *backSurface, backBounds->vertices(segments));
     double maxBValue = phi(
         *std::max_element(backVertices.begin(), backVertices.end(),
                           [](const Acts::Vector3D& a, const Acts::Vector3D& b) {

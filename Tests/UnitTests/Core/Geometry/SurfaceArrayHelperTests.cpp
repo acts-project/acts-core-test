@@ -90,10 +90,13 @@ static SurfacePtrVector createCylinder(double r, double halfZ,
 /// sorted into a cylinder
 ///
 BOOST_AUTO_TEST_CASE(SingleCylinderArray) {
+  double r = 33_mm;
+  double hZ = 100_mm;
+  double stagger = 2_mm;
   unsigned int nPhi = 18, nZ = 12;
 
   // Create the surfaces
-  auto surfaces = createCylinder(33_mm, 100_mm, nPhi, nZ, 2_mm);
+  auto surfaces = createCylinder(r, hZ, nPhi, nZ, stagger);
   BOOST_CHECK(surfaces.size() == nPhi * nZ);
 
   // Options to sort into one cylinder
@@ -107,6 +110,55 @@ BOOST_AUTO_TEST_CASE(SingleCylinderArray) {
   BOOST_CHECK(sSurfaces.size() == 1);
   // All surfaces should be contained
   BOOST_CHECK(sSurfaces[0].surfaces.size() == nPhi * nZ);
+  // Check if the reference radius is within tolerance
+  BOOST_CHECK(std::abs(sSurfaces[0].splitValue - r) < sOptions.rSplitTolerance);
+}
+
+/// @brief Unit test to see if surfaces are correctly
+/// sorted into three cylinders
+///
+BOOST_AUTO_TEST_CASE(ThreeCylinderArray) {
+  double r0 = 33_mm, hz0 = 100_mm;
+  unsigned int nPhi0 = 18, nZ0 = 12;
+  double stagger = 2_mm;
+
+  double r1 = 45_mm, hz1 = 100_mm;
+  unsigned int nPhi1 = 38, nZ1 = 12;
+
+  double r2 = 76_mm, hz2 = 100_mm;
+  unsigned int nPhi2 = 52, nZ2 = 12;
+
+  // Create the surfaces for the cylinders
+  auto surfaces0 = createCylinder(r0, hz0, nPhi0, nZ0, stagger);
+  auto surfaces1 = createCylinder(r1, hz1, nPhi1, nZ1, stagger);
+  auto surfaces2 = createCylinder(r2, hz2, nPhi2, nZ2, stagger);
+
+  auto surfaces = surfaces0;
+  surfaces.insert(surfaces.end(), surfaces1.begin(), surfaces1.end());
+  surfaces.insert(surfaces.end(), surfaces2.begin(), surfaces2.end());
+
+  // Check if all surfaces are filled in
+  BOOST_CHECK(surfaces.size() == (nPhi0 * nZ0 + nPhi1 * nZ1 + nPhi2 * nZ2));
+
+  // Let's shuffle the surfaces
+  std::random_device rd;
+  std::mt19937 g(rd());
+
+  std::shuffle(surfaces.begin(), surfaces.end(), g);
+
+  // Options to sort into one cylinder
+  SurfaceArrayHelper::Options sOptions;
+  sOptions.rSplitTolerance = 3_mm;
+
+  auto sSurfaces = sArrayHelper.cylinders(
+      tgContext, unpack_shared_vector(surfaces), sOptions);
+
+  // This should lead into three cylinders
+  BOOST_CHECK(sSurfaces.size() == 3);
+  // All surfaces should be contained in the right patch
+  BOOST_CHECK(sSurfaces[0].surfaces.size() == nPhi0 * nZ0);
+  BOOST_CHECK(sSurfaces[1].surfaces.size() == nPhi1 * nZ1);
+  BOOST_CHECK(sSurfaces[2].surfaces.size() == nPhi2 * nZ2);
 }
 
 }  // namespace Test

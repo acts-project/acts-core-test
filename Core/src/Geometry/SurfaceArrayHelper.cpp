@@ -55,7 +55,6 @@ Acts::SortedSurfaceVector Acts::SurfaceArrayHelper::planes(
   double splitTolerance = options.zSplitTolerance;
   // Return the sorted
   auto sSurfaces = sort(gctx, surfaces, splitBin, splitTolerance);
-  //
 
   // Estimate the binning
   return sSurfaces;
@@ -85,5 +84,8 @@ Acts::SortedSurfaceVector Acts::SurfaceArrayHelper::sort(
     }
     patch->surfaces.push_back(sf);
   }
+  // Sort the patches
+  std::sort(sSurfaces.begin(), sSurfaces.end());
+
   return sSurfaces;
 }

@@ -1,14 +1,10 @@
 // This file is part of the Acts project.
 //
-// Copyright (C) 2016-2018 CERN for the benefit of the Acts project
+// Copyright (C) 2016-2020 CERN for the benefit of the Acts project
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
-///////////////////////////////////////////////////////////////////
-// DiscTrapezoidalBounds.h, Acts project
-///////////////////////////////////////////////////////////////////
 
 #pragma once
 #include <cmath>
@@ -120,6 +116,17 @@ class DiscTrapezoidalBounds : public DiscBounds {
 
   /// Return a reference phi for binning
   double binningValuePhi() const final;
+
+  /// This method returns the xy coordinates of the four corners of the
+  /// bounds in module coorindates (in xy)
+  ///
+  /// @param lseg the number of segments used to approximate
+  /// and eventually curved line
+  ///
+  /// @note that the number of segments are ignored for this surface
+  ///
+  /// @return vector for vertices in 2D
+  std::vector<Vector2D> vertices(unsigned int lseg) const;
 
  private:
   double m_rMin, m_rMax, m_minHalfX, m_maxHalfX, m_avgPhi;

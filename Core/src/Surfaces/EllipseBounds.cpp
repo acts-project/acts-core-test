@@ -1,14 +1,10 @@
 // This file is part of the Acts project.
 //
-// Copyright (C) 2016-2018 CERN for the benefit of the Acts project
+// Copyright (C) 2016-2020 CERN for the benefit of the Acts project
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
-///////////////////////////////////////////////////////////////////
-// EllipseBounds.cpp, Acts project
-///////////////////////////////////////////////////////////////////
 
 #include "Acts/Surfaces/EllipseBounds.hpp"
 
@@ -145,9 +141,18 @@ double Acts::EllipseBounds::distanceToBoundary(
   return sf;
 }
 
-std::vector<Acts::Vector2D> Acts::EllipseBounds::vertices() const {
-  // 2017-04-08 msmk: this is definitely too coarse
-  return {{rMaxX(), 0}, {0, rMaxY()}, {-rMaxX(), 0}, {0, -rMaxY()}};
+std::vector<Acts::Vector2D> Acts::EllipseBounds::vertices(
+    unsigned int lseg) const {
+  // list of vertices counter-clockwise starting at smallest phi w.r.t center
+  std::vector<Vector2D> rvertices;
+  unsigned int segs = M_PI / m_halfPhi * lseg;
+  double phiStep = 2 * m_halfPhi / segs;
+  rvertices.reserve(segs);
+  for (unsigned int iseg = 0; iseg < segs; ++iseg) {
+    double cphi = m_avgPhi - m_halfPhi + iseg * phiStep;
+    rvertices.push_back({rMaxX() * std::cos(cphi), rMaxY() * std::sin(cphi)});
+  }
+  return rvertices;
 }
 
 const Acts::RectangleBounds& Acts::EllipseBounds::boundingBox() const {

@@ -1,14 +1,10 @@
 // This file is part of the Acts project.
 //
-// Copyright (C) 2019 CERN for the benefit of the Acts project
+// Copyright (C) 2020 CERN for the benefit of the Acts project
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
-///////////////////////////////////////////////////////////////////
-// AnnulusBounds.cpp, Acts project
-///////////////////////////////////////////////////////////////////
 
 #include "Acts/Surfaces/AnnulusBounds.hpp"
 #include "Acts/Utilities/Helpers.hpp"
@@ -111,7 +107,8 @@ std::vector<Acts::Vector2D> Acts::AnnulusBounds::corners() const {
           rot * m_inLeftStripPC, rot * m_inRightStripPC};
 }
 
-std::vector<Acts::Vector2D> Acts::AnnulusBounds::vertices() const {
+std::vector<Acts::Vector2D> Acts::AnnulusBounds::vertices(
+    unsigned int /*lseg*/) const {
   return {m_outRightStripXY, m_outLeftStripXY, m_inLeftStripXY,
           m_inRightStripXY};
 }

@@ -1,14 +1,10 @@
 // This file is part of the Acts project.
 //
-// Copyright (C) 2016-2018 CERN for the benefit of the Acts project
+// Copyright (C) 2016-2020 CERN for the benefit of the Acts project
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
-///////////////////////////////////////////////////////////////////
-// Surface.h, Acts project
-///////////////////////////////////////////////////////////////////
 
 #pragma once
 
@@ -17,6 +13,7 @@
 #include "Acts/Geometry/GeometryObject.hpp"
 #include "Acts/Geometry/GeometryStatics.hpp"
 #include "Acts/Surfaces/BoundaryCheck.hpp"
+#include "Acts/Surfaces/PolyhedronRepresentation.hpp"
 #include "Acts/Surfaces/SurfaceBounds.hpp"
 #include "Acts/Utilities/BinnedArray.hpp"
 #include "Acts/Utilities/BinningType.hpp"
@@ -442,6 +439,15 @@ class Surface : public virtual GeometryObject,
   virtual Intersection intersectionEstimate(
       const GeometryContext& gctx, const Vector3D& position,
       const Vector3D& direction, const BoundaryCheck& bcheck) const = 0;
+
+  /// Return a PolyhedronRepresentation for the surfaces
+  ///
+  /// @param gctx The current geometry context object, e.g. alignment
+  /// @param lseg Number of segments along curved lines
+  ///
+  /// @return A list of vertices and a face/facett description of it
+  virtual PolyhedronRepresentation polyhedronRepresentation(
+      const GeometryContext& gctx, size_t lseg = 1) const = 0;
 
   /// Output Method for std::ostream, to be overloaded by child classes
   ///
