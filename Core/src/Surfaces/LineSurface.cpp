@@ -52,7 +52,7 @@ Acts::LineSurface& Acts::LineSurface::operator=(const LineSurface& other) {
 }
 
 Acts::PolyhedronRepresentation Acts::LineSurface::polyhedronRepresentation(
-    const GeometryContext& gctx, size_t lseg) const {
+    const GeometryContext& gctx, size_t lseg, bool /*ignored*/) const {
   std::vector<Vector3D> vertices;
   std::vector<std::vector<size_t>> faces;
 

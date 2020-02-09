@@ -18,6 +18,12 @@ namespace Acts {
 
 class DiscBounds : public SurfaceBounds {
  public:
+  /// Return method for inner Radius
+  virtual double rMin() const = 0;
+
+  /// Return method for outer Radius
+  virtual double rMax() const = 0;
+
   /// Return the vertices
   ///
   /// @param lseg the number of segments used to approximate

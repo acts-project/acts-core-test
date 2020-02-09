@@ -13,7 +13,7 @@
 #include <iostream>
 #include <utility>
 
-#include "Acts/Surfaces/DiscTrapezoidalBounds.hpp"
+#include "Acts/Surfaces/DiscTrapezoidBounds.hpp"
 #include "Acts/Surfaces/InfiniteBounds.hpp"
 #include "Acts/Surfaces/RadialBounds.hpp"
 #include "Acts/Utilities/Definitions.hpp"
@@ -43,7 +43,7 @@ Acts::DiscSurface::DiscSurface(std::shared_ptr<const Transform3D> htrans,
                                double minR, double avephi, double stereo)
     : GeometryObject(),
       Surface(std::move(htrans)),
-      m_bounds(std::make_shared<const DiscTrapezoidalBounds>(
+      m_bounds(std::make_shared<const DiscTrapezoidBounds>(
           minhalfx, maxhalfx, maxR, minR, avephi, stereo)) {}
 
 Acts::DiscSurface::DiscSurface(std::shared_ptr<const Transform3D> htrans,
@@ -94,8 +94,8 @@ bool Acts::DiscSurface::globalToLocal(const GeometryContext& gctx,
 
 const Acts::Vector2D Acts::DiscSurface::localPolarToLocalCartesian(
     const Vector2D& locpol) const {
-  const DiscTrapezoidalBounds* dtbo =
-      dynamic_cast<const Acts::DiscTrapezoidalBounds*>(&(bounds()));
+  const DiscTrapezoidBounds* dtbo =
+      dynamic_cast<const Acts::DiscTrapezoidBounds*>(&(bounds()));
   if (dtbo != nullptr) {
     double rMedium = dtbo->rCenter();
     double phi = dtbo->averagePhi();
@@ -149,7 +149,7 @@ const Acts::SurfaceBounds& Acts::DiscSurface::bounds() const {
 }
 
 Acts::PolyhedronRepresentation Acts::DiscSurface::polyhedronRepresentation(
-    const GeometryContext& gctx, size_t lseg) const {
+    const GeometryContext& gctx, size_t lseg, bool /*ignored*/) const {
   // Prepare vertices and faces
   std::vector<Vector3D> vertices;
   std::vector<std::vector<size_t>> faces;
@@ -162,6 +162,15 @@ Acts::PolyhedronRepresentation Acts::DiscSurface::polyhedronRepresentation(
       vertices.push_back(transform(gctx) * Vector3D(v2D.x(), v2D.y(), 0.));
       face.push_back(face.size());
     }
+    faces.push_back(face);
+    // Close the disc if bounds cover full 2*PI
+    if (m_bounds->coversFullAzimuth() and m_bounds->rMin() > 0.) {
+      faces.push_back({0, 1, vertices.size() - 2, vertices.size() - 1});
+    }
+
+  } else {
+    throw std::domain_error(
+        "Polyhedron repr of boundless surface not possible.");
   }
   return PolyhedronRepresentation(vertices, faces);
 }

@@ -61,12 +61,16 @@ class ConeBounds : public SurfaceBounds {
   ConeBounds(double alpha, double zmin, double zmax, double halfphi = M_PI,
              double avphi = 0.);
 
-  ~ConeBounds() override;
+  /// Defaulted destructor
+  ~ConeBounds() override = default;
 
+  /// Virtual constructor
   ConeBounds* clone() const final;
 
+  /// The type enumeration
   BoundsType type() const final;
 
+  /// The value store for persistency
   std::vector<TDD_real_t> valueStore() const final;
 
   /// inside method for local position

@@ -191,11 +191,17 @@ class PlaneSurface : public Surface {
   /// Return a PolyhedronRepresentation for the surfaces
   ///
   /// @param gctx The current geometry context object, e.g. alignment
-  /// @param lseg Number of segments along curved lines
+  /// @param lseg Number of segments along curved lines, it represents
+  /// the full 2*M_PI coverange, if lseg is set to 1 only the extrema
+  /// are given
+  /// @param triangulate is a boolean to indicate if the polyhedron is
+  /// actually expressed as a set of triangulars for a triangular mesh
+  /// representation
   ///
   /// @return A list of vertices and a face/facett description of it
   PolyhedronRepresentation polyhedronRepresentation(
-      const GeometryContext& gctx, size_t lseg = 1) const final;
+      const GeometryContext& gctx, size_t lseg = 1,
+      bool triangulate = false) const final;
 
   /// Return properly formatted class name for screen output
   std::string name() const override;

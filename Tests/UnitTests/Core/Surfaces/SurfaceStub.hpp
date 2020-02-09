@@ -102,7 +102,8 @@ class SurfaceStub : public Surface {
 
   /// Return a PolyhedronRepresentation for the surfaces
   PolyhedronRepresentation polyhedronRepresentation(
-      const GeometryContext& /*gctx*/, size_t /*lseg */) const final {
+      const GeometryContext& /*gctx*/, size_t /*lseg */,
+      bool /*ignored*/) const final {
     std::vector<Vector3D> vertices;
     std::vector<std::vector<size_t>> faces;
 

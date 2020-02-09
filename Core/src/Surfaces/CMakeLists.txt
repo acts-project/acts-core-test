@@ -8,7 +8,7 @@ target_sources_local(
     CylinderSurface.cpp
     DiamondBounds.cpp
     DiscSurface.cpp
-    DiscTrapezoidalBounds.cpp
+    DiscTrapezoidBounds.cpp
     EllipseBounds.cpp
     LineBounds.cpp
     LineSurface.cpp

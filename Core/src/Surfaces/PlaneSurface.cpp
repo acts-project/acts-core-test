@@ -6,7 +6,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-
 #include "Acts/Surfaces/PlaneSurface.hpp"
 
 #include <cmath>
@@ -117,7 +116,7 @@ const Acts::SurfaceBounds& Acts::PlaneSurface::bounds() const {
 }
 
 Acts::PolyhedronRepresentation Acts::PlaneSurface::polyhedronRepresentation(
-    const GeometryContext& gctx, size_t lseg) const {
+    const GeometryContext& gctx, size_t lseg, bool /*ignored*/) const {
   // Prepare vertices and faces
   std::vector<Vector3D> vertices;
   std::vector<std::vector<size_t>> faces;
@@ -130,6 +129,10 @@ Acts::PolyhedronRepresentation Acts::PlaneSurface::polyhedronRepresentation(
       vertices.push_back(transform(gctx) * Vector3D(v2D.x(), v2D.y(), 0.));
       face.push_back(face.size());
     }
+    faces.push_back(face);
+  } else {
+    throw std::domain_error(
+        "Polyhedron repr of boundless surface not possible.");
   }
   return PolyhedronRepresentation(vertices, faces);
 }

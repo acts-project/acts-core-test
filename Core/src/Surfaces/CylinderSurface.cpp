@@ -184,7 +184,7 @@ const Acts::CylinderBounds& Acts::CylinderSurface::bounds() const {
 }
 
 Acts::PolyhedronRepresentation Acts::CylinderSurface::polyhedronRepresentation(
-    const GeometryContext& gctx, size_t lseg) const {
+    const GeometryContext& gctx, size_t lseg, bool /*ignored*/) const {
   std::vector<Vector3D> vertices;
   std::vector<std::vector<size_t>> faces;
 

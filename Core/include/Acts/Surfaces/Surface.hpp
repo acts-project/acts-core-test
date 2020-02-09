@@ -443,11 +443,18 @@ class Surface : public virtual GeometryObject,
   /// Return a PolyhedronRepresentation for the surfaces
   ///
   /// @param gctx The current geometry context object, e.g. alignment
-  /// @param lseg Number of segments along curved lines
+  /// @param lseg Number of segments along curved lines, if the lseg
+  /// is set to one, only the corners and the extrema are given,
+  /// otherwise it represents the number of segments for a full 2*M_PI
+  /// circle and is scaled to the relevant sector
+  /// @param triangulate is a boolean to indicate if the polyhedron is
+  /// actually expressed as a set of triangulars for a triangular mesh
+  /// representation
   ///
   /// @return A list of vertices and a face/facett description of it
   virtual PolyhedronRepresentation polyhedronRepresentation(
-      const GeometryContext& gctx, size_t lseg = 1) const = 0;
+      const GeometryContext& gctx, size_t lseg = 1,
+      bool triangulate = false) const = 0;
 
   /// Output Method for std::ostream, to be overloaded by child classes
   ///

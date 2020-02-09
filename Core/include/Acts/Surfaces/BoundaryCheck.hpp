@@ -169,7 +169,7 @@ class BoundaryCheck {
   friend class RectangleBounds;
   // To be able to use `transformed`
   friend class CylinderBounds;
-  friend class DiscTrapezoidalBounds;
+  friend class DiscTrapezoidBounds;
   // EllipseBounds needs a custom implementation
   friend class EllipseBounds;
 };
