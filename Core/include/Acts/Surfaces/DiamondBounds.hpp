@@ -44,12 +44,16 @@ class DiamondBounds : public PlanarBounds {
   /// @image html DiamondBounds.svg
   DiamondBounds(double x1, double x2, double x3, double y1, double y2);
 
-  ~DiamondBounds() override;
+  /// Defaulted desctructor
+  ~DiamondBounds() override = default;
 
+  /// Virtual constructor
   DiamondBounds* clone() const final;
 
+  /// Enumeration type
   BoundsType type() const final;
 
+  /// The value store for persistency
   std::vector<TDD_real_t> valueStore() const final;
 
   /// Inside check for the bounds object driven by the boundary check directive

@@ -194,9 +194,52 @@ const Acts::ConeBounds& Acts::ConeSurface::bounds() const {
 }
 
 Acts::PolyhedronRepresentation Acts::ConeSurface::polyhedronRepresentation(
-    const GeometryContext& gctx, size_t lseg) const {
+    const GeometryContext& gctx, size_t lseg, bool /*ignored*/) const {
   std::vector<Vector3D> vertices;
   std::vector<std::vector<size_t>> faces;
 
+  if (bounds().minZ() == -std::numeric_limits<double>::infinity() or
+      bounds().maxZ() == std::numeric_limits<double>::infinity()) {
+    throw std::domain_error(
+        "Polyhedron repr of boundless surface not possible");
+  }
+
+  auto ctransform = transform(gctx);
+
+  // The tip
+  vertices.push_back(ctransform * Vector3D(0., 0., 0.));
+
+  // Calculate the segments
+  unsigned int segs = M_PI / bounds().halfPhiSector() * lseg;
+  double phistep = 2 * bounds().halfPhiSector() / segs;
+
+  // Helper function to create a single-sided cone
+  auto createCone = [&](double zext) -> void {
+    auto offset = vertices.size();
+    double r = zext / bounds().tanAlpha();
+    for (unsigned int iphi = 0; iphi < segs; ++iphi) {
+      double phi =
+          bounds().averagePhi() - bounds().halfPhiSector() + iphi * phistep;
+      vertices.push_back(ctransform *
+                         Vector3D(r * std::cos(phi), r * std::sin(phi), zext));
+      // every second time, make a face
+      if (iphi % 2 == 1) {
+        size_t nvertices = vertices.size();
+        faces.push_back({0, nvertices - 2, nvertices - 1});
+      }
+    }
+    // if it's closed, close
+    if (bounds().halfPhiSector() == M_PI) {
+      faces.push_back({0, vertices.size() - 1, offset});
+    }
+  };
+  // Negative cone if exists
+  if (bounds().minZ() < 0.) {
+    createCone(bounds().minZ());
+  }
+  // Positive cone if exists
+  if (bounds().maxZ() > 0.) {
+    createCone(bounds().maxZ());
+  }
   return PolyhedronRepresentation(vertices, faces);
 }

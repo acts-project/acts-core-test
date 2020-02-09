@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <utility>
+#include <vector>
 #include "Acts/Utilities/Definitions.hpp"
 #include "Acts/Utilities/IVisualization.hpp"
 
@@ -34,6 +36,11 @@ class ObjHelper : public IVisualization {
   using vertex_type = ActsVector<value_type, 3>;
 
   /**
+   * Type of a line
+   */
+  using line_type = std::pair<size_t, size_t>;
+
+  /**
    * Typedef of what a face is.
    */
   using face_type = std::vector<size_t>;
@@ -51,11 +58,13 @@ class ObjHelper : public IVisualization {
    * @copydoc Acts::IVisualization::line()
    * @note This function ist not implemented for the OBJ format.
    */
-  void line(const Vector3D& /*a*/, const Vector3D& /*b*/,
+  void line(const Vector3D& a, const Vector3D& b,
             IVisualization::color_type color = {0, 0, 0}) override {
     (void)color;  // suppress unused warning
     // not implemented
-    throw std::runtime_error("Line not implemented for OBJ");
+    vertex(a);
+    vertex(b);
+    m_lines.push_back({m_vertices.size() - 2, m_vertices.size() - 1});
   }
 
   /**
@@ -81,6 +90,10 @@ class ObjHelper : public IVisualization {
       os << "v " << vtx.x() << " " << vtx.y() << " " << vtx.z() << "\n";
     }
 
+    for (const line_type& ln : m_lines) {
+      os << "l " << ln.first << " " << ln.second << "\n";
+    }
+
     for (const face_type& fc : m_faces) {
       os << "f";
       for (size_t i = 0; i < fc.size(); i++) {
@@ -96,10 +109,12 @@ class ObjHelper : public IVisualization {
   void clear() override {
     m_vertices.clear();
     m_faces.clear();
+    m_lines.clear();
   }
 
  private:
   std::vector<vertex_type> m_vertices;
   std::vector<face_type> m_faces;
+  std::vector<line_type> m_lines;
 };
 }  // namespace Acts

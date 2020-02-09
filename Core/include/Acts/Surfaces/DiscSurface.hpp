@@ -59,7 +59,7 @@ class DiscSurface : public Surface {
 
   /// Constructor for Discs from Transform3D, \f$ r_{min}, r_{max}, hx_{min},
   /// hx_{max} \f$
-  /// This is n this case you have DiscTrapezoidalBounds
+  /// This is n this case you have DiscTrapezoidBounds
   ///
   /// @param htrans is transform that places the disc in the global 3D space
   /// (can be nullptr)
@@ -309,11 +309,17 @@ class DiscSurface : public Surface {
   /// Return a PolyhedronRepresentation for the surfaces
   ///
   /// @param gctx The current geometry context object, e.g. alignment
-  /// @param lseg Number of segments along curved lines
+  /// @param lseg Number of segments along curved lines, it represents
+  /// the full 2*M_PI coverange, if lseg is set to 1 only the extrema
+  /// are given
+  /// @param triangulate is a boolean to indicate if the polyhedron is
+  /// actually expressed as a set of triangulars for a triangular mesh
+  /// representation
   ///
   /// @return A list of vertices and a face/facett description of it
   PolyhedronRepresentation polyhedronRepresentation(
-      const GeometryContext& gctx, size_t lseg = 12) const final;
+      const GeometryContext& gctx, size_t lseg = 12,
+      bool triangulate = false) const final;
 
  protected:
   std::shared_ptr<const DiscBounds> m_bounds;  ///< bounds (shared)

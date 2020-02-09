@@ -25,8 +25,6 @@ Acts::DiamondBounds::DiamondBounds(double x1, double x2, double x3, double y1,
   throw_assert((x3 <= x2), "Hexagon must be a convex polygon");
 }
 
-Acts::DiamondBounds::~DiamondBounds() = default;
-
 Acts::DiamondBounds* Acts::DiamondBounds::clone() const {
   return new DiamondBounds(*this);
 }

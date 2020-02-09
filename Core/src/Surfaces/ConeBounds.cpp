@@ -29,8 +29,6 @@ Acts::ConeBounds::ConeBounds(double alpha, double zmin, double zmax,
       m_avgPhi(detail::radian_sym(avphi)),
       m_halfPhi(std::abs(halfphi)) {}
 
-Acts::ConeBounds::~ConeBounds() = default;
-
 Acts::ConeBounds* Acts::ConeBounds::clone() const {
   return new ConeBounds(*this);
 }

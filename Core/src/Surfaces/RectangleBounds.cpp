@@ -42,13 +42,8 @@ double Acts::RectangleBounds::distanceToBoundary(
 
 std::vector<Acts::Vector2D> Acts::RectangleBounds::vertices(
     unsigned int /*lseg*/) const {
-  // counter-clockwise starting from bottom-right corner
-  return {
-      {m_max.x(), m_min.y()},
-      m_max,
-      {m_min.x(), m_max.y()},
-      m_min,
-  };
+  // counter-clockwise starting from bottom-left corner
+  return {m_min, {m_max.x(), m_min.y()}, m_max, {m_min.x(), m_max.y()}};
 }
 
 const Acts::RectangleBounds& Acts::RectangleBounds::boundingBox() const {
