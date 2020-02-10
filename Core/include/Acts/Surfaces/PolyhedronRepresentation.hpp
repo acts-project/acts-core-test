@@ -40,20 +40,26 @@ struct PolyhedronRepresentation {
   /// corresponding to the vertex vector above
   std::vector<std::vector<size_t>> faces;
 
-  /// Method to return an obj string.
-  /// @param vtxOffset Optional obj vertex enumeration offset
-  /// @note Vertices in obj are enumerated globally. The offset is required
-  ///       to allow for multiple output objects in one obj file.
-  std::string objString(size_t vtxOffset = 0) const;
-
+  /// Draw method for polyhedrons
+  ///
+  /// @tparam helper_t The draw helper
+  ///
+  /// @param helper The draw helper object (visitor pattern)
+  /// @param decompose Boolean that forces a decomposition into
+  /// individual vertices
   template <typename helper_t>
-  void draw(helper_t& helper) const {
-    for (const auto& face : faces) {
-      std::vector<Vector3D> face_vtx;
-      for (size_t i : face) {
-        face_vtx.push_back(vertices[i]);
+  void draw(helper_t& helper, bool decompose = false) const {
+    // vertices and faces are
+    if (not decompose) {
+      helper.faces(vertices, faces);
+    } else {
+      for (const auto& face : faces) {
+        std::vector<Vector3D> face_vtx;
+        for (size_t i : face) {
+          face_vtx.push_back(vertices[i]);
+        }
+        helper.face(face_vtx);
       }
-      helper.face(face_vtx);
     }
   }
 };

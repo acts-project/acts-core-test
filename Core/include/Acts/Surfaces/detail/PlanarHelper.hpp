@@ -13,6 +13,8 @@
 
 namespace Acts {
 
+namespace detail {
+
 /// @brief Helpers for planar surfaces that share the same maths
 namespace PlanarHelper {
 
@@ -45,4 +47,5 @@ static Intersection intersectionEstimate(const Transform3D& transform,
 }
 
 }  // namespace PlanarHelper
+}  // namespace detail
 }  // namespace Acts

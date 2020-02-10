@@ -14,7 +14,6 @@ target_sources_local(
     LineSurface.cpp
     PerigeeSurface.cpp
     PlaneSurface.cpp
-    PolyhedronRepresentation.cpp
     RadialBounds.cpp
     RectangleBounds.cpp
     StrawSurface.cpp

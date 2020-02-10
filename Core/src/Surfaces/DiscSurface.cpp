@@ -149,7 +149,7 @@ const Acts::SurfaceBounds& Acts::DiscSurface::bounds() const {
 }
 
 Acts::PolyhedronRepresentation Acts::DiscSurface::polyhedronRepresentation(
-    const GeometryContext& gctx, size_t lseg, bool /*ignored*/) const {
+    const GeometryContext& gctx, size_t lseg, bool triangulate) const {
   // Prepare vertices and faces
   std::vector<Vector3D> vertices;
   std::vector<std::vector<size_t>> faces;
@@ -160,14 +160,29 @@ Acts::PolyhedronRepresentation Acts::DiscSurface::polyhedronRepresentation(
     std::vector<size_t> face;
     for (const auto& v2D : vertices2D) {
       vertices.push_back(transform(gctx) * Vector3D(v2D.x(), v2D.y(), 0.));
-      face.push_back(face.size());
+      if (not triangulate) {
+        face.push_back(face.size() - 1);
+      }
     }
-    faces.push_back(face);
-    // Close the disc if bounds cover full 2*PI
-    if (m_bounds->coversFullAzimuth() and m_bounds->rMin() > 0.) {
-      faces.push_back({0, 1, vertices.size() - 2, vertices.size() - 1});
-    }
+    if (not triangulate) {
+      // Close the disc if bounds cover full 2*PI
+      // if (m_bounds->coversFullAzimuth()) {
+      //  if (m_bounds->rMin() > 0.){
+      //
+      //  } else {
+      //    face.push_back(0);
+      //  }
+      //}
+      faces.push_back(face);
 
+    } else if (m_bounds->rMin() > 0.) {
+    } else {
+      vertices.push_back(center(gctx));
+      size_t lastv = vertices.size() - 1;
+      for (unsigned int iseg = 0; iseg < lastv; ++iseg) {
+        faces.push_back({lastv, iseg, (iseg == lastv - 1 ? 0 : iseg + 1)});
+      }
+    }
   } else {
     throw std::domain_error(
         "Polyhedron repr of boundless surface not possible.");

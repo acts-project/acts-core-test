@@ -7,6 +7,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "Acts/Surfaces/RadialBounds.hpp"
+#include "Acts/Surfaces/detail/VertexHelper.hpp"
 #include "Acts/Utilities/detail/periodic.hpp"
 
 #include <cmath>
@@ -65,18 +66,35 @@ std::vector<Acts::Vector2D> Acts::RadialBounds::vertices(
     unsigned int lseg) const {
   // list of vertices counter-clockwise starting at smallest phi w.r.t center
   std::vector<Acts::Vector2D> rvertices;
-  unsigned int segs = M_PI / m_halfPhi * lseg;
-  double phiStep = 2 * m_halfPhi / segs;
-  rvertices.reserve(2 * segs);
-  // lower bow from phi_max -> phi_min
-  for (unsigned int iseg = 0; iseg < segs; ++iseg) {
-    double cphi = m_avgPhi + m_halfPhi - iseg * phiStep;
-    rvertices.push_back({m_rMin * std::cos(cphi), m_rMin * std::sin(cphi)});
+
+  // Helper method to write the segment to the extrema point
+  auto writeSegment = [&](double r, double phi1, double phi2) -> void {
+    unsigned int nsegs =
+        lseg > 1 ? std::abs((phi2 - phi1) / (2 * M_PI)) * lseg : 1;
+    // minimum number of segments is 1
+    nsegs = nsegs > 1 ? nsegs : 1;
+    double phistep = (phi2 - phi1) / nsegs;
+    for (unsigned int iseg = 0; iseg < nsegs; ++iseg) {
+      double phi = phi2 + iseg * phistep;
+      rvertices.push_back({r * std::cos(phi), r * std::sin(phi)});
+    }
+  };
+
+  // Get the phi segments from the helper method
+  auto phiSegs = coversFullAzimuth() ? detail::VertexHelper::phiSegments()
+                                     : detail::VertexHelper::phiSegments(
+                                           m_avgPhi - m_halfPhi,
+                                           m_avgPhi + m_halfPhi, {m_avgPhi});
+
+  // Lower bow from phi_max -> phi_min (only if rMin != 0.)
+  if (m_rMin > 0.) {
+    for (unsigned int iseg = phiSegs.size() - 1; iseg > 0; --iseg) {
+      writeSegment(m_rMin, phiSegs[iseg], phiSegs[iseg - 1]);
+    }
   }
-  // uppwer bow from phi_min -> phi_max
-  for (unsigned int iseg = 0; iseg < segs; ++iseg) {
-    double cphi = m_avgPhi - m_halfPhi + iseg * phiStep;
-    rvertices.push_back({m_rMax * std::cos(cphi), m_rMax * std::sin(cphi)});
+  // Upper bow from phi_min -> phi_max
+  for (unsigned int iseg = 0; iseg < phiSegs.size() - 2; ++iseg) {
+    writeSegment(m_rMax, phiSegs[iseg], phiSegs[iseg + 1]);
   }
   return rvertices;
 }

@@ -210,7 +210,7 @@ class ConeSurface : public Surface {
   /// are given
   /// @param triangulate is a boolean to indicate if the polyhedron is
   /// actually expressed as a set of triangulars for a triangular mesh
-  /// representation
+  /// representation @note for a cone surface this is always the case
   ///
   /// @return A list of vertices and a face/facett description of it
   PolyhedronRepresentation polyhedronRepresentation(

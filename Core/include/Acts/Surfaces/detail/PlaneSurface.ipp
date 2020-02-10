@@ -31,8 +31,8 @@ inline Intersection PlaneSurface::intersectionEstimate(
   // Get the contextual transform
   const auto& gctxTransform = transform(gctx);
   // Use the intersection helper for planar surfaces
-  auto intersection =
-      PlanarHelper::intersectionEstimate(gctxTransform, position, direction);
+  auto intersection = detail::PlanarHelper::intersectionEstimate(
+      gctxTransform, position, direction);
   // Evaluate boundary check if requested (and reachable)
   if (intersection.status != Intersection::Status::unreachable and bcheck) {
     // Built-in local to global for speed reasons
