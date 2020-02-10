@@ -6,14 +6,14 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "Acts/Surfaces/ConeSurface.hpp"
-
 #include <cassert>
 #include <cmath>
 #include <iomanip>
 #include <iostream>
 #include <utility>
 
+#include "Acts/Surfaces/ConeSurface.hpp"
+#include "Acts/Surfaces/detail/VertexHelper.hpp"
 #include "Acts/Utilities/ThrowAssert.hpp"
 #include "Acts/Utilities/detail/RealQuadraticEquation.hpp"
 
@@ -206,40 +206,59 @@ Acts::PolyhedronRepresentation Acts::ConeSurface::polyhedronRepresentation(
 
   auto ctransform = transform(gctx);
 
-  // The tip
+  // The tip - written only once
   vertices.push_back(ctransform * Vector3D(0., 0., 0.));
 
-  // Calculate the segments
-  unsigned int segs = M_PI / bounds().halfPhiSector() * lseg;
-  double phistep = 2 * bounds().halfPhiSector() / segs;
+  // Cone parameters
+  double hPhiSec = bounds().halfPhiSector();
+  double avgPhi = bounds().averagePhi();
+  bool fullAzimuth = (hPhiSec == M_PI);
 
   // Helper function to create a single-sided cone
-  auto createCone = [&](double zext) -> void {
-    auto offset = vertices.size();
-    double r = zext / bounds().tanAlpha();
+  auto createCone = [&](double zext, double phiMin, double phiMax) -> void {
+    // The current offset in vertices (e.g. for second cone)
+    double r = zext * bounds().tanAlpha();
+    // Calculate the number of segments - 1 is the minimum
+    unsigned int segs = (phiMax - phiMin) / (2 * M_PI) * lseg;
+    segs = segs > 0 ? segs : 1;
+    double phistep = (phiMax - phiMin) / segs;
+
     for (unsigned int iphi = 0; iphi < segs; ++iphi) {
-      double phi =
-          bounds().averagePhi() - bounds().halfPhiSector() + iphi * phistep;
+      double phi = phiMin + iphi * phistep;
       vertices.push_back(ctransform *
                          Vector3D(r * std::cos(phi), r * std::sin(phi), zext));
-      // every second time, make a face
-      if (iphi % 2 == 1) {
-        size_t nvertices = vertices.size();
+      // Write the triangular faces
+      size_t nvertices = vertices.size();
+      if (nvertices > 2) {
         faces.push_back({0, nvertices - 2, nvertices - 1});
       }
     }
-    // if it's closed, close
-    if (bounds().halfPhiSector() == M_PI) {
-      faces.push_back({0, vertices.size() - 1, offset});
-    }
   };
+
+  // Get the phi segments from the helper
+  auto phiSegs = fullAzimuth
+                     ? detail::VertexHelper::phiSegments()
+                     : detail::VertexHelper::phiSegments(
+                           avgPhi - hPhiSec, avgPhi + hPhiSec, {avgPhi});
+
   // Negative cone if exists
   if (bounds().minZ() < 0.) {
-    createCone(bounds().minZ());
+    for (unsigned int iseg = 0; iseg < phiSegs.size() - 1; ++iseg) {
+      createCone(bounds().minZ(), phiSegs[iseg], phiSegs[iseg + 1]);
+    }
+    if (fullAzimuth) {
+      faces.push_back({0, vertices.size() - 1, 1});
+    }
   }
+  auto firstNew = vertices.size();
   // Positive cone if exists
   if (bounds().maxZ() > 0.) {
-    createCone(bounds().maxZ());
+    for (unsigned int iseg = 0; iseg < phiSegs.size() - 1; ++iseg) {
+      createCone(bounds().maxZ(), phiSegs[iseg], phiSegs[iseg + 1]);
+    }
+    if (fullAzimuth) {
+      faces.push_back({0, vertices.size() - 1, firstNew});
+    }
   }
   return PolyhedronRepresentation(vertices, faces);
 }
