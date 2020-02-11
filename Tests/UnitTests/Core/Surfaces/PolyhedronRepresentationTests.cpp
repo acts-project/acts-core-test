@@ -53,6 +53,19 @@ namespace Test {
 GeometryContext tgContext = GeometryContext();
 
 /// Helper method to write
+static void writeSectorLinesObj(const std::string& name,
+                                const std::pair<Vector3D, Vector3D>& lineA,
+                                const std::pair<Vector3D, Vector3D>& lineB) {
+  std::ofstream ostream;
+  ostream.open(name + ".obj");
+  ObjHelper objH;
+  objH.line(lineA.first, lineA.second);
+  objH.line(lineB.first, lineB.second);
+  objH.write(ostream);
+  ostream.close();
+}
+
+/// Helper method to write
 static void writeSectorPlanesObj(const std::string& name, double phiSec,
                                  double phiAvg, double hX, double hY) {
   // Construct the helper planes for sectoral building
@@ -107,6 +120,17 @@ std::vector<std::pair<std::string, unsigned int>> testModes = {
 auto transform = std::make_shared<Transform3D>(Transform3D::Identity());
 
 BOOST_AUTO_TEST_SUITE(Surfaces)
+
+/// Unit tests for Polyderon construction & operator +=
+BOOST_AUTO_TEST_CASE(PolyhedronRepresentationTest) {
+  std::vector<Vector3D> vertices = {Vector3D(-1, -1, 0.), Vector3D(1., -1, 0.),
+                                    Vector3D(0., 1., 0.)};
+  std::vector<std::vector<size_t>> faces = {{0, 1, 2}};
+
+  PolyhedronRepresentation triangle(vertices, faces);
+  BOOST_CHECK(vertices == triangle.vertices);
+  BOOST_CHECK(faces == triangle.faces);
+}
 
 /// Unit tests for Cone Surfaces
 BOOST_AUTO_TEST_CASE(ConeSurfacePolyhedrons) {
@@ -272,41 +296,79 @@ BOOST_AUTO_TEST_CASE(CylinderSurfacePolyhedrons) {
 BOOST_AUTO_TEST_CASE(DiscSurfacePolyhedrons) {
   std::vector<IdentifiedPolyderon> testTypes;
 
+  double innerR = 10_mm;
+  double outerR = 25_mm;
+  double phiSector = 0.345;
+  double averagePhi = -2.0;
+
+  double cphi = std::cos(phiSector);
+  double sphi = std::sin(phiSector);
+
+  std::pair<Vector3D, Vector3D> lineA = {
+      Vector3D(0., 0., 0.), Vector3D(outerR * cphi, outerR * sphi, 0.)};
+  std::pair<Vector3D, Vector3D> lineB = {
+      Vector3D(0., 0., 0.), Vector3D(outerR * cphi, -outerR * sphi, 0.)};
+  writeSectorLinesObj("DiscSectorLines", lineA, lineB);
+
+  double minPhi = averagePhi - phiSector;
+  double maxPhi = averagePhi + phiSector;
+  linaA = {Vector3D(0., 0., 0.),
+           Vector3D(outerR * std::cos(minPhi), outerR * std::sin(minPhi), 0.)};
+  linaB = {Vector3D(0., 0., 0.),
+           Vector3D(outerR * std::cos(maxPhi), outerR * std::sin(maxPhi), 0.)};
+  writeSectorLinesObj("DiscSectorLinesShifted", lineA, lineB);
+
   for (const auto& mode : testModes) {
     bool triangulate = (mode.first == "TriangleMesh");
 
     // Full disc
-    auto disc = std::make_shared<RadialBounds>(0_mm, 25_mm);
+    auto disc = std::make_shared<RadialBounds>(0_mm, outerR);
     auto fullDisc = Surface::makeShared<DiscSurface>(transform, disc);
-    auto fullPh =
+    auto fullDiscPh =
         fullDisc->polyhedronRepresentation(tgContext, mode.second, triangulate);
-    testTypes.push_back({"DiscFull" + mode.first, fullPh});
-    /*
-        // Ring disc
-        auto radial = std::make_shared<RadialBounds>(10_mm, 25_mm);
-        auto radialDisc = Surface::makeShared<DiscSurface>(transform, radial);
-        auto radialPh =
-            radialDisc->polyhedronRepresentation(tgContext, mode.second,
-       triangulate); testTypes.push_back({"DiscRing" + mode.first, radialPh});
 
-        // Sectoral disc - around 0.
-        auto sector = std::make_shared<RadialBounds>(10_mm, 25_mm, 1.25);
-        auto sectorDisc = Surface::makeShared<DiscSurface>(transform, sector);
-        auto sectorPh =
-            sectorDisc->polyhedronRepresentation(tgContext, mode.second,
-       triangulate); testTypes.push_back({"DiscSectorCentered" + mode.first,
-       sectorPh});
+    unsigned int expectedVertices = mode.second > 4 ? mode.second : 4;
+    unsigned int expectedFaces = triangulate ? 72 : 1;
+    if (triangulate) {
+      expectedVertices += 1;
+    }
+    BOOST_CHECK_EQUAL(fullDiscPh.faces.size(), expectedFaces);
+    BOOST_CHECK_EQUAL(fullDiscPh.vertices.size(), expectedVertices);
 
-        // Sectoral disc - shifted
-        auto sectorShifted =
-            std::make_shared<RadialBounds>(10_mm, 25_mm, 0.25, 0.25);
-        auto sectorDiscShifted =
-            Surface::makeShared<DiscSurface>(transform, sectorShifted);
-        auto sectorPhShifted =
-            sectorDiscShifted->polyhedronRepresentation(tgContext, mode.second,
-       triangulate); testTypes.push_back({"DiscSectorShifted" + mode.first,
-       sectorPhShifted});
-    */
+    auto extent = fullDiscPh.surfaceExtent();
+    CHECK_CLOSE_ABS(extent.xrange.first, -outerR, 1e-6);
+    CHECK_CLOSE_ABS(extent.xrange.second, outerR, 1e-6);
+    CHECK_CLOSE_ABS(extent.yrange.first, -outerR, 1e-6);
+    CHECK_CLOSE_ABS(extent.yrange.second, outerR, 1e-6);
+    CHECK_CLOSE_ABS(extent.rrange.first, 0., 1e-6);
+    CHECK_CLOSE_ABS(extent.rrange.second, outerR, 1e-6);
+    CHECK_CLOSE_ABS(extent.zrange.first, 0., 1e-6);
+    CHECK_CLOSE_ABS(extent.zrange.second, 0., 1e-6);
+
+    testTypes.push_back({"DiscFull" + mode.first, fullDiscPh});
+
+    // Ring disc
+    auto radial = std::make_shared<RadialBounds>(innerR, outerR);
+    auto radialDisc = Surface::makeShared<DiscSurface>(transform, radial);
+    auto radialPh = radialDisc->polyhedronRepresentation(tgContext, mode.second,
+                                                         triangulate);
+    testTypes.push_back({"DiscRing" + mode.first, radialPh});
+
+    // Sectoral disc - around 0.
+    auto sector = std::make_shared<RadialBounds>(innerR, outerR, phiSector);
+    auto sectorDisc = Surface::makeShared<DiscSurface>(transform, sector);
+    auto sectorPh = sectorDisc->polyhedronRepresentation(tgContext, mode.second,
+                                                         triangulate);
+    testTypes.push_back({"DiscSectorCentered" + mode.first, sectorPh});
+
+    // Sectoral disc - shifted
+    auto sectorShifted =
+        std::make_shared<RadialBounds>(innerR, outerR, phiSector, averagePhi);
+    auto sectorDiscShifted =
+        Surface::makeShared<DiscSurface>(transform, sectorShifted);
+    auto sectorPhShifted = sectorDiscShifted->polyhedronRepresentation(
+        tgContext, mode.second, triangulate);
+    testTypes.push_back({"DiscSectorShifted" + mode.first, sectorPhShifted});
   }
   writeObj(testTypes);
 }

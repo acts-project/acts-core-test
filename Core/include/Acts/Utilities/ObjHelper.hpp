@@ -93,7 +93,7 @@ class ObjHelper : public IVisualization {
     }
 
     for (const line_type& ln : m_lines) {
-      os << "l " << ln.first << " " << ln.second << "\n";
+      os << "l " << ln.first + 1 << " " << ln.second + 1 << "\n";
     }
 
     for (const face_type& fc : m_faces) {

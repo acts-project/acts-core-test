@@ -68,33 +68,37 @@ std::vector<Acts::Vector2D> Acts::RadialBounds::vertices(
   std::vector<Acts::Vector2D> rvertices;
 
   // Helper method to write the segment to the extrema point
-  auto writeSegment = [&](double r, double phi1, double phi2) -> void {
+  auto writeSegment = [&](double r, double phi1, double phi2,
+                          int addon) -> void {
     unsigned int nsegs =
         lseg > 1 ? std::abs((phi2 - phi1) / (2 * M_PI)) * lseg : 1;
     // minimum number of segments is 1
     nsegs = nsegs > 1 ? nsegs : 1;
     double phistep = (phi2 - phi1) / nsegs;
-    for (unsigned int iseg = 0; iseg < nsegs; ++iseg) {
-      double phi = phi2 + iseg * phistep;
+    for (unsigned int iseg = 0; iseg < nsegs + addon; ++iseg) {
+      double phi = phi1 + iseg * phistep;
       rvertices.push_back({r * std::cos(phi), r * std::sin(phi)});
     }
   };
 
+  bool fullDisc = coversFullAzimuth();
   // Get the phi segments from the helper method
-  auto phiSegs = coversFullAzimuth() ? detail::VertexHelper::phiSegments()
-                                     : detail::VertexHelper::phiSegments(
-                                           m_avgPhi - m_halfPhi,
-                                           m_avgPhi + m_halfPhi, {m_avgPhi});
+  auto phiSegs =
+      fullDisc ? detail::VertexHelper::phiSegments()
+               : detail::VertexHelper::phiSegments(
+                     m_avgPhi - m_halfPhi, m_avgPhi + m_halfPhi, {m_avgPhi});
 
   // Lower bow from phi_max -> phi_min (only if rMin != 0.)
   if (m_rMin > 0.) {
     for (unsigned int iseg = phiSegs.size() - 1; iseg > 0; --iseg) {
-      writeSegment(m_rMin, phiSegs[iseg], phiSegs[iseg - 1]);
+      int addon = (iseg == 1 and not fullDisc) ? 1 : 0;
+      writeSegment(m_rMin, phiSegs[iseg], phiSegs[iseg - 1], addon);
     }
   }
   // Upper bow from phi_min -> phi_max
-  for (unsigned int iseg = 0; iseg < phiSegs.size() - 2; ++iseg) {
-    writeSegment(m_rMax, phiSegs[iseg], phiSegs[iseg + 1]);
+  for (unsigned int iseg = 0; iseg < phiSegs.size() - 1; ++iseg) {
+    int addon = (iseg == phiSegs.size() - 2 and not fullDisc) ? 1 : 0;
+    writeSegment(m_rMax, phiSegs[iseg], phiSegs[iseg + 1], addon);
   }
   return rvertices;
 }
