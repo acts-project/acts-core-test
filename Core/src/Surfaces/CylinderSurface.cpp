@@ -13,6 +13,7 @@
 #include <iostream>
 #include <utility>
 
+#include "Acts/Surfaces/detail/VertexHelper.hpp"
 #include "Acts/Utilities/ThrowAssert.hpp"
 
 using Acts::VectorHelpers::perp;
@@ -184,37 +185,62 @@ const Acts::CylinderBounds& Acts::CylinderSurface::bounds() const {
 }
 
 Acts::PolyhedronRepresentation Acts::CylinderSurface::polyhedronRepresentation(
-    const GeometryContext& gctx, size_t lseg, bool /*ignored*/) const {
+    const GeometryContext& gctx, size_t lseg, bool triangulate) const {
   std::vector<Vector3D> vertices;
   std::vector<std::vector<size_t>> faces;
 
-  if (lseg <= 1) {
-    throw std::domain_error(
-        "Polyhedron repr of cylinder with 1 div is undefined");
+  auto ctransform = transform(gctx);
+
+  double hPhiSec = bounds().halfPhiSector();
+  double avgPhi = bounds().averagePhi();
+  bool fullCylinder = bounds().coversFullAzimuth();
+
+  // Get the phi segments from the helper
+  auto phiSegs = fullCylinder
+                     ? detail::VertexHelper::phiSegments()
+                     : detail::VertexHelper::phiSegments(
+                           avgPhi - hPhiSec, avgPhi + hPhiSec, {avgPhi});
+
+  // Helper function to create a single-sided cone
+  auto createBow = [&](double phiMin, double phiMax, int side,
+                       int addon = 0) -> void {
+    // Calculate the number of segments - 1 is the minimum
+    unsigned int segs = (phiMax - phiMin) / (2 * M_PI) * lseg;
+    segs = segs > 0 ? segs : 1;
+    double phistep = (phiMax - phiMin) / segs;
+    // Create the segments
+    for (unsigned int iphi = 0; iphi < segs + addon; ++iphi) {
+      double phi = phiMin + iphi * phistep;
+      vertices.push_back(ctransform * Vector3D(bounds().r() * std::cos(phi),
+                                               bounds().r() * std::sin(phi),
+                                               side * bounds().halflengthZ()));
+    }
+  };
+
+  // Write the two bows on either side
+  std::vector<int> sides = {-1, 1};
+  for (auto& side : sides) {
+    for (size_t iseg = 0; iseg < phiSegs.size() - 1; ++iseg) {
+      int addon = (iseg == phiSegs.size() - 2 and not fullCylinder) ? 1 : 0;
+      createBow(phiSegs[iseg], phiSegs[iseg + 1], side, addon);
+    }
   }
 
-  unsigned int segs = M_PI / bounds().halfPhiSector() * lseg;
-
-  double phistep = 2 * bounds().halfPhiSector() / segs;
-  double hlZ = bounds().halflengthZ();
-  double r = bounds().r();
-
-  const Transform3D& sfTransform = transform(gctx);
-
-  for (size_t iseg = 0; iseg < segs; ++iseg) {
-    double phi =
-        bounds().averagePhi() - bounds().halfPhiSector() + iseg * phistep;
-    double cphi = std::cos(phi);
-    double sphi = std::sin(phi);
-    vertices.push_back(sfTransform * Vector3D(r * cphi, r * sphi, -hlZ));
-    vertices.push_back(sfTransform * Vector3D(r * cphi, r * sphi, hlZ));
-  }
-
-  for (size_t v = 0; v < vertices.size() - 2; v = v + 2) {
-    faces.push_back({v, v + 1, v + 3, v + 2});
-  }
-  if (bounds().coversFullAzimuth()) {
-    faces.push_back({vertices.size() - 2, vertices.size() - 1, 1, 0});
+  // Write the faces
+  size_t nqfaces = 0.5 * vertices.size();
+  size_t reduce = (not fullCylinder) ? 1 : 0;
+  for (size_t iface = 0; iface < nqfaces - reduce; ++iface) {
+    size_t p2 = (iface + 1 == nqfaces) ? 0 : iface + 1;
+    if (not triangulate) {
+      std::vector<size_t> face = {iface, p2, p2 + nqfaces, nqfaces + iface};
+      faces.push_back(face);
+    } else {
+      // Create two if configured to triangulate
+      std::vector<size_t> triA = {iface, p2, p2 + nqfaces};
+      faces.push_back(triA);
+      std::vector<size_t> triB = {p2 + nqfaces, nqfaces + iface, iface};
+      faces.push_back(triB);
+    }
   }
 
   return PolyhedronRepresentation(vertices, faces);

@@ -212,41 +212,44 @@ Acts::PolyhedronRepresentation Acts::ConeSurface::polyhedronRepresentation(
   // Cone parameters
   double hPhiSec = bounds().halfPhiSector();
   double avgPhi = bounds().averagePhi();
-  bool fullAzimuth = (hPhiSec == M_PI);
+  bool fullCone = (hPhiSec == M_PI);
 
   // Helper function to create a single-sided cone
-  auto createCone = [&](double zext, double phiMin, double phiMax) -> void {
+  auto createCone = [&](double zext, double phiMin, double phiMax,
+                        int addon) -> void {
     // The current offset in vertices (e.g. for second cone)
     double r = zext * bounds().tanAlpha();
     // Calculate the number of segments - 1 is the minimum
     unsigned int segs = (phiMax - phiMin) / (2 * M_PI) * lseg;
     segs = segs > 0 ? segs : 1;
     double phistep = (phiMax - phiMin) / segs;
-
-    for (unsigned int iphi = 0; iphi < segs; ++iphi) {
+    // Create the segments
+    for (unsigned int iphi = 0; iphi < segs + addon; ++iphi) {
       double phi = phiMin + iphi * phistep;
       vertices.push_back(ctransform *
                          Vector3D(r * std::cos(phi), r * std::sin(phi), zext));
       // Write the triangular faces
       size_t nvertices = vertices.size();
-      if (nvertices > 2) {
+      // Ignore if the vertices are at different z values
+      if (nvertices > 2 and
+          vertices[nvertices - 2].z() * vertices[nvertices - 1].z() > 0.) {
         faces.push_back({0, nvertices - 2, nvertices - 1});
       }
     }
   };
 
   // Get the phi segments from the helper
-  auto phiSegs = fullAzimuth
-                     ? detail::VertexHelper::phiSegments()
-                     : detail::VertexHelper::phiSegments(
-                           avgPhi - hPhiSec, avgPhi + hPhiSec, {avgPhi});
+  auto phiSegs = fullCone ? detail::VertexHelper::phiSegments()
+                          : detail::VertexHelper::phiSegments(
+                                avgPhi - hPhiSec, avgPhi + hPhiSec, {avgPhi});
 
   // Negative cone if exists
   if (bounds().minZ() < 0.) {
     for (unsigned int iseg = 0; iseg < phiSegs.size() - 1; ++iseg) {
-      createCone(bounds().minZ(), phiSegs[iseg], phiSegs[iseg + 1]);
+      int addon = (iseg == phiSegs.size() - 2 and not fullCone) ? 1 : 0;
+      createCone(bounds().minZ(), phiSegs[iseg], phiSegs[iseg + 1], addon);
     }
-    if (fullAzimuth) {
+    if (fullCone) {
       faces.push_back({0, vertices.size() - 1, 1});
     }
   }
@@ -254,9 +257,10 @@ Acts::PolyhedronRepresentation Acts::ConeSurface::polyhedronRepresentation(
   // Positive cone if exists
   if (bounds().maxZ() > 0.) {
     for (unsigned int iseg = 0; iseg < phiSegs.size() - 1; ++iseg) {
-      createCone(bounds().maxZ(), phiSegs[iseg], phiSegs[iseg + 1]);
+      int addon = (iseg == phiSegs.size() - 2 and not fullCone) ? 1 : 0;
+      createCone(bounds().maxZ(), phiSegs[iseg], phiSegs[iseg + 1], addon);
     }
-    if (fullAzimuth) {
+    if (fullCone) {
       faces.push_back({0, vertices.size() - 1, firstNew});
     }
   }

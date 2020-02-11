@@ -10,16 +10,25 @@
 #include <boost/test/tools/output_test_stream.hpp>
 #include <boost/test/unit_test.hpp>
 
+// Helper
+#include "Acts/Tests/CommonHelpers/FloatComparisons.hpp"
+
+// The class to test
 #include "Acts/Surfaces/PolyhedronRepresentation.hpp"
 
 // Cone surface
 #include "Acts/Surfaces/ConeBounds.hpp"
 #include "Acts/Surfaces/ConeSurface.hpp"
 
+// Cylinder surface
+#include "Acts/Surfaces/CylinderBounds.hpp"
+#include "Acts/Surfaces/CylinderSurface.hpp"
+
 // Disc Surface
 #include "Acts/Surfaces/DiscSurface.hpp"
 #include "Acts/Surfaces/DiscTrapezoidBounds.hpp"
 #include "Acts/Surfaces/RadialBounds.hpp"
+
 // Plane Surface
 #include "Acts/Surfaces/DiamondBounds.hpp"
 #include "Acts/Surfaces/EllipseBounds.hpp"
@@ -38,8 +47,50 @@ using namespace UnitLiterals;
 
 using IdentifiedPolyderon = std::pair<std::string, PolyhedronRepresentation>;
 
+namespace Test {
+
+// Create a test context
+GeometryContext tgContext = GeometryContext();
+
+/// Helper method to write
+static void writeSectorPlanesObj(const std::string& name, double phiSec,
+                                 double phiAvg, double hX, double hY) {
+  // Construct the helper planes for sectoral building
+  auto sectorBounds = std::make_shared<RectangleBounds>(hX, hY);
+
+  Vector3D helperColX(0., 0., 1.);
+  Vector3D helperColY(1., 0., 0.);
+  Vector3D helperColZ(0., 1., 0.);
+  RotationMatrix3D helperRotation;
+  helperRotation.col(0) = helperColX;
+  helperRotation.col(1) = helperColY;
+  helperRotation.col(2) = helperColZ;
+  // curvilinear surfaces are boundless
+  Transform3D helperTransform{helperRotation};
+
+  auto sectorTransformM = std::make_shared<Transform3D>(helperTransform);
+  sectorTransformM->prerotate(AngleAxis3D(phiAvg - phiSec, helperColX));
+
+  auto sectorTransformP = std::make_shared<Transform3D>(helperTransform);
+  sectorTransformP->prerotate(AngleAxis3D(phiAvg + phiSec, helperColX));
+
+  auto sectorPlaneM =
+      Surface::makeShared<PlaneSurface>(sectorTransformM, sectorBounds);
+
+  auto sectorPlaneP =
+      Surface::makeShared<PlaneSurface>(sectorTransformP, sectorBounds);
+
+  std::ofstream ostream;
+  ostream.open(name + ".obj");
+  ObjHelper objH;
+  sectorPlaneM->polyhedronRepresentation(tgContext).draw(objH);
+  sectorPlaneP->polyhedronRepresentation(tgContext).draw(objH);
+  objH.write(ostream);
+  ostream.close();
+}
+
 /// Helper method to be called from sub tests
-void writeObj(const std::vector<IdentifiedPolyderon>& iphs) {
+static void writeObj(const std::vector<IdentifiedPolyderon>& iphs) {
   for (const auto& iph : iphs) {
     std::ofstream ostream;
     ostream.open(iph.first + ".obj");
@@ -55,16 +106,17 @@ std::vector<std::pair<std::string, unsigned int>> testModes = {
 
 auto transform = std::make_shared<Transform3D>(Transform3D::Identity());
 
-namespace Test {
-
-// Create a test context
-GeometryContext tgContext = GeometryContext();
-
 BOOST_AUTO_TEST_SUITE(Surfaces)
 
 /// Unit tests for Cone Surfaces
 BOOST_AUTO_TEST_CASE(ConeSurfacePolyhedrons) {
   std::vector<IdentifiedPolyderon> testTypes;
+
+  double hzpos = 35_mm;
+  double hzneg = -20_mm;
+  double alpha = 0.234;
+  double phiSector = 0.358;
+  writeSectorPlanesObj("ConeSectorPlanes", phiSector, 0., hzpos, hzpos);
 
   for (const auto& mode : testModes) {
     // For ConeSurface types the polyhedron representation is
@@ -74,11 +126,145 @@ BOOST_AUTO_TEST_CASE(ConeSurfacePolyhedrons) {
       continue;
     }
 
-    auto cone = std::make_shared<ConeBounds>(0.235, 0_mm, 100_mm);
+    /// The full cone on one side
+    auto cone = std::make_shared<ConeBounds>(alpha, 0_mm, hzpos);
     auto oneCone = Surface::makeShared<ConeSurface>(transform, cone);
     auto oneConePh = oneCone->polyhedronRepresentation(tgContext, mode.second);
+    size_t expectedFaces = mode.second < 4 ? 4 : mode.second;
+    BOOST_CHECK_EQUAL(oneConePh.faces.size(), expectedFaces);
+    BOOST_CHECK_EQUAL(oneConePh.vertices.size(), expectedFaces + 1);
+    // Check the extent in space
+    double r = hzpos * std::tan(alpha);
+    auto extent = oneConePh.surfaceExtent();
+    CHECK_CLOSE_ABS(extent.xrange.first, -r, 1e-6);
+    CHECK_CLOSE_ABS(extent.xrange.second, r, 1e-6);
+    CHECK_CLOSE_ABS(extent.yrange.first, -r, 1e-6);
+    CHECK_CLOSE_ABS(extent.yrange.second, r, 1e-6);
+    CHECK_CLOSE_ABS(extent.rrange.first, 0_mm, 1e-6);
+    CHECK_CLOSE_ABS(extent.rrange.second, r, 1e-6);
+    CHECK_CLOSE_ABS(extent.zrange.first, 0_mm, 1e-6);
+    CHECK_CLOSE_ABS(extent.zrange.second, hzpos, 1e-6);
     testTypes.push_back({"ConeOneFull" + mode.first, oneConePh});
+
+    // The full cone on both sides
+    auto coneBoth = std::make_shared<ConeBounds>(alpha, hzneg, hzpos);
+    auto twoCones = Surface::makeShared<ConeSurface>(transform, coneBoth);
+    auto twoConesPh =
+        twoCones->polyhedronRepresentation(tgContext, mode.second);
+    expectedFaces = mode.second < 4 ? 8 : 2 * mode.second;
+    BOOST_CHECK_EQUAL(twoConesPh.faces.size(), expectedFaces);
+    BOOST_CHECK_EQUAL(twoConesPh.vertices.size(), expectedFaces + 1);
+    extent = twoConesPh.surfaceExtent();
+    CHECK_CLOSE_ABS(extent.xrange.first, -r, 1e-6);
+    CHECK_CLOSE_ABS(extent.xrange.second, r, 1e-6);
+    CHECK_CLOSE_ABS(extent.yrange.first, -r, 1e-6);
+    CHECK_CLOSE_ABS(extent.yrange.second, r, 1e-6);
+    CHECK_CLOSE_ABS(extent.rrange.first, 0_mm, 1e-6);
+    CHECK_CLOSE_ABS(extent.rrange.second, r, 1e-6);
+    CHECK_CLOSE_ABS(extent.zrange.first, hzneg, 1e-6);
+    CHECK_CLOSE_ABS(extent.zrange.second, hzpos, 1e-6);
+    testTypes.push_back({"ConesTwoFull" + mode.first, twoConesPh});
+
+    // A centered sectoral cone on both sides
+    auto sectoralBoth =
+        std::make_shared<ConeBounds>(alpha, hzneg, hzpos, phiSector, 0.);
+    auto sectoralCones =
+        Surface::makeShared<ConeSurface>(transform, sectoralBoth);
+    auto sectoralConesPh =
+        sectoralCones->polyhedronRepresentation(tgContext, mode.second);
+    extent = sectoralConesPh.surfaceExtent();
+    CHECK_CLOSE_ABS(extent.xrange.second, r, 1e-6);
+    CHECK_CLOSE_ABS(extent.rrange.first, 0_mm, 1e-6);
+    CHECK_CLOSE_ABS(extent.rrange.second, r, 1e-6);
+    CHECK_CLOSE_ABS(extent.zrange.first, hzneg, 1e-6);
+    CHECK_CLOSE_ABS(extent.zrange.second, hzpos, 1e-6);
+    testTypes.push_back({"ConesSectoral" + mode.first, sectoralConesPh});
   }
+  writeObj(testTypes);
+}
+
+/// Unit tests for Cylinder Surfaces
+BOOST_AUTO_TEST_CASE(CylinderSurfacePolyhedrons) {
+  double r = 25_mm;
+  double hZ = 35_mm;
+
+  double phiSector = 0.458;
+  double averagePhi = -1.345;
+  writeSectorPlanesObj("CylinderCentralSectorPlanes", phiSector, 0., 1.5 * r,
+                       1.5 * hZ);
+  writeSectorPlanesObj("CylinderShiftedSectorPlanes", phiSector, averagePhi,
+                       1.5 * r, 1.5 * hZ);
+
+  std::vector<IdentifiedPolyderon> testTypes;
+
+  for (const auto& mode : testModes) {
+    bool triangulate = (mode.first == "TriangleMesh");
+    size_t mulitplier = triangulate ? 2 : 1;
+
+    size_t expectedFaces = mode.second < 4 ? 4 : mulitplier * mode.second;
+    size_t expectedVertices = mode.second < 4 ? 8 : 2 * mode.second;
+
+    /// The full cone on one side
+    auto cylinder = std::make_shared<CylinderBounds>(r, hZ);
+    auto fullCylinder =
+        Surface::makeShared<CylinderSurface>(transform, cylinder);
+    auto fullCylinderPh = fullCylinder->polyhedronRepresentation(
+        tgContext, mode.second, triangulate);
+
+    BOOST_CHECK_EQUAL(fullCylinderPh.faces.size(), expectedFaces);
+    BOOST_CHECK_EQUAL(fullCylinderPh.vertices.size(), expectedVertices);
+    // Check the extent in space
+    auto extent = fullCylinderPh.surfaceExtent();
+    CHECK_CLOSE_ABS(extent.xrange.first, -r, 1e-6);
+    CHECK_CLOSE_ABS(extent.xrange.second, r, 1e-6);
+    CHECK_CLOSE_ABS(extent.yrange.first, -r, 1e-6);
+    CHECK_CLOSE_ABS(extent.yrange.second, r, 1e-6);
+    CHECK_CLOSE_ABS(extent.rrange.first, 0., 1e-6);
+    CHECK_CLOSE_ABS(extent.rrange.second, r, 1e-6);
+    CHECK_CLOSE_ABS(extent.zrange.first, -hZ, 1e-6);
+    CHECK_CLOSE_ABS(extent.zrange.second, hZ, 1e-6);
+    testTypes.push_back({"CylinderFull" + mode.first, fullCylinderPh});
+
+    /// The full cone on one side
+    auto sectorCentered = std::make_shared<CylinderBounds>(r, phiSector, hZ);
+    auto centerSectoredCylinder =
+        Surface::makeShared<CylinderSurface>(transform, sectorCentered);
+    auto centerSectoredCylinderPh =
+        centerSectoredCylinder->polyhedronRepresentation(tgContext, mode.second,
+                                                         triangulate);
+
+    // Check the extent in space
+    extent = centerSectoredCylinderPh.surfaceExtent();
+    CHECK_CLOSE_ABS(extent.xrange.first, r * std::cos(phiSector), 1e-6);
+    CHECK_CLOSE_ABS(extent.xrange.second, r, 1e-6);
+    CHECK_CLOSE_ABS(extent.yrange.first, -r * std::sin(phiSector), 1e-6);
+    CHECK_CLOSE_ABS(extent.yrange.second, r * std::sin(phiSector), 1e-6);
+    CHECK_CLOSE_ABS(extent.rrange.first, 0., 1e-6);
+    CHECK_CLOSE_ABS(extent.rrange.second, r, 1e-6);
+    CHECK_CLOSE_ABS(extent.zrange.first, -hZ, 1e-6);
+    CHECK_CLOSE_ABS(extent.zrange.second, hZ, 1e-6);
+    testTypes.push_back(
+        {"CylinderSectorCentered" + mode.first, centerSectoredCylinderPh});
+
+    /// The full cone on one side
+    auto sectorShifted =
+        std::make_shared<CylinderBounds>(r, averagePhi, phiSector, hZ);
+    auto shiftedSectoredCylinder =
+        Surface::makeShared<CylinderSurface>(transform, sectorShifted);
+    auto shiftedSectoredCylinderPh =
+        shiftedSectoredCylinder->polyhedronRepresentation(
+            tgContext, mode.second, triangulate);
+
+    // Check the extent in space
+    extent = shiftedSectoredCylinderPh.surfaceExtent();
+    CHECK_CLOSE_ABS(extent.rrange.first, 0., 1e-6);
+    CHECK_CLOSE_ABS(extent.rrange.second, r, 1e-6);
+    CHECK_CLOSE_ABS(extent.zrange.first, -hZ, 1e-6);
+    CHECK_CLOSE_ABS(extent.zrange.second, hZ, 1e-6);
+    testTypes.push_back(
+        {"CylinderSectorShifted" + mode.first, shiftedSectoredCylinderPh});
+  }
+
   writeObj(testTypes);
 }
 

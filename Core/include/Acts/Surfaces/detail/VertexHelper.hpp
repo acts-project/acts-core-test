@@ -30,7 +30,7 @@ namespace VertexHelper {
 static std::vector<double> phiSegments(double phiMin = -M_PI,
                                        double phiMax = M_PI,
                                        std::vector<double> phiRefs = {},
-                                       double phiTolerance = 0.) {
+                                       double phiTolerance = 1e-6) {
   // This is to ensure that the extrema are built regardless of number
   // of segments
   std::vector<double> phiSegments;
