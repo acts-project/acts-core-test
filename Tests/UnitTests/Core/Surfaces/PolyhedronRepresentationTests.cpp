@@ -312,9 +312,9 @@ BOOST_AUTO_TEST_CASE(DiscSurfacePolyhedrons) {
 
   double minPhi = averagePhi - phiSector;
   double maxPhi = averagePhi + phiSector;
-  linaA = {Vector3D(0., 0., 0.),
+  lineA = {Vector3D(0., 0., 0.),
            Vector3D(outerR * std::cos(minPhi), outerR * std::sin(minPhi), 0.)};
-  linaB = {Vector3D(0., 0., 0.),
+  lineB = {Vector3D(0., 0., 0.),
            Vector3D(outerR * std::cos(maxPhi), outerR * std::sin(maxPhi), 0.)};
   writeSectorLinesObj("DiscSectorLinesShifted", lineA, lineB);
 
