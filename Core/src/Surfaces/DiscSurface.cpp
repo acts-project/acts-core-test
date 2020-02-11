@@ -161,7 +161,7 @@ Acts::PolyhedronRepresentation Acts::DiscSurface::polyhedronRepresentation(
     for (const auto& v2D : vertices2D) {
       vertices.push_back(transform(gctx) * Vector3D(v2D.x(), v2D.y(), 0.));
       if (not triangulate) {
-        face.push_back(face.size() - 1);
+        face.push_back(vertices.size() - 1);
       }
     }
     if (not triangulate) {

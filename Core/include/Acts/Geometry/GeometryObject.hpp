@@ -1,14 +1,10 @@
 // This file is part of the Acts project.
 //
-// Copyright (C) 2016-2018 CERN for the benefit of the Acts project
+// Copyright (C) 2016-2020 CERN for the benefit of the Acts project
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
-///////////////////////////////////////////////////////////////////
-// GeometryObject.h, Acts project
-///////////////////////////////////////////////////////////////////
 
 #pragma once
 
@@ -39,7 +35,7 @@ class GeometryObject {
   /// give you the maximal extent in 3D space/
   struct Extent {
     /// Possible maximal value
-    static const double maxval = std::numeric_limits<double>::max();
+    static constexpr double maxval = std::numeric_limits<double>::max();
 
     /// The range in x
     range_type xrange = {maxval, -maxval};
