@@ -20,6 +20,8 @@
 
 namespace Acts {
 
+using range_type = std::pair<double, double>;
+
 /// @class GeometryObject
 ///
 /// Base class to provide GeometryID interface:
@@ -30,15 +32,52 @@ namespace Acts {
 ///
 class GeometryObject {
  public:
+  /// @brief Extent in space
+  ///
+  /// This is a nested struct to the GeometryObject representation
+  /// which can be retrieved and used for surface parsing and will
+  /// give you the maximal extent in 3D space/
+  struct Extent {
+    /// Possible maximal value
+    static const double maxval = std::numeric_limits<double>::max();
+
+    /// The range in x
+    range_type xrange = {maxval, -maxval};
+    /// The range in x
+    range_type yrange = {maxval, -maxval};
+    /// The range in x
+    range_type zrange = {maxval, -maxval};
+    /// The range in x
+    range_type rrange = {0., -maxval};
+
+    /// Check the vertex
+    /// @param vtx the Vertex to be checked
+    void check(const Vector3D& vtx) {
+      // min/max value check
+      auto minMax = [&](range_type& range, double value) -> void {
+        range.first = std::min(value, range.first);
+        range.second = std::max(value, range.second);
+      };
+      // go through the parameters
+      minMax(xrange, vtx.x());
+      minMax(yrange, vtx.y());
+      minMax(zrange, vtx.z());
+      minMax(rrange, VectorHelpers::perp(vtx));
+    }
+  };
+
+  /// Defaulted construrctor
   GeometryObject() = default;
+
+  /// Defaulted copy constructor
   GeometryObject(const GeometryObject&) = default;
 
-  /// constructor from a ready-made value
+  /// Constructor from a ready-made value
   ///
   /// @param geoID the geometry identifier of the object
   GeometryObject(const GeometryID& geoID) : m_geoID(geoID) {}
 
-  /// assignment operator
+  /// Assignment operator
   ///
   /// @param geoID the source geoID
   GeometryObject& operator=(const GeometryObject& geoID) {
@@ -48,7 +87,6 @@ class GeometryObject {
     return *this;
   }
 
-  /// Return the value
   /// @return the geometry id by reference
   const GeometryID& geoID() const;
 

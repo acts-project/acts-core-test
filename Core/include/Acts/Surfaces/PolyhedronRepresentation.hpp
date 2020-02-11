@@ -8,9 +8,12 @@
 
 #pragma once
 
+#include <limits>
 #include <vector>
 
+#include "Acts/Geometry/GeometryObject.hpp"
 #include "Acts/Utilities/Definitions.hpp"
+#include "Acts/Utilities/Helpers.hpp"
 
 namespace Acts {
 
@@ -61,6 +64,22 @@ struct PolyhedronRepresentation {
         helper.face(face_vtx);
       }
     }
+  }
+
+  /// Maximum extent of the surface in space
+  ///
+  /// @param transform is the an (optional) transform
+  /// to apply to the vertices for estimation the extent
+  /// with respect to a coordinate frame
+  ///
+  /// @return ranges that describe the space taken by this surface
+  GeometryObject::Extent surfaceExtent(
+      const Transform3D& transform = Transform3D::Identity()) const {
+    GeometryObject::Extent surfaceExtend;
+    for (const auto& vtx : vertices) {
+      surfaceExtend.check(transform * vtx);
+    }
+    return surfaceExtend;
   }
 };
 }  // namespace Acts
