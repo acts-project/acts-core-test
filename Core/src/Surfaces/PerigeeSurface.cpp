@@ -67,3 +67,25 @@ std::ostream& Acts::PerigeeSurface::toStream(const GeometryContext& gctx,
   sl << std::setprecision(-1);
   return sl;
 }
+
+Acts::PolyhedronRepresentation Acts::PerigeeSurface::polyhedronRepresentation(
+    const GeometryContext& gctx, size_t /*lseg*/, bool triangulate) const {
+  std::vector<Vector3D> vertices;
+  std::vector<std::vector<size_t>> faces;
+
+  const Transform3D& ctransform = transform(gctx);
+  Vector3D left(0, 0, -100.);
+  Vector3D right(0, 0, 100.);
+
+  // The central wire/straw
+  vertices.push_back(ctransform * left);
+  vertices.push_back(ctransform * right);
+  if (not triangulate) {
+    faces.push_back({0, 1});
+  } else {
+    vertices.push_back(ctransform * Vector3D(0., 0., 0.));
+    faces.push_back({0, 2, 1});
+  }
+
+  return PolyhedronRepresentation(vertices, faces);
+}

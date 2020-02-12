@@ -93,12 +93,20 @@ class StrawSurface : public LineSurface {
   /// Return properly formatted class name for screen output */
   std::string name() const final;
 
-  /// Return a PolyhedronRepresentation for this object
+  /// Return a PolyhedronRepresentation for the surfaces
+  ///
   /// @param gctx The current geometry context object, e.g. alignment
-  /// @param l0div Number of divisions along l0 (phi)
-  /// @param l1div Number of divisions along l1 (z)
-  virtual PolyhedronRepresentation polyhedronRepresentation(
-      const GeometryContext& gctx, size_t l0div = 10, size_t l1div = 1) const;
+  /// @param lseg Number of segments along curved lines, it represents
+  /// the full 2*M_PI coverange, if lseg is set to 1 only the extrema
+  /// are given @note if lseg is set to 1 then only the straw is created
+  /// @param triangulate is a boolean to indicate if the polyhedron is
+  /// actually expressed as a set of triangulars for a triangular mesh
+  /// representation
+  ///
+  /// @return A list of vertices and a face/facett description of it
+  PolyhedronRepresentation polyhedronRepresentation(
+      const GeometryContext& gctx, size_t lseg = 72,
+      bool triangulate = false) const final;
 
  private:
   /// Clone method implementation

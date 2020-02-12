@@ -8,10 +8,13 @@
 
 #include "Acts/Surfaces/DiscSurface.hpp"
 
+#include <algorithm>
 #include <cmath>
 #include <iomanip>
 #include <iostream>
+#include <numeric>
 #include <utility>
+#include <vector>
 
 #include "Acts/Surfaces/DiscTrapezoidBounds.hpp"
 #include "Acts/Surfaces/InfiniteBounds.hpp"
@@ -153,34 +156,85 @@ Acts::PolyhedronRepresentation Acts::DiscSurface::polyhedronRepresentation(
   // Prepare vertices and faces
   std::vector<Vector3D> vertices;
   std::vector<std::vector<size_t>> faces;
+  // Understand the disc
+  bool fullDisc = m_bounds->coversFullAzimuth();
+  bool toCenter = m_bounds->rMin() < s_onSurfaceTolerance;
   // If you have bounds you can create a polyhedron representation
   if (m_bounds) {
-    auto vertices2D = m_bounds->vertices(lseg);
-    vertices.reserve(vertices2D.size());
-    std::vector<size_t> face;
-    for (const auto& v2D : vertices2D) {
-      vertices.push_back(transform(gctx) * Vector3D(v2D.x(), v2D.y(), 0.));
-      if (not triangulate) {
-        face.push_back(vertices.size() - 1);
+    // Helper function to create a face
+    auto createFace = [&](std::vector<Vector2D>& vertices2D) -> void {
+      // Split the vertices if you have
+      std::vector<Vector3D> vertices3D;
+      vertices3D.reserve(vertices2D.size());
+      for (const auto& v : vertices2D) {
+        vertices3D.push_back(transform(gctx) * Vector3D(v.x(), v.y(), 0.));
       }
-    }
-    if (not triangulate) {
-      // Close the disc if bounds cover full 2*PI
-      // if (m_bounds->coversFullAzimuth()) {
-      //  if (m_bounds->rMin() > 0.){
-      //
-      //  } else {
-      //    face.push_back(0);
-      //  }
-      //}
+      std::vector<size_t> face(vertices3D.size());
+      std::iota(face.begin(), face.end(), vertices.size());
+      vertices.insert(vertices.end(), vertices3D.begin(), vertices3D.end());
       faces.push_back(face);
-
-    } else if (m_bounds->rMin() > 0.) {
+    };
+    auto v2D = m_bounds->vertices(lseg);
+    // If not triangulate
+    if (not triangulate) {
+      // - just fill with 0 to N, split into two faces for rings
+      if (fullDisc and not toCenter) {
+        auto vsize = v2D.size();
+        std::vector<Vector2D> half1(v2D.begin(), v2D.begin() + vsize / 4 + 1);
+        half1.insert(half1.end(), v2D.begin() + 0.75 * vsize, v2D.end());
+        half1.push_back(v2D[0.5 * vsize]);
+        std::vector<Vector2D> half2(v2D.begin() + vsize / 4,
+                                    v2D.begin() + vsize / 2);
+        half2.push_back(v2D[0]);
+        half2.insert(half2.end(), v2D.begin() + 0.5 * vsize,
+                     v2D.begin() + 0.75 * vsize + 1);
+        createFace(half1);
+        createFace(half2);
+      } else {
+        createFace(v2D);
+      }
     } else {
-      vertices.push_back(center(gctx));
-      size_t lastv = vertices.size() - 1;
-      for (unsigned int iseg = 0; iseg < lastv; ++iseg) {
-        faces.push_back({lastv, iseg, (iseg == lastv - 1 ? 0 : iseg + 1)});
+      /// Triangulation
+      // Disc to the center are handled with a central anker point
+      if (toCenter) {
+        vertices.reserve(v2D.size() + 1);
+        if (fullDisc) {
+          vertices.push_back(Vector3D(0., 0., 0.));
+        }
+        for (const auto& v : v2D) {
+          vertices.push_back(transform(gctx) * Vector3D(v.x(), v.y(), 0.));
+          if (vertices.size() > 2) {
+            std::vector<size_t> face = {0, vertices.size() - 2,
+                                        vertices.size() - 1};
+            faces.push_back(face);
+          }
+        }
+        if (fullDisc) {
+          faces.push_back({0, vertices.size() - 1, 1});
+        }
+      } else {
+        // Reorder the vertices for triangulation
+        vertices.reserve(v2D.size());
+        for (size_t iv = 0; iv < 0.5 * v2D.size(); ++iv) {
+          auto vf = v2D[iv];
+          auto vs = v2D[v2D.size() - 1 - iv];
+          vertices.push_back(transform(gctx) * Vector3D(vf.x(), vf.y(), 0.));
+          vertices.push_back(transform(gctx) * Vector3D(vs.x(), vs.y(), 0.));
+        }
+        for (size_t iv = 0; iv < vertices.size() + 1; ++iv) {
+          if (iv > 2) {
+            std::vector<size_t> face = {iv - 3, iv - 2, iv - 1};
+            if (iv % 2) {
+              std::reverse(face.begin(), face.end());
+            }
+            faces.push_back(face);
+          }
+        }
+        // Close if it's a ring
+        if (fullDisc) {
+          faces.push_back({0, 1, vertices.size() - 2});
+          faces.push_back({vertices.size() - 2, 1, vertices.size() - 1});
+        }
       }
     }
   } else {

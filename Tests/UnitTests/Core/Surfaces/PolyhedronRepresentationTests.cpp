@@ -36,6 +36,10 @@
 #include "Acts/Surfaces/RectangleBounds.hpp"
 #include "Acts/Surfaces/TrapezoidBounds.hpp"
 
+// Straw Surface
+#include "Acts/Surfaces/LineBounds.hpp"
+#include "Acts/Surfaces/StrawSurface.hpp"
+
 #include "Acts/Utilities/ObjHelper.hpp"
 #include "Acts/Utilities/Units.hpp"
 
@@ -298,8 +302,9 @@ BOOST_AUTO_TEST_CASE(DiscSurfacePolyhedrons) {
 
   double innerR = 10_mm;
   double outerR = 25_mm;
+
   double phiSector = 0.345;
-  double averagePhi = -2.0;
+  double averagePhi = -1.0;
 
   double cphi = std::cos(phiSector);
   double sphi = std::sin(phiSector);
@@ -320,7 +325,6 @@ BOOST_AUTO_TEST_CASE(DiscSurfacePolyhedrons) {
 
   for (const auto& mode : testModes) {
     bool triangulate = (mode.first == "TriangleMesh");
-
     // Full disc
     auto disc = std::make_shared<RadialBounds>(0_mm, outerR);
     auto fullDisc = Surface::makeShared<DiscSurface>(transform, disc);
@@ -355,21 +359,33 @@ BOOST_AUTO_TEST_CASE(DiscSurfacePolyhedrons) {
     testTypes.push_back({"DiscRing" + mode.first, radialPh});
 
     // Sectoral disc - around 0.
-    auto sector = std::make_shared<RadialBounds>(innerR, outerR, phiSector);
+    auto sector = std::make_shared<RadialBounds>(0, outerR, phiSector);
     auto sectorDisc = Surface::makeShared<DiscSurface>(transform, sector);
     auto sectorPh = sectorDisc->polyhedronRepresentation(tgContext, mode.second,
                                                          triangulate);
     testTypes.push_back({"DiscSectorCentered" + mode.first, sectorPh});
 
-    // Sectoral disc - shifted
-    auto sectorShifted =
-        std::make_shared<RadialBounds>(innerR, outerR, phiSector, averagePhi);
-    auto sectorDiscShifted =
-        Surface::makeShared<DiscSurface>(transform, sectorShifted);
-    auto sectorPhShifted = sectorDiscShifted->polyhedronRepresentation(
+    // Sectoral ring - around 0.
+    auto sectorRing = std::make_shared<RadialBounds>(innerR, outerR, phiSector);
+    auto sectorRingDisc =
+        Surface::makeShared<DiscSurface>(transform, sectorRing);
+    auto sectorRingDiscPh = sectorRingDisc->polyhedronRepresentation(
         tgContext, mode.second, triangulate);
-    testTypes.push_back({"DiscSectorShifted" + mode.first, sectorPhShifted});
+    testTypes.push_back(
+        {"DiscRingSectorCentered" + mode.first, sectorRingDiscPh});
+
+    // Sectoral disc - shifted
+    auto sectorRingShifted =
+        std::make_shared<RadialBounds>(innerR, outerR, averagePhi, phiSector);
+    auto sectorRingDiscShifted =
+        Surface::makeShared<DiscSurface>(transform, sectorRingShifted);
+    auto sectorRingDiscShiftedPh =
+        sectorRingDiscShifted->polyhedronRepresentation(tgContext, mode.second,
+                                                        triangulate);
+    testTypes.push_back(
+        {"DiscRingSectorShifted" + mode.first, sectorRingDiscShiftedPh});
   }
+
   writeObj(testTypes);
 }
 

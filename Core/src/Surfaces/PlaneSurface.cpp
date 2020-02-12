@@ -11,6 +11,7 @@
 #include <cmath>
 #include <iomanip>
 #include <iostream>
+#include <numeric>
 
 #include "Acts/Surfaces/InfiniteBounds.hpp"
 #include "Acts/Surfaces/RectangleBounds.hpp"
@@ -124,20 +125,19 @@ Acts::PolyhedronRepresentation Acts::PlaneSurface::polyhedronRepresentation(
   if (m_bounds) {
     auto vertices2D = m_bounds->vertices(lseg);
     vertices.reserve(vertices2D.size());
-    std::vector<size_t> face;
     for (const auto& v2D : vertices2D) {
       vertices.push_back(transform(gctx) * Vector3D(v2D.x(), v2D.y(), 0.));
-      if (not triangulate) {
-        face.push_back(vertices.size() - 1);
-      }
     }
-    // If triangulation is chosen
-    if (triangulate) {
+    // If triangulation is not chosen - create one face
+    if (not triangulate) {
+      std::vector<size_t> face(vertices.size());
+      std::iota(face.begin(), face.end(), 0);
+      faces.push_back(face);
+    } else {
+      /// Triangulate
       for (unsigned int it = 2; it < vertices.size(); ++it) {
         faces.push_back({0, it - 1, it});
       }
-    } else {
-      faces.push_back(face);
     }
   } else {
     throw std::domain_error(
