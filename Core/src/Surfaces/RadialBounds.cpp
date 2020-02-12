@@ -64,22 +64,13 @@ double Acts::RadialBounds::distanceToBoundary(
 
 std::vector<Acts::Vector2D> Acts::RadialBounds::vertices(
     unsigned int lseg) const {
-  // list of vertices counter-clockwise starting at smallest phi w.r.t center
+  // List of vertices counter-clockwise starting at smallest phi w.r.t center
   std::vector<Acts::Vector2D> rvertices;
 
-  // Helper method to write the segment to the extrema point
-  auto writeSegment = [&](double r, double phi1, double phi2,
-                          int addon) -> void {
-    unsigned int nsegs =
-        lseg > 1 ? std::abs((phi2 - phi1) / (2 * M_PI)) * lseg : 1;
-    // minimum number of segments is 1
-    nsegs = nsegs > 1 ? nsegs : 1;
-    double phistep = (phi2 - phi1) / nsegs;
-    for (unsigned int iseg = 0; iseg < nsegs + addon; ++iseg) {
-      double phi = phi1 + iseg * phistep;
-      rvertices.push_back({r * std::cos(phi), r * std::sin(phi)});
-    }
-  };
+  // Add the center for sectors
+  if (m_rMin < s_onSurfaceTolerance and not coversFullAzimuth()) {
+    rvertices.push_back(Vector2D(0., 0.));
+  }
 
   bool fullDisc = coversFullAzimuth();
   // Get the phi segments from the helper method
@@ -92,13 +83,15 @@ std::vector<Acts::Vector2D> Acts::RadialBounds::vertices(
   if (m_rMin > 0.) {
     for (unsigned int iseg = phiSegs.size() - 1; iseg > 0; --iseg) {
       int addon = (iseg == 1 and not fullDisc) ? 1 : 0;
-      writeSegment(m_rMin, phiSegs[iseg], phiSegs[iseg - 1], addon);
+      detail::VertexHelper::createSegment<Vector2D, Eigen::Affine2d>(
+          rvertices, m_rMin, phiSegs[iseg], phiSegs[iseg - 1], lseg, addon);
     }
   }
   // Upper bow from phi_min -> phi_max
   for (unsigned int iseg = 0; iseg < phiSegs.size() - 1; ++iseg) {
     int addon = (iseg == phiSegs.size() - 2 and not fullDisc) ? 1 : 0;
-    writeSegment(m_rMax, phiSegs[iseg], phiSegs[iseg + 1], addon);
+    detail::VertexHelper::createSegment<Vector2D, Eigen::Affine2d>(
+        rvertices, m_rMax, phiSegs[iseg], phiSegs[iseg + 1], lseg, addon);
   }
   return rvertices;
 }

@@ -189,8 +189,9 @@ Acts::PolyhedronRepresentation Acts::CylinderSurface::polyhedronRepresentation(
   std::vector<Vector3D> vertices;
   std::vector<std::vector<size_t>> faces;
 
-  auto ctransform = transform(gctx);
-
+  auto ctrans = transform(gctx);
+  double r = bounds().r();
+  double hZ = bounds().halflengthZ();
   double hPhiSec = bounds().halfPhiSector();
   double avgPhi = bounds().averagePhi();
   bool fullCylinder = bounds().coversFullAzimuth();
@@ -201,32 +202,19 @@ Acts::PolyhedronRepresentation Acts::CylinderSurface::polyhedronRepresentation(
                      : detail::VertexHelper::phiSegments(
                            avgPhi - hPhiSec, avgPhi + hPhiSec, {avgPhi});
 
-  // Helper function to create a single-sided cone
-  auto createBow = [&](double phiMin, double phiMax, int side,
-                       int addon = 0) -> void {
-    // Calculate the number of segments - 1 is the minimum
-    unsigned int segs = (phiMax - phiMin) / (2 * M_PI) * lseg;
-    segs = segs > 0 ? segs : 1;
-    double phistep = (phiMax - phiMin) / segs;
-    // Create the segments
-    for (unsigned int iphi = 0; iphi < segs + addon; ++iphi) {
-      double phi = phiMin + iphi * phistep;
-      vertices.push_back(ctransform * Vector3D(bounds().r() * std::cos(phi),
-                                               bounds().r() * std::sin(phi),
-                                               side * bounds().halflengthZ()));
-    }
-  };
-
-  // Write the two bows on either side
+  // Write the two bows/circles on either side
   std::vector<int> sides = {-1, 1};
   for (auto& side : sides) {
     for (size_t iseg = 0; iseg < phiSegs.size() - 1; ++iseg) {
       int addon = (iseg == phiSegs.size() - 2 and not fullCylinder) ? 1 : 0;
-      createBow(phiSegs[iseg], phiSegs[iseg + 1], side, addon);
+      /// Helper method to create the segment
+      detail::VertexHelper::createSegment(vertices, r, phiSegs[iseg],
+                                          phiSegs[iseg + 1], lseg, addon,
+                                          Vector3D(0., 0., side * hZ), ctrans);
     }
   }
 
-  // Write the faces
+  // Write the faces from the built vertices
   size_t nqfaces = 0.5 * vertices.size();
   size_t reduce = (not fullCylinder) ? 1 : 0;
   for (size_t iface = 0; iface < nqfaces - reduce; ++iface) {

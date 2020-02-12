@@ -205,7 +205,6 @@ Acts::PolyhedronRepresentation Acts::ConeSurface::polyhedronRepresentation(
   }
 
   auto ctransform = transform(gctx);
-
   // The tip - written only once
   vertices.push_back(ctransform * Vector3D(0., 0., 0.));
 
@@ -214,54 +213,38 @@ Acts::PolyhedronRepresentation Acts::ConeSurface::polyhedronRepresentation(
   double avgPhi = bounds().averagePhi();
   bool fullCone = (hPhiSec == M_PI);
 
-  // Helper function to create a single-sided cone
-  auto createCone = [&](double zext, double phiMin, double phiMax,
-                        int addon) -> void {
-    // The current offset in vertices (e.g. for second cone)
-    double r = zext * bounds().tanAlpha();
-    // Calculate the number of segments - 1 is the minimum
-    unsigned int segs = (phiMax - phiMin) / (2 * M_PI) * lseg;
-    segs = segs > 0 ? segs : 1;
-    double phistep = (phiMax - phiMin) / segs;
-    // Create the segments
-    for (unsigned int iphi = 0; iphi < segs + addon; ++iphi) {
-      double phi = phiMin + iphi * phistep;
-      vertices.push_back(ctransform *
-                         Vector3D(r * std::cos(phi), r * std::sin(phi), zext));
-      // Write the triangular faces
-      size_t nvertices = vertices.size();
-      // Ignore if the vertices are at different z values
-      if (nvertices > 2 and
-          vertices[nvertices - 2].z() * vertices[nvertices - 1].z() > 0.) {
-        faces.push_back({0, nvertices - 2, nvertices - 1});
-      }
-    }
-  };
-
   // Get the phi segments from the helper
   auto phiSegs = fullCone ? detail::VertexHelper::phiSegments()
                           : detail::VertexHelper::phiSegments(
                                 avgPhi - hPhiSec, avgPhi + hPhiSec, {avgPhi});
 
   // Negative cone if exists
-  if (bounds().minZ() < 0.) {
-    for (unsigned int iseg = 0; iseg < phiSegs.size() - 1; ++iseg) {
-      int addon = (iseg == phiSegs.size() - 2 and not fullCone) ? 1 : 0;
-      createCone(bounds().minZ(), phiSegs[iseg], phiSegs[iseg + 1], addon);
-    }
-    if (fullCone) {
-      faces.push_back({0, vertices.size() - 1, 1});
-    }
+  std::vector<double> coneSides;
+  if (bounds().minZ()) {
+    coneSides.push_back(bounds().minZ());
   }
-  auto firstNew = vertices.size();
-  // Positive cone if exists
-  if (bounds().maxZ() > 0.) {
+  if (bounds().maxZ()) {
+    coneSides.push_back(bounds().maxZ());
+  }
+  for (auto& z : coneSides) {
+    // Remember the first vertex
+    size_t firstIv = vertices.size();
+    // Radius and z offset
+    double r = std::abs(z) * bounds().tanAlpha();
+    Vector3D zoffset(0., 0., z);
     for (unsigned int iseg = 0; iseg < phiSegs.size() - 1; ++iseg) {
       int addon = (iseg == phiSegs.size() - 2 and not fullCone) ? 1 : 0;
-      createCone(bounds().maxZ(), phiSegs[iseg], phiSegs[iseg + 1], addon);
+      detail::VertexHelper::createSegment(vertices, r, phiSegs[iseg],
+                                          phiSegs[iseg + 1], lseg, addon,
+                                          zoffset, ctransform);
     }
+    // Create the faces
+    for (size_t iv = firstIv + 2; iv < vertices.size() + 1; ++iv) {
+      faces.push_back({0, iv - 2, iv - 1});
+    }
+    // Complete cone if necessary
     if (fullCone) {
-      faces.push_back({0, vertices.size() - 1, firstNew});
+      faces.push_back({0, vertices.size() - 1, firstIv});
     }
   }
   return PolyhedronRepresentation(vertices, faces);
