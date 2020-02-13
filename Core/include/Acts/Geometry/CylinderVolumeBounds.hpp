@@ -6,12 +6,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-///////////////////////////////////////////////////////////////////
-// CylinderVolumeBounds.h, Acts project
-///////////////////////////////////////////////////////////////////
-
 #pragma once
 #include <cmath>
+#include "Acts/Geometry/GeometryContext.hpp"
 #include "Acts/Geometry/Volume.hpp"
 #include "Acts/Geometry/VolumeBounds.hpp"
 #include "Acts/Surfaces/CylinderSurface.hpp"
@@ -186,12 +183,6 @@ class CylinderVolumeBounds : public VolumeBounds {
 
   /// Output Method for std::ostream
   std::ostream& toStream(std::ostream& sl) const override;
-
-  /// Draw this cylinder to a given helper
-  /// @param helper The helper instance
-  /// @param transform An additional transform, default is identity
-  void draw(IVisualization& helper,
-            const Transform3D& transform = Transform3D::Identity()) const;
 
  private:
   /// templated dumpT method

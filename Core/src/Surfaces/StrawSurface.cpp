@@ -7,7 +7,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "Acts/Surfaces/StrawSurface.hpp"
-#include "Acts/Surfaces/PolyhedronRepresentation.hpp"
+#include "Acts/Geometry/Polyhedron.hpp"
 #include "Acts/Surfaces/detail/VertexHelper.hpp"
 
 #include <iomanip>
@@ -55,17 +55,16 @@ Acts::StrawSurface* Acts::StrawSurface::clone_impl(
   return new StrawSurface(gctx, *this, shift);
 }
 
-Acts::PolyhedronRepresentation Acts::StrawSurface::polyhedronRepresentation(
-    const GeometryContext& gctx, size_t lseg, bool triangulate) const {
+Acts::Polyhedron Acts::StrawSurface::polyhedronRepresentation(
+    const GeometryContext& gctx, size_t lseg) const {
+  // Prepare vertices and faces
   std::vector<Vector3D> vertices;
-  std::vector<std::vector<size_t>> faces;
+  std::vector<Polyhedron::face_type> faces;
+  std::vector<Polyhedron::face_type> triangularMesh;
 
   const Transform3D& ctransform = transform(gctx);
-  double hZ = m_bounds->halflengthZ();
-
   // Draw the bounds if more than one segment are chosen
   if (lseg > 1) {
-    double r = m_bounds->r();
     auto phiSegs = detail::VertexHelper::phiSegments();
     // Write the two bows/circles on either side
     std::vector<int> sides = {-1, 1};
@@ -74,39 +73,33 @@ Acts::PolyhedronRepresentation Acts::StrawSurface::polyhedronRepresentation(
         int addon = (iseg == phiSegs.size() - 2) ? 1 : 0;
         /// Helper method to create the segment
         detail::VertexHelper::createSegment(
-            vertices, r, phiSegs[iseg], phiSegs[iseg + 1], lseg, addon,
-            Vector3D(0., 0., side * hZ), ctransform);
+            vertices, m_bounds->r(), phiSegs[iseg], phiSegs[iseg + 1], lseg,
+            addon, Vector3D(0., 0., side * m_bounds->halflengthZ()),
+            ctransform);
       }
     }
     // Write the faces from the built vertices
     size_t nqfaces = 0.5 * (vertices.size() - 2);
     for (size_t iface = 0; iface < nqfaces; ++iface) {
       size_t p2 = (iface + 1 == nqfaces) ? 0 : iface + 1;
-      if (not triangulate) {
-        std::vector<size_t> face = {iface, p2, p2 + nqfaces, nqfaces + iface};
-        faces.push_back(face);
-      } else {
-        // Create two if configured to triangulate
-        std::vector<size_t> triA = {iface, p2, p2 + nqfaces};
-        faces.push_back(triA);
-        std::vector<size_t> triB = {p2 + nqfaces, nqfaces + iface, iface};
-        faces.push_back(triB);
-      }
+      std::vector<size_t> face = {iface, p2, p2 + nqfaces, nqfaces + iface};
+      faces.push_back(face);
+      std::vector<size_t> triA = {iface, p2, p2 + nqfaces};
+      triangularMesh.push_back(triA);
+      std::vector<size_t> triB = {p2 + nqfaces, nqfaces + iface, iface};
+      triangularMesh.push_back(triB);
     }
   }
 
   size_t bvertices = vertices.size();
-  Vector3D left(0, 0, -hZ);
-  Vector3D right(0, 0, hZ);
+  Vector3D left(0, 0, -m_bounds->halflengthZ());
+  Vector3D right(0, 0, m_bounds->halflengthZ());
   // The central wire/straw
   vertices.push_back(ctransform * left);
   vertices.push_back(ctransform * right);
-  if (not triangulate) {
-    faces.push_back({bvertices, bvertices + 1});
-  } else {
-    vertices.push_back(ctransform * Vector3D(0., 0., 0.));
-    faces.push_back({bvertices, bvertices + 2, bvertices + 1});
-  }
+  faces.push_back({bvertices, bvertices + 1});
+  vertices.push_back(ctransform * Vector3D(0., 0., 0.));
+  triangularMesh.push_back({bvertices, bvertices + 2, bvertices + 1});
 
-  return PolyhedronRepresentation(vertices, faces);
+  return Polyhedron(vertices, faces, triangularMesh);
 }

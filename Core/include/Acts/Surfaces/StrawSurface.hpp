@@ -16,7 +16,7 @@
 namespace Acts {
 
 class DetectorElementBase;
-struct PolyhedronRepresentation;
+struct Polyhedron;
 
 ///  @class StrawSurface
 ///
@@ -93,20 +93,16 @@ class StrawSurface : public LineSurface {
   /// Return properly formatted class name for screen output */
   std::string name() const final;
 
-  /// Return a PolyhedronRepresentation for the surfaces
+  /// Return a Polyhedron for the surfaces
   ///
   /// @param gctx The current geometry context object, e.g. alignment
   /// @param lseg Number of segments along curved lines, it represents
   /// the full 2*M_PI coverange, if lseg is set to 1 only the extrema
   /// are given @note if lseg is set to 1 then only the straw is created
-  /// @param triangulate is a boolean to indicate if the polyhedron is
-  /// actually expressed as a set of triangulars for a triangular mesh
-  /// representation
   ///
   /// @return A list of vertices and a face/facett description of it
-  PolyhedronRepresentation polyhedronRepresentation(
-      const GeometryContext& gctx, size_t lseg = 72,
-      bool triangulate = false) const final;
+  Polyhedron polyhedronRepresentation(const GeometryContext& gctx,
+                                      size_t lseg) const final;
 
  private:
   /// Clone method implementation

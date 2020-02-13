@@ -28,15 +28,6 @@ BOOST_AUTO_TEST_CASE(construction_test) {
   ccvb.toStream(std::cout);
 }
 
-BOOST_AUTO_TEST_CASE(decomposeToSurfaces_test) {
-  CutoutCylinderVolumeBounds ccvb(5, 10, 15, 30, 25);
-  PlyHelper<double> ply;
-  ccvb.draw(ply);
-
-  std::ofstream os("ccvb.ply");
-  os << ply;
-}
-
 BOOST_AUTO_TEST_CASE(inside_test) {
   CutoutCylinderVolumeBounds ccvb(5, 10, 15, 30, 25);
 

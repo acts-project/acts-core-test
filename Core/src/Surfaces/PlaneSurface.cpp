@@ -116,11 +116,13 @@ const Acts::SurfaceBounds& Acts::PlaneSurface::bounds() const {
   return s_noBounds;
 }
 
-Acts::PolyhedronRepresentation Acts::PlaneSurface::polyhedronRepresentation(
-    const GeometryContext& gctx, size_t lseg, bool triangulate) const {
+Acts::Polyhedron Acts::PlaneSurface::polyhedronRepresentation(
+    const GeometryContext& gctx, size_t lseg) const {
   // Prepare vertices and faces
   std::vector<Vector3D> vertices;
-  std::vector<std::vector<size_t>> faces;
+  std::vector<Polyhedron::face_type> faces;
+  std::vector<Polyhedron::face_type> triangularMesh;
+
   // If you have bounds you can create a polyhedron representation
   if (m_bounds) {
     auto vertices2D = m_bounds->vertices(lseg);
@@ -128,20 +130,18 @@ Acts::PolyhedronRepresentation Acts::PlaneSurface::polyhedronRepresentation(
     for (const auto& v2D : vertices2D) {
       vertices.push_back(transform(gctx) * Vector3D(v2D.x(), v2D.y(), 0.));
     }
-    // If triangulation is not chosen - create one face
-    if (not triangulate) {
-      std::vector<size_t> face(vertices.size());
-      std::iota(face.begin(), face.end(), 0);
-      faces.push_back(face);
-    } else {
-      /// Triangulate
-      for (unsigned int it = 2; it < vertices.size(); ++it) {
-        faces.push_back({0, it - 1, it});
-      }
+    // Write the face
+    std::vector<size_t> face(vertices.size());
+    std::iota(face.begin(), face.end(), 0);
+    faces.push_back(face);
+    /// Triangular mesh construction
+    for (unsigned int it = 2; it < vertices.size(); ++it) {
+      triangularMesh.push_back({0, it - 1, it});
     }
+
   } else {
     throw std::domain_error(
         "Polyhedron repr of boundless surface not possible.");
   }
-  return PolyhedronRepresentation(vertices, faces);
+  return Polyhedron(vertices, faces, triangularMesh);
 }

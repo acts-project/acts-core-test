@@ -9,11 +9,11 @@
 #include <cmath>
 
 #include <algorithm>
+#include "Acts/Geometry/Polyhedron.hpp"
 #include "Acts/Geometry/ProtoLayer.hpp"
 #include "Acts/Surfaces/AnnulusBounds.hpp"
 #include "Acts/Surfaces/CylinderBounds.hpp"
 #include "Acts/Surfaces/CylinderSurface.hpp"
-#include "Acts/Surfaces/PolyhedronRepresentation.hpp"
 #include "Acts/Utilities/Helpers.hpp"
 
 using Acts::VectorHelpers::perp;
@@ -141,8 +141,8 @@ void ProtoLayer::measure(const GeometryContext& gctx,
       //        makes it into the Surface base class
       //        The envelopes might need special treatments though
 
-      PolyhedronRepresentation ph = cylSurface->polyhedronRepresentation(gctx);
-      // evaluate at all vertices
+      Polyhedron ph = cylSurface->polyhedronRepresentation(gctx, 1);
+      // evaluate at all vertices - @TODO be replaces by ph.surfaceExtent()
       for (const auto& vtx : ph.vertices) {
         maxX = std::max(maxX, vtx.x());
         minX = std::min(minX, vtx.x());

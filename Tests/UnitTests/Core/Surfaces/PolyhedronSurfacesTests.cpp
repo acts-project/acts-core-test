@@ -14,7 +14,7 @@
 #include "Acts/Tests/CommonHelpers/FloatComparisons.hpp"
 
 // The class to test
-#include "Acts/Surfaces/PolyhedronRepresentation.hpp"
+#include "Acts/Geometry/Polyhedron.hpp"
 
 // Cone surface
 #include "Acts/Surfaces/ConeBounds.hpp"
@@ -49,7 +49,7 @@ namespace Acts {
 
 using namespace UnitLiterals;
 
-using IdentifiedPolyderon = std::pair<std::string, PolyhedronRepresentation>;
+using IdentifiedPolyderon = std::pair<std::string, Polyhedron>;
 
 namespace Test {
 
@@ -100,8 +100,8 @@ static void writeSectorPlanesObj(const std::string& name, double phiSec,
   std::ofstream ostream;
   ostream.open(name + ".obj");
   ObjHelper objH;
-  sectorPlaneM->polyhedronRepresentation(tgContext).draw(objH);
-  sectorPlaneP->polyhedronRepresentation(tgContext).draw(objH);
+  sectorPlaneM->polyhedronRepresentation(tgContext, 1).draw(objH);
+  sectorPlaneP->polyhedronRepresentation(tgContext, 1).draw(objH);
   objH.write(ostream);
   ostream.close();
 }
@@ -118,23 +118,12 @@ static void writeObj(const std::vector<IdentifiedPolyderon>& iphs) {
   }
 }
 
-std::vector<std::pair<std::string, unsigned int>> testModes = {
-    {"", 72}, {"Extremas", 1}, {"TriangleMesh", 72}};
+std::vector<std::pair<std::string, unsigned int>> testModes = {{"", 72},
+                                                               {"Extremas", 1}};
 
 auto transform = std::make_shared<Transform3D>(Transform3D::Identity());
 
 BOOST_AUTO_TEST_SUITE(Surfaces)
-
-/// Unit tests for Polyderon construction & operator +=
-BOOST_AUTO_TEST_CASE(PolyhedronRepresentationTest) {
-  std::vector<Vector3D> vertices = {Vector3D(-1, -1, 0.), Vector3D(1., -1, 0.),
-                                    Vector3D(0., 1., 0.)};
-  std::vector<std::vector<size_t>> faces = {{0, 1, 2}};
-
-  PolyhedronRepresentation triangle(vertices, faces);
-  BOOST_CHECK(vertices == triangle.vertices);
-  BOOST_CHECK(faces == triangle.faces);
-}
 
 /// Unit tests for Cone Surfaces
 BOOST_AUTO_TEST_CASE(ConeSurfacePolyhedrons) {
@@ -147,13 +136,6 @@ BOOST_AUTO_TEST_CASE(ConeSurfacePolyhedrons) {
   writeSectorPlanesObj("ConeSectorPlanes", phiSector, 0., hzpos, hzpos);
 
   for (const auto& mode : testModes) {
-    // For ConeSurface types the polyhedron representation is
-    /// always a triangular mesh
-    bool triangulate = (mode.first == "TriangleMesh");
-    if (triangulate) {
-      continue;
-    }
-
     /// The full cone on one side
     auto cone = std::make_shared<ConeBounds>(alpha, 0_mm, hzpos);
     auto oneCone = Surface::makeShared<ConeSurface>(transform, cone);
@@ -226,18 +208,15 @@ BOOST_AUTO_TEST_CASE(CylinderSurfacePolyhedrons) {
   std::vector<IdentifiedPolyderon> testTypes;
 
   for (const auto& mode : testModes) {
-    bool triangulate = (mode.first == "TriangleMesh");
-    size_t mulitplier = triangulate ? 2 : 1;
-
-    size_t expectedFaces = mode.second < 4 ? 4 : mulitplier * mode.second;
+    size_t expectedFaces = mode.second < 4 ? 4 : mode.second;
     size_t expectedVertices = mode.second < 4 ? 8 : 2 * mode.second;
 
     /// The full cone on one side
     auto cylinder = std::make_shared<CylinderBounds>(r, hZ);
     auto fullCylinder =
         Surface::makeShared<CylinderSurface>(transform, cylinder);
-    auto fullCylinderPh = fullCylinder->polyhedronRepresentation(
-        tgContext, mode.second, triangulate);
+    auto fullCylinderPh =
+        fullCylinder->polyhedronRepresentation(tgContext, mode.second);
 
     BOOST_CHECK_EQUAL(fullCylinderPh.faces.size(), expectedFaces);
     BOOST_CHECK_EQUAL(fullCylinderPh.vertices.size(), expectedVertices);
@@ -247,7 +226,7 @@ BOOST_AUTO_TEST_CASE(CylinderSurfacePolyhedrons) {
     CHECK_CLOSE_ABS(extent.xrange.second, r, 1e-6);
     CHECK_CLOSE_ABS(extent.yrange.first, -r, 1e-6);
     CHECK_CLOSE_ABS(extent.yrange.second, r, 1e-6);
-    CHECK_CLOSE_ABS(extent.rrange.first, 0., 1e-6);
+    CHECK_CLOSE_ABS(extent.rrange.first, r, 1e-6);
     CHECK_CLOSE_ABS(extent.rrange.second, r, 1e-6);
     CHECK_CLOSE_ABS(extent.zrange.first, -hZ, 1e-6);
     CHECK_CLOSE_ABS(extent.zrange.second, hZ, 1e-6);
@@ -258,8 +237,8 @@ BOOST_AUTO_TEST_CASE(CylinderSurfacePolyhedrons) {
     auto centerSectoredCylinder =
         Surface::makeShared<CylinderSurface>(transform, sectorCentered);
     auto centerSectoredCylinderPh =
-        centerSectoredCylinder->polyhedronRepresentation(tgContext, mode.second,
-                                                         triangulate);
+        centerSectoredCylinder->polyhedronRepresentation(tgContext,
+                                                         mode.second);
 
     // Check the extent in space
     extent = centerSectoredCylinderPh.surfaceExtent();
@@ -267,7 +246,7 @@ BOOST_AUTO_TEST_CASE(CylinderSurfacePolyhedrons) {
     CHECK_CLOSE_ABS(extent.xrange.second, r, 1e-6);
     CHECK_CLOSE_ABS(extent.yrange.first, -r * std::sin(phiSector), 1e-6);
     CHECK_CLOSE_ABS(extent.yrange.second, r * std::sin(phiSector), 1e-6);
-    CHECK_CLOSE_ABS(extent.rrange.first, 0., 1e-6);
+    CHECK_CLOSE_ABS(extent.rrange.first, r, 1e-6);
     CHECK_CLOSE_ABS(extent.rrange.second, r, 1e-6);
     CHECK_CLOSE_ABS(extent.zrange.first, -hZ, 1e-6);
     CHECK_CLOSE_ABS(extent.zrange.second, hZ, 1e-6);
@@ -280,12 +259,12 @@ BOOST_AUTO_TEST_CASE(CylinderSurfacePolyhedrons) {
     auto shiftedSectoredCylinder =
         Surface::makeShared<CylinderSurface>(transform, sectorShifted);
     auto shiftedSectoredCylinderPh =
-        shiftedSectoredCylinder->polyhedronRepresentation(
-            tgContext, mode.second, triangulate);
+        shiftedSectoredCylinder->polyhedronRepresentation(tgContext,
+                                                          mode.second);
 
     // Check the extent in space
     extent = shiftedSectoredCylinderPh.surfaceExtent();
-    CHECK_CLOSE_ABS(extent.rrange.first, 0., 1e-6);
+    CHECK_CLOSE_ABS(extent.rrange.first, r, 1e-6);
     CHECK_CLOSE_ABS(extent.rrange.second, r, 1e-6);
     CHECK_CLOSE_ABS(extent.zrange.first, -hZ, 1e-6);
     CHECK_CLOSE_ABS(extent.zrange.second, hZ, 1e-6);
@@ -324,18 +303,15 @@ BOOST_AUTO_TEST_CASE(DiscSurfacePolyhedrons) {
   writeSectorLinesObj("DiscSectorLinesShifted", lineA, lineB);
 
   for (const auto& mode : testModes) {
-    bool triangulate = (mode.first == "TriangleMesh");
     // Full disc
     auto disc = std::make_shared<RadialBounds>(0_mm, outerR);
     auto fullDisc = Surface::makeShared<DiscSurface>(transform, disc);
     auto fullDiscPh =
-        fullDisc->polyhedronRepresentation(tgContext, mode.second, triangulate);
+        fullDisc->polyhedronRepresentation(tgContext, mode.second);
 
     unsigned int expectedVertices = mode.second > 4 ? mode.second : 4;
-    unsigned int expectedFaces = triangulate ? 72 : 1;
-    if (triangulate) {
-      expectedVertices += 1;
-    }
+    unsigned int expectedFaces = mode.second;
+
     BOOST_CHECK_EQUAL(fullDiscPh.faces.size(), expectedFaces);
     BOOST_CHECK_EQUAL(fullDiscPh.vertices.size(), expectedVertices);
 
@@ -354,23 +330,50 @@ BOOST_AUTO_TEST_CASE(DiscSurfacePolyhedrons) {
     // Ring disc
     auto radial = std::make_shared<RadialBounds>(innerR, outerR);
     auto radialDisc = Surface::makeShared<DiscSurface>(transform, radial);
-    auto radialPh = radialDisc->polyhedronRepresentation(tgContext, mode.second,
-                                                         triangulate);
+    auto radialPh =
+        radialDisc->polyhedronRepresentation(tgContext, mode.second);
+    extent = radialPh.surfaceExtent();
+    CHECK_CLOSE_ABS(extent.xrange.first, -outerR, 1e-6);
+    CHECK_CLOSE_ABS(extent.xrange.second, outerR, 1e-6);
+    CHECK_CLOSE_ABS(extent.yrange.first, -outerR, 1e-6);
+    CHECK_CLOSE_ABS(extent.yrange.second, outerR, 1e-6);
+    CHECK_CLOSE_ABS(extent.rrange.first, innerR, 1e-6);
+    CHECK_CLOSE_ABS(extent.rrange.second, outerR, 1e-6);
+    CHECK_CLOSE_ABS(extent.zrange.first, 0., 1e-6);
+    CHECK_CLOSE_ABS(extent.zrange.second, 0., 1e-6);
     testTypes.push_back({"DiscRing" + mode.first, radialPh});
 
     // Sectoral disc - around 0.
-    auto sector = std::make_shared<RadialBounds>(0, outerR, phiSector);
+    auto sector = std::make_shared<RadialBounds>(0., outerR, phiSector);
     auto sectorDisc = Surface::makeShared<DiscSurface>(transform, sector);
-    auto sectorPh = sectorDisc->polyhedronRepresentation(tgContext, mode.second,
-                                                         triangulate);
+    auto sectorPh =
+        sectorDisc->polyhedronRepresentation(tgContext, mode.second);
+    extent = sectorPh.surfaceExtent();
+    CHECK_CLOSE_ABS(extent.xrange.first, 0., 1e-6);
+    CHECK_CLOSE_ABS(extent.xrange.second, outerR, 1e-6);
+    CHECK_CLOSE_ABS(extent.yrange.first, -outerR * std::sin(phiSector), 1e-6);
+    CHECK_CLOSE_ABS(extent.yrange.second, outerR * std::sin(phiSector), 1e-6);
+    CHECK_CLOSE_ABS(extent.rrange.first, 0., 1e-6);
+    CHECK_CLOSE_ABS(extent.rrange.second, outerR, 1e-6);
+    CHECK_CLOSE_ABS(extent.zrange.first, 0., 1e-6);
+    CHECK_CLOSE_ABS(extent.zrange.second, 0., 1e-6);
     testTypes.push_back({"DiscSectorCentered" + mode.first, sectorPh});
 
     // Sectoral ring - around 0.
     auto sectorRing = std::make_shared<RadialBounds>(innerR, outerR, phiSector);
     auto sectorRingDisc =
         Surface::makeShared<DiscSurface>(transform, sectorRing);
-    auto sectorRingDiscPh = sectorRingDisc->polyhedronRepresentation(
-        tgContext, mode.second, triangulate);
+    auto sectorRingDiscPh =
+        sectorRingDisc->polyhedronRepresentation(tgContext, mode.second);
+    extent = sectorRingDiscPh.surfaceExtent();
+    CHECK_CLOSE_ABS(extent.xrange.first, innerR * std::cos(phiSector), 1e-6);
+    CHECK_CLOSE_ABS(extent.xrange.second, outerR, 1e-6);
+    CHECK_CLOSE_ABS(extent.yrange.first, -outerR * std::sin(phiSector), 1e-6);
+    CHECK_CLOSE_ABS(extent.yrange.second, outerR * std::sin(phiSector), 1e-6);
+    CHECK_CLOSE_ABS(extent.rrange.first, innerR, 1e-6);
+    CHECK_CLOSE_ABS(extent.rrange.second, outerR, 1e-6);
+    CHECK_CLOSE_ABS(extent.zrange.first, 0., 1e-6);
+    CHECK_CLOSE_ABS(extent.zrange.second, 0., 1e-6);
     testTypes.push_back(
         {"DiscRingSectorCentered" + mode.first, sectorRingDiscPh});
 
@@ -380,8 +383,12 @@ BOOST_AUTO_TEST_CASE(DiscSurfacePolyhedrons) {
     auto sectorRingDiscShifted =
         Surface::makeShared<DiscSurface>(transform, sectorRingShifted);
     auto sectorRingDiscShiftedPh =
-        sectorRingDiscShifted->polyhedronRepresentation(tgContext, mode.second,
-                                                        triangulate);
+        sectorRingDiscShifted->polyhedronRepresentation(tgContext, mode.second);
+    extent = sectorRingDiscShiftedPh.surfaceExtent();
+    CHECK_CLOSE_ABS(extent.rrange.first, innerR, 1e-6);
+    CHECK_CLOSE_ABS(extent.rrange.second, outerR, 1e-6);
+    CHECK_CLOSE_ABS(extent.zrange.first, 0., 1e-6);
+    CHECK_CLOSE_ABS(extent.zrange.second, 0., 1e-6);
     testTypes.push_back(
         {"DiscRingSectorShifted" + mode.first, sectorRingDiscShiftedPh});
   }
@@ -394,38 +401,57 @@ BOOST_AUTO_TEST_CASE(PlaneSurfacePolyhedrons) {
   std::vector<IdentifiedPolyderon> testTypes;
 
   for (const auto& mode : testModes) {
-    bool triangulate = (mode.first == "TriangleMesh");
+    double rhX = 10_mm;
+    double rhY = 25_mm;
 
     /// Rectangular Plane
-    auto rectangular = std::make_shared<RectangleBounds>(10_mm, 25_mm);
+    auto rectangular = std::make_shared<RectangleBounds>(rhX, rhY);
     auto rectangularPlane =
         Surface::makeShared<PlaneSurface>(transform, rectangular);
-    auto rectangularPh = rectangularPlane->polyhedronRepresentation(
-        tgContext, mode.second, triangulate);
+    auto rectangularPh =
+        rectangularPlane->polyhedronRepresentation(tgContext, mode.second);
+    auto extent = rectangularPh.surfaceExtent();
+    CHECK_CLOSE_ABS(extent.xrange.first, -rhX, 1e-6);
+    CHECK_CLOSE_ABS(extent.xrange.second, rhX, 1e-6);
+    CHECK_CLOSE_ABS(extent.yrange.first, -rhY, 1e-6);
+    CHECK_CLOSE_ABS(extent.yrange.second, rhY, 1e-6);
+    CHECK_CLOSE_ABS(extent.rrange.first, 0., 1e-6);
+    CHECK_CLOSE_ABS(extent.rrange.second, std::sqrt(rhX * rhX + rhY * rhY),
+                    1e-6);
+    CHECK_CLOSE_ABS(extent.zrange.first, 0., 1e-6);
+    CHECK_CLOSE_ABS(extent.zrange.second, 0., 1e-6);
     BOOST_CHECK(rectangularPh.vertices.size() == 4);
-    if (not triangulate) {
-      BOOST_CHECK(rectangularPh.faces.size() == 1);
-      std::vector<size_t> expectedRect = {0, 1, 2, 3};
-      BOOST_CHECK(rectangularPh.faces[0] == expectedRect);
-    } else {
-      BOOST_CHECK(rectangularPh.faces.size() == 2);
-    }
+    BOOST_CHECK(rectangularPh.faces.size() == 1);
+    std::vector<size_t> expectedRect = {0, 1, 2, 3};
+    BOOST_CHECK(rectangularPh.faces[0] == expectedRect);
     testTypes.push_back({"PlaneRectangle" + mode.first, rectangularPh});
 
     /// Trapezoidal Plane
-    auto trapezoid = std::make_shared<TrapezoidBounds>(10_mm, 25_mm, 35_mm);
+    double thX1 = 10_mm;
+    double thX2 = 25_mm;
+    double thY = 35_mm;
+
+    auto trapezoid = std::make_shared<TrapezoidBounds>(thX1, thX2, thY);
     auto trapezoidalPlane =
         Surface::makeShared<PlaneSurface>(transform, trapezoid);
-    auto trapezoidalPh = trapezoidalPlane->polyhedronRepresentation(
-        tgContext, mode.second, triangulate);
+    auto trapezoidalPh =
+        trapezoidalPlane->polyhedronRepresentation(tgContext, mode.second);
+    extent = trapezoidalPh.surfaceExtent();
+
+    double thX = std::max(thX1, thX2);
+    CHECK_CLOSE_ABS(extent.xrange.first, -thX, 1e-6);
+    CHECK_CLOSE_ABS(extent.xrange.second, thX, 1e-6);
+    CHECK_CLOSE_ABS(extent.yrange.first, -thY, 1e-6);
+    CHECK_CLOSE_ABS(extent.yrange.second, thY, 1e-6);
+    CHECK_CLOSE_ABS(extent.rrange.first, 0., 1e-6);
+    CHECK_CLOSE_ABS(extent.rrange.second, std::sqrt(thX * thX + thY * thY),
+                    1e-6);
+    CHECK_CLOSE_ABS(extent.zrange.first, 0., 1e-6);
+    CHECK_CLOSE_ABS(extent.zrange.second, 0., 1e-6);
     BOOST_CHECK(trapezoidalPh.vertices.size() == 4);
-    if (not triangulate) {
-      BOOST_CHECK(trapezoidalPh.faces.size() == 1);
-      std::vector<size_t> expectedTra = {0, 1, 2, 3};
-      BOOST_CHECK(trapezoidalPh.faces[0] == expectedTra);
-    } else {
-      BOOST_CHECK(trapezoidalPh.faces.size() == 2);
-    }
+    BOOST_CHECK(trapezoidalPh.faces.size() == 1);
+    std::vector<size_t> expectedTra = {0, 1, 2, 3};
+    BOOST_CHECK(trapezoidalPh.faces[0] == expectedTra);
     testTypes.push_back({"PlaneTrapezoid" + mode.first, trapezoidalPh});
 
     /// Full ellispoidal Plane
@@ -437,20 +463,16 @@ BOOST_AUTO_TEST_CASE(PlaneSurfacePolyhedrons) {
     testTypes.push_back({"PlaneFullEllipse",ellispoidPh});
     */
 
-    /// Sectoral epplise
+    /// Sectoral ellipse
 
     /// Diamond shaped plane
     auto diamond =
         std::make_shared<DiamondBounds>(10_mm, 20_mm, 15_mm, 40_mm, 50_mm);
     auto diamondPlane = Surface::makeShared<PlaneSurface>(transform, diamond);
-    auto diamondPh = diamondPlane->polyhedronRepresentation(
-        tgContext, mode.second, triangulate);
+    auto diamondPh =
+        diamondPlane->polyhedronRepresentation(tgContext, mode.second);
     BOOST_CHECK(diamondPh.vertices.size() == 6);
-    if (not triangulate) {
-      BOOST_CHECK(diamondPh.faces.size() == 1);
-    } else {
-      BOOST_CHECK(diamondPh.faces.size() == 4);
-    }
+    BOOST_CHECK(diamondPh.faces.size() == 1);
     testTypes.push_back({"PlaneDiamond" + mode.first, diamondPh});
   }
   writeObj(testTypes);
