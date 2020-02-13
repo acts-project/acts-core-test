@@ -100,14 +100,14 @@ class SurfaceStub : public Surface {
   /// Simply return true to check a method can be called on a constructed object
   bool constructedOk() const { return true; }
 
-  /// Return a PolyhedronRepresentation for the surfaces
-  PolyhedronRepresentation polyhedronRepresentation(
-      const GeometryContext& /*gctx*/, size_t /*lseg */,
-      bool /*ignored*/) const final {
+  /// Return a Polyhedron for the surfaces
+  Polyhedron polyhedronRepresentation(const GeometryContext& /*gctx*/,
+                                      size_t /*lseg */) const final {
     std::vector<Vector3D> vertices;
     std::vector<std::vector<size_t>> faces;
+    std::vector<std::vector<size_t>> triangularMesh;
 
-    return PolyhedronRepresentation(vertices, faces);
+    return Polyhedron(vertices, faces, triangularMesh);
   }
 
  private:

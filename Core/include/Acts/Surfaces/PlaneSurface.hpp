@@ -11,9 +11,9 @@
 #include <limits>
 #include "Acts/Geometry/GeometryContext.hpp"
 #include "Acts/Geometry/GeometryStatics.hpp"
+#include "Acts/Geometry/Polyhedron.hpp"
 #include "Acts/Surfaces/InfiniteBounds.hpp"
 #include "Acts/Surfaces/PlanarBounds.hpp"
-#include "Acts/Surfaces/PolyhedronRepresentation.hpp"
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Surfaces/detail/PlanarHelper.hpp"
 #include "Acts/Utilities/Definitions.hpp"
@@ -188,20 +188,16 @@ class PlaneSurface : public Surface {
       const Vector3D& direction,
       const BoundaryCheck& bcheck = false) const final;
 
-  /// Return a PolyhedronRepresentation for the surfaces
+  /// Return a Polyhedron for the surfaces
   ///
   /// @param gctx The current geometry context object, e.g. alignment
   /// @param lseg Number of segments along curved lines, it represents
   /// the full 2*M_PI coverange, if lseg is set to 1 only the extrema
   /// are given
-  /// @param triangulate is a boolean to indicate if the polyhedron is
-  /// actually expressed as a set of triangulars for a triangular mesh
-  /// representation
   ///
   /// @return A list of vertices and a face/facett description of it
-  PolyhedronRepresentation polyhedronRepresentation(
-      const GeometryContext& gctx, size_t lseg = 1,
-      bool triangulate = false) const final;
+  Polyhedron polyhedronRepresentation(const GeometryContext& gctx,
+                                      size_t lseg) const final;
 
   /// Return properly formatted class name for screen output
   std::string name() const override;

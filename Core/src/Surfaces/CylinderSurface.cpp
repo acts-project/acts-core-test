@@ -184,23 +184,23 @@ const Acts::CylinderBounds& Acts::CylinderSurface::bounds() const {
   return (*m_bounds.get());
 }
 
-Acts::PolyhedronRepresentation Acts::CylinderSurface::polyhedronRepresentation(
-    const GeometryContext& gctx, size_t lseg, bool triangulate) const {
+Acts::Polyhedron Acts::CylinderSurface::polyhedronRepresentation(
+    const GeometryContext& gctx, size_t lseg) const {
+  // Prepare vertices and faces
   std::vector<Vector3D> vertices;
-  std::vector<std::vector<size_t>> faces;
+  std::vector<Polyhedron::face_type> faces;
+  std::vector<Polyhedron::face_type> triangularMesh;
 
   auto ctrans = transform(gctx);
-  double r = bounds().r();
-  double hZ = bounds().halflengthZ();
-  double hPhiSec = bounds().halfPhiSector();
-  double avgPhi = bounds().averagePhi();
   bool fullCylinder = bounds().coversFullAzimuth();
 
-  // Get the phi segments from the helper
+  // Get the phi segments from the helper - ensures extra points
   auto phiSegs = fullCylinder
                      ? detail::VertexHelper::phiSegments()
                      : detail::VertexHelper::phiSegments(
-                           avgPhi - hPhiSec, avgPhi + hPhiSec, {avgPhi});
+                           bounds().averagePhi() - bounds().halfPhiSector(),
+                           bounds().averagePhi() + bounds().halfPhiSector(),
+                           {bounds().averagePhi()});
 
   // Write the two bows/circles on either side
   std::vector<int> sides = {-1, 1};
@@ -208,28 +208,22 @@ Acts::PolyhedronRepresentation Acts::CylinderSurface::polyhedronRepresentation(
     for (size_t iseg = 0; iseg < phiSegs.size() - 1; ++iseg) {
       int addon = (iseg == phiSegs.size() - 2 and not fullCylinder) ? 1 : 0;
       /// Helper method to create the segment
-      detail::VertexHelper::createSegment(vertices, r, phiSegs[iseg],
-                                          phiSegs[iseg + 1], lseg, addon,
-                                          Vector3D(0., 0., side * hZ), ctrans);
+      detail::VertexHelper::createSegment(
+          vertices, bounds().r(), phiSegs[iseg], phiSegs[iseg + 1], lseg, addon,
+          Vector3D(0., 0., side * bounds().halflengthZ()), ctrans);
     }
   }
-
   // Write the faces from the built vertices
   size_t nqfaces = 0.5 * vertices.size();
   size_t reduce = (not fullCylinder) ? 1 : 0;
   for (size_t iface = 0; iface < nqfaces - reduce; ++iface) {
     size_t p2 = (iface + 1 == nqfaces) ? 0 : iface + 1;
-    if (not triangulate) {
-      std::vector<size_t> face = {iface, p2, p2 + nqfaces, nqfaces + iface};
-      faces.push_back(face);
-    } else {
-      // Create two if configured to triangulate
-      std::vector<size_t> triA = {iface, p2, p2 + nqfaces};
-      faces.push_back(triA);
-      std::vector<size_t> triB = {p2 + nqfaces, nqfaces + iface, iface};
-      faces.push_back(triB);
-    }
+    std::vector<size_t> face = {iface, p2, p2 + nqfaces, nqfaces + iface};
+    faces.push_back(face);
+    std::vector<size_t> triA = {iface, p2, p2 + nqfaces};
+    triangularMesh.push_back(triA);
+    std::vector<size_t> triB = {p2 + nqfaces, nqfaces + iface, iface};
+    triangularMesh.push_back(triB);
   }
-
-  return PolyhedronRepresentation(vertices, faces);
+  return Polyhedron(vertices, faces, triangularMesh);
 }

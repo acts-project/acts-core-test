@@ -6,10 +6,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-///////////////////////////////////////////////////////////////////
-// VolumeBounds.h, Acts project
-///////////////////////////////////////////////////////////////////
-
 #pragma once
 #include <iomanip>
 #include <iostream>
@@ -45,8 +41,10 @@ class VolumeBounds {
  public:
   /// Default Constructor*/
   VolumeBounds() = default;
+
   /// Destructor
   virtual ~VolumeBounds() = default;
+
   ///  clone() method to make deep copy in Volume copy constructor and for
   /// assigment operator  of the Surface class.
   virtual VolumeBounds* clone() const = 0;

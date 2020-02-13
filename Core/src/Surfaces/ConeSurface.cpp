@@ -193,8 +193,8 @@ const Acts::ConeBounds& Acts::ConeSurface::bounds() const {
   return (*m_bounds.get());
 }
 
-Acts::PolyhedronRepresentation Acts::ConeSurface::polyhedronRepresentation(
-    const GeometryContext& gctx, size_t lseg, bool /*ignored*/) const {
+Acts::Polyhedron Acts::ConeSurface::polyhedronRepresentation(
+    const GeometryContext& gctx, size_t lseg) const {
   std::vector<Vector3D> vertices;
   std::vector<std::vector<size_t>> faces;
 
@@ -205,7 +205,8 @@ Acts::PolyhedronRepresentation Acts::ConeSurface::polyhedronRepresentation(
   }
 
   auto ctransform = transform(gctx);
-  // The tip - written only once
+
+  // The tip - created only once
   vertices.push_back(ctransform * Vector3D(0., 0., 0.));
 
   // Cone parameters
@@ -247,5 +248,5 @@ Acts::PolyhedronRepresentation Acts::ConeSurface::polyhedronRepresentation(
       faces.push_back({0, vertices.size() - 1, firstIv});
     }
   }
-  return PolyhedronRepresentation(vertices, faces);
+  return Polyhedron(vertices, faces, faces);
 }

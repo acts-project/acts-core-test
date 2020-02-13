@@ -82,18 +82,14 @@ class PerigeeSurface : public LineSurface {
   std::ostream& toStream(const GeometryContext& gctx,
                          std::ostream& sl) const final;
 
-  /// Return a PolyhedronRepresentation for the surfaces
+  /// Return a Polyhedron for the surfaces
   ///
   /// @param gctx The current geometry context object, e.g. alignment
   /// @param lseg is ignored for a perigee @note ignored
-  /// @param triangulate is a boolean to indicate if the polyhedron is
-  /// actually expressed as a set of triangulars for a triangular mesh
-  /// representation
   ///
   /// @return A list of vertices and a face/facett description of it
-  PolyhedronRepresentation polyhedronRepresentation(
-      const GeometryContext& gctx, size_t /*lseg = 72*/,
-      bool triangulate = false) const final;
+  Polyhedron polyhedronRepresentation(const GeometryContext& gctx,
+                                      size_t /*ignored*/) const final;
 
  private:
   /// Clone method implementation

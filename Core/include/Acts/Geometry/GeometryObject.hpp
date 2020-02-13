@@ -44,7 +44,7 @@ class GeometryObject {
     /// The range in x
     range_type zrange = {maxval, -maxval};
     /// The range in x
-    range_type rrange = {0., -maxval};
+    range_type rrange = {maxval, -maxval};
 
     /// Check the vertex
     /// @param vtx the Vertex to be checked
