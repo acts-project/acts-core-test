@@ -75,6 +75,21 @@ class AbstractVolume : public Volume {
   /// @return the vector of boundary surfaces
   const std::vector<BoundarySurfacePtr>& boundarySurfaces() const;
 
+  // Return a Polyhedron for this object
+  ///
+  /// @param gctx The current geometry context object, e.g. alignment
+  /// @param lseg Number of segments along curved lines, if the lseg
+  /// is set to one, only the corners and the extrema are given,
+  /// otherwise it represents the number of segments for a full 2*M_PI
+  /// circle and is scaled to the relevant sector
+  ///
+  /// @note An internal surface transform can invalidate the extrema
+  /// in the transformed space
+  ///
+  /// @return A list of vertices and a face/facett description of it
+  Polyhedron polyhedronRepresentation(const GeometryContext& gctx,
+                                      size_t lseg) const final;
+
  private:
   /// Private method to create BoundarySurfaces
   void createBoundarySurfaces();

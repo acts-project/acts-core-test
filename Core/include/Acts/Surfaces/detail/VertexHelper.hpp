@@ -96,7 +96,70 @@ void createSegment(std::vector<vertex_t>& vertices, double r, double phi1,
     vertex = vertex + offset;
     vertices.push_back(transform * vertex);
   }
-};
+}
+
+/// Check if the point is inside the polygon w/o any tolerances
+///
+/// @tparam vertex_container_t is an iterable container
+///
+/// @param point is the Vector2DType to check
+/// @param vertices Forward iterable container of convex polygon vertices.
+///                 Calling `std::begin`/ `std::end` on the container must
+///                 return an iterator where `*it` must be convertible to
+///                 an `Vector2DType`.
+/// @return bool for inside/outside
+template <typename vertex_t, typename vertex_container_t>
+bool isInsidePolygon(const vertex_t& point,
+                     const vertex_container_t& vertices) {
+  // when we move along the edges of a convex polygon, a point on the inside of
+  // the polygon will always appear on the same side of each edge.
+  // a point on the outside will switch sides at least once.
+
+  // returns which side of the connecting line between `ll0` and `ll1` the point
+  // `p` is on. computes the sign of the z-component of the cross-product
+  // between the line normal vector and the vector from `ll0` to `p`.
+  auto lineSide = [&](auto&& ll0, auto&& ll1) {
+    auto normal = ll1 - ll0;
+    auto delta = point - ll0;
+    return std::signbit((normal[0] * delta[1]) - (normal[1] * delta[0]));
+  };
+
+  auto iv = std::begin(vertices);
+  auto l0 = *iv;
+  auto l1 = *(++iv);
+  // use vertex0 to vertex1 to define reference sign and compare w/ all edges
+  auto reference = lineSide(l0, l1);
+  for (++iv; iv != std::end(vertices); ++iv) {
+    l0 = l1;
+    l1 = *iv;
+    if (lineSide(l0, l1) != reference) {
+      return false;
+    }
+  }
+  // manual check for last edge from last vertex back to the first vertex
+  if (lineSide(l1, *std::begin(vertices)) != reference) {
+    return false;
+  }
+  // point was always on the same side. point must be inside.
+  return true;
+}
+
+/// Check if the point is inside the rectangle
+///
+/// @tparam vertex_t is vector with [0],[1] access
+///
+/// @param point is the Vector2DType to check
+/// @param vertices Forward iterable container of convex polygon vertices.
+///                 Calling `std::begin`/ `std::end` on the container must
+///                 return an iterator where `*it` must be convertible to
+///                 an `Vector2DType`.
+/// @return bool for inside/outside
+template <typename vertex_t>
+bool isInsideRectangle(const vertex_t& point, const vertex_t& lowerLeft,
+                       const vertex_t& upperRight) {
+  return (lowerLeft[0] <= point[0]) && (point[0] < upperRight[0]) &&
+         (lowerLeft[1] <= point[1]) && (point[1] < upperRight[1]);
+}
 
 }  // namespace VertexHelper
 

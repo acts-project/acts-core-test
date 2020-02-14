@@ -10,13 +10,12 @@
 
 #include "Acts/Geometry/GeometryContext.hpp"
 #include "Acts/Geometry/GeometryID.hpp"
+#include "Acts/Geometry/Polyhedron.hpp"
 #include "Acts/Utilities/BinningType.hpp"
 #include "Acts/Utilities/Definitions.hpp"
 #include "Acts/Utilities/Helpers.hpp"
 
 namespace Acts {
-
-using range_type = std::pair<double, double>;
 
 /// @class GeometryObject
 ///
@@ -28,47 +27,13 @@ using range_type = std::pair<double, double>;
 ///
 class GeometryObject {
  public:
-  /// @brief Extent in space
-  ///
-  /// This is a nested struct to the GeometryObject representation
-  /// which can be retrieved and used for surface parsing and will
-  /// give you the maximal extent in 3D space/
-  struct Extent {
-    /// Possible maximal value
-    static constexpr double maxval = std::numeric_limits<double>::max();
-
-    /// The range in x
-    range_type xrange = {maxval, -maxval};
-    /// The range in x
-    range_type yrange = {maxval, -maxval};
-    /// The range in x
-    range_type zrange = {maxval, -maxval};
-    /// The range in x
-    range_type rrange = {maxval, -maxval};
-
-    /// Check the vertex
-    /// @param vtx the Vertex to be checked
-    void check(const Vector3D& vtx) {
-      // min/max value check
-      auto minMax = [&](range_type& range, double value) -> void {
-        range.first = std::min(value, range.first);
-        range.second = std::max(value, range.second);
-      };
-      // go through the parameters
-      minMax(xrange, vtx.x());
-      minMax(yrange, vtx.y());
-      minMax(zrange, vtx.z());
-      minMax(rrange, VectorHelpers::perp(vtx));
-    }
-  };
-
   /// Defaulted construrctor
   GeometryObject() = default;
 
   /// Defaulted copy constructor
   GeometryObject(const GeometryObject&) = default;
 
-  /// Constructor from a ready-made value
+  /// Constructor from a value
   ///
   /// @param geoID the geometry identifier of the object
   GeometryObject(const GeometryID& geoID) : m_geoID(geoID) {}
@@ -109,6 +74,21 @@ class GeometryObject {
   /// @param geoID the geometry identifier to be assigned
   void assignGeoID(const GeometryID& geoID);
 
+  // Return a Polyhedron for this object
+  ///
+  /// @param gctx The current geometry context object, e.g. alignment
+  /// @param lseg Number of segments along curved lines, if the lseg
+  /// is set to one, only the corners and the extrema are given,
+  /// otherwise it represents the number of segments for a full 2*M_PI
+  /// circle and is scaled to the relevant sector
+  ///
+  /// @note An internal surface transform can invalidate the extrema
+  /// in the transformed space
+  ///
+  /// @return A list of vertices and a face/facett description of it
+  virtual Polyhedron polyhedronRepresentation(const GeometryContext& gctx,
+                                              size_t lseg) const = 0;
+
  protected:
   GeometryID m_geoID;
 };
@@ -123,28 +103,6 @@ inline void GeometryObject::assignGeoID(const GeometryID& geoID) {
 
 inline double GeometryObject::binningPositionValue(const GeometryContext& gctx,
                                                    BinningValue bValue) const {
-  using VectorHelpers::perp;
-  // now switch
-  switch (bValue) {
-    // case x
-    case Acts::binX: {
-      return binningPosition(gctx, bValue).x();
-    } break;
-    // case y
-    case Acts::binY: {
-      return binningPosition(gctx, bValue).y();
-    } break;
-    // case z
-    case Acts::binZ: {
-      return binningPosition(gctx, bValue).z();
-    } break;
-    // case - to be overwritten by disks
-    case Acts::binR: {
-      return perp(binningPosition(gctx, bValue));
-    } break;
-    // do nothing for the default
-    default:
-      return 0.;
-  }
+  return VectorHelpers::cast(binningPosition(gctx, bValue), bValue);
 }
 }  // namespace Acts

@@ -16,6 +16,7 @@
 #include <utility>
 
 #include "Acts/Geometry/VolumeBounds.hpp"
+#include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Utilities/Units.hpp"
 
 using namespace Acts::UnitLiterals;
@@ -109,4 +110,14 @@ Acts::Volume::BoundingBox Acts::Volume::boundingBox(
 
 const Acts::Volume::BoundingBox& Acts::Volume::orientedBoundingBox() const {
   return m_orientedBoundingBox;
+}
+
+Acts::Polyhedron Acts::Volume::polyhedronRepresentation(
+    const GeometryContext& gctx, size_t lseg) const {
+  Polyhedron phed;
+  auto boundSurfaces = volumeBounds().decomposeToSurfaces(&transform());
+  for (const auto& bSurface : boundSurfaces) {
+    phed += bSurface->polyhedronRepresentation(gctx, lseg);
+  }
+  return phed;
 }

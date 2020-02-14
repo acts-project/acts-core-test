@@ -10,8 +10,8 @@
 
 #include <limits>
 #include <vector>
-
-#include "Acts/Geometry/GeometryObject.hpp"
+#include "Acts/Geometry/Extent.hpp"
+#include "Acts/Surfaces/BoundaryCheck.hpp"
 #include "Acts/Utilities/Definitions.hpp"
 #include "Acts/Utilities/Helpers.hpp"
 
@@ -50,12 +50,12 @@ struct Polyhedron {
   /// List of faces connecting the vertices.
   /// each face is a list of vertices v
   /// corresponding to the vertex vector above
-  std::vector<std::vector<size_t>> faces;
+  std::vector<face_type> faces;
 
   /// List of faces connecting the vertices.
   /// each face is a list of vertices v
   /// - in this case restricted to a triangular representation
-  std::vector<std::vector<size_t>> triangularMesh;
+  std::vector<face_type> triangularMesh;
 
   /// Add another Polyhedrons
   ///
@@ -96,14 +96,6 @@ struct Polyhedron {
   /// with respect to a given coordinate frame
   ///
   /// @return ranges that describe the space taken by this surface
-  GeometryObject::Extent surfaceExtent(
-      const Transform3D& transform = Transform3D::Identity()) const {
-    GeometryObject::Extent surfaceExtend;
-    for (const auto& vtx : vertices) {
-      surfaceExtend.check(transform * vtx);
-    }
-
-    return surfaceExtend;
-  }
+  Extent extent(const Transform3D& transform = Transform3D::Identity()) const;
 };
 }  // namespace Acts

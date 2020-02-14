@@ -440,21 +440,6 @@ class Surface : public virtual GeometryObject,
       const GeometryContext& gctx, const Vector3D& position,
       const Vector3D& direction, const BoundaryCheck& bcheck) const = 0;
 
-  /// Return a Polyhedron for the surfaces
-  ///
-  /// @param gctx The current geometry context object, e.g. alignment
-  /// @param lseg Number of segments along curved lines, if the lseg
-  /// is set to one, only the corners and the extrema are given,
-  /// otherwise it represents the number of segments for a full 2*M_PI
-  /// circle and is scaled to the relevant sector
-  ///
-  /// @note An internal surface transform can invalidate the extrema
-  /// in the transformed space
-  ///
-  /// @return A list of vertices and a face/facett description of it
-  virtual Polyhedron polyhedronRepresentation(const GeometryContext& gctx,
-                                              size_t lseg) const = 0;
-
   /// Output Method for std::ostream, to be overloaded by child classes
   ///
   /// @param gctx The current geometry context object, e.g. alignment

@@ -493,3 +493,13 @@ void Acts::TrackingVolume::visitSurfaces(
     }
   }
 }
+
+Acts::Polyhedron Acts::TrackingVolume::polyhedronRepresentation(
+    const GeometryContext& gctx, size_t lseg) const {
+  Polyhedron phed;
+  for (const auto& bSurface : m_boundarySurfaces) {
+    phed +=
+        bSurface->surfaceRepresentation().polyhedronRepresentation(gctx, lseg);
+  }
+  return phed;
+}
