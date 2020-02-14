@@ -54,3 +54,13 @@ void Acts::AbstractVolume::createBoundarySurfaces() {
     m_boundarySurfaces.push_back(bSurface);
   }
 }
+
+Acts::Polyhedron Acts::AbstractVolume::polyhedronRepresentation(
+    const GeometryContext& gctx, size_t lseg) const {
+  Polyhedron phed;
+  for (const auto& bSurface : m_boundarySurfaces) {
+    phed +=
+        bSurface->surfaceRepresentation().polyhedronRepresentation(gctx, lseg);
+  }
+  return phed;
+}

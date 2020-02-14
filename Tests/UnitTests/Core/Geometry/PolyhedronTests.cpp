@@ -16,6 +16,8 @@
 // The class to test
 #include <fstream>
 #include "Acts/Geometry/Polyhedron.hpp"
+#include "Acts/Utilities/ObjHelper.hpp"
+#include "Acts/Utilities/Units.hpp"
 
 namespace Acts {
 
@@ -63,11 +65,20 @@ BOOST_AUTO_TEST_CASE(PolyhedronTest) {
   rStream.close();
 
   // Now add them
-  Polyhedron tr();
-  // tr += triangle;
-  // BOOST_CHECK(tr.vertices == rectangle.vertices);
-  // BOOST_CHECK(tr.faces == rectangle.faces);
-  // BOOST_CHECK(tr.triangularMesh == rectangle.triangularMesh);
+  Polyhedron tr;
+  tr += triangle;
+  BOOST_CHECK(tr.vertices == triangle.vertices);
+  BOOST_CHECK(tr.faces == triangle.faces);
+  BOOST_CHECK(tr.triangularMesh == triangle.triangularMesh);
+
+  tr += rectangle;
+
+  std::ofstream trStream;
+  trStream.open("PolyhedronTriangleRectangle.obj");
+  ObjHelper objtrH;
+  tr.draw(objtrH);
+  objtrH.write(trStream);
+  trStream.close();
 }
 
 BOOST_AUTO_TEST_SUITE_END()

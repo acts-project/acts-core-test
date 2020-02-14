@@ -97,3 +97,15 @@ void Acts::Layer::closeGeometry(const IMaterialDecorator* materialDecorator,
     }
   }
 }
+
+Acts::Polyhedron Acts::Layer::layerPolyhedron(const GeometryContext& gctx,
+                                              size_t lseg) const {
+  Polyhedron phed;
+  if (m_approachDescriptor) {
+    for (const auto& aSurface : m_approachDescriptor->containedSurfaces()) {
+      phed += aSurface->polyhedronRepresentation(gctx, lseg);
+    }
+    return phed;
+  }
+  return surfaceRepresentation().polyhedronRepresentation(gctx, lseg);
+}
