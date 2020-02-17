@@ -84,14 +84,16 @@ std::vector<Acts::Vector2D> Acts::RadialBounds::vertices(
     for (unsigned int iseg = phiSegs.size() - 1; iseg > 0; --iseg) {
       int addon = (iseg == 1 and not fullDisc) ? 1 : 0;
       detail::VertexHelper::createSegment<Vector2D, Eigen::Affine2d>(
-          rvertices, m_rMin, phiSegs[iseg], phiSegs[iseg - 1], lseg, addon);
+          rvertices, {m_rMin, m_rMin}, phiSegs[iseg], phiSegs[iseg - 1], lseg,
+          addon);
     }
   }
   // Upper bow from phi_min -> phi_max
   for (unsigned int iseg = 0; iseg < phiSegs.size() - 1; ++iseg) {
     int addon = (iseg == phiSegs.size() - 2 and not fullDisc) ? 1 : 0;
     detail::VertexHelper::createSegment<Vector2D, Eigen::Affine2d>(
-        rvertices, m_rMax, phiSegs[iseg], phiSegs[iseg + 1], lseg, addon);
+        rvertices, {m_rMax, m_rMax}, phiSegs[iseg], phiSegs[iseg + 1], lseg,
+        addon);
   }
   return rvertices;
 }
