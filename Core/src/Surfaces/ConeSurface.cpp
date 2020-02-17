@@ -221,10 +221,10 @@ Acts::Polyhedron Acts::ConeSurface::polyhedronRepresentation(
 
   // Negative cone if exists
   std::vector<double> coneSides;
-  if (bounds().minZ()) {
+  if (bounds().minZ() < 0.) {
     coneSides.push_back(bounds().minZ());
   }
-  if (bounds().maxZ()) {
+  if (bounds().maxZ() > 0.) {
     coneSides.push_back(bounds().maxZ());
   }
   for (auto& z : coneSides) {
@@ -235,7 +235,7 @@ Acts::Polyhedron Acts::ConeSurface::polyhedronRepresentation(
     Vector3D zoffset(0., 0., z);
     for (unsigned int iseg = 0; iseg < phiSegs.size() - 1; ++iseg) {
       int addon = (iseg == phiSegs.size() - 2 and not fullCone) ? 1 : 0;
-      detail::VertexHelper::createSegment(vertices, r, phiSegs[iseg],
+      detail::VertexHelper::createSegment(vertices, {r, r}, phiSegs[iseg],
                                           phiSegs[iseg + 1], lseg, addon,
                                           zoffset, ctransform);
     }

@@ -209,7 +209,8 @@ Acts::Polyhedron Acts::CylinderSurface::polyhedronRepresentation(
       int addon = (iseg == phiSegs.size() - 2 and not fullCylinder) ? 1 : 0;
       /// Helper method to create the segment
       detail::VertexHelper::createSegment(
-          vertices, bounds().r(), phiSegs[iseg], phiSegs[iseg + 1], lseg, addon,
+          vertices, {bounds().r(), bounds().r()}, phiSegs[iseg],
+          phiSegs[iseg + 1], lseg, addon,
           Vector3D(0., 0., side * bounds().halflengthZ()), ctrans);
     }
   }

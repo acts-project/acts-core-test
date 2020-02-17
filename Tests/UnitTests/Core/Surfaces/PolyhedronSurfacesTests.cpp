@@ -31,6 +31,7 @@
 #include "Acts/Surfaces/RadialBounds.hpp"
 
 // Plane Surface
+#include "Acts/Surfaces/ConvexPolygonBounds.hpp"
 #include "Acts/Surfaces/DiamondBounds.hpp"
 #include "Acts/Surfaces/EllipseBounds.hpp"
 #include "Acts/Surfaces/PlaneSurface.hpp"
@@ -460,25 +461,81 @@ BOOST_AUTO_TEST_CASE(PlaneSurfacePolyhedrons) {
     BOOST_CHECK(trapezoidalPh.faces[0] == expectedTra);
     testTypes.push_back({"PlaneTrapezoid" + mode.first, trapezoidalPh});
 
-    /// Full ellispoidal Plane
-    /**
-    auto ellipse = std::make_shared<EllipseBounds>(10_mm,20_mm,30_mm,40_mm);
-    auto ellipsoidPlane = Surface::makeShared<PlaneSurface>(transform,ellipse);
-    auto ellispoidPh = ellipsoidPlane->polyhedronRepresentation(tgContext,72);
-    BOOST_CHECK(ellispoidPh.vertices.size()==72);
-    testTypes.push_back({"PlaneFullEllipse",ellispoidPh});
-    */
+    /// Ring-like ellispoidal Plane
+    double rMaxX = 30_mm;
+    double rMaxY = 40_mm;
+    auto ellipse = std::make_shared<EllipseBounds>(0., 0., rMaxX, rMaxY);
+    auto ellipsoidPlane = Surface::makeShared<PlaneSurface>(transform, ellipse);
+    auto ellispoidPh =
+        ellipsoidPlane->polyhedronRepresentation(tgContext, mode.second);
+    extent = ellispoidPh.extent();
+    CHECK_CLOSE_ABS(extent.ranges[binX].first, -rMaxX, 1e-6);
+    CHECK_CLOSE_ABS(extent.ranges[binX].second, rMaxX, 1e-6);
+    CHECK_CLOSE_ABS(extent.ranges[binY].first, -rMaxY, 1e-6);
+    CHECK_CLOSE_ABS(extent.ranges[binY].first, -rMaxY, 1e-6);
+    CHECK_CLOSE_ABS(extent.ranges[binR].first, 0., 1e-6);
+    CHECK_CLOSE_ABS(extent.ranges[binR].second, rMaxY, 1e-6);
+    CHECK_CLOSE_ABS(extent.ranges[binZ].first, 0., 1e-6);
+    CHECK_CLOSE_ABS(extent.ranges[binZ].second, 0., 1e-6);
 
-    /// Sectoral ellipse
+    testTypes.push_back({"PlaneFullEllipse" + mode.first, ellispoidPh});
+
+    double rMinX = 10_mm;
+    double rMinY = 20_mm;
+    auto ellipseRing =
+        std::make_shared<EllipseBounds>(rMinX, rMaxX, rMinY, rMaxY);
+    auto ellipsoidRingPlane =
+        Surface::makeShared<PlaneSurface>(transform, ellipseRing);
+    auto ellispoidRingPh =
+        ellipsoidRingPlane->polyhedronRepresentation(tgContext, mode.second);
+
+    extent = ellispoidPh.extent();
+    CHECK_CLOSE_ABS(extent.ranges[binX].first, -rMaxX, 1e-6);
+    CHECK_CLOSE_ABS(extent.ranges[binX].second, rMaxX, 1e-6);
+    CHECK_CLOSE_ABS(extent.ranges[binY].first, -rMaxY, 1e-6);
+    CHECK_CLOSE_ABS(extent.ranges[binY].first, rMinX, 1e-6);
+    CHECK_CLOSE_ABS(extent.ranges[binR].second, rMaxY, 1e-6);
+    CHECK_CLOSE_ABS(extent.ranges[binZ].first, 0., 1e-6);
+    CHECK_CLOSE_ABS(extent.ranges[binZ].second, 0., 1e-6);
+
+    // BOOST_CHECK(ellispoidPh.vertices.size()==72);
+    testTypes.push_back({"PlaneRingEllipse" + mode.first, ellispoidRingPh});
+
+    /// ConvextPolygonBounds test
+    std::vector<Vector2D> vtxs = {
+        Vector2D(-40_mm, -10_mm), Vector2D(-10_mm, -30_mm),
+        Vector2D(30_mm, -20_mm),  Vector2D(10_mm, 20_mm),
+        Vector2D(-20_mm, 50_mm),  Vector2D(-30_mm, 30_mm)};
+
+    auto sextagon = std::make_shared<ConvexPolygonBounds<6>>(vtxs);
+    auto sextagonPlane = Surface::makeShared<PlaneSurface>(transform, sextagon);
+    auto sextagonPlanePh =
+        sextagonPlane->polyhedronRepresentation(tgContext, mode.second);
+    testTypes.push_back({"PlaneSextagon" + mode.first, sextagonPlanePh});
 
     /// Diamond shaped plane
+    double hMinX = 10_mm;
+    double hMedX = 20_mm;
+    double hMaxX = 15_mm;
+    double hMinY = 40_mm;
+    double hMaxY = 50_mm;
     auto diamond =
-        std::make_shared<DiamondBounds>(10_mm, 20_mm, 15_mm, 40_mm, 50_mm);
+        std::make_shared<DiamondBounds>(hMinX, hMedX, hMaxX, hMinY, hMaxY);
     auto diamondPlane = Surface::makeShared<PlaneSurface>(transform, diamond);
     auto diamondPh =
         diamondPlane->polyhedronRepresentation(tgContext, mode.second);
     BOOST_CHECK(diamondPh.vertices.size() == 6);
     BOOST_CHECK(diamondPh.faces.size() == 1);
+    extent = diamondPh.extent();
+    CHECK_CLOSE_ABS(extent.ranges[binX].first, -hMedX, 1e-6);
+    CHECK_CLOSE_ABS(extent.ranges[binX].second, hMedX, 1e-6);
+    CHECK_CLOSE_ABS(extent.ranges[binY].first, -hMinY, 1e-6);
+    CHECK_CLOSE_ABS(extent.ranges[binY].second, hMaxY, 1e-6);
+    CHECK_CLOSE_ABS(extent.ranges[binR].first, 0., 1e-6);
+    CHECK_CLOSE_ABS(extent.ranges[binR].second,
+                    std::sqrt(hMaxX * hMaxX + hMaxY * hMaxY), 1e-6);
+    CHECK_CLOSE_ABS(extent.ranges[binZ].first, 0., 1e-6);
+    CHECK_CLOSE_ABS(extent.ranges[binZ].second, 0., 1e-6);
     testTypes.push_back({"PlaneDiamond" + mode.first, diamondPh});
   }
   writeObj(testTypes);

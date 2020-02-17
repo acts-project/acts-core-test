@@ -18,6 +18,7 @@
 #include "Acts/Surfaces/ConeBounds.hpp"
 #include "Acts/Surfaces/PlaneSurface.hpp"
 #include "Acts/Surfaces/RectangleBounds.hpp"
+#include "Acts/Geometry/Polyhedron.hpp"
 
 #include "LayerStub.hpp"
 
@@ -70,6 +71,7 @@ BOOST_AUTO_TEST_CASE(ConeLayerConstruction) {
   auto pConeLayerWithLayerType = ConeLayer::create(
       pTransform, pCone, nullptr, thickness, std::move(ad), LayerType::passive);
   BOOST_CHECK_EQUAL(pConeLayerWithLayerType->layerType(), LayerType::passive);
+
 }
 
 /// Unit test for testing Layer properties

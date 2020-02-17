@@ -73,9 +73,9 @@ Acts::Polyhedron Acts::StrawSurface::polyhedronRepresentation(
         int addon = (iseg == phiSegs.size() - 2) ? 1 : 0;
         /// Helper method to create the segment
         detail::VertexHelper::createSegment(
-            vertices, m_bounds->r(), phiSegs[iseg], phiSegs[iseg + 1], lseg,
-            addon, Vector3D(0., 0., side * m_bounds->halflengthZ()),
-            ctransform);
+            vertices, {m_bounds->r(), m_bounds->r()}, phiSegs[iseg],
+            phiSegs[iseg + 1], lseg, addon,
+            Vector3D(0., 0., side * m_bounds->halflengthZ()), ctransform);
       }
     }
     // Write the faces from the built vertices

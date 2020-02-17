@@ -18,8 +18,8 @@ namespace Acts {
 
 /// @class EllipseBounds
 ///
-/// Class to describe the bounds for a planar EllipseSurface,
-/// i.e. the surface between two ellipses.
+/// Class to describe the bounds for a planar ellispoid
+/// surface.
 /// By providing an argument for hphisec, the bounds can
 /// be restricted to a phi-range around the center position.
 ///
@@ -38,6 +38,7 @@ class EllipseBounds : public PlanarBounds {
     bv_length = 6
   };
 
+  /// Deleted default constructor
   EllipseBounds() = delete;
 
   /// Constructor for full of an ellipsoid disc
@@ -52,12 +53,16 @@ class EllipseBounds : public PlanarBounds {
                 double maxRadius1, double averagePhi = 0.,
                 double halfPhi = M_PI);
 
-  ~EllipseBounds() override;
+  /// Defaulted destructor
+  ~EllipseBounds() override = default;
 
+  /// Clone method for surface cloning
   EllipseBounds* clone() const final;
 
+  /// Type enumeration
   BoundsType type() const final;
 
+  /// Complete value store for persistency
   std::vector<TDD_real_t> valueStore() const final;
 
   /// This method checks if the point given in the local coordinates is between
