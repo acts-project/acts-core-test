@@ -8,6 +8,7 @@
 
 #pragma once
 #include <iostream>
+#include "Acts/Geometry/Extent.hpp"
 #include "Acts/Geometry/GeometryContext.hpp"
 #include "Acts/Surfaces/PlanarBounds.hpp"
 #include "Acts/Surfaces/Surface.hpp"
@@ -23,26 +24,8 @@ namespace Acts {
 
 struct ProtoLayer {
  public:
-  double maxX;
-  double minX;
-
-  double maxY;
-  double minY;
-
-  double maxZ;
-  double minZ;
-
-  double maxR;
-  double minR;
-
-  double maxPhi;
-  double minPhi;
-
-  std::pair<double, double> envX = {0, 0};
-  std::pair<double, double> envY = {0, 0};
-  std::pair<double, double> envZ = {0, 0};
-  std::pair<double, double> envR = {0, 0};
-  std::pair<double, double> envPhi = {0, 0};
+  /// The extent of the ProtoLayer
+  Extent environment;
 
   /// Constructor
   ///
@@ -66,18 +49,10 @@ struct ProtoLayer {
   ProtoLayer(const GeometryContext& gctx,
              const std::vector<std::shared_ptr<const Surface>>& surfaces);
 
-  // normal empty constructor
+  // Defaulated empty constructor
   ProtoLayer() = default;
 
   std::ostream& toStream(std::ostream& sl) const;
-
-  /// Calculates the closest radial distance of a line
-  ///
-  /// @param pos1 is the first position on the line
-  /// @param pos2 is the second position on the line
-  ///
-  /// @return is the closest distance
-  double radialDistance(const Vector3D& pos1, const Vector3D& pos2) const;
 
  private:
   /// Helper method which performs the actual min/max calculation

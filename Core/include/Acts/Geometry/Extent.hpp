@@ -33,6 +33,16 @@ struct Extent {
   // The different ranges
   std::vector<range_type> ranges = std::vector<range_type>(9, maxrange);
 
+  /// Merge another extent in - using operator+=
+  /// @param other is the source Extent
+  Extent& operator+=(const Extent& other){
+    for (auto ir : other.ranges.size(){
+      ranges[ir].first = std::min(ranges[ir].first, other.ranges[ir].first);
+      ranges[ir].second = std::max(ranges[ir].second, other.ranges[ir].second);
+    }
+    return (*this);
+  }
+
   /// Check the vertex
   /// @param vtx the Vertex to be checked
   void check(const Vector3D& vtx) {

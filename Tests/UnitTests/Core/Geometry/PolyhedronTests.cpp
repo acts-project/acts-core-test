@@ -23,8 +23,6 @@ namespace Acts {
 
 using namespace UnitLiterals;
 
-using IdentifiedPolyderon = std::pair<std::string, Polyhedron>;
-
 namespace Test {
 
 BOOST_AUTO_TEST_SUITE(Geometry)
