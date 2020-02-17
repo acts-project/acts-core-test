@@ -19,7 +19,6 @@
 
 // Cone surface
 #include "Acts/Surfaces/ConeBounds.hpp"
-#include "Acts/Surfaces/ConeSurface.hpp"
 
 // Cylinder surface
 #include "Acts/Surfaces/CylinderBounds.hpp"
@@ -472,7 +471,7 @@ BOOST_AUTO_TEST_CASE(PlaneSurfacePolyhedrons) {
     CHECK_CLOSE_ABS(extent.ranges[binX].first, -rMaxX, 1e-6);
     CHECK_CLOSE_ABS(extent.ranges[binX].second, rMaxX, 1e-6);
     CHECK_CLOSE_ABS(extent.ranges[binY].first, -rMaxY, 1e-6);
-    CHECK_CLOSE_ABS(extent.ranges[binY].first, -rMaxY, 1e-6);
+    CHECK_CLOSE_ABS(extent.ranges[binY].second, rMaxY, 1e-6);
     CHECK_CLOSE_ABS(extent.ranges[binR].first, 0., 1e-6);
     CHECK_CLOSE_ABS(extent.ranges[binR].second, rMaxY, 1e-6);
     CHECK_CLOSE_ABS(extent.ranges[binZ].first, 0., 1e-6);
@@ -489,11 +488,12 @@ BOOST_AUTO_TEST_CASE(PlaneSurfacePolyhedrons) {
     auto ellispoidRingPh =
         ellipsoidRingPlane->polyhedronRepresentation(tgContext, mode.second);
 
-    extent = ellispoidPh.extent();
+    extent = ellispoidRingPh.extent();
     CHECK_CLOSE_ABS(extent.ranges[binX].first, -rMaxX, 1e-6);
     CHECK_CLOSE_ABS(extent.ranges[binX].second, rMaxX, 1e-6);
     CHECK_CLOSE_ABS(extent.ranges[binY].first, -rMaxY, 1e-6);
-    CHECK_CLOSE_ABS(extent.ranges[binY].first, rMinX, 1e-6);
+    CHECK_CLOSE_ABS(extent.ranges[binY].second, rMaxX, 1e-6);
+    CHECK_CLOSE_ABS(extent.ranges[binR].first, rMaxX, 1e-6);
     CHECK_CLOSE_ABS(extent.ranges[binR].second, rMaxY, 1e-6);
     CHECK_CLOSE_ABS(extent.ranges[binZ].first, 0., 1e-6);
     CHECK_CLOSE_ABS(extent.ranges[binZ].second, 0., 1e-6);
