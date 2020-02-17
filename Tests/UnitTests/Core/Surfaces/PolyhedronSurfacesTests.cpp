@@ -19,6 +19,7 @@
 
 // Cone surface
 #include "Acts/Surfaces/ConeBounds.hpp"
+#include "Acts/Surfaces/ConeSurface.hpp"
 
 // Cylinder surface
 #include "Acts/Surfaces/CylinderBounds.hpp"

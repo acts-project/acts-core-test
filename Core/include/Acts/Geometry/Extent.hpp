@@ -18,11 +18,11 @@ namespace Acts {
 
 using range_type = std::pair<double, double>;
 
-// @brief Extent in space
+/// @brief Extent in space
 ///
 /// This is a nested struct to the GeometryObject representation
 /// which can be retrieved and used for surface parsing and will
-/// give you the maximal extent in 3D space/
+/// give you the maximal extent in 3D space
 struct Extent {
   /// Possible maximal value
   static constexpr double maxval = std::numeric_limits<double>::max();
@@ -31,7 +31,8 @@ struct Extent {
   static constexpr range_type maxrange = {maxval, -maxval};
 
   // The different ranges
-  std::vector<range_type> ranges = std::vector<range_type>(9, maxrange);
+  std::vector<range_type> ranges =
+      std::vector<range_type>((int)binValues, maxrange);
 
   /// Check the vertex
   /// @param vtx the Vertex to be checked
