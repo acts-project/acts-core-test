@@ -36,7 +36,8 @@ Acts::Layer::Layer(std::unique_ptr<SurfaceArray> surfaceArray, double thickness,
   }
 }
 
-const Acts::ApproachDescriptor* Acts::Layer::approachDescriptor() const {
+const Acts::ApproachDescriptor* Acts::Layer::approachDescriptor(
+    const Vector3D& /*ignored*/) const {
   return m_approachDescriptor.get();
 }
 
@@ -101,7 +102,7 @@ void Acts::Layer::closeGeometry(const IMaterialDecorator* materialDecorator,
 Acts::Polyhedron Acts::Layer::layerPolyhedron(const GeometryContext& gctx,
                                               size_t lseg) const {
   Polyhedron phed;
-  if (m_approachDescriptor) {
+  if (m_approachDescriptor != nullptr) {
     for (const auto& aSurface : m_approachDescriptor->containedSurfaces()) {
       phed += aSurface->polyhedronRepresentation(gctx, lseg);
     }

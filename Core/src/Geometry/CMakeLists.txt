@@ -4,6 +4,7 @@ target_sources_local(
     AbstractVolume.cpp
     BinUtility.cpp
     ConeLayer.cpp
+    CompoundLayer.cpp
     CuboidVolumeBounds.cpp
     CuboidVolumeBuilder.cpp
     CutoutCylinderVolumeBounds.cpp

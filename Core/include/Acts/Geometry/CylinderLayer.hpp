@@ -27,9 +27,7 @@ class ApproachDescriptor;
 /// @class CylinderLayer
 ///
 /// Class to describe a cylindrical detector layer for tracking, it inhertis
-/// from
-/// both,
-/// Layer base class and CylinderSurface class
+/// from  both, Layer base class and CylinderSurface class
 ///
 class CylinderLayer : public CylinderSurface, public Layer {
  public:

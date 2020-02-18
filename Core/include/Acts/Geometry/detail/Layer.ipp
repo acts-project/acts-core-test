@@ -10,7 +10,8 @@
 
 namespace Acts {
 
-inline const SurfaceArray* Layer::surfaceArray() const {
+inline const SurfaceArray* Layer::surfaceArray(
+    const Vector3D& /*ignored*/) const {
   return m_surfaceArray.get();
 }
 
@@ -75,12 +76,14 @@ std::vector<SurfaceIntersection> Layer::compatibleSurfaces(
   // remember the surfaces for duplicate removal
   std::map<const Surface*, bool> accepted;
 
+  auto sfArray = surfaceArray(position);
+  auto aDescriptor = approachDescriptor(position);
   // fast exit - there is nothing to
-  if (!m_surfaceArray || !m_approachDescriptor || !options.navDir) {
+  if (!sfArray || !aDescriptor) {
     return sIntersections;
   }
 
-  // reserve a few bins
+  // Reserve a few bins
   sIntersections.reserve(20);
 
   // (0) End surface check
@@ -163,11 +166,10 @@ std::vector<SurfaceIntersection> Layer::compatibleSurfaces(
   // the approach surfaces are in principle always testSurfaces
   // - the surface on approach is excluded via the veto
   // - the surfaces are only collected if needed
-  if (m_approachDescriptor &&
-      (options.resolveMaterial || options.resolvePassive)) {
+  if (aDescriptor && (options.resolveMaterial or options.resolvePassive)) {
     // the approach surfaces
     const std::vector<const Surface*>& approachSurfaces =
-        m_approachDescriptor->containedSurfaces();
+        aDescriptor->containedSurfaces();
     // we loop through and veto
     // - if the approach surface is the parameter surface
     // - if the surface is not compatible with the collect
@@ -179,11 +181,11 @@ std::vector<SurfaceIntersection> Layer::compatibleSurfaces(
   // (B) sensitive surface section
   //
   // check the sensitive surfaces if you have some
-  if (m_surfaceArray && (options.resolveMaterial || options.resolvePassive ||
-                         options.resolveSensitive)) {
+  if (sfArray and (options.resolveMaterial or options.resolvePassive or
+                   options.resolveSensitive)) {
     // get the canditates
     const std::vector<const Surface*>& sensitiveSurfaces =
-        m_surfaceArray->neighbors(position);
+        sfArray->neighbors(position);
     // loop through and veto
     // - if the approach surface is the parameter surface
     // - if the surface is not compatible with the type(s) that are collected
@@ -217,8 +219,8 @@ const SurfaceIntersection Layer::surfaceOnApproach(
   // - options.resolveSensitive is on -> always
   // - options.resolveMaterial is on
   //   && either sensitive or approach surfaces have material
-  bool resolvePS = options.resolveSensitive || options.resolvePassive;
-  bool resolveMS = options.resolveMaterial &&
+  bool resolvePS = options.resolveSensitive or options.resolvePassive;
+  bool resolveMS = options.resolveMaterial and
                    (m_ssSensitiveSurfaces > 1 || m_ssApproachSurfaces > 1 ||
                     surfaceRepresentation().surfaceMaterial());
 
@@ -264,8 +266,10 @@ const SurfaceIntersection Layer::surfaceOnApproach(
     return SurfaceIntersection();
   };
 
+  // Get the approach descriptor
+  auto aDescriptor = approachDescriptor(position);
   // Approach descriptor present and resolving is necessary
-  if (m_approachDescriptor && (resolvePS || resolveMS)) {
+  if (aDescriptor && (resolvePS || resolveMS)) {
     SurfaceIntersection aSurface = m_approachDescriptor->approachSurface(
         gctx, position, sDirection, options.boundaryCheck);
     return checkIntersection(aSurface);

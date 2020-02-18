@@ -1,14 +1,10 @@
 // This file is part of the Acts project.
 //
-// Copyright (C) 2016-2018 CERN for the benefit of the Acts project
+// Copyright (C) 2016-2020 CERN for the benefit of the Acts project
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
-///////////////////////////////////////////////////////////////////
-// Layer.h, Acts project
-///////////////////////////////////////////////////////////////////
 
 #pragma once
 
@@ -100,8 +96,13 @@ class Layer : public virtual GeometryObject {
   /// @param lay is the source layer for assignment
   Layer& operator=(const Layer&) = delete;
 
-  /// Return the entire SurfaceArray, returns a nullptr if no SurfaceArray
-  const SurfaceArray* surfaceArray() const;
+  /// Return the corresponding SurfaceArray, returns a nullptr if no
+  /// SurfaceArray is present inside the layer
+  ///
+  /// @param position is an optional argument if multiple surface arrays
+  /// exist in case of a compound layer
+  virtual const SurfaceArray* surfaceArray(
+      const Vector3D& position = Vector3D(0., 0., 0.)) const;
 
   /// Non-const version
   SurfaceArray* surfaceArray();
@@ -115,7 +116,8 @@ class Layer : public virtual GeometryObject {
   virtual Surface& surfaceRepresentation() = 0;
 
   /// Return the Thickness of the Layer
-  /// this is by definition along the normal vector of the surfaceRepresentation
+  /// this is by definition along the normal vector
+  /// of the surfaceRepresentation
   double thickness() const;
 
   /// geometrical isOnLayer() method
@@ -131,9 +133,16 @@ class Layer : public virtual GeometryObject {
                          const BoundaryCheck& bcheck = true) const;
 
   /// Return method for the approach descriptor, can be nullptr
-  const ApproachDescriptor* approachDescriptor() const;
+  ///
+  /// @param position is an optional argument if multiple
+  /// approach descriptors exist, e.g. for compount layers
+  virtual const ApproachDescriptor* approachDescriptor(
+      const Vector3D& position = Vector3D(0., 0., 0.)) const;
 
   /// Non-const version of the approach descriptor
+  ///
+  /// @param position is an optional argument if multiple
+  /// approach descriptors exist, e.g. for compount layers
   ApproachDescriptor* approachDescriptor();
 
   /// Accept layer according to the following collection directives
@@ -277,7 +286,7 @@ class Layer : public virtual GeometryObject {
   ///
   std::unique_ptr<const ApproachDescriptor> m_approachDescriptor = nullptr;
 
-  /// the enclosing TrackingVolume
+  /// The enclosing TrackingVolume
   const TrackingVolume* m_trackingVolume = nullptr;
 
   /// Representing Volume
