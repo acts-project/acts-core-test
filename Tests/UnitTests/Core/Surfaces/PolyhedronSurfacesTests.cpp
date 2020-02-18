@@ -483,7 +483,7 @@ BOOST_AUTO_TEST_CASE(PlaneSurfacePolyhedrons) {
     double rMinX = 10_mm;
     double rMinY = 20_mm;
     auto ellipseRing =
-        std::make_shared<EllipseBounds>(rMinX, rMaxX, rMinY, rMaxY);
+        std::make_shared<EllipseBounds>(rMinX, rMinY, rMaxX, rMaxY);
     auto ellipsoidRingPlane =
         Surface::makeShared<PlaneSurface>(transform, ellipseRing);
     auto ellispoidRingPh =
@@ -493,8 +493,8 @@ BOOST_AUTO_TEST_CASE(PlaneSurfacePolyhedrons) {
     CHECK_CLOSE_ABS(extent.ranges[binX].first, -rMaxX, 1e-6);
     CHECK_CLOSE_ABS(extent.ranges[binX].second, rMaxX, 1e-6);
     CHECK_CLOSE_ABS(extent.ranges[binY].first, -rMaxY, 1e-6);
-    CHECK_CLOSE_ABS(extent.ranges[binY].second, rMaxX, 1e-6);
-    CHECK_CLOSE_ABS(extent.ranges[binR].first, rMaxX, 1e-6);
+    CHECK_CLOSE_ABS(extent.ranges[binY].second, rMaxY, 1e-6);
+    CHECK_CLOSE_ABS(extent.ranges[binR].first, rMinX, 1e-6);
     CHECK_CLOSE_ABS(extent.ranges[binR].second, rMaxY, 1e-6);
     CHECK_CLOSE_ABS(extent.ranges[binZ].first, 0., 1e-6);
     CHECK_CLOSE_ABS(extent.ranges[binZ].second, 0., 1e-6);
