@@ -1,5 +1,6 @@
 add_unittest(AlignmentContextTests AlignmentContextTests.cpp)
 add_unittest(ConeLayerTests ConeLayerTests.cpp)
+add_unittest(CompoundLayerTests CompoundLayerTests.cpp)
 add_unittest(CuboidVolumeBuilderTests CuboidVolumeBuilderTests.cpp)
 add_unittest(CutoutCylinderVolumeBoundsTest CutoutCylinderVolumeBoundsTest.cpp)
 add_unittest(CylinderLayerTests CylinderLayerTests.cpp)
