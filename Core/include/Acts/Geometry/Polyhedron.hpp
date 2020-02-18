@@ -36,10 +36,12 @@ struct Polyhedron {
   /// @param verticesIn The 3D global vertices that make up the object
   /// @param facesIn List of lists of indices for faces.
   /// @param triangularMeshIn List of lists of indices for a triangular mesh
+  /// @param radialCheck A dedicated check for radial extent done
   /// @note This creates copies of the input vectors
   Polyhedron(const std::vector<Vector3D>& verticesIn,
              const std::vector<face_type>& facesIn,
-             const std::vector<face_type>& triangularMeshIn)
+             const std::vector<face_type>& triangularMeshIn,
+             bool radialCheck = false)
       : vertices(verticesIn),
         faces(facesIn),
         triangularMesh(triangularMeshIn) {}
@@ -91,7 +93,7 @@ struct Polyhedron {
 
   /// Maximum extent of the polyhedron in space
   ///
-  /// @param transform is the an (optional) transform
+  /// @param transform An (optional) transform
   /// to apply to the vertices for estimation the extent
   /// with respect to a given coordinate frame
   ///

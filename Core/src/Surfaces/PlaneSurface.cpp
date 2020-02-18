@@ -138,7 +138,6 @@ Acts::Polyhedron Acts::PlaneSurface::polyhedronRepresentation(
     for (unsigned int it = 2; it < vertices.size(); ++it) {
       triangularMesh.push_back({0, it - 1, it});
     }
-
   } else {
     throw std::domain_error(
         "Polyhedron repr of boundless surface not possible.");

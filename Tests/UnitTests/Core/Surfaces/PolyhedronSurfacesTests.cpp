@@ -407,12 +407,28 @@ BOOST_AUTO_TEST_CASE(DiscSurfacePolyhedrons) {
 BOOST_AUTO_TEST_CASE(PlaneSurfacePolyhedrons) {
   std::vector<IdentifiedPolyderon> testTypes;
 
-  for (const auto& mode : testModes) {
-    double rhX = 10_mm;
-    double rhY = 25_mm;
+  double rhX = 10_mm;
+  double rhY = 25_mm;
+  double shiftY = 50_mm;
+  auto rectangular = std::make_shared<RectangleBounds>(rhX, rhY);
 
+  // Special test for shifted plane to check rMin/rMax
+  Vector3D shift(0., shiftY, 0.);
+  auto shiftedTransform =
+      std::make_shared<Transform3D>(Transform3D::Identity());
+  shiftedTransform->pretranslate(shift);
+  auto shiftedPlane =
+      Surface::makeShared<PlaneSurface>(shiftedTransform, rectangular);
+  auto shiftedPh = shiftedPlane->polyhedronRepresentation(tgContext, 1);
+  auto shiftedExtent = shiftedPh.extent();
+  // Let's check the extent
+  CHECK_CLOSE_ABS(shiftedExtent.ranges[binX].first, -rhX, 1e-6);
+  CHECK_CLOSE_ABS(shiftedExtent.ranges[binX].second, rhX, 1e-6);
+  CHECK_CLOSE_ABS(shiftedExtent.ranges[binY].first, -rhY + shiftY, 1e-6);
+  CHECK_CLOSE_ABS(shiftedExtent.ranges[binY].second, rhY + shiftY, 1e-6);
+
+  for (const auto& mode : testModes) {
     /// Rectangular Plane
-    auto rectangular = std::make_shared<RectangleBounds>(rhX, rhY);
     auto rectangularPlane =
         Surface::makeShared<PlaneSurface>(transform, rectangular);
     auto rectangularPh =

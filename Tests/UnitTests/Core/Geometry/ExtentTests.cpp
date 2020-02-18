@@ -16,6 +16,9 @@
 // The class to test
 #include "Acts/Geometry/Extent.hpp"
 
+#include "Acts/Utilities/Definitions.hpp"
+#include "Acts/Utilities/Units.hpp"
+
 namespace Acts {
 
 using namespace UnitLiterals;
@@ -26,35 +29,49 @@ BOOST_AUTO_TEST_SUITE(Geometry)
 
 /// Unit tests for Polyderon construction & operator +=
 BOOST_AUTO_TEST_CASE(ExtentTest) {
+  std::vector<Vector3D> vertices = {
+      Vector3D(15_mm, -3_mm, -10_mm), Vector3D(18_mm, 0_mm, -10_mm),
+      Vector3D(15_mm, 3_mm, -10_mm),  Vector3D(15_mm, -3_mm, 10_mm),
+      Vector3D(18_mm, 0_mm, 10_mm),   Vector3D(15_mm, 3_mm, 10_mm)};
 
-    std::vector<Vector3D> vertices = 
-        { Vector3D(15_mm,-3_mm, -10_mm),
-          Vector3D(18_mm, 0_mm, -10_mm),
-          Vector3D(15_mm,-3_mm, -10_mm),
-          Vector3D(15_mm,-3_mm,  10_mm),
-          Vector3D(18_mm, 0_mm,  10_mm),
-          Vector3D(15_mm,-3_mm,  10_mm)};
+  // Create an Extent
+  Extent gExt;
+  for (const auto& v : vertices) {
+    gExt.check(v);
+  }
 
-    // Create an Extent
-    Extent gExt;
-    for (const auto& v : vertices){
-        gExt.check(v);
-    }
+  double phiMin = std::atan2(-3_mm, 15_mm);
+  double phiMax = std::atan2(3_mm, 15_mm);
+  double rMin = std::sqrt(15_mm * 15_mm + 3_mm * 3_mm);
 
-    CHECK_CLOSE_ABS(gExt.ranges[binX].first,15_mm,1e-6);
-    CHECK_CLOSE_ABS(gExt.ranges[binX].second,18_mm,1e-6);
-    CHECK_CLOSE_ABS(gExt.ranges[binY].first,-3_mm,1e-6);
-    CHECK_CLOSE_ABS(gExt.ranges[binY].second,3_mm,1e-6);
-    CHECK_CLOSE_ABS(gExt.ranges[binZ].first,0_mm,1e-6);
-    CHECK_CLOSE_ABS(gExt.ranges[binZ].second,0_mm,1e-6);
-    CHECK_CLOSE_ABS(gExt.ranges[binR].first,15_mm,1e-6);
-    CHECK_CLOSE_ABS(gExt.ranges[binR].second,18_mm,1e-6);
-    CHECK_CLOSE_ABS(gExt.ranges[binPhi].first, ,1e-6);
-    CHECK_CLOSE_ABS(gExt.ranges[binPhi].second, ,1e-6);
+  CHECK_CLOSE_ABS(gExt.min(binX), 15_mm, 1e-6);
+  CHECK_CLOSE_ABS(gExt.max(binX), 18_mm, 1e-6);
+  CHECK_CLOSE_ABS(gExt.min(binY), -3_mm, 1e-6);
+  CHECK_CLOSE_ABS(gExt.max(binY), 3_mm, 1e-6);
+  CHECK_CLOSE_ABS(gExt.min(binZ), -10_mm, 1e-6);
+  CHECK_CLOSE_ABS(gExt.max(binZ), 10_mm, 1e-6);
+  CHECK_CLOSE_ABS(gExt.min(binR), rMin, 1e-6);
+  CHECK_CLOSE_ABS(gExt.max(binR), 18_mm, 1e-6);
+  CHECK_CLOSE_ABS(gExt.min(binPhi), phiMin, 1e-6);
+  CHECK_CLOSE_ABS(gExt.max(binPhi), phiMax, 1e-6);
 
+  // Create a second Extent
+  Extent otherExt;
+  otherExt += gExt;
+
+  CHECK_CLOSE_ABS(otherExt.min(binX), 15_mm, 1e-6);
+  CHECK_CLOSE_ABS(otherExt.max(binX), 18_mm, 1e-6);
+  CHECK_CLOSE_ABS(otherExt.min(binY), -3_mm, 1e-6);
+  CHECK_CLOSE_ABS(otherExt.max(binY), 3_mm, 1e-6);
+  CHECK_CLOSE_ABS(otherExt.min(binZ), -10_mm, 1e-6);
+  CHECK_CLOSE_ABS(otherExt.max(binZ), 10_mm, 1e-6);
+  CHECK_CLOSE_ABS(otherExt.min(binR), rMin, 1e-6);
+  CHECK_CLOSE_ABS(otherExt.max(binR), 18_mm, 1e-6);
+  CHECK_CLOSE_ABS(otherExt.min(binPhi), phiMin, 1e-6);
+  CHECK_CLOSE_ABS(otherExt.max(binPhi), phiMax, 1e-6);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
 
-}
-}
+}  // namespace Test
+}  // namespace Acts

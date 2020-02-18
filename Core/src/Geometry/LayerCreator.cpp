@@ -33,7 +33,6 @@ Acts::LayerCreator::LayerCreator(const Acts::LayerCreator::Config& lcConfig,
 
 void Acts::LayerCreator::setConfiguration(
     const Acts::LayerCreator::Config& lcConfig) {
-  // @todo check consistency
   // copy the configuration
   m_cfg = lcConfig;
 }
@@ -51,34 +50,31 @@ Acts::MutableLayerPtr Acts::LayerCreator::cylinderLayer(
   ProtoLayer protoLayer =
       _protoLayer ? *_protoLayer : ProtoLayer(gctx, surfaces);
 
-  // remaining layer parameters
-  double layerR = 0.5 * (protoLayer.minR - protoLayer.envR.first +
-                         protoLayer.maxR + protoLayer.envR.second);
-  double binPosZ = 0.5 * (protoLayer.minZ + protoLayer.maxZ);
-
-  double envZShift = 0.5 * (-protoLayer.envZ.first + protoLayer.envZ.second);
-  double layerZ = binPosZ + envZShift;
-  double layerHalfZ = 0.5 * std::abs(protoLayer.maxZ + protoLayer.envZ.second -
-                                     (protoLayer.minZ - protoLayer.envZ.first));
-  double layerThickness = (protoLayer.maxR - protoLayer.minR) +
-                          protoLayer.envR.first + protoLayer.envR.second;
+  // Remaining layer parameters - with enevlope
+  double layerR = protoLayer.medium(binR, true);
+  double layerThickness = protoLayer.range(binR, true);
+  double layerZ = protoLayer.medium(binZ, true);
+  double layerHalfZ = 0.5 * protoLayer.range(binZ, true);
 
   ACTS_VERBOSE("Creating a cylindrical Layer:");
   ACTS_VERBOSE(" - with layer R     = " << layerR);
-  ACTS_VERBOSE(" - from R min/max   = " << protoLayer.minR << " / "
-                                        << protoLayer.maxR);
+  ACTS_VERBOSE(" - from R min/max   = " << protoLayer.min(binR) << " / "
+                                        << protoLayer.max(binR));
   ACTS_VERBOSE(" - with R thickness = " << layerThickness);
-  ACTS_VERBOSE("   - incl envelope  = " << protoLayer.envR.first << " / "
-                                        << protoLayer.envR.second);
+  ACTS_VERBOSE("   - incl envelope  = " << protoLayer.envelope[binR].first
+                                        << " / "
+                                        << protoLayer.envelope[binR].second);
 
   ACTS_VERBOSE(" - with z min/max   = "
-               << protoLayer.minZ << " (-" << protoLayer.envZ.first << ") / "
-               << protoLayer.maxZ << " (+" << protoLayer.envZ.second << ")");
+               << protoLayer.min(binZ) << " (-"
+               << protoLayer.envelope[binZ].first << ") / "
+               << protoLayer.max(binZ) << " (+"
+               << protoLayer.envelope[binZ].second << ")");
 
   ACTS_VERBOSE(" - z center         = " << layerZ);
   ACTS_VERBOSE(" - halflength z     = " << layerHalfZ);
 
-  // create the layer transforms if not given
+  // Create the layer transforms if not given
   // we need to transform in case layerZ != 0, so that the layer will be
   // correctly defined using the halflength
   if (!transform) {
@@ -88,8 +84,8 @@ Acts::MutableLayerPtr Acts::LayerCreator::cylinderLayer(
     ACTS_VERBOSE(" - layer z shift  = " << -layerZ);
   }
 
-  ACTS_VERBOSE(" - with phi min/max = " << protoLayer.minPhi << " / "
-                                        << protoLayer.maxPhi);
+  ACTS_VERBOSE(" - with phi min/max = " << protoLayer.min(binPhi) << " / "
+                                        << protoLayer.max(binPhi));
   ACTS_VERBOSE(" - # of modules     = " << surfaces.size() << " ordered in ( "
                                         << binsPhi << " x " << binsZ << ")");
   std::unique_ptr<SurfaceArray> sArray;
@@ -100,11 +96,11 @@ Acts::MutableLayerPtr Acts::LayerCreator::cylinderLayer(
     checkBinning(gctx, *sArray);
   }
 
-  // create the layer and push it back
+  // Create the layer and push it back
   std::shared_ptr<const CylinderBounds> cBounds(
       new CylinderBounds(layerR, layerHalfZ));
 
-  // create the layer
+  // Create the layer
   MutableLayerPtr cLayer =
       CylinderLayer::create(transform, cBounds, std::move(sArray),
                             layerThickness, std::move(ad), active);
@@ -113,82 +109,6 @@ Acts::MutableLayerPtr Acts::LayerCreator::cylinderLayer(
     ACTS_ERROR("Creation of cylinder layer did not succeed!");
   associateSurfacesToLayer(*cLayer);
 
-  // now return
-  return cLayer;
-}
-
-Acts::MutableLayerPtr Acts::LayerCreator::cylinderLayer(
-    const GeometryContext& gctx,
-    std::vector<std::shared_ptr<const Surface>> surfaces, BinningType bTypePhi,
-    BinningType bTypeZ, std::optional<ProtoLayer> _protoLayer,
-    std::shared_ptr<const Transform3D> transform,
-    std::unique_ptr<ApproachDescriptor> ad) const {
-  ProtoLayer protoLayer =
-      _protoLayer ? *_protoLayer : ProtoLayer(gctx, surfaces);
-
-  // remaining layer parameters
-  double layerR = 0.5 * (protoLayer.minR - protoLayer.envR.first +
-                         protoLayer.maxR + protoLayer.envR.second);
-  double binPosZ = 0.5 * (protoLayer.minZ + protoLayer.maxZ);
-  double envZShift = 0.5 * (-protoLayer.envZ.first + protoLayer.envZ.second);
-  double layerZ = binPosZ + envZShift;
-
-  double layerHalfZ = 0.5 * std::abs(protoLayer.maxZ + protoLayer.envZ.second -
-                                     (protoLayer.minZ - protoLayer.envZ.first));
-
-  double layerThickness = (protoLayer.maxR - protoLayer.minR) +
-                          protoLayer.envR.first + protoLayer.envR.second;
-
-  // adjust the layer radius
-  ACTS_VERBOSE("Creating a cylindrical Layer:");
-  ACTS_VERBOSE(" - with layer R     = " << layerR);
-  ACTS_VERBOSE(" - from R min/max   = " << protoLayer.minR << " / "
-                                        << protoLayer.maxR);
-  ACTS_VERBOSE(" - with R thickness = " << layerThickness);
-  ACTS_VERBOSE("   - incl envelope  = " << protoLayer.envR.first << " / "
-                                        << protoLayer.envR.second);
-  ACTS_VERBOSE(" - with z min/max   = "
-               << protoLayer.minZ << " (-" << protoLayer.envZ.first << ") / "
-               << protoLayer.maxZ << " (+" << protoLayer.envZ.second << ")");
-  ACTS_VERBOSE(" - z center         = " << layerZ);
-  ACTS_VERBOSE(" - halflength z     = " << layerHalfZ);
-
-  // create the layer transforms if not given
-  // we need to transform in case layerZ != 0, so that the layer will be
-  // correctly defined using the halflength
-  if (!transform && bTypeZ == equidistant) {
-    transform =
-        std::make_shared<const Transform3D>(Translation3D(0., 0., layerZ));
-    ACTS_VERBOSE(" - layer z shift    = " << -layerZ);
-  }
-
-  ACTS_VERBOSE(" - with phi min/max = " << protoLayer.minPhi << " / "
-                                        << protoLayer.maxPhi);
-  ACTS_VERBOSE(" - # of modules     = " << surfaces.size() << "");
-
-  // create the surface array
-  std::unique_ptr<SurfaceArray> sArray;
-  if (!surfaces.empty()) {
-    sArray = m_cfg.surfaceArrayCreator->surfaceArrayOnCylinder(
-        gctx, std::move(surfaces), bTypePhi, bTypeZ, protoLayer, nullptr);
-
-    checkBinning(gctx, *sArray);
-  }
-
-  // create the layer and push it back
-  std::shared_ptr<const CylinderBounds> cBounds(
-      new CylinderBounds(layerR, layerHalfZ));
-
-  // create the layer
-  MutableLayerPtr cLayer =
-      CylinderLayer::create(transform, cBounds, std::move(sArray),
-                            layerThickness, std::move(ad), active);
-
-  if (!cLayer)
-    ACTS_ERROR("Creation of cylinder layer did not succeed!");
-  associateSurfacesToLayer(*cLayer);
-
-  // now return
   return cLayer;
 }
 
@@ -201,33 +121,34 @@ Acts::MutableLayerPtr Acts::LayerCreator::discLayer(
   ProtoLayer protoLayer =
       _protoLayer ? *_protoLayer : ProtoLayer(gctx, surfaces);
 
-  double layerZ = 0.5 * (protoLayer.minZ - protoLayer.envZ.first +
-                         protoLayer.maxZ + protoLayer.envZ.second);
-  double layerThickness = (protoLayer.maxZ - protoLayer.minZ) +
-                          protoLayer.envZ.first + protoLayer.envZ.second;
+  double layerZ = protoLayer.medium(binZ, true);
+  double layerThickness = protoLayer.range(binZ, true);
 
   // adjust the layer radius
   ACTS_VERBOSE("Creating a disk Layer:");
   ACTS_VERBOSE(" - at Z position    = " << layerZ);
-  ACTS_VERBOSE(" - from Z min/max   = " << protoLayer.minZ << " / "
-                                        << protoLayer.maxZ);
+  ACTS_VERBOSE(" - from Z min/max   = " << protoLayer.min(binZ) << " / "
+                                        << protoLayer.max(binZ));
   ACTS_VERBOSE(" - with Z thickness = " << layerThickness);
-  ACTS_VERBOSE("   - incl envelope  = " << protoLayer.envZ.first << " / "
-                                        << protoLayer.envZ.second);
+  ACTS_VERBOSE("   - incl envelope  = " << protoLayer.envelope[binZ].first
+                                        << " / "
+                                        << protoLayer.envelope[binZ].second);
   ACTS_VERBOSE(" - with R min/max   = "
-               << protoLayer.minR << " (-" << protoLayer.envR.first << ") / "
-               << protoLayer.maxR << " (+" << protoLayer.envR.second << ")");
-  ACTS_VERBOSE(" - with phi min/max = " << protoLayer.minPhi << " / "
-                                        << protoLayer.maxPhi);
+               << protoLayer.min(binR) << " (-"
+               << protoLayer.envelope[binR].first << ") / "
+               << protoLayer.max(binR) << " (+"
+               << protoLayer.envelope[binR].second << ")");
+  ACTS_VERBOSE(" - with phi min/max = " << protoLayer.min(binPhi) << " / "
+                                        << protoLayer.max(binPhi);
   ACTS_VERBOSE(" - # of modules    = " << surfaces.size() << " ordered in ( "
                                        << binsR << " x " << binsPhi << ")");
 
-  // create the layer transforms if not given
+  // Create the layer transforms if not given
   if (!transform) {
     transform =
         std::make_shared<const Transform3D>(Translation3D(0., 0., layerZ));
   }
-  // create the surface array
+  // Create the surface array
   std::unique_ptr<SurfaceArray> sArray;
   if (!surfaces.empty()) {
     sArray = m_cfg.surfaceArrayCreator->surfaceArrayOnDisc(
@@ -236,12 +157,13 @@ Acts::MutableLayerPtr Acts::LayerCreator::discLayer(
     checkBinning(gctx, *sArray);
   }
 
-  // create the share disc bounds
-  auto dBounds = std::make_shared<const RadialBounds>(
-      protoLayer.minR - protoLayer.envR.first,
-      protoLayer.maxR + protoLayer.envR.second);
+  // Create the  disc bounds
+  auto dBounds 
+    = std::make_shared<const RadialBounds>(
+        protoLayer.min(binR,true),
+        protoLayer.max(binR,true));
 
-  // create the layers
+  // Create the layer
   // we use the same transform here as for the layer itself
   // for disk this is fine since we don't bin in Z, so does not matter
   MutableLayerPtr dLayer =
@@ -251,67 +173,7 @@ Acts::MutableLayerPtr Acts::LayerCreator::discLayer(
   if (!dLayer)
     ACTS_ERROR("Creation of disc layer did not succeed!");
   associateSurfacesToLayer(*dLayer);
-  // return the layer
-  return dLayer;
-}
 
-Acts::MutableLayerPtr Acts::LayerCreator::discLayer(
-    const GeometryContext& gctx,
-    std::vector<std::shared_ptr<const Surface>> surfaces, BinningType bTypeR,
-    BinningType bTypePhi, std::optional<ProtoLayer> _protoLayer,
-    std::shared_ptr<const Transform3D> transform,
-    std::unique_ptr<ApproachDescriptor> ad) const {
-  ProtoLayer protoLayer =
-      _protoLayer ? *_protoLayer : ProtoLayer(gctx, surfaces);
-
-  double layerZ = 0.5 * (protoLayer.minZ - protoLayer.envZ.first +
-                         protoLayer.maxZ + protoLayer.envZ.second);
-  double layerThickness = std::abs(protoLayer.maxZ - protoLayer.minZ) +
-                          protoLayer.envZ.first + protoLayer.envZ.second;
-
-  // adjust the layer radius
-  ACTS_VERBOSE("Creating a disk Layer:");
-  ACTS_VERBOSE(" - at Z position    = " << layerZ);
-  ACTS_VERBOSE(" - from Z min/max   = " << protoLayer.minZ << " / "
-                                        << protoLayer.maxZ);
-  ACTS_VERBOSE(" - with Z thickness = " << layerThickness);
-  ACTS_VERBOSE("   - incl envelope  = " << protoLayer.envZ.first << " / "
-                                        << protoLayer.envZ.second);
-  ACTS_VERBOSE(" - with R min/max   = "
-               << protoLayer.minR << " (-" << protoLayer.envR.first << ") / "
-               << protoLayer.maxR << " (+" << protoLayer.envR.second << ")");
-  ACTS_VERBOSE(" - with phi min/max = " << protoLayer.minPhi << " / "
-                                        << protoLayer.maxPhi);
-  ACTS_VERBOSE(" - # of modules     = " << surfaces.size());
-
-  // create the layer transforms if not given
-  if (!transform) {
-    transform =
-        std::make_shared<const Transform3D>(Translation3D(0., 0., layerZ));
-  }
-
-  // create the surface array
-  std::unique_ptr<SurfaceArray> sArray;
-  if (!surfaces.empty()) {
-    sArray = m_cfg.surfaceArrayCreator->surfaceArrayOnDisc(
-        gctx, std::move(surfaces), bTypeR, bTypePhi, protoLayer, transform);
-
-    checkBinning(gctx, *sArray);
-  }
-
-  // create the shared disc bounds
-  auto dBounds = std::make_shared<const RadialBounds>(
-      protoLayer.minR - protoLayer.envR.first,
-      protoLayer.maxR + protoLayer.envR.second);
-
-  // create the layers
-  MutableLayerPtr dLayer =
-      DiscLayer::create(transform, dBounds, std::move(sArray), layerThickness,
-                        std::move(ad), active);
-  if (!dLayer)
-    ACTS_ERROR("Creation of disc layer did not succeed!");
-  associateSurfacesToLayer(*dLayer);
-  // return the layer
   return dLayer;
 }
 
@@ -324,42 +186,42 @@ Acts::MutableLayerPtr Acts::LayerCreator::planeLayer(
   ProtoLayer protoLayer =
       _protoLayer ? *_protoLayer : ProtoLayer(gctx, surfaces);
 
-  // remaining layer parameters
-  double layerHalf1, layerHalf2, layerThickness;
+  // Remaining layer parameters
+  double layerThickness = protoLayer.range(bValue, true);
+  double layerHalf1 = 0.;
+  double layerHalf2 = 0.;
+
   switch (bValue) {
     case BinningValue::binX: {
-      layerHalf1 = 0.5 * (protoLayer.maxY - protoLayer.minY);
-      layerHalf2 = 0.5 * (protoLayer.maxZ - protoLayer.minZ);
-      layerThickness = (protoLayer.maxX - protoLayer.minX);
+      layerHalf1 = 0.5 * protoLayer.range(binY, true);
+      layerHalf2 = 0.5 * protoLayer.range(binZ, true);
       break;
     }
     case BinningValue::binY: {
-      layerHalf1 = 0.5 * (protoLayer.maxX - protoLayer.minX);
-      layerHalf2 = 0.5 * (protoLayer.maxZ - protoLayer.minZ);
-      layerThickness = (protoLayer.maxY - protoLayer.minY);
+      layerHalf1 = 0.5 * protoLayer.range(binX, true);
+      layerHalf2 = 0.5 * protoLayer.range(binZ, true);
       break;
     }
     default: {
-      layerHalf1 = 0.5 * (protoLayer.maxX - protoLayer.minX);
-      layerHalf2 = 0.5 * (protoLayer.maxY - protoLayer.minY);
-      layerThickness = (protoLayer.maxZ - protoLayer.minZ);
+      layerHalf1 = 0.5 * protoLayer.range(binX, true);
+      layerHalf2 = 0.5 * protoLayer.range(binY, true));
     }
   }
 
-  double centerX = 0.5 * (protoLayer.maxX + protoLayer.minX);
-  double centerY = 0.5 * (protoLayer.maxY + protoLayer.minY);
-  double centerZ = 0.5 * (protoLayer.maxZ + protoLayer.minZ);
+  double centerX = 0.5 * protoLayer.medium(binX, true);
+  double centerY = 0.5 * protoLayer.medium(binY, true);
+  double centerZ = 0.5 * protoLayer.medium(binZ, true);
 
   ACTS_VERBOSE("Creating a plane Layer:");
   ACTS_VERBOSE(" - with layer center     = "
                << "(" << centerX << ", " << centerY << ", " << centerZ << ")");
-  ACTS_VERBOSE(" - from X min/max   = " << protoLayer.minX << " / "
-                                        << protoLayer.maxX);
-  ACTS_VERBOSE(" - from Y min/max   = " << protoLayer.minY << " / "
-                                        << protoLayer.maxY);
+  ACTS_VERBOSE(" - from X min/max   = " << protoLayer.min(binX) << " / "
+                                        << protoLayer.max(binX));
+  ACTS_VERBOSE(" - from Y min/max   = " << protoLayer.min(binY) << " / "
+                                        << protoLayer.max(binY));
   ACTS_VERBOSE(" - with Z thickness = " << layerThickness);
 
-  // create the layer transforms if not given
+  // Create the layer transforms if not given
   // we need to transform in case centerX/centerY/centerZ != 0, so that the
   // layer will be correctly defined
   if (!transform) {
@@ -379,11 +241,10 @@ Acts::MutableLayerPtr Acts::LayerCreator::planeLayer(
     checkBinning(gctx, *sArray);
   }
 
-  // create the layer and push it back
+  // Create the bounds and the layer
   std::shared_ptr<const PlanarBounds> pBounds(
       new RectangleBounds(layerHalf1, layerHalf2));
 
-  // create the layer
   MutableLayerPtr pLayer =
       PlaneLayer::create(transform, pBounds, std::move(sArray), layerThickness,
                          std::move(ad), active);
@@ -392,7 +253,6 @@ Acts::MutableLayerPtr Acts::LayerCreator::planeLayer(
     ACTS_ERROR("Creation of plane layer did not succeed!");
   associateSurfacesToLayer(*pLayer);
 
-  // now return
   return pLayer;
 }
 
@@ -409,7 +269,7 @@ void Acts::LayerCreator::associateSurfacesToLayer(Layer& layer) const {
 
 bool Acts::LayerCreator::checkBinning(const GeometryContext& gctx,
                                       const SurfaceArray& sArray) const {
-  // do consistency check: can we access all sensitive surfaces
+  // Consistency check: can we access all sensitive surfaces
   // through the binning? If not, surfaces get lost and the binning does not
   // work
 
@@ -421,7 +281,7 @@ bool Acts::LayerCreator::checkBinning(const GeometryContext& gctx,
   size_t nEmptyBins = 0;
   size_t nBinsChecked = 0;
 
-  // iterate over all bins
+  // Iterate over all bins
   size_t size = sArray.size();
   for (size_t b = 0; b < size; ++b) {
     std::vector<const Surface*> binContent = sArray.at(b);

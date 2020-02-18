@@ -12,6 +12,7 @@
 #include "Acts/Geometry/GeometryContext.hpp"
 #include "Acts/Surfaces/PlanarBounds.hpp"
 #include "Acts/Surfaces/Surface.hpp"
+#include "Acts/Utilities/BinningType.hpp"
 #include "Acts/Utilities/Definitions.hpp"
 
 namespace Acts {
@@ -25,7 +26,12 @@ namespace Acts {
 struct ProtoLayer {
  public:
   /// The extent of the ProtoLayer
-  Extent environment;
+  Extent extent;
+
+  /// The envelope parameters
+  using range_type = std::pair<double, double>;
+  std::vector<range_type> envelope =
+      std::vector<range_type>((int)binValues, {0., 0.});
 
   /// Constructor
   ///
@@ -52,6 +58,28 @@ struct ProtoLayer {
   // Defaulated empty constructor
   ProtoLayer() = default;
 
+  /// Get the parameters : min
+  /// @param bval The accessed binning value
+  /// @param addenv The steering if enevlope is added or not
+  double min(BinningValue bval, bool addenv = true);
+
+  // Get the  parameters : max
+  /// @param bval The accessed binning value
+  /// @param addenv The steering if enevlope is added or not
+  double max(BinningValue bval, bool addenv = true);
+
+  // Get the  parameters : max
+  /// @param bval The accessed binning value
+  /// @param addenv The steering if enevlope is added or not
+  double medium(BinningValue bval, bool addenv = true);
+
+  // Get the  parameters : max
+  /// @param bval The accessed binning value
+  /// @param addenv The steering if enevlope is added or not
+  double range(BinningValue bval, bool addenv = true);
+
+  /// Output to ostream
+  /// @param sl the input ostream
   std::ostream& toStream(std::ostream& sl) const;
 
  private:
@@ -61,5 +89,13 @@ struct ProtoLayer {
   /// @param surfaces The surfaces to build this protolayer out of
   void measure(const GeometryContext& gctx,
                const std::vector<const Surface*>& surfaces);
+
+  /// Calculates the closest radial distance of a line
+  ///
+  /// @param pos1 is the first position on the line
+  /// @param pos2 is the second position on the line
+  ///
+  /// @return is the closest distance
+  double radialDistance(const Vector3D& pos1, const Vector3D& pos2) const;
 };
 }  // namespace Acts

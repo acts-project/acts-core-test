@@ -16,6 +16,7 @@
 // The class to test
 #include <fstream>
 #include "Acts/Geometry/Polyhedron.hpp"
+#include "Acts/Utilities/Helpers.hpp"
 #include "Acts/Utilities/ObjHelper.hpp"
 #include "Acts/Utilities/Units.hpp"
 
@@ -77,6 +78,41 @@ BOOST_AUTO_TEST_CASE(PolyhedronTest) {
   tr.draw(objtrH);
   objtrH.write(trStream);
   trStream.close();
+}
+
+/// Unit tests for Polyderon construction & operator +=
+BOOST_AUTO_TEST_CASE(PolyhedronExtent) {
+  std::vector<Vector3D> rvertices = {Vector3D(-1, -2, 0.), Vector3D(1., -2, 0.),
+                                     Vector3D(1., -1., 0.),
+                                     Vector3D(-1., -1., 0.)};
+
+  std::vector<std::vector<size_t>> rfaces = {{0, 1, 2, 3}};
+  std::vector<std::vector<size_t>> rmesh = {{0, 1, 2}, {2, 3, 0}};
+  Polyhedron rectangle(rvertices, rfaces, rmesh);
+
+  auto rExtent = rectangle.extent();
+  CHECK_CLOSE_ABS(rExtent.min(binX), -1., 1e-6);
+  CHECK_CLOSE_ABS(rExtent.max(binX), 1., 1e-6);
+  CHECK_CLOSE_ABS(rExtent.min(binY), -2., 1e-6);
+  CHECK_CLOSE_ABS(rExtent.max(binY), -1., 1e-6);
+  CHECK_CLOSE_ABS(rExtent.min(binZ), 0., 1e-6);
+  CHECK_CLOSE_ABS(rExtent.max(binZ), 0., 1e-6);
+  CHECK_CLOSE_ABS(rExtent.min(binR), 1., 1e-6);
+  CHECK_CLOSE_ABS(rExtent.max(binR), VectorHelpers::perp(rvertices[0]), 1e-6);
+  CHECK_CLOSE_ABS(rExtent.min(binPhi), VectorHelpers::phi(rvertices[3]), 1e-6);
+  CHECK_CLOSE_ABS(rExtent.max(binPhi), VectorHelpers::phi(rvertices[2]), 1e-6);
+
+  // Now shift the Extent
+  Vector3D shift(-1., 0., 1.);
+  Transform3D shiftedTransform = Transform3D::Identity();
+  shiftedTransform.pretranslate(shift);
+  rExtent = rectangle.extent(shiftedTransform);
+  CHECK_CLOSE_ABS(rExtent.min(binX), -2., 1e-6);
+  CHECK_CLOSE_ABS(rExtent.max(binX), 0., 1e-6);
+  CHECK_CLOSE_ABS(rExtent.min(binY), -2., 1e-6);
+  CHECK_CLOSE_ABS(rExtent.max(binY), -1., 1e-6);
+  CHECK_CLOSE_ABS(rExtent.min(binZ), 1., 1e-6);
+  CHECK_CLOSE_ABS(rExtent.max(binZ), 1., 1e-6);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

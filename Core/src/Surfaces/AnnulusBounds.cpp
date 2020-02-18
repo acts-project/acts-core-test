@@ -7,6 +7,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "Acts/Surfaces/AnnulusBounds.hpp"
+#include "Acts/Surfaces/detail/VertexHelper.hpp"
 #include "Acts/Utilities/Helpers.hpp"
 #include "Acts/Utilities/detail/periodic.hpp"
 
@@ -108,9 +109,36 @@ std::vector<Acts::Vector2D> Acts::AnnulusBounds::corners() const {
 }
 
 std::vector<Acts::Vector2D> Acts::AnnulusBounds::vertices(
-    unsigned int /*lseg*/) const {
-  return {m_outRightStripXY, m_outLeftStripXY, m_inLeftStripXY,
-          m_inRightStripXY};
+    unsigned int lseg) const {
+  // List of vertices counter-clockwise starting with left inner
+  std::vector<Acts::Vector2D> rvertices;
+
+  double phiMinInner = VectorHelpers::phi(m_inLeftStripXY);
+  double phiMaxInner = VectorHelpers::phi(m_inRightStripXY);
+  double phiMinOuter = VectorHelpers::phi(m_outRightStripXY);
+  double phiMaxOuter = VectorHelpers::phi(m_outLeftStripXY);
+
+  std::vector<double> phisInner =
+      detail::VertexHelper::phiSegments(phiMinInner, phiMaxInner);
+  std::vector<double> phisOuter =
+      detail::VertexHelper::phiSegments(phiMinOuter, phiMaxOuter);
+
+  // Inner bow from phi_min -> phi_max
+  for (unsigned int iseg = 0; iseg < phisInner.size() - 1; ++iseg) {
+    int addon = (iseg == phisInner.size() - 2) ? 1 : 0;
+    detail::VertexHelper::createSegment<Vector2D, Eigen::Affine2d>(
+        rvertices, {rMin(), rMin()}, phisInner[iseg], phisInner[iseg + 1], lseg,
+        addon);
+  }
+  // Upper bow from phi_min -> phi_max
+  for (unsigned int iseg = 0; iseg < phisOuter.size() - 1; ++iseg) {
+    int addon = (iseg == phisOuter.size() - 2) ? 1 : 0;
+    detail::VertexHelper::createSegment<Vector2D, Eigen::Affine2d>(
+        rvertices, {rMax(), rMax()}, phisOuter[iseg], phisOuter[iseg + 1], lseg,
+        addon);
+  }
+
+  return rvertices;
 }
 
 bool Acts::AnnulusBounds::inside(const Vector2D& lposition, double tolR,

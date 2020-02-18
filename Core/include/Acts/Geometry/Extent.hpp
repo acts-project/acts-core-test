@@ -33,14 +33,37 @@ struct Extent {
   // The different ranges
   std::vector<range_type> ranges = std::vector<range_type>(9, maxrange);
 
+  // Constructor
+  Extent() = default;
+
   /// Merge another extent in - using operator+=
   /// @param other is the source Extent
-  Extent& operator+=(const Extent& other){
-    for (auto ir : other.ranges.size(){
+  Extent& operator+=(const Extent& other) {
+    for (auto ir = 0; ir < other.ranges.size(); ++ir) {
       ranges[ir].first = std::min(ranges[ir].first, other.ranges[ir].first);
       ranges[ir].second = std::max(ranges[ir].second, other.ranges[ir].second);
     }
     return (*this);
+  }
+
+  /// Access the minimum parameter
+  /// @param bval the binning identification
+  double min(BinningValue bval) const { return ranges[bval].first; }
+
+  /// Access the max parameter
+  /// @param bval the binning identification
+  double max(BinningValue bval) const { return ranges[bval].second; }
+
+  /// Access the medium parameter
+  /// @param bval the binning identification
+  double medium(BinningValue bval) const {
+    return 0.5 * (ranges[bval].first + ranges[bval].second);
+  }
+
+  /// Access the range - always positive
+  /// @param bval the binning identification
+  double range(BinningValue bval) const {
+    return std::abs(ranges[bval].second - ranges[bval].first);
   }
 
   /// Check the vertex

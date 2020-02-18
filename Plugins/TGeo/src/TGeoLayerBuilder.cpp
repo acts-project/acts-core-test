@@ -109,14 +109,14 @@ void Acts::TGeoLayerBuilder::buildLayers(const GeometryContext& gctx,
         // Create the layer  - either way as cylinder or disk
         if (type == 0) {
           ProtoLayer pl(gctx, lSurfaces);
-          pl.envR = {lCfg.envelope.first, lCfg.envelope.second};
-          pl.envZ = {lCfg.envelope.second, lCfg.envelope.second};
+          pl.envelope[binR] = lCfg.envelope;
+          pl.envelope[binZ] = lCfg.envelope;
           layers.push_back(m_cfg.layerCreator->cylinderLayer(
               gctx, lSurfaces, lCfg.binsLoc0, lCfg.binsLoc1, pl));
         } else {
           ProtoLayer pl(gctx, lSurfaces);
-          pl.envR = {lCfg.envelope.first, lCfg.envelope.second};
-          pl.envZ = {lCfg.envelope.second, lCfg.envelope.second};
+          pl.envelope[binR] = lCfg.envelope;
+          pl.envelope[binZ] = lCfg.envelope;
           layers.push_back(m_cfg.layerCreator->discLayer(
               gctx, lSurfaces, lCfg.binsLoc0, lCfg.binsLoc1, pl));
         }

@@ -21,15 +21,6 @@
 
 #include <optional>
 
-#ifndef ACTS_LAYERCREATOR_TAKESMALLERBIGGER
-#define ACTS_LAYERCREATOR_TAKESMALLERBIGGER
-#define takeSmaller(current, test) current = current < test ? current : test
-#define takeBigger(current, test) current = current > test ? current : test
-#define takeSmallerBigger(cSmallest, cBiggest, test) \
-  takeSmaller(cSmallest, test);                      \
-  takeBigger(cBiggest, test)
-#endif
-
 namespace Acts {
 
 namespace Test {
@@ -72,7 +63,7 @@ class LayerCreator {
   /// Destructor
   ~LayerCreator() = default;
 
-  /// returning a cylindrical layer
+  /// Returning a cylindrical layer
   ///
   /// @param gctx ist the geometry context with which the geometry is built
   /// @param surfaces is the vector of pointers to sensitive surfaces
@@ -96,32 +87,7 @@ class LayerCreator {
       std::shared_ptr<const Transform3D> transform = nullptr,
       std::unique_ptr<ApproachDescriptor> ad = nullptr) const;
 
-  /// returning a cylindrical layer
-  ///
-  /// @param gctx ist the geometry context with which the geometry is built
-  /// @param surfaces is the vector of pointers to sensitive surfaces
-  /// represented by this layer
-  /// @pre the pointers to the sensitive surfaces in the surfaces vectors all
-  /// need to be valid, since no check is performed
-  /// @param bTypePhi binning type in phi (equidistant/arbitrary)
-  /// @param bTypeZ binning type in z (equidistant/arbitrary)
-  /// @param _protoLayer (optional) proto layer specifying the dimensions and
-  /// envelopes
-  /// @param transform is the (optional) transform of the layer
-  /// @param ad possibility to hand over a specific ApproachDescriptor, which is
-  /// needed for material mapping. Otherwise the default ApproachDescriptor will
-  /// be taken used for this layer
-  ///
-  /// @return shared pointer to a newly created layer
-  MutableLayerPtr cylinderLayer(
-      const GeometryContext& gctx,
-      std::vector<std::shared_ptr<const Surface>> surfaces,
-      BinningType bTypePhi, BinningType bTypeZ,
-      std::optional<ProtoLayer> _protoLayer = std::nullopt,
-      std::shared_ptr<const Transform3D> transform = nullptr,
-      std::unique_ptr<ApproachDescriptor> ad = nullptr) const;
-
-  /// returning a disc layer
+  /// Returning a Disc layer
   ///
   /// @param gctx ist the geometry context with which the geometry is built
   /// @param surfaces is the vector of pointers to sensitive surfaces
@@ -145,32 +111,7 @@ class LayerCreator {
       std::shared_ptr<const Transform3D> transform = nullptr,
       std::unique_ptr<ApproachDescriptor> ad = nullptr) const;
 
-  /// returning a disc layer
-  ///
-  /// @param gctx ist the geometry context with which the geometry is built
-  /// @param surfaces is the vector of pointers to sensitive surfaces
-  /// represented by this layer
-  /// @pre the pointers to the sensitive surfaces in the surfaces vectors all
-  /// need to be valid, since no check is performed
-  /// @param bTypeR binning type in r (equidistant/arbitrary)
-  /// @param bTypePhi binning type in phi (equidistant/arbitrary)
-  /// @param transform is the (optional) transform of the layer
-  /// @param _protoLayer (optional) proto layer specifying the dimensions and
-  /// envelopes
-  /// @param ad possibility to hand over a specific ApproachDescriptor, which is
-  /// needed for material mapping. Otherwise the default ApproachDescriptor will
-  /// be taken used for this layer
-  ///
-  /// @return shared pointer to a newly created layer
-  MutableLayerPtr discLayer(
-      const GeometryContext& gctx,
-      std::vector<std::shared_ptr<const Surface>> surfaces, BinningType bTypeR,
-      BinningType bTypePhi,
-      std::optional<ProtoLayer> _protoLayer = std::nullopt,
-      std::shared_ptr<const Transform3D> transform = nullptr,
-      std::unique_ptr<ApproachDescriptor> ad = nullptr) const;
-
-  /// returning a plane layer
+  /// Returning a plane layer
   ///
   /// @param gctx ist the geometry context with which the geometry is built
   /// @param [in] surfaces is the vector of pointers to sensitive surfaces
@@ -206,11 +147,11 @@ class LayerCreator {
   /// Access th configuration object
   Config getConfiguration() const;
 
-  /// set logging instance
+  /// Set logging instance
   /// @param newLogger the logger instance
   void setLogger(std::unique_ptr<const Logger> newLogger);
 
-  // associate surfaces contained by this layer to this layer
+  // Associate surfaces contained by this layer to this layer
   void associateSurfacesToLayer(Layer& layer) const;
 
  private:

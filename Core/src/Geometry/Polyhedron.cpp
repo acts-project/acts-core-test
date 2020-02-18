@@ -34,10 +34,10 @@ Acts::Extent Acts::Polyhedron::extent(const Transform3D& transform) const {
   for (const auto& vtx : vertices) {
     extent.check(transform * vtx);
   }
-  // For purely planar surfaces we need to check if the (0,0,0) is
-  // inside any of the convex faces
+  // Special checks for binR:
   if (std::abs(extent.ranges[binZ].first) < s_onSurfaceTolerance and
       std::abs(extent.ranges[binZ].second) < s_onSurfaceTolerance) {
+    // Check inclusion of origin (i.e. convex around origin)
     Vector3D origin = transform * Vector3D(0., 0., 0.);
     for (const auto& face : faces) {
       std::vector<Vector3D> tface;
@@ -49,6 +49,38 @@ Acts::Extent Acts::Polyhedron::extent(const Transform3D& transform) const {
         extent.ranges[binR].first = 0.;
         break;
       }
+    }
+    // Check for radial extent
+    auto radialDistance = [&](const Vector3D& pos1,
+                              const Vector3D& pos2) -> double {
+      Vector2D p1(pos1.x(), pos1.y());
+      Vector2D p2(pos2.x(), pos2.y());
+
+      Vector2D O(0, 0);
+      Vector2D p1p2 = (p2 - p1);
+      double L = p1p2.norm();
+      Vector2D p1O = (O - p1);
+
+      // don't do division if L is very small
+      if (L < 1e-7) {
+        return std::numeric_limits<double>::max();
+      }
+      double f = p1p2.dot(p1O) / L;
+
+      // clamp to [0, |p1p2|]
+      f = std::min(L, std::max(0., f));
+
+      Vector2D closest = f * p1p2.normalized() + p1;
+      double dist = (closest - O).norm();
+
+      return dist;
+    };
+
+    for (size_t iv = 1; iv < vertices.size() + 1; ++iv) {
+      size_t fpoint = iv < vertices.size() ? iv : 0;
+      double testR = radialDistance(transform * vertices[fpoint],
+                                    transform * vertices[iv - 1]);
+      extent.ranges[binR].first = std::min(extent.ranges[binR].first, testR);
     }
   }
   return extent;

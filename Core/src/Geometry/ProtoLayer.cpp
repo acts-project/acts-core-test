@@ -32,14 +32,30 @@ ProtoLayer::ProtoLayer(
   measure(gctx, unpack_shared_vector(surfaces));
 }
 
+double ProtoLayer::min(BinningValue bval, bool addenv) {
+  if (addenv) {
+    return extent.min(bval) - envelope[bval].first;
+  }
+  return extent.min(bval);
+}
+
+double ProtoLayer::max(BinningValue bval, bool addenv) {
+  if (addenv) {
+    return extent.max(bval) + envelope[bval].second;
+  }
+  return extent.max(bval);
+}
+
+double ProtoLayer::medium(BinningValue bval, bool addenv) {
+  return 0.5 * (min(bval, addenv) + max(bval, addenv));
+}
+
+double ProtoLayer::range(BinningValue bval, bool addenv) {
+  return std::abs(max(bval, addenv) - min(bval, addenv));
+}
+
 std::ostream& ProtoLayer::toStream(std::ostream& sl) const {
   sl << "ProtoLayer with dimensions (min/max)" << std::endl;
-  sl << " - r : " << minR << " - " << envR.first << " / " << maxR << " + "
-     << envR.second << std::endl;
-  sl << " - z : " << minZ << " - " << envZ.first << " / " << maxZ << " + "
-     << envZ.second << std::endl;
-  sl << " - phi : " << minPhi << " - " << envPhi.first << " / " << maxPhi
-     << " + " << envPhi.second << std::endl;
 
   return sl;
 }
@@ -49,22 +65,22 @@ void ProtoLayer::measure(const GeometryContext& gctx,
   for (const auto& sf : surfaces) {
     // Take the thickness in account if necessary
     double thickness = 0;
-    auto sfPolyhedron = sf->polyhedronRepresentation(gctx,1);
+    auto sfPolyhedron = sf->polyhedronRepresentation(gctx, 1);
     const DetectorElementBase* element = sf->associatedDetectorElement();
     if (element != nullptr) {
       thickness = element->thickness();
       // We need a translation along and opposite half thickness
-      Vector3D sfNormal = sf->normal(gctx, center(gctx));
-      std::vector<Translation3D> deltaT = 
-      { Translation3D(-0.5*thiskness*sfNormal),
-        Translation3D(-0.5*thiskness*sfNormal)};
-      for (const auto& dT : deltaT){
-          environment += sfPolyhedron.extent(dT); 
-      }  
+      Vector3D sfNormal = sf->normal(gctx, sf->center(gctx));
+      std::vector<double> deltaT = {-0.5 * thickness, 0.5 * thickness};
+      for (const auto& dT : deltaT) {
+        Transform3D dtransform = Transform3D::Identity();
+        dtransform.pretranslate(dT * sfNormal);
+        extent += sfPolyhedron.extent(dtransform);
+      }
       continue;
-    } 
-    environment += sfPolyhedron.extent(); 
-  }                          
+    }
+    extent += sfPolyhedron.extent();
+  }
 }
 
 }  // namespace Acts
