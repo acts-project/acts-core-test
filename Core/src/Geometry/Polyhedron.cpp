@@ -35,8 +35,7 @@ Acts::Extent Acts::Polyhedron::extent(const Transform3D& transform) const {
     extent.check(transform * vtx);
   }
   // Special checks for binR:
-  if (std::abs(extent.ranges[binZ].first) < s_onSurfaceTolerance and
-      std::abs(extent.ranges[binZ].second) < s_onSurfaceTolerance) {
+  if (std::abs(extent.range(binZ)) < s_onSurfaceTolerance) {
     // Check inclusion of origin (i.e. convex around origin)
     Vector3D origin = transform * Vector3D(0., 0., 0.);
     for (const auto& face : faces) {
