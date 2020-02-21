@@ -15,7 +15,7 @@
 #include "Acts/Utilities/detail/periodic.hpp"
 
 Acts::DiscTrapezoidBounds::DiscTrapezoidBounds(double minhalfx, double maxhalfx,
-                                               double maxR, double minR,
+                                               double minR, double maxR,
                                                double avephi, double stereo)
     : m_rMin(std::min(std::abs(minR), std::abs(maxR))),
       m_rMax(std::max(std::abs(minR), std::abs(maxR))),
@@ -23,8 +23,6 @@ Acts::DiscTrapezoidBounds::DiscTrapezoidBounds(double minhalfx, double maxhalfx,
       m_maxHalfX(std::abs(maxhalfx)),
       m_avgPhi(detail::radian_sym(avephi)),
       m_stereo(stereo) {}
-
-Acts::DiscTrapezoidBounds::~DiscTrapezoidBounds() = default;
 
 Acts::DiscTrapezoidBounds* Acts::DiscTrapezoidBounds::clone() const {
   return new DiscTrapezoidBounds(*this);
@@ -85,7 +83,6 @@ std::vector<Acts::Vector2D> Acts::DiscTrapezoidBounds::vertices(
     unsigned int /*lseg*/) const {
   Vector2D cAxis(std::cos(m_avgPhi), std::sin(m_avgPhi));
   Vector2D nAxis(cAxis.y(), -cAxis.x());
-
   return {
       m_rMin * cAxis - m_minHalfX * nAxis, m_rMin * cAxis + m_minHalfX * nAxis,
       m_rMax * cAxis + m_maxHalfX * nAxis, m_rMax * cAxis - m_maxHalfX * nAxis};

@@ -5,6 +5,7 @@ target_sources_local(
     BinUtility.cpp
     ConeLayer.cpp
     CompoundLayer.cpp
+    ConicalVolumeBounds.cpp
     CuboidVolumeBounds.cpp
     CuboidVolumeBuilder.cpp
     CutoutCylinderVolumeBounds.cpp
@@ -13,6 +14,7 @@ target_sources_local(
     CylinderVolumeBuilder.cpp
     CylinderVolumeHelper.cpp
     DiscLayer.cpp
+    Extent.cpp
     DoubleTrapezoidVolumeBounds.cpp
     GenericApproachDescriptor.cpp
     GenericCuboidVolumeBounds.cpp

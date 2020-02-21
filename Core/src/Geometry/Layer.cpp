@@ -36,8 +36,7 @@ Acts::Layer::Layer(std::unique_ptr<SurfaceArray> surfaceArray, double thickness,
   }
 }
 
-const Acts::ApproachDescriptor* Acts::Layer::approachDescriptor(
-    const Vector3D& /*ignored*/) const {
+const Acts::ApproachDescriptor* Acts::Layer::approachDescriptor() const {
   return m_approachDescriptor.get();
 }
 

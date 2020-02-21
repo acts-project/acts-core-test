@@ -55,9 +55,10 @@ double Acts::DiamondBounds::distanceToBoundary(
 
 std::vector<Acts::Vector2D> Acts::DiamondBounds::vertices(
     unsigned int /*lseg*/) const {
-  // vertices starting from lower right in clock-wise order
-  return {{x1(), -y1()}, {x2(), 0},  {x3(), y2()},
-          {-x3(), y2()}, {-x2(), 0}, {-x1(), -y1()}};
+  // Vertices starting at lower left (min rel. phi)
+  // counter-clockwise
+  return {{-x1(), -y1()}, {x1(), -y1()}, {x2(), 0.},
+          {x3(), y2()},   {-x3(), y2()}, {-x2(), 0.}};
 }
 
 const Acts::RectangleBounds& Acts::DiamondBounds::boundingBox() const {

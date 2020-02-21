@@ -43,19 +43,23 @@ class DiscTrapezoidBounds : public DiscBounds {
   /// Rmin and R max
   /// @param minhalfx half length in X at min radius
   /// @param maxhalfx half length in X at maximum radius
-  /// @param maxR outer radius
   /// @param minR inner radius
+  /// @param maxR outer radius
   /// @param avephi average phi value
   /// @param stereo optional stero angle applied
-  DiscTrapezoidBounds(double minhalfx, double maxhalfx, double maxR,
-                      double minR, double avephi = M_PI_2, double stereo = 0.);
+  DiscTrapezoidBounds(double minhalfx, double maxhalfx, double minR,
+                      double maxR, double avephi = M_PI_2, double stereo = 0.);
 
-  ~DiscTrapezoidBounds() override;
+  /// Defaulted Destructor
+  ~DiscTrapezoidBounds() override = default;
 
+  /// Overloaded clone method
   DiscTrapezoidBounds* clone() const final;
 
+  /// Type identifier
   SurfaceBounds::BoundsType type() const final;
 
+  /// Value store for persistency
   std::vector<TDD_real_t> valueStore() const final;
 
   ///  This method cheks if the radius given in the LocalPosition is inside

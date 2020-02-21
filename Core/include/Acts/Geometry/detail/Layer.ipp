@@ -77,7 +77,7 @@ std::vector<SurfaceIntersection> Layer::compatibleSurfaces(
   std::map<const Surface*, bool> accepted;
 
   auto sfArray = surfaceArray(position);
-  auto aDescriptor = approachDescriptor(position);
+  auto aDescriptor = approachDescriptor();
   // fast exit - there is nothing to
   if (!sfArray || !aDescriptor) {
     return sIntersections;
@@ -267,7 +267,7 @@ const SurfaceIntersection Layer::surfaceOnApproach(
   };
 
   // Get the approach descriptor
-  auto aDescriptor = approachDescriptor(position);
+  auto aDescriptor = approachDescriptor();
   // Approach descriptor present and resolving is necessary
   if (aDescriptor && (resolvePS || resolveMS)) {
     SurfaceIntersection aSurface = m_approachDescriptor->approachSurface(

@@ -98,13 +98,6 @@ class CompoundLayer : public Layer {
   /// exist in case of a compound layer
   const SurfaceArray* surfaceArray(const Vector3D& position) const final;
 
-  /// Return method for the approach descriptor, can be nullptr
-  ///
-  /// @param position is an optional argument if multiple
-  /// approach descriptors exist, e.g. for compount layers
-  const ApproachDescriptor* approachDescriptor(
-      const Vector3D& position) const final;
-
   /// Return a Polyhedron for this object
   ///
   /// Will return a compound polyhedron built from the sub components
@@ -149,15 +142,6 @@ inline const SurfaceArray* CompoundLayer::surfaceArray(
   if (m_surfaceArrays != nullptr) {
     std::array<size_t, 3> bin;
     m_surfaceArrays->object(position, bin).get();
-  }
-  return nullptr;
-}
-
-inline const ApproachDescriptor* CompoundLayer::approachDescriptor(
-    const Vector3D& position) const {
-  if (m_apporachDescriptors != nullptr) {
-    std::array<size_t, 3> bin;
-    m_apporachDescriptors->object(position, bin).get();
   }
   return nullptr;
 }

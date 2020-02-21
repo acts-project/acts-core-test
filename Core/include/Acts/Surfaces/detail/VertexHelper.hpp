@@ -1,6 +1,6 @@
 // This file is part of the Acts project.
 //
-// Copyright (C) 2019-2020 CERN for the benefit of the Acts project
+// Copyright (C) 2020 CERN for the benefit of the Acts project
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -11,13 +11,13 @@
 #include <utility>
 #include <vector>
 #include "Acts/Utilities/Definitions.hpp"
-#include "Acts/Utilities/Intersection.hpp"
 
 namespace Acts {
 
 namespace detail {
 
-/// @brief Helpers to draw segments between phi min/max
+/// @brief Helper method for set of vertices for polyhedrons
+/// drawing and inside/outside checks
 namespace VertexHelper {
 
 /// A method that inserts the cartesian extrema points and segments
@@ -99,6 +99,82 @@ void createSegment(std::vector<vertex_t>& vertices,
     vertex = vertex + offset;
     vertices.push_back(transform * vertex);
   }
+}
+
+/// Vertices on an ellipse-like bound object
+///
+/// @param innerRx The radius of the inner ellipse (in x), 0 if sector
+/// @param innerRy The radius of the inner ellipse (in y), 0 if sector
+/// @param outerRx The radius of the outer ellipse (in x)
+/// @param outerRy The radius of the outer ellipse (in y)
+/// @param avgPhi The phi direction of the center if sector
+/// @param halfPhi The half phi sector if sector
+/// @param lseg The number of segments for for a full 2*pi segment
+///
+/// @return a vector of 2d-vectors
+static std::vector<Vector2D> ellispoidVertices(double innerRx, double innerRy,
+                                               double outerRx, double outerRy,
+                                               double avgPhi = 0.,
+                                               double halfPhi = M_PI,
+                                               unsigned int lseg = 1) {
+  // List of vertices counter-clockwise starting at smallest phi w.r.t center,
+  // for both inner/outer ring/segment
+  std::vector<Acts::Vector2D> rvertices;  // return vertices
+  std::vector<Acts::Vector2D> ivertices;  // inner vertices
+  std::vector<Acts::Vector2D> overtices;  // outer verices
+
+  bool innerExists = (innerRx > 0. and innerRy > 0.);
+  bool closed = std::abs(halfPhi - M_PI) < s_onSurfaceTolerance;
+
+  // Get the phi segments from the helper method
+  auto phiSegs = detail::VertexHelper::phiSegments(avgPhi - halfPhi,
+                                                   avgPhi + halfPhi, {avgPhi});
+
+  // The inner (if exists) and outer bow
+  for (unsigned int iseg = 0; iseg < phiSegs.size() - 1; ++iseg) {
+    int addon = (iseg == phiSegs.size() - 2 and not closed) ? 1 : 0;
+    if (innerExists) {
+      detail::VertexHelper::createSegment<Vector2D, Eigen::Affine2d>(
+          ivertices, {innerRx, innerRy}, phiSegs[iseg], phiSegs[iseg + 1], lseg,
+          addon);
+    }
+    detail::VertexHelper::createSegment<Vector2D, Eigen::Affine2d>(
+        overtices, {outerRx, outerRy}, phiSegs[iseg], phiSegs[iseg + 1], lseg,
+        addon);
+  }
+
+  // We want to keep the same counter-clockwise orientation for displaying
+  if (not innerExists) {
+    if (not closed) {
+      // Add the center case we have a sector
+      rvertices.push_back(Vector2D(0., 0.));
+    }
+    rvertices.insert(rvertices.end(), overtices.begin(), overtices.end());
+  } else if (not closed) {
+    rvertices.insert(rvertices.end(), overtices.begin(), overtices.end());
+    rvertices.insert(rvertices.end(), ivertices.rbegin(), ivertices.rend());
+  } else {
+    rvertices.insert(rvertices.end(), overtices.begin(), overtices.end());
+    rvertices.insert(rvertices.end(), ivertices.begin(), ivertices.end());
+  }
+  return rvertices;
+}
+
+/// Vertices on an disc/wheel-like bound object
+///
+/// @param innerR The radius of the inner circle (sector)
+/// @param outerR The radius of the outer circle (sector)
+/// @param avgPhi The phi direction of the center if sector
+/// @param halfPhi The half phi sector if sector
+/// @param lseg The number of segments for for a full 2*pi segment
+///
+/// @return a vector of 2d-vectors
+static std::vector<Vector2D> circularVertices(double innerR, double outerR,
+                                              double avgPhi = 0.,
+                                              double halfPhi = M_PI,
+                                              unsigned int lseg = 1) {
+  return ellispoidVertices(innerR, innerR, outerR, outerR, avgPhi, halfPhi,
+                           lseg);
 }
 
 /// Check if the point is inside the polygon w/o any tolerances

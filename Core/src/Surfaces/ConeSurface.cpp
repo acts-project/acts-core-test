@@ -13,6 +13,7 @@
 #include <utility>
 
 #include "Acts/Surfaces/ConeSurface.hpp"
+#include "Acts/Surfaces/detail/FacesHelper.hpp"
 #include "Acts/Surfaces/detail/VertexHelper.hpp"
 #include "Acts/Utilities/ThrowAssert.hpp"
 #include "Acts/Utilities/detail/RealQuadraticEquation.hpp"
@@ -195,8 +196,10 @@ const Acts::ConeBounds& Acts::ConeSurface::bounds() const {
 
 Acts::Polyhedron Acts::ConeSurface::polyhedronRepresentation(
     const GeometryContext& gctx, size_t lseg) const {
+  // Prepare vertices and faces
   std::vector<Vector3D> vertices;
-  std::vector<std::vector<size_t>> faces;
+  std::vector<Polyhedron::face_type> faces;
+  std::vector<Polyhedron::face_type> triangularMesh;
 
   if (bounds().minZ() == -std::numeric_limits<double>::infinity() or
       bounds().maxZ() == std::numeric_limits<double>::infinity()) {
@@ -206,8 +209,13 @@ Acts::Polyhedron Acts::ConeSurface::polyhedronRepresentation(
 
   auto ctransform = transform(gctx);
 
-  // The tip - created only once
-  vertices.push_back(ctransform * Vector3D(0., 0., 0.));
+  // The tip - created only once and only
+  // if the we don't have a cut-off cone
+  bool tipExists = false;
+  if (bounds().minZ() * bounds().maxZ() <= s_onSurfaceTolerance) {
+    vertices.push_back(ctransform * Vector3D(0., 0., 0.));
+    tipExists = true;
+  }
 
   // Cone parameters
   double hPhiSec = bounds().halfPhiSector();
@@ -221,10 +229,10 @@ Acts::Polyhedron Acts::ConeSurface::polyhedronRepresentation(
 
   // Negative cone if exists
   std::vector<double> coneSides;
-  if (bounds().minZ() < 0.) {
+  if (std::abs(bounds().minZ()) > s_onSurfaceTolerance) {
     coneSides.push_back(bounds().minZ());
   }
-  if (bounds().maxZ() > 0.) {
+  if (std::abs(bounds().maxZ()) > s_onSurfaceTolerance) {
     coneSides.push_back(bounds().maxZ());
   }
   for (auto& z : coneSides) {
@@ -240,13 +248,32 @@ Acts::Polyhedron Acts::ConeSurface::polyhedronRepresentation(
                                           zoffset, ctransform);
     }
     // Create the faces
-    for (size_t iv = firstIv + 2; iv < vertices.size() + 1; ++iv) {
-      faces.push_back({0, iv - 2, iv - 1});
-    }
-    // Complete cone if necessary
-    if (fullCone) {
-      faces.push_back({0, vertices.size() - 1, firstIv});
+    if (tipExists) {
+      for (size_t iv = firstIv + 2; iv < vertices.size() + 1; ++iv) {
+        size_t one = 0, two = iv - 1, three = iv - 2;
+        if (z < 0.) {
+          std::swap(two, three);
+        }
+        faces.push_back({one, two, three});
+      }
+      // Complete cone if necessary
+      if (fullCone) {
+        if (z > 0.) {
+          faces.push_back({0, firstIv, vertices.size() - 1});
+        } else {
+          faces.push_back({0, vertices.size() - 1, firstIv});
+        }
+      }
     }
   }
-  return Polyhedron(vertices, faces, faces);
+  // if no tip exists, connect the two bows
+  if (tipExists) {
+    triangularMesh = faces;
+  } else {
+    auto facesMesh =
+        detail::FacesHelper::cylindricalFaceMesh(vertices, fullCone);
+    faces = facesMesh.first;
+    triangularMesh = facesMesh.second;
+  }
+  return Polyhedron(vertices, faces, triangularMesh);
 }

@@ -142,39 +142,8 @@ double Acts::EllipseBounds::distanceToBoundary(
 
 std::vector<Acts::Vector2D> Acts::EllipseBounds::vertices(
     unsigned int lseg) const {
-  // List of vertices counter-clockwise starting at smallest phi w.r.t center
-  std::vector<Acts::Vector2D> rvertices;
-
-  bool fullEllpise = std::abs(m_halfPhi - M_PI) < s_onSurfaceTolerance;
-
-  // Add the center for sectors
-  if (m_rMinX < s_onSurfaceTolerance and not fullEllpise) {
-    rvertices.push_back(Vector2D(0., 0.));
-  }
-
-  // Get the phi segments from the helper method
-  auto phiSegs =
-      fullEllpise ? detail::VertexHelper::phiSegments()
-                  : detail::VertexHelper::phiSegments(
-                        m_avgPhi - m_halfPhi, m_avgPhi + m_halfPhi, {m_avgPhi});
-
-  // Lower bow from phi_max -> phi_min (only if rMin != 0.)
-  if (m_rMinX > 0. and m_rMinY > 0.) {
-    for (unsigned int iseg = phiSegs.size() - 1; iseg > 0; --iseg) {
-      int addon = (iseg == 1 and not fullEllpise) ? 1 : 0;
-      detail::VertexHelper::createSegment<Vector2D, Eigen::Affine2d>(
-          rvertices, {m_rMinX, m_rMinY}, phiSegs[iseg], phiSegs[iseg - 1], lseg,
-          addon);
-    }
-  }
-  // Upper bow from phi_min -> phi_max
-  for (unsigned int iseg = 0; iseg < phiSegs.size() - 1; ++iseg) {
-    int addon = (iseg == phiSegs.size() - 2 and not fullEllpise) ? 1 : 0;
-    detail::VertexHelper::createSegment<Vector2D, Eigen::Affine2d>(
-        rvertices, {m_rMaxX, m_rMaxY}, phiSegs[iseg], phiSegs[iseg + 1], lseg,
-        addon);
-  }
-  return rvertices;
+  return detail::VertexHelper::ellispoidVertices(
+      m_rMinX, m_rMinY, m_rMaxX, m_rMaxY, m_avgPhi, m_halfPhi, lseg);
 }
 
 const Acts::RectangleBounds& Acts::EllipseBounds::boundingBox() const {

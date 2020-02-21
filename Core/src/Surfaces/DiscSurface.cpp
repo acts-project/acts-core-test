@@ -19,6 +19,7 @@
 #include "Acts/Surfaces/DiscTrapezoidBounds.hpp"
 #include "Acts/Surfaces/InfiniteBounds.hpp"
 #include "Acts/Surfaces/RadialBounds.hpp"
+#include "Acts/Surfaces/detail/FacesHelper.hpp"
 #include "Acts/Utilities/Definitions.hpp"
 #include "Acts/Utilities/ThrowAssert.hpp"
 
@@ -163,40 +164,30 @@ Acts::Polyhedron Acts::DiscSurface::polyhedronRepresentation(
   bool toCenter = m_bounds->rMin() < s_onSurfaceTolerance;
   // If you have bounds you can create a polyhedron representation
   if (m_bounds) {
-    // Helper function to create a face
-    auto createFace = [&](std::vector<Vector2D>& vertices2D) -> void {
-      // Split the vertices if you have
-      std::vector<Vector3D> vertices3D;
-      vertices3D.reserve(vertices2D.size());
-      for (const auto& v : vertices2D) {
-        vertices3D.push_back(transform(gctx) * Vector3D(v.x(), v.y(), 0.));
-      }
-      std::vector<size_t> face(vertices3D.size());
-      size_t vsize = vertices.size();
-      std::iota(face.begin(), face.end(), vsize);
-      vertices.insert(vertices.end(), vertices3D.begin(), vertices3D.end());
-      faces.push_back(face);
-      /// Triangular mesh construction
-      for (unsigned int it = vsize + 2; it < vertices.size(); ++it) {
-        triangularMesh.push_back({0, it - 1, it});
-      }
-    };
-    auto v2D = m_bounds->vertices(lseg);
-    // - just fill with 0 to N, split into two faces for rings
-    if (fullDisc and not toCenter) {
-      auto vsize = v2D.size();
-      std::vector<Vector2D> half1(v2D.begin(), v2D.begin() + vsize / 4 + 1);
-      half1.insert(half1.end(), v2D.begin() + 0.75 * vsize, v2D.end());
-      half1.push_back(v2D[0.5 * vsize]);
-      std::vector<Vector2D> half2(v2D.begin() + vsize / 4,
-                                  v2D.begin() + vsize / 2);
-      half2.push_back(v2D[0]);
-      half2.insert(half2.end(), v2D.begin() + 0.5 * vsize,
-                   v2D.begin() + 0.75 * vsize + 1);
-      createFace(half1);
-      createFace(half2);
+    auto vertices2D = m_bounds->vertices(lseg);
+    vertices.reserve(vertices2D.size() + 1);
+    Vector3D wCenter(0., 0., 0);
+    for (const auto& v2D : vertices2D) {
+      vertices.push_back(transform(gctx) * Vector3D(v2D.x(), v2D.y(), 0.));
+      wCenter += (*vertices.rbegin());
+    }
+    // These are convex shapes, use the helper method
+    // For rings there's a sweet spot when this stops working
+    if (m_bounds->type() == SurfaceBounds::DiscTrapezoidal or toCenter or
+        not fullDisc) {
+      // Transformt hem into the vertex frame
+      wCenter *= 1. / vertices.size();
+      vertices.push_back(wCenter);
+      auto facesMesh = detail::FacesHelper::convexFaceMesh(vertices, true);
+      faces = facesMesh.first;
+      triangularMesh = facesMesh.second;
     } else {
-      createFace(v2D);
+      // Two concentric rings, we use the pure concentric method momentarily,
+      // but that creates too  many unneccesarry faces, when only two
+      // are needed to descibe the mesh, @todo investigate merging flag
+      auto facesMesh = detail::FacesHelper::cylindricalFaceMesh(vertices, true);
+      faces = facesMesh.first;
+      triangularMesh = facesMesh.second;
     }
   } else {
     throw std::domain_error(

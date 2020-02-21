@@ -140,9 +140,8 @@ class CylinderVolumeBounds : public VolumeBounds {
   /// Method to decompose the Bounds into boundarySurfaces
   /// @param transformPtr is the transform where the boundary surfaces are
   /// situated
-  /// @note this surface is a factory method, the volume handles the memory
   std::vector<std::shared_ptr<const Surface>> decomposeToSurfaces(
-      const Transform3D* transformPtr) const override;
+      const Transform3D* transformPtr = nullptr) const override;
 
   /// Construct bounding box for this shape
   /// @param trf Optional transform

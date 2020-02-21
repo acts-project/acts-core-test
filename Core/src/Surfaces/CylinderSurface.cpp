@@ -13,6 +13,7 @@
 #include <iostream>
 #include <utility>
 
+#include "Acts/Surfaces/detail/FacesHelper.hpp"
 #include "Acts/Surfaces/detail/VertexHelper.hpp"
 #include "Acts/Utilities/ThrowAssert.hpp"
 
@@ -214,17 +215,7 @@ Acts::Polyhedron Acts::CylinderSurface::polyhedronRepresentation(
           Vector3D(0., 0., side * bounds().halflengthZ()), ctrans);
     }
   }
-  // Write the faces from the built vertices
-  size_t nqfaces = 0.5 * vertices.size();
-  size_t reduce = (not fullCylinder) ? 1 : 0;
-  for (size_t iface = 0; iface < nqfaces - reduce; ++iface) {
-    size_t p2 = (iface + 1 == nqfaces) ? 0 : iface + 1;
-    std::vector<size_t> face = {iface, p2, p2 + nqfaces, nqfaces + iface};
-    faces.push_back(face);
-    std::vector<size_t> triA = {iface, p2, p2 + nqfaces};
-    triangularMesh.push_back(triA);
-    std::vector<size_t> triB = {p2 + nqfaces, nqfaces + iface, iface};
-    triangularMesh.push_back(triB);
-  }
-  return Polyhedron(vertices, faces, triangularMesh);
+  auto facesMesh =
+      detail::FacesHelper::cylindricalFaceMesh(vertices, fullCylinder);
+  return Polyhedron(vertices, facesMesh.first, facesMesh.second);
 }

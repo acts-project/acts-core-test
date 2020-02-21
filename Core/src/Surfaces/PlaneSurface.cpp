@@ -13,8 +13,10 @@
 #include <iostream>
 #include <numeric>
 
+#include "Acts/Surfaces/EllipseBounds.hpp"
 #include "Acts/Surfaces/InfiniteBounds.hpp"
 #include "Acts/Surfaces/RectangleBounds.hpp"
+#include "Acts/Surfaces/detail/FacesHelper.hpp"
 #include "Acts/Utilities/ThrowAssert.hpp"
 
 Acts::PlaneSurface::PlaneSurface(const PlaneSurface& other)
@@ -126,17 +128,34 @@ Acts::Polyhedron Acts::PlaneSurface::polyhedronRepresentation(
   // If you have bounds you can create a polyhedron representation
   if (m_bounds) {
     auto vertices2D = m_bounds->vertices(lseg);
-    vertices.reserve(vertices2D.size());
+    vertices.reserve(vertices2D.size() + 1);
     for (const auto& v2D : vertices2D) {
       vertices.push_back(transform(gctx) * Vector3D(v2D.x(), v2D.y(), 0.));
     }
-    // Write the face
-    std::vector<size_t> face(vertices.size());
-    std::iota(face.begin(), face.end(), 0);
-    faces.push_back(face);
-    /// Triangular mesh construction
-    for (unsigned int it = 2; it < vertices.size(); ++it) {
-      triangularMesh.push_back({0, it - 1, it});
+    bool isEllipse = bounds().type() == SurfaceBounds::Ellipse;
+    bool innerExists = false, coversFull = false;
+    if (isEllipse) {
+      auto vStore = bounds().valueStore();
+      innerExists = std::abs(vStore[EllipseBounds::BoundValues::bv_rMinX]) <
+                    s_onSurfaceTolerance;
+      coversFull =
+          std::abs(vStore[EllipseBounds::BoundValues::bv_halfPhiSector]) <
+          M_PI - s_onSurfaceTolerance;
+    }
+    // All of those can be described as convex
+    // @todo same as for Discs: coversFull is not the right criterium
+    // for triangulation
+    if (not isEllipse or not innerExists or not coversFull) {
+      auto facesMesh = detail::FacesHelper::convexFaceMesh(vertices);
+      faces = facesMesh.first;
+      triangularMesh = facesMesh.second;
+    } else {
+      // Two concentric rings, we use the pure concentric method momentarily,
+      // but that creates too  many unneccesarry faces, when only two
+      // are needed to descibe the mesh, @todo investigate merging flag
+      auto facesMesh = detail::FacesHelper::cylindricalFaceMesh(vertices, true);
+      faces = facesMesh.first;
+      triangularMesh = facesMesh.second;
     }
   } else {
     throw std::domain_error(

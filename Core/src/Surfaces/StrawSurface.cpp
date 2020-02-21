@@ -7,12 +7,12 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "Acts/Surfaces/StrawSurface.hpp"
-#include "Acts/Geometry/Polyhedron.hpp"
-#include "Acts/Surfaces/detail/VertexHelper.hpp"
-
 #include <iomanip>
 #include <iostream>
 #include <utility>
+#include "Acts/Geometry/Polyhedron.hpp"
+#include "Acts/Surfaces/detail/FacesHelper.hpp"
+#include "Acts/Surfaces/detail/VertexHelper.hpp"
 
 #include "Acts/Surfaces/InfiniteBounds.hpp"
 
@@ -78,17 +78,9 @@ Acts::Polyhedron Acts::StrawSurface::polyhedronRepresentation(
             Vector3D(0., 0., side * m_bounds->halflengthZ()), ctransform);
       }
     }
-    // Write the faces from the built vertices
-    size_t nqfaces = 0.5 * (vertices.size() - 2);
-    for (size_t iface = 0; iface < nqfaces; ++iface) {
-      size_t p2 = (iface + 1 == nqfaces) ? 0 : iface + 1;
-      std::vector<size_t> face = {iface, p2, p2 + nqfaces, nqfaces + iface};
-      faces.push_back(face);
-      std::vector<size_t> triA = {iface, p2, p2 + nqfaces};
-      triangularMesh.push_back(triA);
-      std::vector<size_t> triB = {p2 + nqfaces, nqfaces + iface, iface};
-      triangularMesh.push_back(triB);
-    }
+    auto facesMesh = detail::FacesHelper::cylindricalFaceMesh(vertices);
+    faces = facesMesh.first;
+    triangularMesh = facesMesh.second;
   }
 
   size_t bvertices = vertices.size();

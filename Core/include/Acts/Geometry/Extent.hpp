@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <iostream>
 #include <utility>
 #include <vector>
 #include "Acts/Utilities/BinningType.hpp"
@@ -46,6 +47,10 @@ struct Extent {
     return (*this);
   }
 
+  /// Convert to output stream for screen output
+  /// @param sl [in,out] The output stream
+  std::ostream& toStream(std::ostream& sl) const;
+
   /// Access the minimum parameter
   /// @param bval the binning identification
   double min(BinningValue bval) const { return ranges[bval].first; }
@@ -81,4 +86,8 @@ struct Extent {
     }
   }
 };
+
+/// Overload of << operator for std::ostream for debug output
+std::ostream& operator<<(std::ostream& sl, const Extent& ext);
+
 }  // namespace Acts

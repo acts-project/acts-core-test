@@ -133,16 +133,9 @@ class Layer : public virtual GeometryObject {
                          const BoundaryCheck& bcheck = true) const;
 
   /// Return method for the approach descriptor, can be nullptr
-  ///
-  /// @param position is an optional argument if multiple
-  /// approach descriptors exist, e.g. for compount layers
-  virtual const ApproachDescriptor* approachDescriptor(
-      const Vector3D& position = Vector3D(0., 0., 0.)) const;
+  const ApproachDescriptor* approachDescriptor() const;
 
   /// Non-const version of the approach descriptor
-  ///
-  /// @param position is an optional argument if multiple
-  /// approach descriptors exist, e.g. for compount layers
   ApproachDescriptor* approachDescriptor();
 
   /// Accept layer according to the following collection directives

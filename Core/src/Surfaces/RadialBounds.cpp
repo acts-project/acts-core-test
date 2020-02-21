@@ -64,38 +64,8 @@ double Acts::RadialBounds::distanceToBoundary(
 
 std::vector<Acts::Vector2D> Acts::RadialBounds::vertices(
     unsigned int lseg) const {
-  // List of vertices counter-clockwise starting at smallest phi w.r.t center
-  std::vector<Acts::Vector2D> rvertices;
-
-  // Add the center for sectors
-  if (m_rMin < s_onSurfaceTolerance and not coversFullAzimuth()) {
-    rvertices.push_back(Vector2D(0., 0.));
-  }
-
-  bool fullDisc = coversFullAzimuth();
-  // Get the phi segments from the helper method
-  auto phiSegs =
-      fullDisc ? detail::VertexHelper::phiSegments()
-               : detail::VertexHelper::phiSegments(
-                     m_avgPhi - m_halfPhi, m_avgPhi + m_halfPhi, {m_avgPhi});
-
-  // Lower bow from phi_max -> phi_min (only if rMin != 0.)
-  if (m_rMin > 0.) {
-    for (unsigned int iseg = phiSegs.size() - 1; iseg > 0; --iseg) {
-      int addon = (iseg == 1 and not fullDisc) ? 1 : 0;
-      detail::VertexHelper::createSegment<Vector2D, Eigen::Affine2d>(
-          rvertices, {m_rMin, m_rMin}, phiSegs[iseg], phiSegs[iseg - 1], lseg,
-          addon);
-    }
-  }
-  // Upper bow from phi_min -> phi_max
-  for (unsigned int iseg = 0; iseg < phiSegs.size() - 1; ++iseg) {
-    int addon = (iseg == phiSegs.size() - 2 and not fullDisc) ? 1 : 0;
-    detail::VertexHelper::createSegment<Vector2D, Eigen::Affine2d>(
-        rvertices, {m_rMax, m_rMax}, phiSegs[iseg], phiSegs[iseg + 1], lseg,
-        addon);
-  }
-  return rvertices;
+  return detail::VertexHelper::circularVertices(m_rMin, m_rMax, m_avgPhi,
+                                                m_halfPhi, lseg);
 }
 
 // ostream operator overload

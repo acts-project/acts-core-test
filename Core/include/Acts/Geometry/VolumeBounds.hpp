@@ -15,6 +15,20 @@
 #include "Acts/Utilities/BoundingBox.hpp"
 #include "Acts/Utilities/Definitions.hpp"
 
+#ifndef VOLUMEBOUNDS_VALUESTORE_FILL
+#define VOLUMEBOUNDS_VALUESTORE_FILL(val) m_valueStore[bv_##val] = val
+#endif
+
+#ifndef VOLUMEBOUNDS_VALUESTORE_ACCESS
+#define VOLUMEBOUNDS_VALUESTORE_ACCESS(val) \
+  double val() const { return m_valueStore[bv_##val]; }
+#endif
+
+#ifndef VOLUMEBOUNDS_DERIVED_ACCESS
+#define VOLUMEBOUNDS_DERIVED_ACCESS(derived) \
+  double derived() const { return m_##derived; }
+#endif
+
 namespace Acts {
 
 class Surface;
@@ -23,6 +37,8 @@ class Volume;
 class VolumeBounds;
 using VolumeBoundsPtr = std::shared_ptr<const VolumeBounds>;
 
+using SurfacePtr = std::shared_ptr<const Surface>;
+using SurfacePtrVector = std::vector<SurfacePtr>;
 /// @class VolumeBounds
 ///
 /// Pure Absract Base Class for Volume bounds.
@@ -62,10 +78,9 @@ class VolumeBounds {
   ///
   /// @param transform is the 3D transform to be applied to the boundary
   /// surfaces to position them in 3D space
-  /// @note this is factory method
   ///
   /// @return a vector of surfaces bounding this volume
-  virtual std::vector<std::shared_ptr<const Surface>> decomposeToSurfaces(
+  virtual SurfacePtrVector decomposeToSurfaces(
       const Transform3D* transform) const = 0;
 
   /// Construct bounding box for this shape
