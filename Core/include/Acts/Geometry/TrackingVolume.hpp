@@ -17,7 +17,6 @@
 #include "Acts/Geometry/BoundarySurfaceT.hpp"
 #include "Acts/Geometry/GeometryContext.hpp"
 #include "Acts/Geometry/GeometryID.hpp"
-#include "Acts/Geometry/GeometrySignature.hpp"
 #include "Acts/Geometry/Layer.hpp"
 #include "Acts/Geometry/Volume.hpp"
 #include "Acts/Material/IVolumeMaterial.hpp"
@@ -336,18 +335,6 @@ class TrackingVolume : public Volume {
   /// @return If it has a BVH or not.
   bool hasBoundingVolumeHierarchy() const;
 
-  /// Sign the volume - the geometry builder has to do that
-  ///
-  /// @param geosign is the volume signature
-  /// @param geotype is the volume navigation type
-  void sign(GeometrySignature geosign, GeometryType geotype = Static);
-
-  /// return the Signature
-  GeometrySignature geometrySignature() const;
-
-  /// return the Signature
-  GeometryType geometryType() const;
-
   /// Register the color code
   ///
   /// @param icolor is a color number
@@ -456,22 +443,16 @@ class TrackingVolume : public Volume {
   /// Array of Volumes inside the Volume when actin as container
   std::shared_ptr<const TrackingVolumeArray> m_confinedVolumes = nullptr;
 
-  /// confined dense
+  /// Confined dense
   MutableTrackingVolumeVector m_confinedDenseVolumes;
 
   /// Volumes to glue Volumes from the outside
   GlueVolumesDescriptor* m_glueVolumeDescriptor{nullptr};
 
-  /// The Signature done by the GeometryBuilder
-  GeometrySignature m_geometrySignature{Unsigned};
-
-  /// The gometry type for the navigation schema
-  GeometryType m_geometryType{NumberOfGeometryTypes};
-
   /// Volume name for debug reasons & screen output
   std::string m_name;
 
-  /// color code for displaying
+  /// Color code for displaying
   unsigned int m_colorCode{20};
 
   /// Bounding Volume Hierarchy (BVH)
@@ -509,14 +490,6 @@ inline const MutableTrackingVolumeVector TrackingVolume::denseVolumes() const {
 inline std::shared_ptr<const TrackingVolumeArray>
 TrackingVolume::confinedVolumes() const {
   return m_confinedVolumes;
-}
-
-inline GeometrySignature TrackingVolume::geometrySignature() const {
-  return m_geometrySignature;
-}
-
-inline GeometryType TrackingVolume::geometryType() const {
-  return m_geometryType;
 }
 
 inline void TrackingVolume::registerColorCode(unsigned int icolor) {

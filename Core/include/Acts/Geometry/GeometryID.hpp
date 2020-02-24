@@ -13,6 +13,8 @@
 
 namespace Acts {
 
+static constexpr int NumberOfGeometryTypes = 3;
+
 /// Identifier for geometry nodes.
 ///
 /// Each identifier can be split info the following components:
