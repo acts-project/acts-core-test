@@ -8,7 +8,8 @@
 
 #include "Acts/Utilities/ThrowAssert.hpp"
 
-std::ostream& Acts::ConvexPolygonBoundsBase::toStream(std::ostream& sl) const {
+inline std::ostream& Acts::ConvexPolygonBoundsBase::toStream(
+    std::ostream& sl) const {
   std::vector<Vector2D> vtxs = vertices();
   sl << "Acts::ConvexPolygonBounds<" << vtxs.size() << ">: vertices: [x, y]\n";
   for (size_t i = 0; i < vtxs.size(); i++) {
@@ -37,7 +38,8 @@ Acts::RectangleBounds Acts::ConvexPolygonBoundsBase::makeBoundingBox(
   return {vmin, vmax};
 }
 
-std::vector<TDD_real_t> Acts::ConvexPolygonBoundsBase::valueStore() const {
+inline std::vector<TDD_real_t> Acts::ConvexPolygonBoundsBase::valueStore()
+    const {
   std::vector<TDD_real_t> values;
   for (const auto& vtx : vertices()) {
     values.push_back(vtx.x());
@@ -141,40 +143,42 @@ bool Acts::ConvexPolygonBounds<N>::convex() const {
   return convex_impl(m_vertices);
 }
 
-Acts::ConvexPolygonBounds<Acts::PolygonDynamic>::ConvexPolygonBounds(
+inline Acts::ConvexPolygonBounds<Acts::PolygonDynamic>::ConvexPolygonBounds(
     const std::vector<Vector2D>& vertices)
     : m_vertices(vertices.begin(), vertices.end()),
       m_boundingBox(makeBoundingBox(vertices)) {}
-Acts::ConvexPolygonBounds<Acts::PolygonDynamic>*
+
+inline Acts::ConvexPolygonBounds<Acts::PolygonDynamic>*
 Acts::ConvexPolygonBounds<Acts::PolygonDynamic>::clone() const {
-  return new Acts::ConvexPolygonBounds<Acts::PolygonDynamic>(*this);
+  return new ConvexPolygonBounds<Acts::PolygonDynamic>(*this);
 }
 
-Acts::SurfaceBounds::BoundsType
+inline Acts::SurfaceBounds::BoundsType
 Acts::ConvexPolygonBounds<Acts::PolygonDynamic>::type() const {
   return SurfaceBounds::ConvexPolygon;
 }
 
-bool Acts::ConvexPolygonBounds<Acts::PolygonDynamic>::inside(
+inline bool Acts::ConvexPolygonBounds<Acts::PolygonDynamic>::inside(
     const Acts::Vector2D& lposition, const Acts::BoundaryCheck& bcheck) const {
   return bcheck.isInside(lposition, m_vertices);
 }
 
-double Acts::ConvexPolygonBounds<Acts::PolygonDynamic>::distanceToBoundary(
+inline double
+Acts::ConvexPolygonBounds<Acts::PolygonDynamic>::distanceToBoundary(
     const Acts::Vector2D& lposition) const {
   return BoundaryCheck(true).distance(lposition, m_vertices);
 }
 
-std::vector<Acts::Vector2D> Acts::ConvexPolygonBounds<
+inline std::vector<Acts::Vector2D> Acts::ConvexPolygonBounds<
     Acts::PolygonDynamic>::vertices(unsigned int /*lseg*/) const {
   return {m_vertices.begin(), m_vertices.end()};
 }
 
-const Acts::RectangleBounds&
+inline const Acts::RectangleBounds&
 Acts::ConvexPolygonBounds<Acts::PolygonDynamic>::boundingBox() const {
   return m_boundingBox;
 }
 
-bool Acts::ConvexPolygonBounds<Acts::PolygonDynamic>::convex() const {
+inline bool Acts::ConvexPolygonBounds<Acts::PolygonDynamic>::convex() const {
   return convex_impl(m_vertices);
 }

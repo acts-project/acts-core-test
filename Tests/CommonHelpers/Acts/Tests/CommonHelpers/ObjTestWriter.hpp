@@ -83,6 +83,19 @@ struct ObjTestWriter {
     ostream.close();
   }
 
+  /// Helper method to write a point cloud
+  /// @param name The name of the file
+  /// @param points The point cloud
+  static void writeObj(const std::string& name,
+                       const std::vector<Vector3D>& pointCloud) {
+    std::ofstream ostream;
+    ostream.open(name + std::string(".obj"));
+    for (const auto& p : pointCloud){
+      ostream << "v " << p.x() << " " << p.y() << " " << p.z() << std::endl;
+    }
+    ostream.close();
+  }
+
   /// Helper method to be called from sub tests
   /// It will draw the polyhedron and create a file, the boolean
   /// steers whether the obj should be triangulated
@@ -101,7 +114,8 @@ struct ObjTestWriter {
   /// Helper method to be called from sub tests to write bounding boxes
   /// It will draw the polyhedron and create a file, the boolean
   /// steers whether the obj should be triangulated
-  /// @param iphs The Identified Polyhedrons (= with name and boolean)
+  /// @param nane The name of the file
+  /// @param bBox The bounding gox 
   static void writeObj(const std::string& name,
                        const Volume::BoundingBox& bBox) {
     std::ofstream ostream;
