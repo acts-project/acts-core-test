@@ -210,6 +210,35 @@ integration_tests_cc7_lcg96_llvm9:
     - export LLVM_ACTS_VERSION=9.0.0
     - set +e && source CI/setup_llvm.sh; set -e
 
+# CC7, LCG96, LLVM8 + libstdc++
+
+build_cc7_lcg96_llvm8:
+  <<: *template_build
+  image: gitlab-registry.cern.ch/acts/machines/cc7:latest
+  before_script:
+    - set +e && source CI/env_info.sh; set -e
+    - set +e && source /cvmfs/sft.cern.ch/lcg/views/LCG_96/x86_64-centos7-clang8-opt/setup.sh; set -e
+
+unit_tests_cc7_lcg96_llvm8:
+  <<: *template_unit_tests
+  dependencies:
+    - build_cc7_lcg96_llvm8
+  needs: ["build_cc7_lcg96_llvm8"]
+  image: gitlab-registry.cern.ch/acts/machines/cc7:latest
+  before_script:
+    - set +e && source CI/env_info.sh; set -e
+    - set +e && source /cvmfs/sft.cern.ch/lcg/views/LCG_96/x86_64-centos7-clang8-opt/setup.sh; set -e
+
+integration_tests_cc7_lcg96_llvm8:
+  <<: *template_integration_tests
+  dependencies:
+    - build_cc7_lcg96_llvm8
+  needs: ["build_cc7_lcg96_llvm8"]
+  image: gitlab-registry.cern.ch/acts/machines/cc7:latest
+  before_script:
+    - set +e && source CI/env_info.sh; set -e
+    - set +e && source /cvmfs/sft.cern.ch/lcg/views/LCG_96/x86_64-centos7-clang8-opt/setup.sh; set -e
+
 # SLC6, LCG96, build w/ legacy disabled
 
 build_cc7_lcg96_no_legacy:
