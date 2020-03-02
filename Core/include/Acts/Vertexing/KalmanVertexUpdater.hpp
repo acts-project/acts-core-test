@@ -40,40 +40,44 @@ Result<void> updateVertexWithTrack(Vertex<input_track_t>* vtx,
 /// @param linTrack Linearized version of track to be added or removed
 /// @param trackWeight Track weight
 /// @param sign +1 (add track) or -1 (remove track)
+/// TODO: update
 ///
 /// @return Vertex with updated position and covariance
 template <typename input_track_t>
-Result<Vertex<input_track_t>> updatePosition(const Vertex<input_track_t>* vtx,
-                                             const LinearizedTrack& linTrack,
-                                             double trackWeight, int sign);
+void updatePosition(const Acts::Vertex<input_track_t>* vtx,
+    const Acts::LinearizedTrack& linTrack, double trackWeight, int sign, 
+    Vector3D& newVtxPos, ActsSymMatrixD<3>& newVtxCov, ActsSymMatrixD<3>& oldVtxWeight,
+    ActsSymMatrixD<5>& trkParamWeight);
 
 namespace detail {
 /// @brief Takes old and new vtx and calculates position chi2
 ///
+/// TODO: update
 /// @param oldVtx Old vertex
 /// @param newVtx New vertex
 ///
 /// @return Chi2
 template <typename input_track_t>
-double vertexPositionChi2(const Vertex<input_track_t>* oldVtx,
-                          const Vertex<input_track_t>* newVtx);
+double vertexPositionChi2(const Vertex<input_track_t>* oldVtx, const Vector3D& newVtxPos,
+    const ActsSymMatrixD<3>& oldVertexWeight);
 
 /// @brief Calculates chi2 of refitted track parameters
 /// w.r.t. updated vertex
 ///
+/// TODO: update
 /// @param vtx The already updated vertex
 /// @param linTrack Linearized version of track
 ///
 /// @return Chi2
 template <typename input_track_t>
-double trackParametersChi2(const Vertex<input_track_t>& vtx,
-                           const LinearizedTrack& linTrack);
+double trackParametersChi2( const Vector3D& vtxPos, const LinearizedTrack& linTrack,
+     const ActsSymMatrixD<5>& trkParamWeight);
 
 /// @brief Adds or removes (depending on `sign`) tracks from vertex
 /// and updates the vertex
 ///
 /// @param vtx Vertex to be updated
-/// @param trk Track to be added to/removed from vtx
+/// @param trk Track to be added to/removed from vtx 
 /// @param sign +1 (add track) or -1 (remove track)
 template <typename input_track_t>
 Result<void> update(Vertex<input_track_t>* vtx,
