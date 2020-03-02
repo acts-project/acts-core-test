@@ -52,15 +52,16 @@ Acts::AdaptiveMultiVertexFitter<input_track_t, linearizer_t>::fitImpl(
 
   std::cout << "\tfit: vtxInfoMap: " << std::endl;
   int c = 0;
-  for(const auto& m : state.vtxInfoMap){
+  for(const auto& vtx : state.vertexCollection){
     c++;
-    std::cout << "\t\t" << c << ". vertex, track size: " << m.second.trackLinks.size() << std::endl;
-    std::cout << "\t\t" << c << ". vertex, track linPoint: " << m.second.linPoint << std::endl;
-    std::cout << "\t\t" << c << ". vertex, track oldPosition: " << m.second.oldPosition << std::endl;
-    std::cout << "\t\t" << c << ". vertex, track seedPosition: " << m.second.seedPosition << std::endl;
+    auto m = state.vtxInfoMap[vtx];
+    std::cout << "\t\t" << c << ". vertex, track size: " << m.trackLinks.size() << std::endl;
+    std::cout << "\t\t" << c << ". vertex, track linPoint: " << m.linPoint << std::endl;
+    std::cout << "\t\t" << c << ". vertex, track oldPosition: " << m.oldPosition << std::endl;
+    std::cout << "\t\t" << c << ". vertex, track seedPosition: " << m.seedPosition << std::endl;
 
   }
-  
+
   // Start iterating
   while (nIter < m_cfg.maxIterations &&
          (!state.annealingState.equilibriumReached || !isSmallShift)) {
