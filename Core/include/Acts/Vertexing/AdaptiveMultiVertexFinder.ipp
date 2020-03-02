@@ -40,6 +40,8 @@ auto Acts::AdaptiveMultiVertexFinder<vfitter_t, sfinder_t>::find(
          iteration < m_cfg.maxIterations) {
     auto oldFitterState = fitterState;
 
+    std::cout << "finder iteration: " << iteration << std::endl;
+
     // Tracks that are used for searching compatible tracks
     // near a vertex candidate
     std::vector<const InputTrack_t*> myTracks;
@@ -58,6 +60,8 @@ auto Acts::AdaptiveMultiVertexFinder<vfitter_t, sfinder_t>::find(
 
     Vertex<InputTrack_t>* vtxCandidate = (allVertices.back()).get();
     allVerticesPtr.push_back(vtxCandidate);
+
+    std::cout << "\tseed z pos: " << vtxCandidate->fullPosition()[2] << std::endl;
 
     ACTS_DEBUG("Position of current vertex candidate after seeding: "
                << vtxCandidate->fullPosition());
@@ -125,13 +129,16 @@ auto Acts::AdaptiveMultiVertexFinder<vfitter_t, sfinder_t>::find(
       allVerticesPtr.pop_back();
 
       if (!m_cfg.refitAfterBadVertex) {
+        std::cout << "\tUSE OLD STATE HERE!!!" << std::endl;
         fitterState.vertexCollection = oldFitterState.vertexCollection;
         fitterState.annealingState = oldFitterState.annealingState;
         fitterState.vtxInfoMap.clear();
-        for (const auto& vtx : allVerticesPtr) {
+
+        for(const auto& vInfo : oldFitterState.vtxInfoMap){
           fitterState.vtxInfoMap.insert(
-              std::make_pair(vtx, oldFitterState.vtxInfoMap[vtx]));
+              std::make_pair(vInfo.first, vInfo.second));
         }
+
         fitterState.trackToVerticesMultiMap =
             oldFitterState.trackToVerticesMultiMap;
         fitterState.tracksAtVerticesMap = oldFitterState.tracksAtVerticesMap;
