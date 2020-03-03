@@ -129,6 +129,8 @@ class Volume : public virtual GeometryObject {
   Vector3D m_center;
   VolumeBoundsPtr m_volumeBounds;
   BoundingBox m_orientedBoundingBox;
+  /// Possibility to attach a material descrption
+  std::shared_ptr<const IVolumeMaterial> m_volumeMaterial;
 };
 
 inline const Transform3D& Volume::transform() const {
@@ -153,7 +155,5 @@ inline const VolumeBounds& Volume::volumeBounds() const {
 /**Overload of << operator for std::ostream for debug output*/
 std::ostream& operator<<(std::ostream& sl, const Volume& vol);
 
-/// Possibility to attach a material descrption
-std::shared_ptr<const IVolumeMaterial> m_volumeMaterial;
 
 }  // namespace Acts
