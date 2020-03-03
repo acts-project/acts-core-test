@@ -50,7 +50,8 @@ Acts::Volume::Volume(const Volume& vol, const Transform3D* shift)
       m_center(s_origin),
       m_volumeBounds(vol.m_volumeBounds),
       m_orientedBoundingBox(m_volumeBounds->boundingBox(
-          nullptr, {0.05_mm, 0.05_mm, 0.05_mm}, this)) {
+          nullptr, {0.05_mm, 0.05_mm, 0.05_mm}, this)),
+      m_volumeMaterial(vol.m_volumeMaterial) {
   // apply the shift if it exists
   if (shift != nullptr) {
     m_transform = std::make_shared<const Transform3D>(transform() * (*shift));
@@ -81,6 +82,7 @@ Acts::Volume& Acts::Volume::operator=(const Acts::Volume& vol) {
     m_transform = vol.m_transform;
     m_center = vol.m_center;
     m_volumeBounds = vol.m_volumeBounds;
+    m_volumeMaterial = vol.m_volumeMaterial;
   }
   return *this;
 }

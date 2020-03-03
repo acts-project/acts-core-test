@@ -21,6 +21,7 @@
 namespace Acts {
 
 class VolumeBounds;
+class IVolumeMaterial;
 using VolumeBoundsPtr = std::shared_ptr<const VolumeBounds>;
 
 /// @class Volume
@@ -105,6 +106,23 @@ class Volume : public virtual GeometryObject {
   const Vector3D binningPosition(const GeometryContext& gctx,
                                  BinningValue bValue) const override;
 
+  /// Return method for the associated Material to this volume
+  /// @return VolumeMaterial as plain pointer, can be nullptr
+  const IVolumeMaterial* volumeMaterial() const;
+
+  /// Return method for the shared pointer to the associated Material
+  /// @return VolumeMaterial as shared_pointer, can be nullptr
+  const std::shared_ptr<const IVolumeMaterial>& volumeMaterialSharedPtr() const;
+
+  /// Assign the surface material description
+  ///
+  /// The material is usually derived in a complicated way and loaded from
+  /// a framework given source. As various surfaces may share the same source
+  /// this is provided by a shared pointer
+  ///
+  /// @param material Material description associated to this surface
+  void assignVolumeMaterial(std::shared_ptr<const IVolumeMaterial> material);
+
  protected:
   std::shared_ptr<const Transform3D> m_transform;
   Transform3D m_itransform;
@@ -134,5 +152,8 @@ inline const VolumeBounds& Volume::volumeBounds() const {
 
 /**Overload of << operator for std::ostream for debug output*/
 std::ostream& operator<<(std::ostream& sl, const Volume& vol);
+
+/// Possibility to attach a material descrption
+std::shared_ptr<const IVolumeMaterial> m_volumeMaterial;
 
 }  // namespace Acts
