@@ -13,13 +13,115 @@
 #pragma once
 
 #include <stdexcept>
-
+#include "Acts/Geometry/CuboidVolumeBounds.hpp"
+#include "Acts/Geometry/CylinderVolumeBounds.hpp"
+#include "Acts/Geometry/Volume.hpp"
 #include "Acts/Surfaces/CylinderBounds.hpp"
 #include "Acts/Surfaces/RadialBounds.hpp"
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Utilities/BinUtility.hpp"
 
 namespace Acts {
+
+/// @brief adjust the BinUtility bu to the dimensions of cylinder volume bounds
+///
+/// @param bu BinUtility at source
+/// @param cBounds the Cylinder volume bounds to adjust to
+///
+/// @return new updated BinUtiltiy
+BinUtility adjustBinUtility(const BinUtility& bu,
+                            const CylinderVolumeBounds& cBounds) {
+  // Default constructor
+  BinUtility uBinUtil;
+  // The parameters from the cylinder bounds
+  double minR = cBounds.innerRadius();
+  double maxR = cBounds.outerRadius();
+  double minPhi = -cBounds.halfPhiSector();
+  double maxPhi = cBounds.halfPhiSector();
+  double minZ = -cBounds.halflengthZ();
+  double maxZ = cBounds.halflengthZ();
+  // Retrieve the binning data
+  const std::vector<BinningData>& bData = bu.binningData();
+  // Loop over the binning data and adjust the dimensions
+  for (auto& bd : bData) {
+    // The binning value
+    BinningValue bval = bd.binvalue;
+    // Throw exceptions is stuff doesn't make sense:
+    // - not the right binning value
+    // - not equidistant
+    if (bd.type == arbitrary) {
+      throw std::invalid_argument("Arbirary binning can not be adjusted.");
+    } else if (bval != binR and bval != binPhi and bval != binZ) {
+      throw std::invalid_argument("Cylinder volume binning must be: phi, r, z");
+    }
+    float min, max = 0.;
+    // Perform the value adjustment
+    if (bval == binPhi) {
+      min = minPhi;
+      max = maxPhi;
+    } else if (bval == binR) {
+      min = minR;
+      max = maxR;
+    } else if (bval == binZ) {
+      min = minZ;
+      max = maxZ;
+    }
+    // Create the updated BinningData
+    BinningData uBinData(bd.option, bval, bd.bins(), min, max);
+    uBinUtil += BinUtility(uBinData);
+  }
+  return uBinUtil;
+}
+
+/// @brief adjust the BinUtility bu to the dimensions of cuboid volume bounds
+///
+/// @param bu BinUtility at source
+/// @param cBounds the Cuboid volume bounds to adjust to
+///
+/// @return new updated BinUtiltiy
+BinUtility adjustBinUtility(const BinUtility& bu,
+                            const CuboidVolumeBounds& cBounds) {
+  // Default constructor
+  BinUtility uBinUtil;
+  // The parameters from the cylinder bounds
+  double minX = -cBounds.halflengthX();
+  double maxX = cBounds.halflengthX();
+  double minY = -cBounds.halflengthY();
+  double maxY = cBounds.halflengthY();
+  double minZ = -cBounds.halflengthZ();
+  double maxZ = cBounds.halflengthZ();
+  // Retrieve the binning data
+  const std::vector<BinningData>& bData = bu.binningData();
+  // Loop over the binning data and adjust the dimensions
+  for (auto& bd : bData) {
+    // The binning value
+    BinningValue bval = bd.binvalue;
+    // Throw exceptions is stuff doesn't make sense:
+    // - not the right binning value
+    // - not equidistant
+    if (bd.type == arbitrary) {
+      throw std::invalid_argument("Arbirary binning can not be adjusted.");
+    } else if (bval != binX and bval != binY and bval != binZ) {
+      throw std::invalid_argument("Cylinder volume binning must be: x, y, z");
+    }
+    float min, max = 0.;
+    // Perform the value adjustment
+    if (bval == binX) {
+      min = minX;
+      max = maxX;
+    } else if (bval == binY) {
+      min = minY;
+      max = maxY;
+    } else if (bval == binZ) {
+      min = minZ;
+      max = maxZ;
+    }
+    // Create the updated BinningData
+    BinningData uBinData(bd.option, bval, bd.bins(), min, max);
+    uBinUtil += BinUtility(uBinData);
+  }
+  return uBinUtil;
+}
 
 /// @brief adjust the BinUtility bu to the dimensions of radial bounds
 ///
@@ -136,6 +238,33 @@ BinUtility adjustBinUtility(const BinUtility& bu, const Surface& surface) {
 
   throw std::invalid_argument(
       "Bin adjustment not implemented for this surface yet!");
+
+  return BinUtility();
+}
+
+/// @brief adjust the BinUtility bu to a volume
+///
+/// @param bu BinUtility at source
+/// @param Volume to which the adjustment is being done
+///
+/// @return new updated BinUtiltiy
+BinUtility adjustBinUtility(const BinUtility& bu, const Volume& volume) {
+  auto cyBounds =
+      dynamic_cast<const CylinderVolumeBounds*>(&(volume.volumeBounds()));
+  auto cuBounds =
+      dynamic_cast<const CuboidVolumeBounds*>(&(volume.volumeBounds()));
+
+  if (cyBounds != nullptr) {
+    // Cylinder bounds
+    return adjustBinUtility(bu, *cyBounds);
+
+  } else if (cuBounds != nullptr) {
+    // Cylinder bounds
+    return adjustBinUtility(bu, *cuBounds);
+  }
+
+  throw std::invalid_argument(
+      "Bin adjustment not implemented for this volume yet!");
 
   return BinUtility();
 }

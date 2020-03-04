@@ -10,7 +10,6 @@ target_sources_local(
     MaterialMapUtils.cpp
     MaterialProperties.cpp
     ProtoSurfaceMaterial.cpp
-    ProtoVolumeMaterial.cpp
     SurfaceMaterialMapper.cpp
     VolumeMaterialMapper.cpp
 )

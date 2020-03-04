@@ -11,9 +11,9 @@
 #include <functional>
 #include <optional>
 #include "Acts/Material/Material.hpp"
+#include "Acts/Utilities/BinUtility.hpp"
 #include "Acts/Utilities/Definitions.hpp"
 #include "Acts/Utilities/Interpolation.hpp"
-
 namespace Acts {
 
 /// @brief Struct for mapping global 3D positions to material values
@@ -300,6 +300,9 @@ class InterpolatedMaterialMap final {
     return m_mapper.isInside(position);
   }
 
+  /// Return the BinUtility
+  const BinUtility& binUtility() const { return m_binUtility; }
+
  private:
   /// @brief Retrieve cell for given position
   ///
@@ -319,5 +322,7 @@ class InterpolatedMaterialMap final {
   /// material grid and the interpolation of the material component values on
   /// close-by grid points.
   Mapper_t m_mapper;
+
+  BinUtility m_binUtility;
 };
 }  // namespace Acts

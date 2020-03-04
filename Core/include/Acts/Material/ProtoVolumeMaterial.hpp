@@ -48,6 +48,9 @@ class ProtoVolumeMaterial : public IVolumeMaterial {
   /// @param smproxy The source proxy
   ~ProtoVolumeMaterial() override = default;
 
+  /// Return the BinUtility
+  const BinUtility& binUtility() const;
+
   /// Assignment operator
   ///
   /// @param smproxy The source proxy
@@ -59,6 +62,11 @@ class ProtoVolumeMaterial : public IVolumeMaterial {
   }
 
  private:
+  BinUtility m_binUtility;
   Material m_material;
 };
 }  // namespace Acts
+
+inline const Acts::BinUtility& Acts::ProtoVolumeMaterial::binUtility() const {
+  return m_binUtility;
+}
