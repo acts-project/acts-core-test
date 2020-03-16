@@ -10,8 +10,10 @@
 
 #include <sstream>
 
+#include "Acts/Geometry/TrackingVolume.hpp"
 #include "Acts/Material/MaterialProperties.hpp"
 #include "Acts/Propagator/detail/PointwiseMaterialInteraction.hpp"
+#include "Acts/Propagator/detail/VolumeMaterialInteraction.hpp"
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Utilities/Units.hpp"
 
@@ -25,8 +27,10 @@ struct MaterialInteraction {
   Vector3D position = Vector3D(0., 0., 0);
   /// The particle time at the interaction.
   double time = 0.0;
-  /// The particle direction at the interaction.
+  /// The particle momentum at the interaction.
   Vector3D direction = Vector3D(0., 0., 0);
+  /// The particle direction at the interaction.
+  double momentum = 0.0;
   /// The momentum change due to the interaction.
   double deltaP = 0.0;
   /// Expected phi variance due to the interactions.
@@ -37,6 +41,8 @@ struct MaterialInteraction {
   double sigmaQoP2 = 0.0;
   /// The surface where the interaction occured.
   const Surface* surface = nullptr;
+  /// The volume where the interaction occured.
+  const TrackingVolume* volume = nullptr;
   /// The path correction factor due to non-zero incidence on the surface.
   double pathCorrection = 1.;
   /// The effective, passed material properties including the path correction.
@@ -84,6 +90,13 @@ struct MaterialInteractor {
   template <typename propagator_state_t, typename stepper_t>
   void operator()(propagator_state_t& state, const stepper_t& stepper,
                   result_type& result) const {
+    // In case of Volume material update the result of the previous step to take
+    // into account the material thickness
+    if (!result.materialInteractions.empty() &&
+        result.materialInteractions.back().volume != nullptr) {
+      UpdateResult(state, stepper, result);
+    }
+
     // If we are on target, everything should have been done
     if (state.navigation.targetReached) {
       return;
@@ -94,45 +107,63 @@ struct MaterialInteractor {
     }
     // We only have material interactions if there is potential material
     const Surface* surface = state.navigation.currentSurface;
-    if (not(surface and surface->surfaceMaterial())) {
+    const TrackingVolume* volume = state.navigation.currentVolume;
+
+    if (not(surface and surface->surfaceMaterial()) and
+        not(volume and volume->volumeMaterial())) {
       return;
     }
 
-    // Prepare relevant input particle properties
-    detail::PointwiseMaterialInteraction d(surface, state, stepper);
+    // In case material is associated to the surface perform the interaction
+    if (surface and surface->surfaceMaterial()) {
+      // Prepare relevant input particle properties
+      detail::PointwiseMaterialInteraction d(surface, state, stepper);
 
-    // Determine the effective traversed material and its properties
-    // Material exists but it's not real, i.e. vacuum; there is nothing to do
-    if (not d.evaluateMaterialProperties(state)) {
-      return;
+      // Determine the effective traversed material and its properties
+      // Material exists but it's not real, i.e. vacuum; there is nothing to do
+      if (not d.evaluateMaterialProperties(state)) {
+        return;
+      }
+
+      // Evaluate the material effects
+      d.evaluatePointwiseMaterialInteraction(multipleScattering, energyLoss);
+
+      if (energyLoss) {
+        debugLog(state, [=] {
+          using namespace UnitLiterals;
+          std::stringstream dstream;
+          dstream << d.slab;
+          dstream << " pdg=" << d.pdg;
+          dstream << " mass=" << d.mass / 1_MeV << "MeV";
+          dstream << " momentum=" << d.momentum / 1_GeV << "GeV";
+          dstream << " energyloss=" << d.Eloss / 1_MeV << "MeV";
+          return dstream.str();
+        });
+      }
+      // To integrate process noise, we need to transport
+      // the covariance to the current position in space
+      // the 'true' indicates re-initializaiton of the further transport
+      if (d.performCovarianceTransport) {
+        stepper.covarianceTransport(state.stepping, true);
+      }
+      // Apply the material interactions
+      d.updateState(state, stepper);
+      // Record the result
+      recordResult(d, result);
     }
-
-    // Evaluate the material effects
-    d.evaluatePointwiseMaterialInteraction(multipleScattering, energyLoss);
-
-    if (energyLoss) {
-      debugLog(state, [=] {
-        using namespace UnitLiterals;
-        std::stringstream dstream;
-        dstream << d.slab;
-        dstream << " pdg=" << d.pdg;
-        dstream << " mass=" << d.mass / 1_MeV << "MeV";
-        dstream << " momentum=" << d.momentum / 1_GeV << "GeV";
-        dstream << " energyloss=" << d.Eloss / 1_MeV << "MeV";
-        return dstream.str();
-      });
+    // If no material surface but a volume material is present record the
+    // interaction if requiered to
+    else if (surface && volume and volume->volumeMaterial()) {
+      // Prepare relevant input particle properties
+      detail::VolumeMaterialInteraction d(surface, volume, state, stepper);
+      // Determine the effective traversed material and its properties
+      // Material exists but it's not real, i.e. vacuum; there is nothing to do
+      if (not d.evaluateMaterialProperties(state)) {
+        return;
+      }
+      // Record the result
+      recordResult(d, result);
     }
-
-    // To integrate process noise, we need to transport
-    // the covariance to the current position in space
-    // the 'true' indicates re-initializaiton of the further transport
-    if (d.performCovarianceTransport) {
-      stepper.covarianceTransport(state.stepping, true);
-    }
-    // Apply the material interactions
-    d.updateState(state, stepper);
-    // Record the result
-    recordResult(d, result);
   }
 
   /// Material interaction has no pure observer.
@@ -154,15 +185,63 @@ struct MaterialInteractor {
       mi.position = d.pos;
       mi.time = d.time;
       mi.direction = d.dir;
+      mi.momentum = d.momentum;
       mi.deltaP = d.nextP - d.momentum;
       mi.sigmaPhi2 = d.variancePhi;
       mi.sigmaTheta2 = d.varianceTheta;
       mi.sigmaQoP2 = d.varianceQoverP;
       mi.surface = d.surface;
+      mi.volume = nullptr;
       mi.pathCorrection = d.pathCorrection;
       mi.materialProperties = d.slab;
       result.materialInteractions.push_back(std::move(mi));
     }
+  }
+
+  /// @brief This function records the material effect for volume
+  ///
+  /// @param [in] d Data cache container
+  /// @param [in, out] result Result storage
+  void recordResult(const detail::VolumeMaterialInteraction& d,
+                    result_type& result) const {
+    // Record the interaction
+    MaterialInteraction mi;
+    mi.position = d.pos;
+    mi.time = d.time;
+    mi.direction = d.dir;
+    mi.momentum = d.momentum;
+    mi.sigmaPhi2 = d.variancePhi;
+    mi.sigmaTheta2 = d.varianceTheta;
+    mi.sigmaQoP2 = d.varianceQoverP;
+    mi.surface = d.surface;
+    mi.volume = d.volume;
+    mi.pathCorrection = d.pathCorrection;
+    mi.materialProperties = d.slab;
+    result.materialInteractions.push_back(std::move(mi));
+  }
+
+  /// @brief This function update the material at the previous step in case of
+  /// volume material
+  ///
+  /// @param state is the mutable propagator state object
+  /// @param stepper The stepper in use
+  /// @param result is the mutable result state object
+  template <typename propagator_state_t, typename stepper_t>
+  void UpdateResult(propagator_state_t& state, const stepper_t& stepper,
+                    result_type& result) const {
+    // Update the previous interaction
+    Vector3D shift = stepper.position(state.stepping) -
+                     result.materialInteractions.back().position;
+    double momentum = stepper.momentum(state.stepping);
+    result.materialInteractions.back().deltaP =
+        momentum - result.materialInteractions.back().momentum;
+    result.materialInteractions.back().materialProperties.scaleThickness(
+        shift.norm());
+
+    result.materialInX0 +=
+        result.materialInteractions.back().materialProperties.thicknessInX0();
+    result.materialInL0 +=
+        result.materialInteractions.back().materialProperties.thicknessInL0();
   }
 
   /// The private propagation debug logging
