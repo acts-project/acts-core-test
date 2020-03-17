@@ -104,6 +104,13 @@ class DirectNavigator {
     /// Navigation state - external interface: the target surface
     const Surface* targetSurface = nullptr;
 
+    /// Navigation state - external interface: the start volume
+    const TrackingVolume* startVolume = nullptr;
+    /// Navigation state - external interface: the current volume
+    const TrackingVolume* currentVolume = nullptr;
+    /// Navigation state - external interface: the target volume
+    const TrackingVolume* targetSVolume = nullptr;
+
     /// Navigation state - external interface: target is reached
     bool targetReached = false;
     /// Navigation state - external interface: a break has been detected
