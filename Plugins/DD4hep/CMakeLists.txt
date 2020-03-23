@@ -14,7 +14,7 @@ target_include_directories(
     ${DD4hep_INCLUDE_DIRS})
 target_link_libraries(
   ActsDD4hepPlugin
-  PUBLIC ActsCore ActsTGeoPlugin ${DD4hep_DDCORE_LIBRARY})
+  PUBLIC ActsCore ActsTGeoPlugin DD4hep::DDCore)
 
 install(
   TARGETS ActsDD4hepPlugin
