@@ -1,4 +1,4 @@
-PyYAML==3.13
+PyYAML==5.1
 fs~=2.2
 fs.sshfs==0.11.0
 tabulate==0.8.2
