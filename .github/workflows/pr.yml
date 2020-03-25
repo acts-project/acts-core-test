@@ -73,13 +73,12 @@ jobs:
 
     - name: Run clang-tidy
       run: >
-        python3 run-clang-tidy.py 
+        (python3 run-clang-tidy.py 
         -p build 
         -export-fixes report/clang-tidy-fixes.yml 
         -j$(nproc) 
         -clang-apply-replacements-binary=clang-apply-replacements-9
-        1> report/clang-tidy.log || true
-
+        1> report/clang-tidy.log || true)
         && codereport report/clang-tidy.json report --title="clang-tidy" --prefix $PWD'
         && CI/static_analysis_results.py --limitfile .static_analysis_limits.yml --itemfile report/clang-tidy.json -v
 
