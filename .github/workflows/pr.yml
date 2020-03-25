@@ -1,4 +1,4 @@
-name: coverage
+name: Additional checks
 
 on:
   - pull_request
