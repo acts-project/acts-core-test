@@ -80,6 +80,10 @@ jobs:
         -j$(nproc) 
         -clang-apply-replacements-binary=clang-apply-replacements-9
         1> report/clang-tidy.log || true)
+        && CI/make_report.py clang-tidy report/clang-tidy.log report/clang-tidy.json -e "$PWD/Tests/*" -e "$PWD/Legacy/*" --filter "$PWD/*"
         && codereport report/clang-tidy.json report --title="clang-tidy" --prefix $PWD
         && CI/static_analysis_results.py --limitfile .static_analysis_limits.yml --itemfile report/clang-tidy.json -v
 
+    - uses: actions/upload-artifact@v1
+      with:
+        path: report
