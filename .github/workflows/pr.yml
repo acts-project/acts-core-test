@@ -73,7 +73,8 @@ jobs:
 
     - name: Run clang-tidy
       run: >
-        (python3 run-clang-tidy.py 
+        mkdir report
+        && (python3 run-clang-tidy.py 
         -p build 
         -export-fixes report/clang-tidy-fixes.yml 
         -j$(nproc) 
