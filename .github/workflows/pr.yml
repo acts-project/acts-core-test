@@ -87,3 +87,20 @@ jobs:
     - uses: actions/upload-artifact@v1
       with:
         path: report
+
+  comment:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@0.9.0
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            console.log(context);
+
+
+# github.issues.createComment({
+  # issue_number: context.issue.number,
+  # owner: context.repo.owner,
+  # repo: context.repo.repo,
+  # body: '👋 Thanks for reporting!'
+# })
