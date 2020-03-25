@@ -95,12 +95,42 @@ jobs:
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
-            console.log(JSON.stringify(context));
+            //console.log(context.payload.repository.owner);
 
+            //console.log(github.pulls)
+            const org = context.payload.repository.owner.login
+            const repo = context.payload.repository;
+            var rev = await github.pulls.listReviews({
+              pull_number: context.payload.pull_request.number,
+              owner: org,
+              repo: repo.name
+            });
 
-# github.issues.createComment({
-  # issue_number: context.issue.number,
-  # owner: context.repo.owner,
-  # repo: context.repo.repo,
-  # body: '👋 Thanks for reporting!'
-# })
+            var review_count = 0;
+            for (const review in rev.data) {
+
+              const rev_user = rev.data[0].user;
+              var is_reviewer = false;
+              try {
+                const team_res = await github.teams.getMembershipInOrg({
+                  org: org,
+                  team_slug: "reviewers",
+                  username: rev_user.login,
+                });
+                if(team_res.data.state == "active") {
+                  is_reviewer = true;
+                }
+              } catch (e) {}
+              console.log(is_reviewer);
+              if(is_reviewer) {
+                review_count++;
+              }
+            }
+
+            if(review_count > 0) {
+              core.info("Is reviewed!");
+            }
+            else {
+              core.setFailed("Not reviewed by the reviewer team");
+            }
+
