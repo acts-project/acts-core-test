@@ -67,8 +67,6 @@ class CylinderBounds : public SurfaceBounds {
 
   ~CylinderBounds() override = default;
 
-  CylinderBounds* clone() const final;
-
   BoundsType type() const final;
 
   /// Return the bound values as dynamically sized vector
